@@ -18,7 +18,7 @@ PKD is built on a high-performance foundation designed to exceed the **McMaster-
 
 ## 📝 Engineering Traceability
 The project follows a high-rigor documentation standard. All architectural and strategic decisions are captured as immutable records:
-- **[Decision Log](./.project/DECISION_LOG.md)** (Index)
+- **[Decision Log](./docs/DECISION_LOG.md)** (Index)
 - **[Architecture ADRs](./docs/adr/)** (Historical Context)
 - **[System Visualizations](./docs/ARCHITECTURE.md)** (Mermaid Diagrams)
 
