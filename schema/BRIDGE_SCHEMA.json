@@ -1,0 +1,124 @@
+{
+  "pkd_prologue": {
+    "project": "Pharos Kitchen Design (Project Prism)",
+    "component": "Bridge / Forensics",
+    "file": "BRIDGE_SCHEMA.json",
+    "author": "Richard D. (https://github.com/iamrichardd)",
+    "license": "FSL-1.1 (See LICENSE file for details)",
+    "purpose": "Mapping for legacy SharedParameter GUIDs to PKD MVM standards.",
+    "traceability": "ADR 0003, ADR 0005"
+  },
+  "legacy_id": "KCL_FOODSERVICE",
+  "system": "KCL",
+  "version": "1.0.1",
+  "description": "Mapping for legacy SharedParameter GUIDs to PKD MVM (Minimum Viable Metadata) standards for Bridged Interoperability.",
+  "mapping_table": [
+    {
+      "pharos_id": "PKD_Voltage",
+      "legacy_name": "Volts",
+      "legacy_guid": "e2105edf-3cf2-44ee-be8c-a790592e8a5f",
+      "unit_type": "ELECTRICAL_POTENTIAL"
+    },
+    {
+      "pharos_id": "PKD_Phase",
+      "legacy_name": "Phase",
+      "legacy_guid": "fb39d483-5543-4f28-9606-769d2e3e9293",
+      "unit_type": "NUMBER"
+    },
+    {
+      "pharos_id": "PKD_Amperage",
+      "legacy_name": "FL Amps",
+      "legacy_guid": "5f60c6e2-4197-42f7-8290-16b68ac82a06",
+      "unit_type": "ELECTRICAL_CURRENT"
+    },
+    {
+      "pharos_id": "PKD_Wattage",
+      "legacy_name": "Watts",
+      "legacy_guid": "138f1852-9282-445d-a41a-d28ffcf2892f",
+      "unit_type": "ELECTRICAL_WATTAGE"
+    },
+    {
+      "pharos_id": "PKD_GasInput",
+      "legacy_name": "Gas Input",
+      "legacy_guid": "0f8198ec-0e09-49ac-a72d-9aa67d91b4c9",
+      "unit_type": "HVAC_POWER"
+    },
+    {
+      "pharos_id": "PKD_GasConnection",
+      "legacy_name": "Gas Size",
+      "legacy_guid": "1172ae48-add4-43cf-8c9d-fced7853210c",
+      "unit_type": "PIPING_SIZE"
+    },
+    {
+      "pharos_id": "PKD_ColdWaterConnection",
+      "legacy_name": "Cold Water Size",
+      "legacy_guid": "99e06fdb-82cc-41fe-9fa2-9c524fec6f0f",
+      "unit_type": "PIPING_SIZE"
+    },
+    {
+      "pharos_id": "PKD_HotWaterConnection",
+      "legacy_name": "Hot Water Size",
+      "legacy_guid": "c031fafc-ce7b-423b-84a1-b87f48f89abf",
+      "unit_type": "PIPING_SIZE"
+    },
+    {
+      "pharos_id": "PKD_WasteConnection",
+      "legacy_name": "Direct Waste Size",
+      "legacy_guid": "484056f7-70a9-4ca6-bd5f-817ca27bd2f8",
+      "unit_type": "PIPING_SIZE"
+    }
+  ],
+  "regional_overrides": {
+    "EU": {
+      "standards_set": "IFSE_BIM",
+      "description": "Override for International Foodservice Editorial standards GUIDs (Future Expansion)"
+    },
+    "US": {
+      "standards_set": "FCSI_USA",
+      "description": "Native FCSI USA SharedParameter GUID mappings (Active Default)"
+    }
+  },
+  "spoof_rules": {
+    "replace_xml_cache": true,
+    "intercept_ashx_requests": true,
+    "enforce_50kb_bloat_rule": true
+  },
+  "kcl_report_mapping": {
+    "A": "PKD_Manufacturer",
+    "B": "PKD_ModelNumber",
+    "C": "PKD_ProductNumber",
+    "D": "PKD_IsObsolete",
+    "E": "PKD_ReplacedBy",
+    "F": "PKD_IsArchived",
+    "G": "PKD_MainCategory",
+    "H": "PKD_ParagraphSpec",
+    "I": "PKD_ImageLink",
+    "J": "PKD_PdfSpecLink",
+    "K": "PKD_DwgFront",
+    "L": "PKD_DwgPlan",
+    "M": "PKD_DwgSide",
+    "N": "PKD_DwgRear",
+    "O": "PKD_Dwg3D",
+    "P": "PKD_DwgDetail",
+    "Q": "PKD_RevitFileName",
+    "R": "PKD_DocLinks",
+    "S": "PKD_ListPrice",
+    "T": "PKD_AdditionalCategories",
+    "U": "PKD_Industry",
+    "V": "PKD_Language",
+    "W": "PKD_TargetRegions",
+    "X": "PKD_ProductLine",
+    "Y": "PKD_EnergyStarMatch"
+  },
+  "asset_naming_conventions": {
+    "dwg_suffixes": {
+      "front": "-VE",
+      "plan": "-VP",
+      "side": "-VS",
+      "rear": "-VB",
+      "3d": "-V3",
+      "detail": "-VD"
+    },
+    "template": "KCL-{mfrname}-{modelnumber}{suffix}.dwg"
+  }
+}

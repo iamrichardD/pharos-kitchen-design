@@ -1,0 +1,84 @@
+{
+  "pkd_prologue": {
+    "project": "Pharos Kitchen Design (Project Prism)",
+    "component": "Samples / Content",
+    "file": "commercial-dishwasher.json",
+    "author": "Richard D. (https://github.com/iamrichardd)",
+    "license": "FSL-1.1 (See LICENSE file for details)",
+    "purpose": "Sample metadata for a High-Efficiency Commercial Dishwasher using PKD standards.",
+    "traceability": "ADR 0002"
+  },
+  "metadata_id": "PHX-DW-001",
+  "name": "High-Efficiency Commercial Dishwasher",
+  "schema_version": "1.0.0",
+  "classification": {
+    "omniclass_table_23": "23-33 11 11 11",
+    "category": "Specialty Equipment"
+  },
+  "parameters": {
+    "PKD_Manufacturer": "Pharos Kitchen Systems",
+    "PKD_ModelNumber": "PHX-750-HE",
+    "PKD_ProductNumber": "PHX-750-HE-001",
+    "PKD_IsObsolete": false,
+    "PKD_MainCategory": "Dishwashers",
+    "PKD_ParagraphSpec": "High-Efficiency Commercial Dishwasher with advanced heat recovery system and low-water rinse technology. Up to 40 racks per hour.",
+    "PKD_Voltage": "208V",
+    "PKD_Phase": 3,
+    "PKD_Wattage": "4500W",
+    "PKD_BTU": "0",
+    "PKD_DrainConnection": "2\" NPT",
+    "PKD_DocLinks": [
+      {
+        "label": "Instruction Manual",
+        "url": "https://iamrichardd.com/pharos-kitchen-design/manuals/phx-750-he.pdf"
+      }
+    ],
+    "PKD_Industry": [
+      "Foodservice"
+    ],
+    "PKD_TargetRegions": [
+      "USA",
+      "Canada"
+    ],
+    "PKD_AssetViews": {
+      "front": "Bridged-PHAROS-PHX750HE-VE.dwg",
+      "plan": "Bridged-PHAROS-PHX750HE-VP.dwg",
+      "side": "Bridged-PHAROS-PHX750HE-VS.dwg",
+      "3d": "Bridged-PHAROS-PHX750HE-V3.dwg"
+    }
+  },
+  "lod_geometry_specs": {
+    "100": {
+      "type": "BoundingBox",
+      "dimensions": {
+        "width": "24\"",
+        "depth": "24\"",
+        "height": "34\""
+      },
+      "description": "Simple extruded footprint for spatial coordination."
+    },
+    "200": {
+      "type": "SimplifiedAssembly",
+      "components": [
+        "Main Chassis",
+        "Control Panel Facia",
+        "Adjustable Feet"
+      ],
+      "description": "Generic representation with approximate handle and control locations."
+    },
+    "300": {
+      "type": "DetailedParametric",
+      "features": [
+        "Internal Rack Rails",
+        "Precise MEP Connection Points",
+        "Access Panel Clearance Zones"
+      ],
+      "description": "Accurate geometry for fabrication modeling and MEP coordination."
+    }
+  },
+  "performance_metadata": {
+    "estimated_rfa_size_kb": 34,
+    "procedural_lod_enabled": true,
+    "ghost_link_active": true
+  }
+}
