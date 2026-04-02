@@ -1,0 +1,18 @@
+{
+  "name": "pharos-kitchen-design",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Pharos Kitchen Design (Project Prism) - High-rigor BIM interoperability layer.",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "test:container": "podman build -t pkd-test -f Containerfile.test . && podman run --rm pkd-test"
+  },
+  "author": "Richard D. (https://github.com/iamrichardd)",
+  "license": "FSL-1.1"
+}

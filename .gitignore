@@ -6,3 +6,7 @@ dist/
 target/
 .DS_Store
 .env
+.idea/
+.vscode/
+.history/
+*.log

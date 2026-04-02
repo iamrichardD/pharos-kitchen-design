@@ -1,0 +1,32 @@
+# ========================================================================
+# Project: Pharos Kitchen Design (Project Prism)
+# Component: DevSecOps / CI
+# File: Containerfile.test
+# Author: Richard D. (https://github.com/iamrichardd)
+# License: FSL-1.1
+# Purpose: Zero-Host execution environment for PKD validation.
+# ========================================================================
+
+FROM docker.io/library/rust:latest AS rust-builder
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y \
+    pkg-config \
+    libssl-dev \
+    curl \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Node.js v24 (LTS) for workspace management
+RUN curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
+    && apt-get install -y nodejs \
+    && npm install -g npm@latest
+
+WORKDIR /work
+COPY . .
+
+# Ensure workspaces are recognized even if empty
+RUN mkdir -p apps packages
+
+# Default command: Run all tests
+CMD ["npm", "test"]

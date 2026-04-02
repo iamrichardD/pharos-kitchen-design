@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "pkd-bridge",
+  "description": "Mapping schema for Legacy Industry Standard fields to Pharos Kitchen Design (PKD) standard.",
+  "type": "object",
+  "properties": {
+    "electrical": {
+      "type": "object",
+      "properties": {
+        "volts": { "type": "number", "description": "Legacy: VOLTS -> PKD: electrical_voltage" },
+        "phase": { "type": "integer", "description": "Legacy: PHASE -> PKD: electrical_phase" },
+        "amps": { "type": "number", "description": "Legacy: AMPS -> PKD: electrical_amperage" },
+        "kw": { "type": "number", "description": "Legacy: KW -> PKD: electrical_kilowatts" }
+      }
+    },
+    "plumbing": {
+      "type": "object",
+      "properties": {
+        "water_hot": { "type": "string", "description": "Legacy: HW_CONN -> PKD: plumbing_hot_water" },
+        "water_cold": { "type": "string", "description": "Legacy: CW_CONN -> PKD: plumbing_cold_water" },
+        "waste": { "type": "string", "description": "Legacy: WASTE_CONN -> PKD: plumbing_waste" },
+        "gas_btu": { "type": "number", "description": "Legacy: GAS_BTU -> PKD: plumbing_gas_btu" }
+      }
+    },
+    "bim_metadata": {
+      "type": "object",
+      "properties": {
+        "lod_toggle": { "type": "boolean", "description": "PKD exclusive visibility control" },
+        "omniclass": { "type": "string", "description": "Legacy: OMNI_ID -> PKD: omniclass_code" },
+        "guid": { "type": "string", "format": "uuid" }
+      }
+    }
+  },
+  "required": ["bim_metadata"]
+}
