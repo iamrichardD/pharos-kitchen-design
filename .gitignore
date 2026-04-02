@@ -1,4 +1,5 @@
 .artifacts/
+!.artifacts/ux/
 .project/
 scripts/
 node_modules/

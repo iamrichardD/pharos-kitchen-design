@@ -1,0 +1,100 @@
+{
+  "pkd_prologue": {
+    "project": "Pharos Kitchen Design (Project Prism)",
+    "component": "Schema / Core",
+    "file": "pharos-schema.json",
+    "author": "Richard D. (https://github.com/iamrichardd)",
+    "license": "FSL-1.1 (See LICENSE file for details)",
+    "purpose": "Absolute source of truth for PKD metadata and LOD standards.",
+    "traceability": "ADR 0002, ADR 0005"
+  },
+  "version": "1.0.0",
+  "agent": "BIM Schema Specialist",
+  "project": "Pharos Kitchen Design (Project Prism)",
+  "lod_definitions": {
+    "100": {
+      "name": "Conceptual/Volumetric",
+      "geometry": "Simple bounding box or extruded footprint",
+      "purpose": "Spatial coordination & massing",
+      "max_complexity": "low"
+    },
+    "200": {
+      "name": "Generic Schematic",
+      "geometry": "Representational geometry with approximate size and shape",
+      "purpose": "Preliminary systems coordination",
+      "max_complexity": "medium"
+    },
+    "300": {
+      "name": "Detailed Design",
+      "geometry": "Accurate geometry for coordination and fabrication modeling",
+      "purpose": "Precise MEP connections & scheduling",
+      "max_complexity": "high"
+    }
+  },
+  "localization_standards": {
+    "default_locale": "en_US",
+    "translation_standard": "Mozilla Fluent",
+    "unit_system": {
+      "metric": "SI (Base Units)",
+      "imperial": "US Customary",
+      "hybrid": "Mixed (UK/Canada)"
+    },
+    "regional_certification_mapping": {
+      "US": [ "UL", "NSF", "EnergyStar", "CSA" ],
+      "EU": [ "CE", "RoHS", "REACH", "WEEE" ],
+      "Global": [ "ISO", "IEC" ]
+    }
+  },
+  "unit_mapping": {
+    "dimensions": { "base": "mm", "display": "in" },
+    "weight": { "base": "kg", "display": "lbs" },
+    "power": { "base": "watts", "display": "kw" },
+    "gas": { "base": "btu/hr", "display": "btu/hr" },
+    "water": { "base": "lpm", "display": "gpm" }
+  },
+  "parameter_standards": {
+    "classification": "OmniClass Table 23 (Products)",
+    "shared_parameters": {
+      "PKD_Manufacturer": "TEXT",
+      "PKD_ModelNumber": "TEXT",
+      "PKD_TargetMarket": "TEXT",
+      "PKD_Voltage": "ELECTRICAL_POTENTIAL",
+      "PKD_Phase": "NUMBER",
+      "PKD_Wattage": "ELECTRICAL_WATTAGE",
+      "PKD_BTU": "HVAC_POWER",
+      "PKD_DrainConnection": "PIPING_SIZE",
+      "PKD_DocLinks": "URL_ARRAY",
+      "PKD_Industry": "ENUM_ARRAY",
+      "PKD_TargetRegions": "ENUM_ARRAY",
+      "PKD_AssetViews": "OBJECT"
+    }
+  },
+  "bloat_rules": {
+    "max_file_size_delta_kb": 50,
+    "action": "flag_for_stripping",
+    "forbidden_metadata": [
+      "AUTODESK_INTERNAL_*",
+      "LEGACY_PARAM_*",
+      "NON_SCHEDULABLE_*"
+    ],
+    "regional_stripping_rules": {
+      "EU": [
+        "UL_LISTING",
+        "ENERGY_STAR",
+        "NSF_CERT"
+      ],
+      "US": [
+        "CE_MARK",
+        "RoHS_COMPLIANCE",
+        "ERP_DIRECTIVE"
+      ]
+    },
+    "procedural_preference": true
+  },
+  "stripper_config": {
+    "mode": "Ghost-Link",
+    "target_rfa_size_mb": 1.0,
+    "strip_hidden_geometry": true,
+    "normalize_omniclass": true
+  }
+}
