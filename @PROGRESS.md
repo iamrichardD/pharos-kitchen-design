@@ -9,9 +9,9 @@
 
 ### Sprint 1: Foundation & High-Rigor CI (2026-04-03)
 - [x] Initial ADR scaffolding (0001-0013).
-- [x] Marketing Site implemented (Astro 6.x, Tailwind CSS, Technical Blueprint).
+- [x] Marketing Site implemented (Astro 5.4.1, Tailwind CSS, Technical Blueprint).
 - [x] Security: Shift-Left Audit codified in Container cycle (ADR 0016).
-- [x] CI: Deployment workflow established for iamrichardd.com.
+- [x] CI: Deployment workflow established and verified for iamrichardd.com.
 - [x] Ops: GitHub Action caching and esbuild mismatches resolved.
 
 ---
