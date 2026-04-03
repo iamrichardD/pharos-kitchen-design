@@ -34,7 +34,6 @@ jobs:
           
       - name: Install dependencies
         run: npm ci
-        working-directory: ./apps/marketing
         
       - name: Build with Astro
         run: npm run build
