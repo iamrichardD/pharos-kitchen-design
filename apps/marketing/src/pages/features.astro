@@ -1,0 +1,58 @@
+---
+/**
+ * Project: Pharos Kitchen Design (Project Prism)
+ * Component: Pages / Features
+ * File: features.astro
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * Purpose: Deep dive into Ghost-Link and Command-First UX.
+ * Traceability: ADR 0015
+ */
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import BlueprintCard from '../components/BlueprintCard.astro';
+---
+
+<BaseLayout title="Capabilities & Logic">
+	<section class="py-16 container mx-auto px-4">
+		<h1 class="text-4xl md:text-5xl mb-12">Capabilities & Logic.</h1>
+		
+		<div class="space-y-20">
+			<div class="flex flex-col md:flex-row gap-12 items-center">
+				<div class="flex-1 order-2 md:order-1">
+					<div class="blueprint-border p-4 bg-black/20 aspect-video flex items-center justify-center font-mono text-[10px] text-ph-blue/40 uppercase">
+						[ PLAYWRIGHT: GHOST-LINK METADATA BINDING ]
+					</div>
+				</div>
+				<div class="flex-1 order-1 md:order-2">
+					<h2 class="text-2xl text-ph-blue mb-4 uppercase tracking-wider italic">01 // GHOST-LINK METADATA PARITY</h2>
+					<p class="text-gray-300 mb-6 leading-relaxed">
+						Metadata usually dies during export. Pharos uses the "Ghost-Link" protocol to ensure that equipment GUIDs and attributes survive the transition between Revit, AutoCAD, and Project Management software.
+					</p>
+					<ul class="space-y-3 font-mono text-[10px] uppercase text-gray-500">
+						<li>+ Deterministic GUID Mapping</li>
+						<li>+ Field-Level Atomicity (RFC-2378 Logic)</li>
+						<li>+ Zero-Toil Sync for Designers</li>
+					</ul>
+				</div>
+			</div>
+
+			<div class="flex flex-col md:flex-row gap-12 items-center">
+				<div class="flex-1">
+					<h2 class="text-2xl text-ph-orange mb-4 uppercase tracking-wider italic">02 // COMMAND-FIRST SEARCH (Cmd+K)</h2>
+					<p class="text-gray-300 mb-6 leading-relaxed">
+						Folder-diving is a productivity killer. Our hybrid Spotlight search allows you to find, filter, and place manufacturer equipment in milliseconds.
+					</p>
+					<div class="p-4 bg-ph-charcoal border border-white/5 font-mono text-xs text-gray-400">
+						<span class="text-ph-orange">></span> query "Vulcan 36 Range" <br/>
+						<span class="text-ph-blue">S: 102: Found 3 matches in 12ms.</span>
+					</div>
+				</div>
+				<div class="flex-1">
+					<div class="blueprint-border p-4 bg-black/20 aspect-video flex items-center justify-center font-mono text-[10px] text-ph-orange/40 uppercase">
+						[ PLAYWRIGHT: SPOTLIGHT INTERACTION ]
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+</BaseLayout>

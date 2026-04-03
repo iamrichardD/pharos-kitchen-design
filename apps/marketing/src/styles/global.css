@@ -1,0 +1,45 @@
+/* ========================================================================
+ * Project: Pharos Kitchen Design (Project Prism)
+ * Component: Marketing Site Styles
+ * File: global.css
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * Purpose: Global styles and utility classes for the "Technical Blueprint" aesthetic.
+ * Traceability: ADR 0012, ADR 0015
+ * ======================================================================== */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-ph-charcoal text-gray-100 font-sans;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-condensed uppercase tracking-tight;
+  }
+}
+
+@layer components {
+  .blueprint-grid {
+    background-image: 
+      linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  .blueprint-border {
+    @apply border border-ph-blue/30 relative;
+  }
+
+  .blueprint-border::before {
+    content: '';
+    @apply absolute -top-1 -left-1 w-2 h-2 bg-ph-blue;
+  }
+
+  .blueprint-border::after {
+    content: '';
+    @apply absolute -bottom-1 -right-1 w-2 h-2 bg-ph-blue;
+  }
+}

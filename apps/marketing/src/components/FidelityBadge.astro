@@ -1,0 +1,28 @@
+---
+/**
+ * Project: Pharos Kitchen Design (Project Prism)
+ * Component: UI / Badge
+ * File: FidelityBadge.astro
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * Purpose: Visual indicator for metadata confidence levels.
+ * Traceability: ADR 0015
+ */
+
+interface Props {
+	level: 'raw' | 'normalized' | 'verified';
+}
+
+const { level } = Astro.props;
+
+const config = {
+	raw: { label: 'RAW', class: 'bg-gray-700 text-gray-300' },
+	normalized: { label: 'NORMALIZED', class: 'bg-ph-blue/20 text-ph-blue border border-ph-blue/50' },
+	verified: { label: 'VERIFIED', class: 'bg-ph-orange/20 text-ph-orange border border-ph-orange/50' }
+};
+
+const { label, class: badgeClass } = config[level];
+---
+
+<span class={`px-2 py-0.5 text-[10px] font-condensed font-bold tracking-widest rounded ${badgeClass}`}>
+	{label}
+</span>

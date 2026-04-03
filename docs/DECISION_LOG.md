@@ -17,6 +17,8 @@ This log provides an index of the technical and architectural decisions made for
 | **[ADR-0011]** | 2026-03-31 | Approved | [Multilingual AEC Taxonomy & Global Roadmap](docs/adr/0011-multilingual-aec-taxonomy-and-roadmap.md) |
 | **[ADR-0012]** | 2026-03-31 | Approved | [Marketing IA & Visual Design System](docs/adr/0012-marketing-ia-and-design-system.md) |
 | **[ADR-0013]** | 2026-03-31 | Approved | [Personal Brand Integration & Proof of Capability](docs/adr/0013-personal-brand-integration-proof-of-capability.md) |
+| **[ADR-0014]** | 2026-04-03 | Approved | [Public Registry & Federated Truth](docs/adr/0014-public-registry-prioritization.md) |
+| **[ADR-0015]** | 2026-04-03 | Approved | [IKD-Centric Marketing & Live-Sync Truth Engine](docs/adr/0015-ikd-centric-marketing-and-truth-engine.md) |
 
 ---
 *To add a new decision, create a new file in `docs/adr/` following the established template and append it to this index.*

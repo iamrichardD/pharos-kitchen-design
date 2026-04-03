@@ -1,0 +1,67 @@
+---
+/**
+ * Project: Pharos Kitchen Design (Project Prism)
+ * Component: Pages / Bridge
+ * File: bridge.astro
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * Purpose: Instructional content for interoperability and the Pharos Bridge.
+ * Traceability: ADR 0015
+ */
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import BlueprintCard from '../components/BlueprintCard.astro';
+---
+
+<BaseLayout title="Interoperability Bridge">
+	<section class="py-16 container mx-auto px-4">
+		<h1 class="text-4xl md:text-5xl mb-12">The Pharos Bridge.</h1>
+		
+		<div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-20">
+			<div class="space-y-8">
+				<p class="text-xl text-gray-300 leading-relaxed font-sans">
+					The Bridge is a lightweight interoperability layer that allows you to use Pharos metadata inside your existing BIM/CAD environment today.
+				</p>
+				
+				<BlueprintCard title="HOW IT WORKS">
+					<ol class="space-y-6">
+						<li class="flex gap-4">
+							<span class="font-condensed text-ph-blue text-2xl">01</span>
+							<div>
+								<h4 class="text-white uppercase mb-1">DOWNLOAD METADATA</h4>
+								<p class="text-sm text-gray-400">Download the lean PKD JSON file for your specified equipment.</p>
+							</div>
+						</li>
+						<li class="flex gap-4">
+							<span class="font-condensed text-ph-blue text-2xl">02</span>
+							<div>
+								<h4 class="text-white uppercase mb-1">BIND TO RELEVANT FAMILY</h4>
+								<p class="text-sm text-gray-400">Map the JSON metadata to your existing RFA or DWG through the Ghost-Link interface.</p>
+							</div>
+						</li>
+						<li class="flex gap-4">
+							<span class="font-condensed text-ph-blue text-2xl">03</span>
+							<div>
+								<h4 class="text-white uppercase mb-1">DETERMINISTIC SCHEDULES</h4>
+								<p class="text-sm text-gray-400">Pharos handles the GUID parity, ensuring your schedules remain 100% accurate across software exports.</p>
+							</div>
+						</li>
+					</ol>
+				</BlueprintCard>
+			</div>
+			
+			<div class="blueprint-border p-4 bg-black/40 flex items-center justify-center font-mono text-xs text-ph-blue/40 uppercase">
+				[ PLAYWRIGHT: STEP-BY-STEP BRIDGE INSTRUCTIONAL GIF ]
+			</div>
+		</div>
+
+		<div class="blueprint-border p-8 border-ph-blue/20">
+			<h3 class="text-2xl mb-6 uppercase tracking-widest text-ph-blue italic">Supported Environments</h3>
+			<div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+				<div class="p-4 border border-white/5 bg-ph-charcoal/40 font-mono text-xs text-gray-400">REVIT 2023+</div>
+				<div class="p-4 border border-white/5 bg-ph-charcoal/40 font-mono text-xs text-gray-400">AUTOCAD 2024+</div>
+				<div class="p-4 border border-white/5 bg-ph-charcoal/40 font-mono text-xs text-gray-400">ARCHICAD 26+</div>
+				<div class="p-4 border border-white/5 bg-ph-charcoal/40 font-mono text-xs text-gray-400">VECTORWORKS 2023+</div>
+			</div>
+		</div>
+	</section>
+</BaseLayout>

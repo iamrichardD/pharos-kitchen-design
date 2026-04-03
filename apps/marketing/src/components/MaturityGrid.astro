@@ -1,0 +1,60 @@
+---
+/**
+ * Project: Pharos Kitchen Design (Project Prism)
+ * Component: Visualizations / Grid
+ * File: MaturityGrid.astro
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * Purpose: Visualizes equipment category coverage and sync status.
+ * Traceability: ADR 0015
+ */
+
+import FidelityBadge from './FidelityBadge.astro';
+
+interface Category {
+	name: string;
+	coverage: number;
+	fidelity: 'raw' | 'normalized' | 'verified';
+	lastSync: string;
+}
+
+const categories: Category[] = [
+	{ name: 'Refrigeration', coverage: 85, fidelity: 'normalized', lastSync: '12d ago' },
+	{ name: 'Cooking Equipment', coverage: 40, fidelity: 'raw', lastSync: '3d ago' },
+	{ name: 'Warewashing', coverage: 95, fidelity: 'verified', lastSync: '1d ago' },
+	{ name: 'Food Prep', coverage: 20, fidelity: 'raw', lastSync: '15d ago' },
+	{ name: 'Serving Systems', coverage: 60, fidelity: 'normalized', lastSync: '5d ago' },
+	{ name: 'Ventilation', coverage: 10, fidelity: 'raw', lastSync: '30d ago' }
+];
+---
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+	{categories.map((cat) => (
+		<div class="blueprint-border p-4 bg-ph-charcoal/40">
+			<div class="flex justify-between items-start mb-4">
+				<h4 class="text-sm text-gray-400 font-mono uppercase">{cat.name}</h4>
+				<FidelityBadge level={cat.fidelity} />
+			</div>
+			
+			<div class="space-y-2">
+				<div class="flex justify-between text-[10px] text-gray-500 font-mono uppercase mb-1">
+					<span>Schema Coverage</span>
+					<span>{cat.coverage}%</span>
+				</div>
+				<div class="w-full bg-gray-800 h-1.5 rounded-full overflow-hidden">
+					<div 
+						class="h-full bg-ph-blue transition-all duration-500" 
+						style={`width: ${cat.coverage}%`}
+					></div>
+				</div>
+			</div>
+			
+			<div class="mt-4 pt-3 border-t border-white/5 flex justify-between items-center">
+				<div class="flex items-center gap-1.5">
+					<span class="w-1.5 h-1.5 rounded-full bg-ph-orange animate-pulse"></span>
+					<span class="text-[10px] text-gray-500 font-mono uppercase">Live Pulse</span>
+				</div>
+				<span class="text-[10px] text-gray-400 font-mono">{cat.lastSync}</span>
+			</div>
+		</div>
+	))}
+</div>

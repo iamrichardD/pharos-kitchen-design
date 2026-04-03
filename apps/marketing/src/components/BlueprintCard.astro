@@ -1,0 +1,27 @@
+---
+/**
+ * Project: Pharos Kitchen Design (Project Prism)
+ * Component: UI / Card
+ * File: BlueprintCard.astro
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * Purpose: A reusable container with industrial styling.
+ * Traceability: ADR 0012, ADR 0015
+ */
+
+interface Props {
+	title?: string;
+	class?: string;
+}
+
+const { title, class: className } = Astro.props;
+---
+
+<div class={`blueprint-border bg-ph-charcoal/60 p-6 ${className}`}>
+	{title && (
+		<h3 class="text-ph-orange text-lg mb-4 flex items-center gap-2">
+			<span class="w-2 h-2 bg-ph-orange inline-block"></span>
+			{title}
+		</h3>
+	)}
+	<slot />
+</div>

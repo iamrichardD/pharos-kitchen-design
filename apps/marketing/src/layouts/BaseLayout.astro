@@ -1,0 +1,71 @@
+---
+/**
+ * Project: Pharos Kitchen Design (Project Prism)
+ * Component: Layouts / Base
+ * File: BaseLayout.astro
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * Purpose: Global shell for the IKD marketing site.
+ * Traceability: ADR 0012, ADR 0013, ADR 0015
+ */
+
+import '../styles/global.css';
+
+interface Props {
+	title: string;
+	description?: string;
+}
+
+const { title, description = "Pharos Kitchen Design: Metadata-First Truth for the Independent Kitchen Designer." } = Astro.props;
+const siteUrl = 'https://iamrichardd.com/pharos-kitchen-design';
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title} | Pharos Kitchen Design</title>
+		<meta name="description" content={description} />
+
+		<!-- Fonts -->
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Roboto+Condensed:wght@700&display=swap" rel="stylesheet">
+
+		<!-- Umami Analytics -->
+		<script defer src="https://cloud.umami.is/script.js" data-website-id="72cdde11-d1e4-4a33-9cc3-a00d5fe4651b"></script>
+	</head>
+	<body class="blueprint-grid min-h-screen flex flex-col">
+		<header class="border-b border-ph-blue/20 py-4 bg-ph-charcoal/80 backdrop-blur-sm sticky top-0 z-50">
+			<div class="container mx-auto px-4 flex justify-between items-center">
+				<a href="/pharos-kitchen-design/" class="flex items-center gap-2">
+					<div class="w-8 h-8 bg-ph-orange flex items-center justify-center font-condensed text-ph-charcoal text-xl">P</div>
+					<span class="font-condensed text-xl tracking-tight hidden sm:inline">PHAROS KITCHEN DESIGN</span>
+				</a>
+				<nav class="flex gap-6 font-condensed text-sm tracking-widest uppercase">
+					<a href="/pharos-kitchen-design/features" class="hover:text-ph-orange transition-colors">Features</a>
+					<a href="/pharos-kitchen-design/coverage" class="hover:text-ph-orange transition-colors">Coverage</a>
+					<a href="/pharos-kitchen-design/bridge" class="hover:text-ph-orange transition-colors">Bridge</a>
+				</nav>
+			</div>
+		</header>
+
+		<main class="flex-grow">
+			<slot />
+		</main>
+
+		<footer class="border-t border-ph-blue/20 py-8 bg-ph-charcoal">
+			<div class="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
+				<div class="text-xs text-gray-500 font-mono">
+					PROJECT: PHAROS // STATUS: DETERMINISTIC // [FSL-1.1]
+				</div>
+				<div class="flex gap-6 items-center">
+					<a href="https://iamrichardd.com" class="text-xs text-gray-400 hover:text-ph-orange transition-colors">A Project by Richard D.</a>
+					<a href="https://github.com/iamrichardD/pharos" class="text-xs text-ph-blue hover:text-ph-orange transition-colors uppercase font-bold tracking-widest">GitHub Repository</a>
+				</div>
+			</div>
+		</footer>
+	</body>
+</html>
