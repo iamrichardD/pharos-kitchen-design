@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Command-First UX Prototype - Project Prism</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* ========================================================================
+         * 2026 DESIGN TOKENS
+         * ======================================================================== */
+        :root, body.theme-perf-dark { --bg-canvas: #121212; --bg-surface: #1a1a1a; --accent: #2dffc4; --text-main: #e2e8f0; --text-muted: #84a59d; --border: rgba(132, 165, 157, 0.1); --handle: #a8c3bc; }
+        body.theme-perf-light { --bg-canvas: #F0EEE9; --bg-surface: #ffffff; --accent: #990F3D; --text-main: #1a1a1a; --text-muted: #708090; --border: rgba(112, 128, 144, 0.15); --handle: #4a5568; }
+        body.theme-bal-dark { --bg-canvas: #1b201e; --bg-surface: #242b28; --accent: #e07a5f; --text-main: #f4f1de; --text-muted: #84a59d; --border: rgba(224, 122, 95, 0.1); --handle: #a8c3bc; }
+        body.theme-bal-light { --bg-canvas: #F0EEE9; --bg-surface: #ffffff; --accent: #E2725B; --text-main: #1b201e; --text-muted: #9DC183; --border: rgba(157, 193, 131, 0.15); --handle: #c5e1a5; }
+        body.theme-moody-dark { --bg-canvas: #0d1b1e; --bg-surface: #152a2d; --accent: #d4a5a5; --text-main: #f8fafc; --text-muted: #6b8e8e; --border: rgba(212, 165, 165, 0.1); --handle: #8fb3b3; }
+        body.theme-moody-light { --bg-canvas: #F0EEE9; --bg-surface: #ffffff; --accent: #4A0404; --text-main: #152a2d; --text-muted: #7A5C4A; --border: rgba(122, 92, 74, 0.15); --handle: #5a4033; }
+        body.theme-solar-dark { --bg-canvas: #1a1a2e; --bg-surface: #24243e; --accent: #706fd3; --text-main: #f7f1e3; --text-muted: #a5a5d9; --border: rgba(112, 111, 211, 0.1); --handle: #706fd3; }
+        body.theme-solar-light { --bg-canvas: #f7f1e3; --bg-surface: #ffffff; --accent: #706fd3; --text-main: #1a1a2e; --text-muted: #706fd3; --border: rgba(112, 111, 211, 0.1); --handle: #4847ad; }
+        body.theme-legacy-dark { --bg-canvas: #222222; --bg-surface: #2d2d2d; --accent: #cccccc; --text-main: #ffffff; --text-muted: #666666; --border: rgba(255, 255, 255, 0.05); --handle: #cccccc; }
+        body.theme-legacy-light { --bg-canvas: #f4f4f4; --bg-surface: #ffffff; --accent: #cc0000; --text-main: #333333; --text-muted: #666666; --border: rgba(0, 0, 0, 0.1); --handle: #444444; }
+
+        /* Base Layout */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background-color: var(--bg-canvas); color: var(--text-main); font-family: 'Inter', sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; transition: all 0.4s ease; }
+        @media (min-width: 768px) { body { flex-direction: row; } }
+
+        /* Canvas Area */
+        #canvas { flex-grow: 1; position: relative; background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px); background-size: 50px 50px; display: flex; align-items: center; justify-content: center; order: 2; overflow: hidden; }
+        @media (min-width: 768px) { #canvas { order: 1; } }
+
+        /* Hybrid Stage */
+        #stage { position: relative; display: flex; flex-direction: column; align-items: center; gap: 20px; transition: all 0.5s ease; }
+        #asset-image { max-width: 240px; height: auto; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.3); opacity: 0; transform: translateY(20px); transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+        #asset-image.active { opacity: 0.8; transform: translateY(0); }
+
+        #legend { position: absolute; top: 20px; right: 20px; text-align: right; color: var(--text-muted); font-size: 10px; font-family: 'JetBrains Mono', monospace; opacity: 0.5; pointer-events: none; }
+        #legend b { color: var(--accent); }
+
+        /* Omni-Bar Area */
+        #header-area { padding: 16px; width: 100%; z-index: 100; background: var(--bg-surface); border-bottom: 1px solid var(--border); order: 1; }
+        @media (min-width: 768px) { 
+            #header-area { 
+                position: absolute; top: 40px; left: 50%; transform: translateX(-50%); 
+                width: 600px; max-width: calc(100% - 40px); background: transparent; border: none; padding: 0; pointer-events: none;
+            } 
+        }
+        #omni-container { display: flex; flex-direction: column; gap: 8px; pointer-events: auto; }
+        #omni-bar { background: var(--bg-surface); backdrop-filter: blur(20px); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 4px; padding: 12px 20px; display: flex; align-items: center; gap: 12px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); transition: padding 0.3s; }
+        
+        /* Ghost Prefix Transition */
+        #omni-bar span.prompt { color: var(--accent); font-family: 'JetBrains Mono', monospace; font-weight: 500; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); opacity: 1; width: auto; }
+        #omni-bar.prefix-hidden span.prompt { opacity: 0; width: 0; margin-right: -12px; pointer-events: none; }
+
+        #omni-bar input { background: transparent; border: none; color: var(--text-main); font-family: 'JetBrains Mono', monospace; font-size: 15px; width: 100%; outline: none; }
+        
+        #suggestions { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 4px; display: none; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .suggestion-item { padding: 10px 20px; font-size: 13px; cursor: pointer; display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); transition: background 0.2s; }
+        .suggestion-item:hover, .suggestion-item.highlighted { background: rgba(255,255,255,0.05); color: var(--accent); border-left: 4px solid var(--accent); }
+        .suggestion-item span.mfr { opacity: 0.6; font-size: 11px; }
+        .suggestion-item.command { border-left: 2px solid var(--accent); }
+        .suggestion-item.command b { color: var(--accent); }
+
+        #status-terminal { background: var(--bg-surface); padding: 10px 18px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); border-radius: 4px; display: none; margin-top: 8px; border: 1px solid var(--border); transition: color 0.3s; }
+        @media (min-width: 768px) { #status-terminal { display: block; } }
+
+        /* Inspector Area */
+        #inspector { width: 100%; max-height: 38vh; background: var(--bg-surface); border-top: 1px solid var(--border); display: flex; flex-direction: column; z-index: 150; order: 3; overflow-y: auto; }
+        @media (min-width: 768px) { #inspector { width: 340px; max-height: 100vh; border-top: none; border-left: 1px solid var(--border); order: 2; } }
+        #inspector header { padding: 24px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg-surface); }
+        .model-name { font-size: 18px; font-weight: 600; color: var(--text-main); }
+        .inspector-content { padding: 24px; }
+        .data-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; }
+        .data-label { color: var(--text-muted); }
+        .data-value { font-family: 'JetBrains Mono', monospace; color: var(--accent); }
+        .badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(0,0,0,0.1); border: 1px solid var(--accent); color: var(--accent); padding: 4px 12px; border-radius: 2px; font-size: 10px; font-weight: 600; margin-top: 12px; text-transform: uppercase; }
+
+        /* Dynamic Equipment SVG */
+        #equipment-svg { stroke: var(--text-muted); stroke-width: 1.25; fill: rgba(132, 165, 157, 0.03); transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        #equipment-svg text { stroke: none; fill: var(--text-muted); font-size: 8px; transition: all 0.5s; }
+        #blueprint-rect { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .utility-node { fill: var(--handle); stroke: var(--bg-canvas); stroke-width: 1.5; transition: all 0.5s ease; }
+
+        /* Matrix Switcher */
+        #matrix-switcher { position: absolute; bottom: 20px; left: 20px; z-index: 200; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 12px; padding: 0; box-shadow: 0 15px 40px rgba(0,0,0,0.4); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); width: 48px; height: 48px; overflow: hidden; }
+        #matrix-switcher.expanded { width: 260px; height: auto; padding: 20px; }
+        #switcher-toggle { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; cursor: pointer; color: var(--accent); position: absolute; top: 0; right: 0; transition: transform 0.3s ease; }
+        #matrix-content { opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
+        #matrix-switcher.expanded #matrix-content { opacity: 1; pointer-events: auto; }
+        .matrix-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+        .swatch-btn { height: 40px; border-radius: 4px; border: 2px solid transparent; cursor: pointer; display: flex; align-items: flex-end; padding: 4px; }
+        .swatch-btn span { font-size: 7px; font-weight: 700; color: white; background: rgba(0,0,0,0.5); padding: 1px 3px; border-radius: 2px; }
+        .swatch-btn.active { border-color: var(--accent); }
+
+        .btn-perf-dark { background: linear-gradient(135deg, #121212 60%, #2dffc4 100%); }
+        .btn-perf-light { background: linear-gradient(135deg, #F0EEE9 60%, #990F3D 100%); }
+        .btn-bal-dark { background: linear-gradient(135deg, #1b201e 60%, #e07a5f 100%); }
+        .btn-bal-light { background: linear-gradient(135deg, #F0EEE9 60%, #E2725B 100%); }
+        .btn-moody-dark { background: linear-gradient(135deg, #0d1b1e 60%, #d4a5a5 100%); }
+        .btn-moody-light { background: linear-gradient(135deg, #F0EEE9 60%, #4A0404 100%); }
+        .btn-solar-dark { background: linear-gradient(135deg, #1a1a2e 60%, #706fd3 100%); }
+        .btn-solar-light { background: linear-gradient(135deg, #f7f1e3 60%, #706fd3 100%); }
+        .btn-legacy-dark { background: linear-gradient(135deg, #222222 60%, #cccccc 100%); }
+        .btn-legacy-light { background: linear-gradient(135deg, #f4f4f4 60%, #cc0000 100%); }
+    </style>
+</head>
+<body class="theme-perf-dark">
+
+    <div id="canvas">
+        <div id="header-area">
+            <div id="omni-container">
+                <div id="omni-bar">
+                    <span class="prompt">/</span>
+                    <input type="text" id="omni-input" placeholder="Search catalog or type '/' for commands..." onkeyup="handleInput(event)" onkeydown="handleKeys(event)" onfocus="showVerbs()">
+                </div>
+                <div id="suggestions"></div>
+                <div id="status-terminal">
+                    [SYS] Catalog Online. Ready for design instructions.
+                </div>
+            </div>
+        </div>
+
+        <div id="legend">
+            <b>[/]</b> COMMAND &nbsp; <b>[ENTER]</b> PLACE &nbsp; <b>[ESC]</b> CLEAR &nbsp; <b>[?]</b> HELP
+        </div>
+        
+        <div id="stage">
+            <img id="asset-image" src="" alt="Verified Asset">
+            <svg id="equipment-svg" viewBox="0 0 100 100" width="200" height="200">
+                <rect id="blueprint-rect" x="10" y="10" width="80" height="80" rx="4" />
+                <rect id="inner-rect" x="20" y="20" width="60" height="60" rx="2" stroke-dasharray="3,3" fill="none" />
+                <circle id="node-1" class="utility-node" cx="50" cy="90" r="4" />
+                <circle id="node-2" class="utility-node" cx="10" cy="50" r="4" />
+                <text id="uuid-label" x="50" y="55" text-anchor="middle" font-family="JetBrains Mono">PHAROS-ROOT</text>
+            </svg>
+        </div>
+
+        <!-- Matrix Switcher -->
+        <div id="matrix-switcher">
+            <button id="switcher-toggle" onclick="toggleMatrix()">
+                <svg id="toggle-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+            </button>
+            <div id="matrix-content">
+                <h4 style="font-size: 10px; margin-bottom: 8px; opacity: 0.6;">Design Matrix</h4>
+                <div class="matrix-grid">
+                    <button class="swatch-btn btn-perf-dark active" onclick="setTheme('perf-dark', this)"><span>Opt-D</span></button>
+                    <button class="swatch-btn btn-perf-light" onclick="setTheme('perf-light', this)"><span>Optimism</span></button>
+                    <button class="swatch-btn btn-bal-dark" onclick="setTheme('bal-dark', this)"><span>Bot-D</span></button>
+                    <button class="swatch-btn btn-bal-light" onclick="setTheme('bal-light', this)"><span>Botanical</span></button>
+                    <button class="swatch-btn btn-moody-dark" onclick="setTheme('moody-dark', this)"><span>Lux-D</span></button>
+                    <button class="swatch-btn btn-moody-light" onclick="setTheme('moody-light', this)"><span>Luxe</span></button>
+                    <button class="swatch-btn btn-solar-dark" onclick="setTheme('solar-dark', this)"><span>Quiet-D</span></button>
+                    <button class="swatch-btn btn-solar-light" onclick="setTheme('solar-light', this)"><span>Solar Lux</span></button>
+                    <button class="swatch-btn btn-legacy-dark" onclick="setTheme('legacy-dark', this)"><span>Leg-D</span></button>
+                    <button class="swatch-btn btn-legacy-light" onclick="setTheme('legacy-light', this)"><span>Legacy</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <aside id="inspector">
+        <header>
+            <h2 style="font-size: 10px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px;">Technical Specifications</h2>
+            <div id="insp-name" class="model-name">Pharos Core</div>
+            <div class="badge">Verified Specs</div>
+        </header>
+        <div class="inspector-content" id="insp-content">
+            <p style="font-size: 12px; color: var(--text-muted); line-height: 1.6;">Type <strong>/add [item]</strong> to link real-world BIM data to the canvas.</p>
+        </div>
+    </aside>
+
+    <script>
+        const models = [
+            { name: "10 Gallon RO Tank", mfr: "3M Purification", id: 93454337, asset: "93454337_3.jpg", w: 40, d: 80, specs: { "Capacity": "10 Gal", "Dimensions": "34\"H x 16\"dia" } },
+            { name: "Countertop Steamer", mfr: "AccuTemp Products", id: 93454338, asset: "93454338_3.jpg", w: 80, d: 60, specs: { "Type": "Steamer", "Origin": "USA" } },
+            { name: "High Speed Oven", mfr: "ACP, Inc.", id: 93454339, asset: "93454339_3.jpg", w: 70, d: 70, specs: { "Tech": "TurboChef", "Power": "240V" } },
+            { name: "Vulcan V-Series Range", mfr: "Vulcan", id: 1006, asset: null, w: 90, d: 80, specs: { "BTUs": "120k", "Inlet": "3/4\"" } }
+        ];
+
+        const verbs = [
+            { cmd: "/add", desc: "Place equipment from catalog" },
+            { cmd: "/export", desc: "Generate Revit/CAD files" },
+            { cmd: "/help", desc: "View all commands" }
+        ];
+
+        let selectedIndex = -1;
+        let activeMatches = [];
+
+        function showVerbs() {
+            const input = document.getElementById('omni-input');
+            if (input.value === "") {
+                activeMatches = verbs.map(v => ({...v, isCommand: true}));
+                renderSuggestions();
+            }
+        }
+
+        function handleKeys(e) {
+            const sugBox = document.getElementById('suggestions');
+            if (sugBox.style.display === 'none' || activeMatches.length === 0) return;
+            if (e.key === 'ArrowDown') { e.preventDefault(); selectedIndex = (selectedIndex + 1) % activeMatches.length; updateHighlight(); }
+            else if (e.key === 'ArrowUp') { e.preventDefault(); selectedIndex = (selectedIndex - 1 + activeMatches.length) % activeMatches.length; updateHighlight(); }
+            else if (e.key === 'Enter' && selectedIndex > -1) { e.preventDefault(); const item = activeMatches[selectedIndex]; if (item.isCommand) applyVerb(item.cmd); else placeModel(item.id); }
+            else if (e.key === 'Escape') { sugBox.style.display = 'none'; selectedIndex = -1; }
+        }
+
+        function updateHighlight() {
+            const items = document.querySelectorAll('.suggestion-item');
+            items.forEach((item, i) => { if (i === selectedIndex) { item.classList.add('highlighted'); item.scrollIntoView({ block: 'nearest' }); } else { item.classList.remove('highlighted'); } });
+        }
+
+        function renderSuggestions() {
+            const sugBox = document.getElementById('suggestions');
+            if (activeMatches.length > 0) {
+                sugBox.style.display = 'block';
+                sugBox.innerHTML = activeMatches.map((m, i) => `
+                    <div class="suggestion-item ${m.isCommand ? 'command' : ''}" onclick="${m.isCommand ? `applyVerb('${m.cmd}')` : `placeModel(${m.id})`}">
+                        <span>${m.isCommand ? `<b>${m.cmd}</b>` : m.name}</span>
+                        <span class="mfr">${m.isCommand ? m.desc : m.mfr}</span>
+                    </div>
+                `).join('');
+                updateHighlight();
+            } else { sugBox.style.display = 'none'; }
+        }
+
+        function applyVerb(v) {
+            const input = document.getElementById('omni-input');
+            input.value = v + " ";
+            input.focus();
+            selectedIndex = -1;
+            handleInput({ target: input });
+        }
+
+        let lastValue = "";
+        function handleInput(e) {
+            const val = e.target.value;
+            const term = document.getElementById('status-terminal');
+            const bar = document.getElementById('omni-bar');
+
+            // GHOST PREFIX LOGIC: Hide static '/' if user types their own
+            if (val.startsWith('/')) { bar.classList.add('prefix-hidden'); } 
+            else { bar.classList.remove('prefix-hidden'); }
+
+            const navKeys = ['ArrowUp', 'ArrowDown', 'Enter', 'Escape', 'Tab'];
+            if (navKeys.includes(e.key) || val === lastValue) return;
+            lastValue = val;
+            if (val === "") { showVerbs(); return; }
+            if (val.startsWith('/add ')) {
+                const query = val.replace('/add ', '').toLowerCase();
+                activeMatches = models.filter(m => m.name.toLowerCase().includes(query) || m.mfr.toLowerCase().includes(query)).map(m => ({...m, isCommand: false}));
+                selectedIndex = -1;
+                renderSuggestions();
+                term.innerText = activeMatches.length > 0 ? `[HINT] Use arrows to select a model.` : `[SYS] No matches for "${query}".`;
+            } else { activeMatches = []; renderSuggestions(); term.innerText = `[SYS] Catalog Online. Ready.`; }
+        }
+
+        function placeModel(id) {
+            const model = models.find(m => m.id === id);
+            document.getElementById('omni-input').value = `/add ${model.name}`;
+            document.getElementById('suggestions').style.display = 'none';
+            document.getElementById('status-terminal').innerText = `[SYS] Linked ${model.name}. Syncing spatial canvas...`;
+            selectedIndex = -1;
+            
+            const img = document.getElementById('asset-image');
+            if (model.asset) { img.src = `/pharos-kitchen-design/assets/data/assets/${model.asset}`; img.classList.add('active'); }
+            else { img.classList.remove('active'); }
+
+            const rect = document.getElementById('blueprint-rect');
+            const inner = document.getElementById('inner-rect');
+            const text = document.getElementById('uuid-label');
+            const n1 = document.getElementById('node-1');
+            const n2 = document.getElementById('node-2');
+            const startX = (100 - model.w) / 2;
+            const startY = (100 - model.d) / 2;
+
+            rect.setAttribute('x', startX); rect.setAttribute('y', startY);
+            rect.setAttribute('width', model.w); rect.setAttribute('height', model.d);
+            inner.setAttribute('x', startX + 5); inner.setAttribute('y', startY + 5);
+            inner.setAttribute('width', model.w - 10); inner.setAttribute('height', model.d - 10);
+            text.setAttribute('x', 50); text.setAttribute('y', 53);
+            text.textContent = `PKD-${model.id}`;
+            n1.setAttribute('cx', 50); n1.setAttribute('cy', startY + model.d);
+            n2.setAttribute('cx', startX); n2.setAttribute('cy', 50);
+
+            document.getElementById('insp-name').innerText = model.name;
+            document.getElementById('insp-content').innerHTML = `
+                <div style="margin-bottom: 20px;">
+                    <h3 style="font-size: 10px; color: var(--text-muted); margin-bottom: 12px; text-transform: uppercase;">Technical Specifications</h3>
+                    ${Object.entries(model.specs).map(([k, v]) => `
+                        <div class="data-row"><span class="data-label">${k}</span> <span class="data-value">${v}</span></div>
+                    `).join('')}
+                </div>
+                <div class="data-row"><span class="data-label">UUID</span> <span class="data-value">pkd-${model.id}</span></div>
+            `;
+        }
+
+        function setTheme(theme, btn) { document.body.className = 'theme-' + theme; document.querySelectorAll('.swatch-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
+        function toggleMatrix() { const switcher = document.getElementById('matrix-switcher'); switcher.classList.toggle('expanded'); const icon = document.getElementById('toggle-icon'); if (switcher.classList.contains('expanded')) icon.innerHTML = '<path d="M18 6L6 18M6 6l12 12"/>'; else icon.innerHTML = '<path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>'; }
+    </script>
+</body>
+</html>

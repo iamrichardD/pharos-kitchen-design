@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legacy UX Prototype - Project Prism</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* ========================================================================
+         * 2026 DESIGN TOKENS
+         * ======================================================================== */
+        :root, body.theme-perf-dark { --bg-canvas: #121212; --bg-surface: #1a1a1a; --accent: #2dffc4; --text-main: #e2e8f0; --text-muted: #84a59d; --border: rgba(132, 165, 157, 0.1); --handle: #a8c3bc; }
+        body.theme-perf-light { --bg-canvas: #F0EEE9; --bg-surface: #ffffff; --accent: #990F3D; --text-main: #1a1a1a; --text-muted: #708090; --border: rgba(112, 128, 144, 0.15); --handle: #4a5568; }
+        body.theme-bal-dark { --bg-canvas: #1b201e; --bg-surface: #242b28; --accent: #e07a5f; --text-main: #f4f1de; --text-muted: #84a59d; --border: rgba(224, 122, 95, 0.1); --handle: #a8c3bc; }
+        body.theme-bal-light { --bg-canvas: #F0EEE9; --bg-surface: #ffffff; --accent: #E2725B; --text-main: #1b201e; --text-muted: #9DC183; --border: rgba(157, 193, 131, 0.15); --handle: #c5e1a5; }
+        body.theme-moody-dark { --bg-canvas: #0d1b1e; --bg-surface: #152a2d; --accent: #d4a5a5; --text-main: #f8fafc; --text-muted: #6b8e8e; --border: rgba(212, 165, 165, 0.1); --handle: #8fb3b3; }
+        body.theme-moody-light { --bg-canvas: #F0EEE9; --bg-surface: #ffffff; --accent: #4A0404; --text-main: #152a2d; --text-muted: #7A5C4A; --border: rgba(122, 92, 74, 0.15); --handle: #5a4033; }
+        body.theme-solar-dark { --bg-canvas: #1a1a2e; --bg-surface: #24243e; --accent: #706fd3; --text-main: #f7f1e3; --text-muted: #a5a5d9; --border: rgba(112, 111, 211, 0.1); --handle: #706fd3; }
+        body.theme-solar-light { --bg-canvas: #f7f1e3; --bg-surface: #ffffff; --accent: #706fd3; --text-main: #1a1a2e; --text-muted: #706fd3; --border: rgba(112, 111, 211, 0.1); --handle: #4847ad; }
+        body.theme-legacy-dark { --bg-canvas: #222222; --bg-surface: #2d2d2d; --accent: #cccccc; --text-main: #ffffff; --text-muted: #666666; --border: rgba(255, 255, 255, 0.05); --handle: #cccccc; }
+        body.theme-legacy-light { --bg-canvas: #f4f4f4; --bg-surface: #ffffff; --accent: #cc0000; --text-main: #333333; --text-muted: #666666; --border: rgba(0, 0, 0, 0.1); --handle: #444444; }
+
+        /* Base Layout */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background-color: var(--bg-canvas); color: var(--text-main); font-family: 'Inter', sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; transition: all 0.4s ease; }
+
+        header#legacy-header { height: 56px; background: var(--bg-surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 20px; gap: 24px; z-index: 100; }
+        .header-icons { display: flex; gap: 20px; color: var(--text-muted); font-size: 14px; }
+        .header-icons span { cursor: pointer; transition: color 0.2s; }
+        .header-icons span:hover, .header-icons span.active { color: var(--accent); }
+        .search-container { flex-grow: 1; max-width: 400px; }
+        .search-container input { width: 100%; background: var(--bg-canvas); border: 1px solid var(--border); border-radius: 4px; padding: 6px 12px; color: var(--text-main); font-size: 13px; outline: none; }
+
+        main { flex-grow: 1; display: flex; overflow: hidden; }
+
+        #sidebar { width: 280px; background: var(--bg-surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+        .sidebar-item { padding: 12px 20px; border-bottom: 1px solid var(--border); cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: space-between; font-size: 13px; }
+        .sidebar-item:hover { background: rgba(255,255,255,0.02); }
+        .sidebar-item.active { border-left: 4px solid var(--accent); background: rgba(255,255,255,0.03); color: var(--accent); }
+        .sidebar-item .count { font-size: 10px; opacity: 0.6; font-family: 'JetBrains Mono', monospace; }
+        .sidebar-list { overflow-y: auto; flex-grow: 1; }
+
+        #canvas-area { flex-grow: 1; position: relative; background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px); background-size: 40px 40px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        
+        /* Hybrid Stage */
+        #stage { position: relative; display: flex; flex-direction: column; align-items: center; gap: 30px; transition: all 0.5s ease; }
+        #asset-image { max-width: 320px; height: auto; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.3); opacity: 0; transform: scale(0.95); transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+        #asset-image.active { opacity: 0.9; transform: scale(1); }
+
+        #inspector { width: 320px; background: var(--bg-surface); border-left: 1px solid var(--border); display: flex; flex-direction: column; overflow-y: auto; }
+        .inspector-header { padding: 24px; border-bottom: 1px solid var(--border); }
+        .inspector-content { padding: 24px; }
+        .data-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 12px; }
+        .data-label { color: var(--text-muted); }
+        .data-value { font-family: 'JetBrains Mono', monospace; color: var(--accent); text-align: right; max-width: 180px; }
+        .badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(0,0,0,0.1); border: 1px solid var(--accent); color: var(--accent); padding: 4px 10px; border-radius: 2px; font-size: 9px; font-weight: 600; margin-top: 12px; text-transform: uppercase; }
+
+        /* Dynamic Equipment SVG */
+        #equipment-svg { stroke: var(--text-muted); stroke-width: 1.25; fill: rgba(132, 165, 157, 0.03); transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        #equipment-svg text { stroke: none; fill: var(--text-muted); font-size: 8px; }
+        #blueprint-rect { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .utility-node { fill: var(--handle); stroke: var(--bg-canvas); stroke-width: 1.5; transition: all 0.5s ease; }
+
+        /* Matrix Switcher */
+        #matrix-switcher { position: absolute; bottom: 20px; left: 20px; z-index: 200; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 12px; padding: 0; box-shadow: 0 15px 40px rgba(0,0,0,0.4); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); width: 48px; height: 48px; overflow: hidden; }
+        #matrix-switcher.expanded { width: 260px; height: auto; padding: 20px; }
+        #switcher-toggle { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; cursor: pointer; color: var(--accent); position: absolute; top: 0; right: 0; }
+        #matrix-content { opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
+        #matrix-switcher.expanded #matrix-content { opacity: 1; pointer-events: auto; }
+        .matrix-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+        .swatch-btn { height: 40px; border-radius: 4px; border: 2px solid transparent; cursor: pointer; display: flex; align-items: flex-end; padding: 4px; }
+        .swatch-btn span { font-size: 7px; font-weight: 700; color: white; background: rgba(0,0,0,0.5); padding: 1px 3px; border-radius: 2px; }
+        .swatch-btn.active { border-color: var(--accent); }
+
+        .btn-perf-dark { background: linear-gradient(135deg, #121212 60%, #2dffc4 100%); }
+        .btn-perf-light { background: linear-gradient(135deg, #F0EEE9 60%, #990F3D 100%); }
+        .btn-bal-dark { background: linear-gradient(135deg, #1b201e 60%, #e07a5f 100%); }
+        .btn-bal-light { background: linear-gradient(135deg, #F0EEE9 60%, #E2725B 100%); }
+        .btn-moody-dark { background: linear-gradient(135deg, #0d1b1e 60%, #d4a5a5 100%); }
+        .btn-moody-light { background: linear-gradient(135deg, #F0EEE9 60%, #4A0404 100%); }
+        .btn-solar-dark { background: linear-gradient(135deg, #1a1a2e 60%, #706fd3 100%); }
+        .btn-solar-light { background: linear-gradient(135deg, #f7f1e3 60%, #706fd3 100%); }
+        .btn-legacy-dark { background: linear-gradient(135deg, #222222 60%, #cccccc 100%); }
+        .btn-legacy-light { background: linear-gradient(135deg, #f4f4f4 60%, #cc0000 100%); }
+    </style>
+</head>
+<body class="theme-perf-dark">
+
+    <header id="legacy-header">
+        <div class="header-icons">
+            <span class="active">Manufacturer</span>
+            <span>Category</span>
+            <span>Models</span>
+        </div>
+        <div class="search-container">
+            <input type="text" id="catalog-search" placeholder="Search catalog..." onkeyup="filterSidebar()">
+        </div>
+        <div class="header-icons" style="margin-left: auto;">
+            <span>Settings</span>
+            <span onclick="alert('Digital DNA Parity: Confirmed.')">Audit</span>
+        </div>
+    </header>
+
+    <main>
+        <aside id="sidebar">
+            <div class="sidebar-list" id="mfr-list">
+                <!-- Populated by JS -->
+            </div>
+        </aside>
+
+        <section id="canvas-area">
+            <div id="stage">
+                <img id="asset-image" src="" alt="Verified Asset">
+                <svg id="equipment-svg" viewBox="0 0 100 100" width="200" height="200">
+                    <rect id="blueprint-rect" x="10" y="10" width="80" height="80" rx="4" />
+                    <rect id="inner-rect" x="20" y="20" width="60" height="60" rx="2" stroke-dasharray="3,3" fill="none" />
+                    <circle id="node-1" class="utility-node" cx="50" cy="90" r="4" />
+                    <circle id="node-2" class="utility-node" cx="10" cy="50" r="4" />
+                    <text id="uuid-label" x="50" y="55" text-anchor="middle" font-family="JetBrains Mono">PKD-DW-01</text>
+                </svg>
+            </div>
+
+            <!-- Matrix Switcher -->
+            <div id="matrix-switcher">
+                <button id="switcher-toggle" onclick="toggleMatrix()">
+                    <svg id="toggle-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                    </svg>
+                </button>
+                <div id="matrix-content">
+                    <h4 style="font-size: 10px; margin-bottom: 8px; opacity: 0.6;">Design Matrix</h4>
+                    <div class="matrix-grid">
+                        <button class="swatch-btn btn-perf-dark active" onclick="setTheme('perf-dark', this)"><span>Opt-D</span></button>
+                        <button class="swatch-btn btn-perf-light" onclick="setTheme('perf-light', this)"><span>Opt-L</span></button>
+                        <button class="swatch-btn btn-bal-dark" onclick="setTheme('bal-dark', this)"><span>Bot-D</span></button>
+                        <button class="swatch-btn btn-bal-light" onclick="setTheme('bal-light', this)"><span>Bot-L</span></button>
+                        <button class="swatch-btn btn-moody-dark" onclick="setTheme('moody-dark', this)"><span>Lux-D</span></button>
+                        <button class="swatch-btn btn-moody-light" onclick="setTheme('moody-light', this)"><span>Lux-L</span></button>
+                        <button class="swatch-btn btn-solar-dark" onclick="setTheme('solar-dark', this)"><span>Sol-D</span></button>
+                        <button class="swatch-btn btn-solar-light" onclick="setTheme('solar-light', this)"><span>Sol-L</span></button>
+                        <button class="swatch-btn btn-legacy-dark" onclick="setTheme('legacy-dark', this)"><span>Leg-D</span></button>
+                        <button class="swatch-btn btn-legacy-light" onclick="setTheme('legacy-light', this)"><span>Leg-L</span></button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <aside id="inspector">
+            <header class="inspector-header">
+                <h2 style="font-size: 10px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px;">Technical Specifications</h2>
+                <div id="insp-name" style="font-size: 16px; font-weight: 600;">Select Catalog Item</div>
+                <div class="badge">Verified Specs</div>
+            </header>
+            <div class="inspector-content" id="insp-content">
+                <p style="font-size: 12px; color: var(--text-muted); line-height: 1.6;">Technical metadata from the Project Prism bridge will appear here once an item is selected from the catalog.</p>
+            </div>
+        </aside>
+    </main>
+
+    <script>
+        const manufacturers = [
+            { name: "3M Purification", count: 50, id: 93454337, asset: "93454337_3.jpg", w: 40, d: 80, specs: { "Capacity": "10 Gal", "Dimensions": "34\"H x 16\"dia" } },
+            { name: "AccuTemp Products", count: 327, id: 93454338, asset: "93454338_3.jpg", w: 80, d: 60, specs: { "Power": "Electric/Gas" } },
+            { name: "ACP, Inc.", count: 59, id: 93454339, asset: "93454339_3.jpg", w: 70, d: 70, specs: { "Tech": "TurboChef" } },
+            { name: "Vulcan", count: 1204, id: 1006, asset: null, w: 90, d: 80, specs: { "BTUs": "120k", "Inlet": "3/4\"" } }
+        ];
+
+        function initSidebar() {
+            document.getElementById('mfr-list').innerHTML = manufacturers.map(mfr => `
+                <div class="sidebar-item" onclick="selectMfr('${mfr.name}', this)">
+                    <span>${mfr.name}</span>
+                    <span class="count">${mfr.count}</span>
+                </div>
+            `).join('');
+        }
+
+        function selectMfr(name, el) {
+            document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+            const data = manufacturers.find(m => m.name === name);
+            
+            // Sync Asset
+            const img = document.getElementById('asset-image');
+            if (data.asset) { img.src = `/pharos-kitchen-design/assets/data/assets/${data.asset}`; img.classList.add('active'); }
+            else { img.classList.remove('active'); }
+
+            // Sync Spatial Footprint (SVG)
+            const rect = document.getElementById('blueprint-rect');
+            const inner = document.getElementById('inner-rect');
+            const label = document.getElementById('uuid-label');
+            const n1 = document.getElementById('node-1');
+            const n2 = document.getElementById('node-2');
+
+            const startX = (100 - data.w) / 2;
+            const startY = (100 - data.d) / 2;
+
+            rect.setAttribute('x', startX); rect.setAttribute('y', startY);
+            rect.setAttribute('width', data.w); rect.setAttribute('height', data.d);
+            inner.setAttribute('x', startX + 5); inner.setAttribute('y', startY + 5);
+            inner.setAttribute('width', data.w - 10); inner.setAttribute('height', data.d - 10);
+            label.setAttribute('x', 50); label.setAttribute('y', 53);
+            label.textContent = `PKD-${data.id}`;
+            n1.setAttribute('cx', 50); n1.setAttribute('cy', startY + data.d);
+            n2.setAttribute('cx', startX); n2.setAttribute('cy', 50);
+
+            document.getElementById('insp-name').innerText = data.name;
+            document.getElementById('insp-content').innerHTML = `
+                <div style="margin-bottom: 20px;">
+                    <h3 style="font-size: 10px; color: var(--text-muted); margin-bottom: 12px; text-transform: uppercase;">BIM Attributes</h3>
+                    ${Object.entries(data.specs).map(([k, v]) => `
+                        <div class="data-row"><span class="data-label">${k}</span> <span class="data-value">${v}</span></div>
+                    `).join('')}
+                </div>
+                <div class="data-row"><span class="data-label">UUID</span> <span class="data-value">pkd-${data.id}</span></div>
+            `;
+        }
+
+        function filterSidebar() {
+            const query = document.getElementById('catalog-search').value.toLowerCase();
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                const name = item.querySelector('span').innerText.toLowerCase();
+                item.style.display = name.includes(query) ? 'flex' : 'none';
+            });
+        }
+
+        function setTheme(theme, btn) { document.body.className = 'theme-' + theme; document.querySelectorAll('.swatch-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
+        function toggleMatrix() { const switcher = document.getElementById('matrix-switcher'); switcher.classList.toggle('expanded'); const icon = document.getElementById('toggle-icon'); if (switcher.classList.contains('expanded')) icon.innerHTML = '<path d="M18 6L6 18M6 6l12 12"/>'; else icon.innerHTML = '<path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>'; }
+
+        initSidebar();
+    </script>
+</body>
+</html>
