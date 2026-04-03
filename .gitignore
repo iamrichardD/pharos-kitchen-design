@@ -5,6 +5,7 @@ scripts/
 node_modules/
 dist/
 target/
+.astro/
 .DS_Store
 .env
 .idea/
