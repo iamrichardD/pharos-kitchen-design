@@ -22,11 +22,14 @@ RUN curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
     && apt-get install -y nodejs \
     && npm install -g npm@latest
 
+# Install cargo-audit for Rust vulnerability scanning
+RUN cargo install cargo-audit
+
 WORKDIR /work
 COPY . .
 
 # Ensure workspaces are recognized even if empty
 RUN mkdir -p apps packages
 
-# Default command: Run all tests
-CMD ["npm", "test"]
+# Default command: Audit then Test
+CMD ["sh", "-c", "npm run audit && npm test"]

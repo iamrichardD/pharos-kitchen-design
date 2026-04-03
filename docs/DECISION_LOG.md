@@ -19,6 +19,7 @@ This log provides an index of the technical and architectural decisions made for
 | **[ADR-0013]** | 2026-03-31 | Approved | [Personal Brand Integration & Proof of Capability](docs/adr/0013-personal-brand-integration-proof-of-capability.md) |
 | **[ADR-0014]** | 2026-04-03 | Approved | [Public Registry & Federated Truth](docs/adr/0014-public-registry-prioritization.md) |
 | **[ADR-0015]** | 2026-04-03 | Approved | [IKD-Centric Marketing & Live-Sync Truth Engine](docs/adr/0015-ikd-centric-marketing-and-truth-engine.md) |
+| **[ADR-0016]** | 2026-04-03 | Approved | [Shift-Left Security & Automated Audit](docs/adr/0016-shift-left-security-and-automated-audit.md) |
 
 ---
 *To add a new decision, create a new file in `docs/adr/` following the established template and append it to this index.*

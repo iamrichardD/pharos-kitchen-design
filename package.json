@@ -11,6 +11,7 @@
     "node": ">=24.0.0"
   },
   "scripts": {
+    "audit": "npm audit --workspaces && cargo audit",
     "test:container": "podman build -t pkd-test -f Containerfile.test . && podman run --rm pkd-test",
     "audit:registries": "grep -E '^FROM\\s+([^/.]+|docker\\.io)/' $(find . -maxdepth 3 -name 'Containerfile*') && echo 'Violation: Low-Rigor registry found.' && exit 1 || echo 'Registry audit passed.'"
   },
