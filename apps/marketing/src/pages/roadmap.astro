@@ -16,16 +16,16 @@ const roadmapData = [
   {
     category: "Identity & Trust (Core)",
     items: [
+      { name: "Cognito PII Silo", status: "Deployed", phase: "Sprint 1", description: "Hardened AWS Cognito User Pool with Opaque UUIDs." },
       { name: "RFC 8628 Edge Bridge", status: "In Construction", phase: "Sprint 2", description: "Cross-platform identity handshake via Cloudflare Workers." },
-      { name: "Hero Protocol (ABAC)", status: "Blueprint Approved", phase: "Sprint 3", description: "Manufacturer-specific claim sets for metadata signing." },
-      { name: "Cognito PII Silo", status: "Deployed", phase: "Sprint 1", description: "Hardened AWS Cognito User Pool with Opaque UUIDs." }
+      { name: "Hero Protocol (ABAC)", status: "Blueprint Approved", phase: "Sprint 3", description: "Manufacturer-specific claim sets for metadata signing." }
     ]
   },
   {
     category: "The Bridge (Revit & Interop)",
     items: [
-      { name: "Ghost-Link Metadata", status: "Research Phase", phase: "Sprint 4", description: "Non-bloat Revit attribution via ephemeral metadata injection." },
       { name: "WASM Bridge Core", status: "In Construction", phase: "Sprint 2", description: "Rust-to-WASM interop layer for cross-OS performance." },
+      { name: "Ghost-Link Metadata", status: "Research Phase", phase: "Sprint 4", description: "Non-bloat Revit attribution via ephemeral metadata injection." },
       { name: "Spotlight Search (Cmd+K)", status: "Blueprint Approved", phase: "Sprint 5", description: "Lightning-fast equipment discovery within the Revit environment." }
     ]
   },
