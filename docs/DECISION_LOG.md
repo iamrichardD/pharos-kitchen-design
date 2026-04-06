@@ -21,7 +21,11 @@ This log provides an index of the technical and architectural decisions made for
 | **[ADR-0015]** | 2026-04-03 | Approved | [IKD-Centric Marketing & Live-Sync Truth Engine](docs/adr/0015-ikd-centric-marketing-and-truth-engine.md) |
 | **[ADR-0016]** | 2026-04-03 | Approved | [Shift-Left Security & Automated Audit](docs/adr/0016-shift-left-security-and-automated-audit.md) |
 | **[ADR-0017]** | 2026-04-06 | Approved | [Crucible-Slice & Three-Option Workflow](docs/adr/0017-crucible-slice-three-option-workflow.md) |
-| **[ADR-0018]** | 2026-04-06 | Proposed | [Identity & Authentication Architecture](docs/adr/0018-identity-and-authentication-architecture.md) |
+| **[ADR-0018]** | 2026-04-06 | Approved | [Identity & Authentication Architecture](docs/adr/0018-identity-and-authentication-architecture.md) |
+| **[ADR-0019]** | 2026-04-06 | Superseded| [AWS Serverless Auth Bridge](docs/adr/0019-aws-serverless-auth-bridge.md) |
+| **[ADR-0020]** | 2026-04-06 | Approved | [Infrastructure as Code (IaC) Strategy](docs/adr/0020-infrastructure-as-code-strategy.md) |
+| **[ADR-0021]** | 2026-04-06 | Approved | [Cloudflare Edge Auth Bridge](docs/adr/0021-cloudflare-edge-auth-bridge.md) |
+| **[ADR-0022]** | 2026-04-06 | Proposed | [System-Triggered Light Mode](docs/adr/0022-system-triggered-light-mode.md) |
 
 ---
 *To add a new decision, create a new file in `docs/adr/` following the established template and append it to this index.*
