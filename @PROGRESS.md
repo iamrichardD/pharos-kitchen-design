@@ -15,6 +15,7 @@
 - [x] Ops: GitHub Action caching and esbuild mismatches resolved.
 
 ### Sprint 2: Edge Identity & Branded Auth (2026-04-06) - 🔄 In Progress
+- [x] Issue #20: RFC 8628 Edge Identity Bridge (Cloudflare).
 - [x] ADR-0018/0019/0020: Identity & IaC Strategy Approved.
 - [x] ADR-0021: Cloudflare Edge Pivot (Workers + D1).
 - [x] Scaffold: `@pkd/auth-bridge` (Cloudflare Worker).

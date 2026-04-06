@@ -2,7 +2,7 @@
  * Project: Pharos Kitchen Design (Project Prism)
  * Component: Documentation / Infrastructure
  * File: 0021-cloudflare-edge-auth-bridge.md
- * Status: Proposed
+ * Status: Approved
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Pivoting the Auth Bridge to Cloudflare Workers and D1 for performance.

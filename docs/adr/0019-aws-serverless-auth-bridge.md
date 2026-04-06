@@ -2,14 +2,17 @@
  * Project: Pharos Kitchen Design (Project Prism)
  * Component: Documentation / AWS Architecture
  * File: 0019-aws-serverless-auth-bridge.md
- * Status: Proposed
+ * Status: Superseded by ADR 0021
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Detailed implementation plan for the RFC 8628 AWS Bridge.
- * Traceability: ADR 0018, RFC 8628
+ * Traceability: ADR 0018, RFC 8628, ADR 0021
  * ======================================================================== */
 
-# ADR 0019: AWS Serverless Auth Bridge Implementation
+# ADR 0019: AWS Serverless Auth Bridge Implementation (Superseded)
+
+## Context
+This ADR proposed an AWS Lambda + DynamoDB bridge. It has been **Superseded by ADR 0021** in favor of a **Cloudflare Edge** implementation to achieve superior polling latency and predictable billing.
 
 ## Context
 ADR 0018 established AWS Cognito as our IdP and RFC 8628 as our cross-platform flow. Since Cognito lacks native support for the "Device Authorization Grant," we must implement a high-rigor serverless bridge using AWS Lambda and DynamoDB.

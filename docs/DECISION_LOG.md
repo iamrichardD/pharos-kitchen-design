@@ -21,6 +21,7 @@ This log provides an index of the technical and architectural decisions made for
 | **[ADR-0015]** | 2026-04-03 | Approved | [IKD-Centric Marketing & Live-Sync Truth Engine](docs/adr/0015-ikd-centric-marketing-and-truth-engine.md) |
 | **[ADR-0016]** | 2026-04-03 | Approved | [Shift-Left Security & Automated Audit](docs/adr/0016-shift-left-security-and-automated-audit.md) |
 | **[ADR-0017]** | 2026-04-06 | Approved | [Crucible-Slice & Three-Option Workflow](docs/adr/0017-crucible-slice-three-option-workflow.md) |
+| **[ADR-0018]** | 2026-04-06 | Proposed | [Identity & Authentication Architecture](docs/adr/0018-identity-and-authentication-architecture.md) |
 
 ---
 *To add a new decision, create a new file in `docs/adr/` following the established template and append it to this index.*

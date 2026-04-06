@@ -12,3 +12,8 @@ target/
 .vscode/
 .history/
 *.log
+
+# Cloudflare Wrangler & D1
+.wrangler/
+*.sqlite
+wrangler-*.log

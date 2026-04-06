@@ -6,7 +6,7 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Defining the cross-platform identity model (Web, Revit, CLI).
- * Traceability: ADR 0005, ADR 0016, RFC 8628, ADR 0019
+ * Traceability: ADR 0005, ADR 0016, RFC 8628, ADR 0019, Issue #20
  * ======================================================================== */
 
 # ADR 0018: Identity & Authentication Architecture
