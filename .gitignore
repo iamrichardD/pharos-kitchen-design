@@ -17,3 +17,6 @@ target/
 .wrangler/
 *.sqlite
 wrangler-*.log
+
+# Playwright MCP Tooling
+.playwright-mcp/

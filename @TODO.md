@@ -8,10 +8,9 @@
 - [ ] Enhance the Maturity Matrix with live crawler data integration.
 
 ### Phase 2: Metadata Core & Identity (Project Prism)
-- [ ] Implement RFC 8628 Auth Bridge (Cloudflare Worker + D1).
-- [ ] Implement Custom Branded Auth UI in Astro (Marketing App).
-- [ ] Configure AWS Cognito User Pools & App Clients (IaC).
-- [ ] Establish OIDC Federation between GitHub Actions and AWS (IaC).
+- [ ] Issue #5: Provision AWS Cognito & Cloudflare D1 (OpenTofu).
+- [ ] Issue #6: Establish GitHub-to-AWS OIDC Federation (Security).
+- [ ] Issue #7: Integrate Auth Bridge with Live Cognito (Real JWTs).
 - [ ] Implement `keyring-rs` integration in Rust CLI for secure token storage.
 - [ ] Develop the "Hero" protocol for manufacturer verification (ABAC).
 

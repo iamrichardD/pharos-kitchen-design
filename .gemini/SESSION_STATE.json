@@ -1,0 +1,24 @@
+{
+  "session_id": "2026-04-06-auth-init",
+  "active_task": "ADR-0018: Identity & Authentication",
+  "workflow_state": "Strategic Planning",
+  "crucible_options": {
+    "beck": {
+      "status": "pending",
+      "focus": "Supabase / GoTrue (SaaS)"
+    },
+    "martin": {
+      "status": "pending",
+      "focus": "Self-Hosted Zitadel (OIDC)"
+    },
+    "fowler": {
+      "status": "pending",
+      "focus": "Stytch / Passkey-Native"
+    }
+  },
+  "pending_human_actions": [
+    "Review ADR-0018 Mermaid diagrams",
+    "Approve final Identity Provider selection (Beck/Martin/Fowler)"
+  ],
+  "last_context_sync": "2026-04-06T15:00:00Z"
+}

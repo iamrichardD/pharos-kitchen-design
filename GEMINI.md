@@ -58,6 +58,9 @@ EVERY source file (JSON, RS, ASTRO) MUST begin with:
 ## DevSecOps & Workflow
 - **Git Flow:** Utilize feature branches tied directly to GitHub Issues (e.g., `feat/issue-4-tcp-listener`). Merge to `main` only after validation in Podman.
 - **AI-Handover:** Every task closure requires a `gh` issue update with a **Fix Summary**, **Security Review**, and **DORA Metric** check.
+- **Issue-First Mandate:** EVERY feature request or bug fix MUST begin with the creation of a GitHub Issue. This issue serves as the **Logical Authority** for the change.
+    - **Branching**: All branches MUST follow the `feat/issue-X-description` or `fix/issue-X-description` naming convention.
+    - **Traceability**: All Pull Requests MUST reference the corresponding issue (e.g., `Closes #X`) to ensure complete architectural and requirement traceability.
 - **CI/CD:** Utilize GitHub Actions for cross-compiling the Tauri binary and deploying the Astro site.
 
 ---

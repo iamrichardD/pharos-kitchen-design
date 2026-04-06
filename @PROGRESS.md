@@ -14,14 +14,19 @@
 - [x] CI: Deployment workflow established and verified for iamrichardd.com.
 - [x] Ops: GitHub Action caching and esbuild mismatches resolved.
 
-### Sprint 2: Edge Identity & Branded Auth (2026-04-06) - 🔄 In Progress
+### Sprint 2: Edge Identity & Branded Auth (2026-04-06) - ✅ COMPLETED
 - [x] Issue #20: RFC 8628 Edge Identity Bridge (Cloudflare).
 - [x] ADR-0018/0019/0020: Identity & IaC Strategy Approved.
 - [x] ADR-0021: Cloudflare Edge Pivot (Workers + D1).
 - [x] Scaffold: `@pkd/auth-bridge` (Cloudflare Worker).
 - [x] Local Dev: Podman Compose with Wrangler/D1.
-- [ ] Integration: RFC 8628 Handshake Validation.
-- [ ] UI: Custom Branded `/verify` page in Astro.
+- [x] Integration: RFC 8628 Handshake Validation.
+- [x] UI: Technical Roadmap (`roadmap.astro`) implemented.
+
+### Sprint 3: Infrastructure Finalization (Upcoming) - 🔄 Initialization
+- [ ] Issue #5: Provision AWS Cognito & Cloudflare D1 (OpenTofu).
+- [ ] Issue #6: Establish GitHub-to-AWS OIDC Federation (Security).
+- [ ] Issue #7: Integrate Auth Bridge with Live Cognito (Real JWTs).
 
 ---
 

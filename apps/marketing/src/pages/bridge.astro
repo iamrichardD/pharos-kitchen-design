@@ -1,67 +1,86 @@
 ---
-/**
+/* ========================================================================
  * Project: Pharos Kitchen Design (Project Prism)
  * Component: Pages / Bridge
  * File: bridge.astro
  * Author: Richard D. (https://github.com/iamrichardd)
- * Purpose: Instructional content for interoperability and the Pharos Bridge.
- * Traceability: ADR 0015
- */
+ * Purpose: Technical overview of the Edge Identity Handshake & Ghost-Link.
+ * Traceability: ADR 0015, ADR 0021
+ * ======================================================================== */
 
-import BaseLayout from '../layouts/BaseLayout.astro';
-import BlueprintCard from '../components/BlueprintCard.astro';
+import BaseLayout from "../layouts/BaseLayout.astro";
+import BlueprintCard from "../components/BlueprintCard.astro";
 ---
 
-<BaseLayout title="Interoperability Bridge">
-	<section class="py-16 container mx-auto px-4">
-		<h1 class="text-4xl md:text-5xl mb-12">The Pharos Bridge.</h1>
-		
-		<div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-20">
-			<div class="space-y-8">
-				<p class="text-xl text-gray-300 leading-relaxed font-sans">
-					The Bridge is a lightweight interoperability layer that allows you to use Pharos metadata inside your existing BIM/CAD environment today.
-				</p>
-				
-				<BlueprintCard title="HOW IT WORKS">
-					<ol class="space-y-6">
-						<li class="flex gap-4">
-							<span class="font-condensed text-ph-blue text-2xl">01</span>
-							<div>
-								<h4 class="text-white uppercase mb-1">DOWNLOAD METADATA</h4>
-								<p class="text-sm text-gray-400">Download the lean PKD JSON file for your specified equipment.</p>
-							</div>
-						</li>
-						<li class="flex gap-4">
-							<span class="font-condensed text-ph-blue text-2xl">02</span>
-							<div>
-								<h4 class="text-white uppercase mb-1">BIND TO RELEVANT FAMILY</h4>
-								<p class="text-sm text-gray-400">Map the JSON metadata to your existing RFA or DWG through the Ghost-Link interface.</p>
-							</div>
-						</li>
-						<li class="flex gap-4">
-							<span class="font-condensed text-ph-blue text-2xl">03</span>
-							<div>
-								<h4 class="text-white uppercase mb-1">DETERMINISTIC SCHEDULES</h4>
-								<p class="text-sm text-gray-400">Pharos handles the GUID parity, ensuring your schedules remain 100% accurate across software exports.</p>
-							</div>
-						</li>
-					</ol>
-				</BlueprintCard>
-			</div>
-			
-			<div class="blueprint-border p-4 bg-black/40 flex items-center justify-center font-mono text-xs text-ph-blue/40 uppercase overflow-hidden">
-				<img src="/pharos-kitchen-design/assets/screenshots/bridge-step.png" alt="Bridge Step" class="w-full h-full object-contain opacity-80" />
-			</div>
-		</div>
+<BaseLayout title="The Bridge | Interoperability Engine">
+  <section class="py-20 bg-ph-charcoal/60 relative overflow-hidden">
+    <div class="container mx-auto px-4 relative z-10">
+      <h1 class="text-6xl font-bold mb-6 font-mono tracking-tighter italic">THE_BRIDGE</h1>
+      <p class="text-xl text-gray-400 max-w-2xl leading-relaxed">
+        Pharos eliminates the "Web-Desktop Gap." Our edge-native identity bridge ensures your design persona is available wherever you work—from the web portal to the Revit command line.
+      </p>
+    </div>
+    <!-- Blueprint Grid Decoration -->
+    <div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image: linear-gradient(#1e293b 1px, transparent 1px), linear-gradient(90deg, #1e293b 1px, transparent 1px); background-size: 50px 50px;"></div>
+  </section>
 
-		<div class="blueprint-border p-8 border-ph-blue/20">
-			<h3 class="text-2xl mb-6 uppercase tracking-widest text-ph-blue italic">Supported Environments</h3>
-			<div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-				<div class="p-4 border border-white/5 bg-ph-charcoal/40 font-mono text-xs text-gray-400">REVIT 2023+</div>
-				<div class="p-4 border border-white/5 bg-ph-charcoal/40 font-mono text-xs text-gray-400">AUTOCAD 2024+</div>
-				<div class="p-4 border border-white/5 bg-ph-charcoal/40 font-mono text-xs text-gray-400">ARCHICAD 26+</div>
-				<div class="p-4 border border-white/5 bg-ph-charcoal/40 font-mono text-xs text-gray-400">VECTORWORKS 2023+</div>
-			</div>
-		</div>
-	</section>
+  <section class="py-20 container mx-auto px-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-16">
+      <!-- 01 // ONE HANDSHAKE -->
+      <div class="space-y-8">
+        <div class="text-ph-orange font-mono text-sm tracking-widest uppercase">01 // EDGE-NATIVE IDENTITY</div>
+        <h2 class="text-4xl font-bold">One Handshake, <span class="text-ph-blue">Any Platform.</span></h2>
+        <p class="text-gray-300 leading-relaxed text-lg">
+          Stop managing separate credentials for different tools. Pharos uses **RFC 8628** (Device Authorization) to synchronize your identity across environments.
+        </p>
+        <div class="bg-black/40 border-l-4 border-ph-orange p-6 font-mono text-xs space-y-2">
+          <div class="text-gray-500">>> Initializing CLI Handshake...</div>
+          <div class="text-ph-blue">S: Code Generated: ABCD-1234</div>
+          <div class="text-gray-500">>> Visit /verify to confirm identity.</div>
+        </div>
+        <p class="text-gray-500 text-sm italic">
+          Powered by Cloudflare Workers for sub-50ms global polling latency.
+        </p>
+      </div>
+
+      <!-- 02 // GHOST LINK -->
+      <div class="space-y-8">
+        <div class="text-ph-blue font-mono text-sm tracking-widest uppercase">02 // GHOST-LINK PROTOCOL</div>
+        <h2 class="text-4xl font-bold">Deterministic <span class="text-ph-orange">Attribution.</span></h2>
+        <p class="text-gray-300 leading-relaxed text-lg">
+          Ghost-Link ensures that metadata survives the export. Equipment GUIDs and manufacturer attributes are injected as ephemeral markers that survive the transition between BIM, CAD, and Specification software.
+        </p>
+        <div class="blueprint-border p-4 bg-black/20 aspect-video flex items-center justify-center">
+            <img src="/pharos-kitchen-design/assets/screenshots/ghost-link-metadata.png" alt="Ghost-Link Protocol" class="w-full h-full object-cover opacity-60" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="py-20 border-t border-white/5">
+    <div class="container mx-auto px-4 text-center">
+        <h3 class="text-2xl mb-8 font-mono tracking-widest uppercase">Status: <span class="text-emerald-500">Edge Bridge Operational</span></h3>
+        <a href="/pharos-kitchen-design/roadmap" class="inline-block bg-ph-blue text-ph-charcoal font-bold px-10 py-4 hover:bg-white transition-colors uppercase tracking-widest text-sm">
+            View Technical Maturity
+        </a>
+    </div>
+  </section>
 </BaseLayout>
+
+<style>
+  .blueprint-border {
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    position: relative;
+  }
+  .blueprint-border::after {
+    content: "";
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    width: 10px;
+    height: 10px;
+    border-top: 2px solid #3b82f6;
+    border-left: 2px solid #3b82f6;
+  }
+</style>
