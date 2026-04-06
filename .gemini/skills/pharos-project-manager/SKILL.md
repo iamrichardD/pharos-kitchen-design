@@ -24,6 +24,11 @@ Track and coordinate tasks across the monorepo structure:
 3.  **Index**: Append a reference to the new ADR in the `.project/DECISION_LOG.md` table.
 
 ### 3. Engineering Rigor & QA
+- **Three-Option Crucible-Slice Rule**: Enforce the mandatory development of exactly three (or fewer) implementation options (Beck, Martin, Fowler) using isolated `git worktree` environments for **Non-Trivial** tasks (See ADR-0017).
+    - **Triviality Gate**: Enforce the Crucible-Slice rule ONLY for changes to `pkd-core/`, `schema/`, **Shift-Left Security**, public APIs of **Vertical Slices**, or adding new dependencies.
+    - **Surgical Strike (Single-Path)**: Allow single-path development for minor UI, documentation, or internal refactoring to maintain velocity.
+- **Brutally Honest Evaluation**: Require a direct, non-sugarcoated assessment of all options before promoting the winner.
+- **Regression Integrity & Test Remediation**: Any existing test failure MUST be resolved as an integral part of the task. You are strictly prohibited from proceeding with a feature or fix while leaving existing regressions unaddressed.
 - **Standardized Prologue**: Ensure every source file begins with the Standardized File Prologue (Attribution, License, Purpose, Traceability).
 - **Shift-Left Security**: Verify that security analysis is conducted during the Research phase of every feature.
 - **VSA Alignment**: Enforce grouping by **Equipment Category** (Vertical Slices) rather than technical layers.

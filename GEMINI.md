@@ -37,11 +37,16 @@ EVERY source file (JSON, RS, ASTRO) MUST begin with:
  * ======================================================================== */
 
 ### 2. Vertical Slice Architecture (VSA) & Clean Code
+- **The Three-Option Crucible-Slice Rule**: For every **Non-Trivial** coding task, the AI agent MUST develop exactly three (or fewer) implementation options (Beck, Martin, Fowler) using isolated `git worktree` environments (See ADR-0017).
+    - **Triviality Gate (Non-Trivial if)**: Changes to `pkd-core/`, `schema/`, **Shift-Left Security**, public APIs of **Vertical Slices**, or adding new dependencies.
+    - **Surgical Strike (Single-Path)**: Allowed for minor UI, documentation, or internal refactoring.
+- **Brutally Honest Evaluation**: Provide a direct, non-sugarcoated assessment of all three options before promoting the winner.
 - **Single-Task Focus:** Work on exactly ONE feature or bug fix at a time.
 - **Read Before Write:** Always read existing code first to prevent logic duplication.
 - **Shift-Left Security:** Security is a core component of the "Research" phase. Identify potential attack vectors (e.g., input validation, broken access control, insecure data handling) BEFORE writing code.
 - **SOLID Principles:** Strictly follow SRP, OCP, LSP, ISP, and DIP.
 - **TDD with Atomic Verification:** Write failing tests BEFORE implementation.
+- **Regression Integrity & Test Remediation**: When developing a feature or remediating a bug, any failure in the existing test suite MUST be resolved as an integral part of the process. You are strictly prohibited from ignoring, bypassing, or suppressing existing test failures to achieve "green" on new work.
 - **Naming Standard:** ALL test functions MUST follow this semantic format:
     - `test_should_[expected_behavior]_when_[state_under_test]`
 - **Versioning:** Strictly adhere to **Semantic Versioning (SemVer)** (e.g., `v1.0.0`).
