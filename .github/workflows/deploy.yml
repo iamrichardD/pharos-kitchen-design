@@ -5,6 +5,9 @@ on:
     branches: [ main ]
     paths:
       - 'apps/marketing/**'
+      - 'packages/auth-bridge/**'
+      - 'package.json'
+      - 'package-lock.json'
       - '.github/workflows/deploy.yml'
   workflow_dispatch:
 
