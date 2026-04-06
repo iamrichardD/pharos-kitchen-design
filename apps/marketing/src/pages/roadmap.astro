@@ -1,0 +1,120 @@
+---
+/* ========================================================================
+ * Project: Pharos Kitchen Design (Project Prism)
+ * Component: Marketing / Roadmap
+ * File: src/pages/roadmap.astro
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * License: FSL-1.1 (See LICENSE file for details)
+ * Purpose: High-fidelity "Technical Maturity Matrix" showing the PKD roadmap.
+ * Traceability: ADR 0012, ADR 0021
+ * ======================================================================== */
+
+import BaseLayout from "../layouts/BaseLayout.astro";
+import MaturityGrid from "../components/MaturityGrid.astro";
+
+const roadmapData = [
+  {
+    category: "Identity & Trust (Core)",
+    items: [
+      { name: "RFC 8628 Edge Bridge", status: "In Construction", phase: "Sprint 2", description: "Cross-platform identity handshake via Cloudflare Workers." },
+      { name: "Hero Protocol (ABAC)", status: "Blueprint Approved", phase: "Sprint 3", description: "Manufacturer-specific claim sets for metadata signing." },
+      { name: "Cognito PII Silo", status: "Deployed", phase: "Sprint 1", description: "Hardened AWS Cognito User Pool with Opaque UUIDs." }
+    ]
+  },
+  {
+    category: "The Bridge (Revit & Interop)",
+    items: [
+      { name: "Ghost-Link Metadata", status: "Research Phase", phase: "Sprint 4", description: "Non-bloat Revit attribution via ephemeral metadata injection." },
+      { name: "WASM Bridge Core", status: "In Construction", phase: "Sprint 2", description: "Rust-to-WASM interop layer for cross-OS performance." },
+      { name: "Spotlight Search (Cmd+K)", status: "Blueprint Approved", phase: "Sprint 5", description: "Lightning-fast equipment discovery within the Revit environment." }
+    ]
+  },
+  {
+    category: "WebMCP & Agentic AI",
+    items: [
+      { name: "WebMCP Server Interface", status: "Blueprint Approved", phase: "Sprint 6", description: "Standardized MCP server for AI agent equipment queries." },
+      { name: "Smart Specification", status: "Research Phase", phase: "Sprint 7", description: "Agent-driven equipment selection based on LEED & LOD criteria." }
+    ]
+  }
+];
+---
+
+<BaseLayout title="Technical Maturity Matrix | Pharos Kitchen Design">
+  <main class="max-w-6xl mx-auto px-6 py-20">
+    <div class="mb-16 border-l-4 border-blue-600 pl-6 py-2 bg-blue-50/30">
+      <h1 class="text-5xl font-bold text-slate-900 tracking-tight mb-4 font-mono">
+        SYSTEM_ROADMAP_v1.0
+      </h1>
+      <p class="text-xl text-slate-600 max-w-3xl leading-relaxed">
+        Pharos is not "Software-as-a-Service." It is a **Metadata-First Standard**. 
+        Our roadmap is a blueprint of technical maturity, prioritizing interoperability over features.
+      </p>
+    </div>
+
+    <div class="space-y-24">
+      {roadmapData.map((section) => (
+        <section>
+          <div class="flex items-center gap-4 mb-10">
+            <h2 class="text-2xl font-bold text-slate-800 uppercase tracking-widest font-mono">
+              {section.category}
+            </h2>
+            <div class="h-px flex-1 bg-slate-200"></div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {section.items.map((item) => (
+              <div class="group relative bg-white border border-slate-200 p-8 hover:border-blue-500 transition-all duration-300 shadow-sm hover:shadow-xl">
+                <!-- Status Badge -->
+                <div class={`absolute top-0 right-0 px-3 py-1 text-[10px] font-bold uppercase tracking-tighter text-white ${
+                  item.status === 'Deployed' ? 'bg-emerald-600' : 
+                  item.status === 'In Construction' ? 'bg-blue-600' :
+                  item.status === 'Blueprint Approved' ? 'bg-amber-500' : 'bg-slate-400'
+                }`}>
+                  {item.status}
+                </div>
+
+                <div class="text-xs font-mono text-blue-600 mb-2 uppercase tracking-widest">{item.phase}</div>
+                <h3 class="text-xl font-bold text-slate-900 mb-4">{item.name}</h3>
+                <p class="text-slate-600 text-sm leading-relaxed mb-6">
+                  {item.description}
+                </p>
+                
+                <!-- Blueprint Decoration -->
+                <div class="absolute bottom-0 left-0 w-8 h-8 opacity-10 pointer-events-none group-hover:opacity-30 transition-opacity">
+                  <svg viewBox="0 0 100 100" class="w-full h-full text-blue-900">
+                    <line x1="0" y1="0" x2="100" y2="100" stroke="currentColor" stroke-width="2" />
+                    <line x1="100" y1="0" x2="0" y2="100" stroke="currentColor" stroke-width="2" />
+                  </svg>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      ))}
+    </div>
+
+    <!-- Final CTA -->
+    <div class="mt-32 p-12 bg-slate-900 text-white border-b-8 border-blue-600 relative overflow-hidden">
+      <div class="relative z-10">
+        <h2 class="text-3xl font-bold mb-6 font-mono tracking-tighter">CONTRIBUTE_TO_THE_BLUEPRINT</h2>
+        <p class="text-slate-400 max-w-2xl mb-8 leading-relaxed">
+          The Pharos standard is open for contribution under the FSL-1.1 license. 
+          Help us define the next generation of AEC interoperability.
+        </p>
+        <a href="https://github.com/iamrichardd/pharos-kitchen-design" class="inline-block px-8 py-4 bg-blue-600 hover:bg-blue-500 font-bold transition-colors uppercase tracking-widest text-sm">
+          Join the Repository
+        </a>
+      </div>
+      <!-- Grid Background Decoration -->
+      <div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: radial-gradient(circle at 1px 1px, white 1px, transparent 0); background-size: 20px 20px;"></div>
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  /* High-rigor Blueprint texture */
+  main {
+    background-image: radial-gradient(circle at 1.5px 1.5px, #e2e8f0 1.5px, transparent 0);
+    background-size: 40px 40px;
+  }
+</style>

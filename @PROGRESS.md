@@ -14,13 +14,19 @@
 - [x] CI: Deployment workflow established and verified for iamrichardd.com.
 - [x] Ops: GitHub Action caching and esbuild mismatches resolved.
 
+### Sprint 2: Edge Identity & Branded Auth (2026-04-06) - 🔄 In Progress
+- [x] ADR-0018/0019/0020: Identity & IaC Strategy Approved.
+- [x] ADR-0021: Cloudflare Edge Pivot (Workers + D1).
+- [x] Scaffold: `@pkd/auth-bridge` (Cloudflare Worker).
+- [x] Local Dev: Podman Compose with Wrangler/D1.
+- [ ] Integration: RFC 8628 Handshake Validation.
+- [ ] UI: Custom Branded `/verify` page in Astro.
+
 ---
 
 ## 🏗️ Active Development
 
-### Marketing Enhancements
-- [ ] Playwright Interaction Screenshots (Instructional Assets).
-- [ ] WebMCP roadmap visuals.
-
-### Metadata Core
-- [ ] Schema refinement for RFC-2378 (Ph) alignment.
+### Marketing & Identity
+- [ ] Custom Auth UI (Astro + Amplify SDK).
+- [ ] Integration tests for RFC 8628.
+- [ ] OpenTofu IaC for Cognito and Cloudflare.

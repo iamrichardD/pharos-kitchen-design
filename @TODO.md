@@ -7,10 +7,13 @@
 - [ ] Implement instructional content for "Ghost-Link" on `/bridge`.
 - [ ] Enhance the Maturity Matrix with live crawler data integration.
 
-### Phase 2: Metadata Core & Truth Engine
-- [ ] Implement "Bootstrap & Crawl" scripts for manufacturer data (3M, Vulcan).
-- [ ] Integrate RFC-2378 (Ph) field keywords in `pkd-core` schema.
-- [ ] Develop the "Hero" protocol for manufacturer authentication.
+### Phase 2: Metadata Core & Identity (Project Prism)
+- [ ] Implement RFC 8628 Auth Bridge (Cloudflare Worker + D1).
+- [ ] Implement Custom Branded Auth UI in Astro (Marketing App).
+- [ ] Configure AWS Cognito User Pools & App Clients (IaC).
+- [ ] Establish OIDC Federation between GitHub Actions and AWS (IaC).
+- [ ] Implement `keyring-rs` integration in Rust CLI for secure token storage.
+- [ ] Develop the "Hero" protocol for manufacturer verification (ABAC).
 
 ### Phase 3: WebMCP & Agentic AI
 - [ ] Implement the WebMCP interface for AI agent equipment queries.

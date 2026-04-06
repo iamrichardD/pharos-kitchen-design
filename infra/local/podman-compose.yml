@@ -1,0 +1,31 @@
+# ========================================================================
+# Project: Pharos Kitchen Design (Project Prism)
+# Component: Infrastructure / Local Dev
+# File: podman-compose.yml
+# Author: Richard D. (https://github.com/iamrichardd)
+# License: FSL-1.1 (See LICENSE file for details)
+# Purpose: Orchestrates the local Cloudflare Worker bridge for testing.
+# Traceability: ADR 0021
+# ========================================================================
+
+services:
+  # 1. Cloudflare Auth Bridge (Worker + Local D1)
+  auth-bridge:
+    image: public.ecr.aws/docker/library/node:20-slim
+    container_name: pkd-auth-bridge
+    security_opt:
+      - seccomp=unconfined
+    working_dir: /app
+    volumes:
+      - ../../packages/auth-bridge:/app
+    ports:
+      - "3001:3001"
+    environment:
+      - VERIFICATION_URI=http://localhost:4321/verify
+      - PORT=3001
+    command: >
+      sh -c "npm install && npx wrangler d1 execute DB --local --command 'CREATE TABLE IF NOT EXISTS auth_codes (device_code TEXT PRIMARY KEY, user_code TEXT, status TEXT, sub TEXT, ttl INTEGER)' && npm run dev -- --ip 0.0.0.0 --port 3001"
+
+networks:
+  default:
+    name: pkd-network

@@ -1,0 +1,11 @@
+name = "auth-bridge"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "pharos-auth"
+database_id = "local-db"
+
+[vars]
+VERIFICATION_URI = "http://localhost:4321/verify"
