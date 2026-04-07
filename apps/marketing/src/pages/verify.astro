@@ -1,0 +1,164 @@
+---
+/* ========================================================================
+ * Project: Pharos Kitchen Design (Project Prism)
+ * Component: Marketing / Verify
+ * File: src/pages/verify.astro
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * License: FSL-1.1 (See LICENSE file for details)
+ * Purpose: Device Authorization Handshake (RFC 8628) Verification Page.
+ * Traceability: ADR 0018, ADR 0021, Issue #7
+ * ======================================================================== */
+
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="Device Verification | Pharos Identity Bridge">
+  <main class="max-w-4xl mx-auto px-6 py-20 min-h-screen flex flex-col items-center justify-center">
+    <div class="w-full max-w-md bg-ph-charcoal/40 border border-ph-blue/20 p-10 relative overflow-hidden blueprint-border">
+      
+      <!-- Grid Decoration -->
+      <div class="absolute inset-0 opacity-5 pointer-events-none" style="background-image: radial-gradient(circle at 1px 1px, white 1px, transparent 0); background-size: 20px 20px;"></div>
+
+      <div class="relative z-10 text-center">
+        <h1 class="text-4xl font-bold mb-4 font-mono tracking-tighter italic uppercase text-white">
+          VERIFY_DEVICE
+        </h1>
+        <p class="text-gray-400 mb-10 text-sm leading-relaxed font-mono">
+          Enter the code displayed on your device to synchronize your Pharos persona.
+        </p>
+
+        <form id="verify-form" class="space-y-6">
+          <div class="space-y-2 text-left">
+            <label for="user_code" class="block text-[10px] font-mono text-ph-blue uppercase tracking-widest">
+              [USER_CODE]
+            </label>
+            <input 
+              type="text" 
+              id="user_code" 
+              name="user_code" 
+              placeholder="ABCD-1234"
+              class="w-full bg-black/60 border border-ph-blue/40 px-4 py-4 text-center text-3xl font-mono text-ph-orange placeholder:text-gray-700 focus:outline-none focus:border-ph-orange transition-colors"
+              maxlength="9"
+              required
+            />
+          </div>
+
+          <div id="status-container" class="hidden text-xs font-mono py-2 px-4 border-l-2 border-ph-orange bg-ph-orange/10 text-ph-orange text-left mb-6">
+            <!-- Dynamic Status -->
+          </div>
+
+          <button 
+            type="submit" 
+            id="submit-btn"
+            class="w-full bg-ph-blue text-ph-charcoal font-bold py-4 hover:bg-white transition-colors uppercase tracking-widest text-sm"
+          >
+            Authorize Device
+          </button>
+        </form>
+
+        <div id="success-container" class="hidden space-y-6">
+            <div class="text-emerald-500 text-6xl mb-4">✓</div>
+            <h2 class="text-2xl font-bold text-white uppercase tracking-tighter">Device Authorized</h2>
+            <p class="text-gray-400 text-sm leading-relaxed font-mono">
+              The handshake is complete. You can now return to your device.
+            </p>
+            <a href="/pharos-kitchen-design/roadmap" class="inline-block mt-8 text-ph-blue hover:text-white transition-colors font-mono text-xs uppercase tracking-widest">
+                Return to Matrix >>
+            </a>
+        </div>
+      </div>
+    </div>
+  </main>
+</BaseLayout>
+
+<script>
+  // Note: Amplify configuration would typically happen in a shared module.
+  // For the "Technical Blueprint" slice, we implement the logic directly.
+  
+  const form = document.getElementById('verify-form') as HTMLFormElement;
+  const statusContainer = document.getElementById('status-container');
+  const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
+  const successContainer = document.getElementById('success-container');
+
+  const showStatus = (msg: string, isError = false) => {
+    if (!statusContainer) return;
+    statusContainer.innerText = `>> ${msg}`;
+    statusContainer.classList.remove('hidden');
+    statusContainer.style.borderColor = isError ? '#ef4444' : '#f97316';
+    statusContainer.style.color = isError ? '#ef4444' : '#f97316';
+  };
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(form);
+    const user_code = formData.get('user_code') as string;
+
+    submitBtn.disabled = true;
+    submitBtn.innerText = "AUTHORIZING...";
+    showStatus("Initializing Cognito Handshake...");
+
+    try {
+        // --- MOCK IDENTITY FLOW (To be replaced with real Amplify calls) ---
+        // In a real implementation:
+        // const user = await Auth.signIn(...);
+        // const tokens = await Auth.currentSession();
+        
+        // Simulating delay for effect
+        await new Promise(r => setTimeout(r, 1500));
+        
+        showStatus("Persona Verified. Linking Edge Bridge...");
+        
+        // Call the Auth Bridge (Worker)
+        const response = await fetch('http://localhost:3001/auth/confirm', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                user_code: user_code.replace('-', '').toUpperCase(),
+                sub: "9345-4337-I-AM-RICHARD-D", // Mock Sub
+                access_token: "pkd_mock_access_" + Date.now(),
+                id_token: "pkd_mock_id_" + Date.now(),
+                refresh_token: "pkd_mock_refresh_" + Date.now()
+            })
+        });
+
+        if (!response.ok) {
+            const err = await response.json() as any;
+            throw new Error(err.error || "Handshake failed");
+        }
+
+        form.classList.add('hidden');
+        successContainer?.classList.remove('hidden');
+
+    } catch (err: any) {
+        showStatus(err.message, true);
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Authorize Device";
+    }
+  });
+
+  // Auto-format user_code (ABCD-1234)
+  const input = document.getElementById('user_code') as HTMLInputElement;
+  input?.addEventListener('input', (e) => {
+    let value = input.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+    if (value.length > 4) {
+      value = value.slice(0, 4) + '-' + value.slice(4, 8);
+    }
+    input.value = value;
+  });
+</script>
+
+<style>
+  .blueprint-border {
+    border: 1px solid rgba(59, 130, 246, 0.2);
+  }
+  .blueprint-border::after {
+    content: "";
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    width: 10px;
+    height: 10px;
+    border-top: 2px solid #3b82f6;
+    border-left: 2px solid #3b82f6;
+  }
+</style>

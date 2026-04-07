@@ -68,6 +68,8 @@ describe('RFC 8628 Auth Handshake', () => {
     expect(poll2Res.status).toBe(200);
     const tokens = await poll2Res.json() as any;
     expect(tokens.access_token).toBeDefined();
+    expect(tokens.id_token).toBeDefined();
+    expect(tokens.refresh_token).toBeDefined();
     expect(tokens.token_type).toBe('Bearer');
   });
 

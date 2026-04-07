@@ -73,9 +73,10 @@ router.post('/auth/token', async (request, env: Env) => {
     }
 
     if (session.status === 'APPROVED') {
-      // Logic for issuing final tokens goes here (Cognito Admin Auth)
       return new Response(JSON.stringify({
-        access_token: `mock_edge_token_for_${session.sub}`,
+        access_token: session.access_token,
+        id_token: session.id_token,
+        refresh_token: session.refresh_token,
         token_type: 'Bearer',
         expires_in: 3600
       }), { headers: { 'Content-Type': 'application/json' } });
@@ -93,12 +94,12 @@ router.post('/auth/token', async (request, env: Env) => {
  * User visits /verify on the marketing site, which calls this.
  */
 router.post('/auth/confirm', async (request, env: Env) => {
-  const { user_code, sub } = await request.json() as { user_code: string, sub: string };
+  const { user_code, sub, access_token, id_token, refresh_token } = await request.json() as any;
   
   try {
     const result = await env.DB.prepare(
-      "UPDATE auth_codes SET status = 'APPROVED', sub = ? WHERE user_code = ? AND status = 'PENDING'"
-    ).bind(sub, user_code.toUpperCase()).run();
+      "UPDATE auth_codes SET status = 'APPROVED', sub = ?, access_token = ?, id_token = ?, refresh_token = ? WHERE user_code = ? AND status = 'PENDING'"
+    ).bind(sub, access_token, id_token, refresh_token, user_code.toUpperCase()).run();
 
     if (result.meta.changes === 0) {
       return new Response(JSON.stringify({ error: 'invalid_code' }), { status: 400 });
@@ -115,12 +116,18 @@ router.post('/auth/confirm', async (request, env: Env) => {
  * Local-only MOCK: Approval via device_code
  */
 router.post('/auth/mock-approve', async (request, env: Env) => {
-  const { device_code, sub } = await request.json() as { device_code: string, sub: string };
+  const { device_code, sub, access_token, id_token, refresh_token } = await request.json() as any;
   
   try {
     await env.DB.prepare(
-      "UPDATE auth_codes SET status = 'APPROVED', sub = ? WHERE device_code = ?"
-    ).bind(sub, device_code).run();
+      "UPDATE auth_codes SET status = 'APPROVED', sub = ?, access_token = ?, id_token = ?, refresh_token = ? WHERE device_code = ?"
+    ).bind(
+      sub, 
+      access_token || `mock_access_token_for_${sub}`, 
+      id_token || `mock_id_token_for_${sub}`, 
+      refresh_token || `mock_refresh_token_for_${sub}`, 
+      device_code
+    ).run();
 
     return new Response(JSON.stringify({ message: 'Mock approval successful' }));
   } catch (e) {
