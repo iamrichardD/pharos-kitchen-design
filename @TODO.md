@@ -9,7 +9,7 @@
 
 ### Phase 2: Metadata Core & Identity (Project Prism)
 - [ ] Issue #5: Provision AWS Cognito & Cloudflare D1 (OpenTofu).
-- [ ] Issue #6: Establish GitHub-to-AWS OIDC Federation (Security).
+- [x] Issue #6: Establish GitHub-to-AWS OIDC Federation (Security).
 - [ ] Issue #7: Integrate Auth Bridge with Live Cognito (Real JWTs).
 - [ ] Implement `keyring-rs` integration in Rust CLI for secure token storage.
 - [ ] Develop the "Hero" protocol for manufacturer verification (ABAC).
