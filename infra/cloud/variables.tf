@@ -34,7 +34,7 @@ variable "PROJECT_NAME" {
 variable "REGION" {
   description = "The AWS region for resource deployment."
   type        = string
-  default     = "us-east-1"
+  default     = "us-west-2"
 }
 
 variable "COMMON_TAGS" {

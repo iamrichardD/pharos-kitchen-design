@@ -23,13 +23,13 @@ terraform {
   }
 
   # Backend configuration (Enable after state.tf resources are provisioned)
-  # backend "s3" {
-  #   bucket         = "pkd-prism-tf-state-<ACCOUNT_ID>"
-  #   key            = "terraform.tfstate"
-  #   region         = "us-east-1"
-  #   dynamodb_table = "pkd-prism-tf-locks"
-  #   encrypt        = true
-  # }
+  backend "s3" {
+    bucket         = "pkd-prism-tf-state-967403974464"
+    key            = "terraform.tfstate"
+    region         = "us-west-2"
+    dynamodb_table = "pkd-prism-tf-locks"
+    encrypt        = true
+  }
 }
 
 provider "aws" {

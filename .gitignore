@@ -26,3 +26,6 @@ wrangler-*.log
 *.tfstate
 *.tfstate.backup
 .terraform.lock.hcl
+
+# Local Secrets
+.env.secret
