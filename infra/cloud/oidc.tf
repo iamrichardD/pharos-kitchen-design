@@ -12,7 +12,10 @@
 resource "aws_iam_openid_connect_provider" "github" {
   url             = "https://token.actions.githubusercontent.com"
   client_id_list  = ["sts.amazonaws.com"]
-  thumbprint_list = ["6938fd4d98bab03faadb97b34396831e3780aea1"] # GitHub's intermediate CA thumbprint
+  thumbprint_list = [
+    "6938fd4d98bab03faadb97b34396831e3780aea1", # GitHub's intermediate CA (DigiCert)
+    "1c58a3a8518e8759bf075b76b750d4f2df264fcd"  # GitHub's secondary DigiCert thumbprint
+  ]
 }
 
 # 2. Trust Policy for GitHub Actions (Generic)
@@ -29,7 +32,10 @@ data "aws_iam_policy_document" "github_actions_assume_role" {
     condition {
       test     = "StringLike"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:${var.GITHUB_REPO}:*"]
+      values   = [
+        "repo:${var.GITHUB_REPO}:*",
+        "repo:${lower(var.GITHUB_REPO)}:*"
+      ]
     }
 
     condition {
@@ -44,11 +50,16 @@ data "aws_iam_policy_document" "github_actions_assume_role" {
 resource "aws_iam_role" "auditor" {
   name               = "${var.PROJECT_NAME}-gh-auditor"
   assume_role_policy = data.aws_iam_policy_document.github_actions_assume_role.json
+}
 
-  managed_policy_arns = [
-    "arn:aws:iam::aws:policy/ReadOnlyAccess",
-    "arn:aws:iam::aws:policy/SecurityAudit"
-  ]
+resource "aws_iam_role_policy_attachment" "auditor_readonly" {
+  role       = aws_iam_role.auditor.name
+  policy_arn = "arn:aws:iam::aws:policy/ReadOnlyAccess"
+}
+
+resource "aws_iam_role_policy_attachment" "auditor_security_audit" {
+  role       = aws_iam_role.auditor.name
+  policy_arn = "arn:aws:iam::aws:policy/SecurityAudit"
 }
 
 # 4. Role: Deployer (Restricted to main branch)
@@ -70,7 +81,10 @@ resource "aws_iam_role" "deployer" {
             "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
           }
           StringLike = {
-            "token.actions.githubusercontent.com:sub": "repo:${var.GITHUB_REPO}:ref:refs/heads/main"
+            "token.actions.githubusercontent.com:sub": [
+              "repo:${var.GITHUB_REPO}:ref:refs/heads/main",
+              "repo:${lower(var.GITHUB_REPO)}:ref:refs/heads/main"
+            ]
           }
         }
       }
