@@ -1,0 +1,21 @@
+# ========================================================================
+# Project: Pharos Kitchen Design (Project Prism)
+# Component: Infrastructure / CI
+# File: Containerfile.infra
+# Author: Richard D. (https://github.com/iamrichardd)
+# License: FSL-1.1 (See LICENSE file for details)
+# Purpose: Zero-Host infrastructure provisioning environment using OpenTofu.
+# Traceability: ADR 0014, ADR 0020
+# ========================================================================
+
+# Using GHCR as an enterprise-grade public registry (ADR-0014)
+FROM ghcr.io/opentofu/opentofu:1.8.1
+
+# Set the working directory to the infrastructure slice
+WORKDIR /infra
+
+# The container expects the infra/cloud directory to be mounted here.
+# It also inherits environment variables for AWS/Cloudflare credentials.
+
+ENTRYPOINT ["tofu"]
+CMD ["--help"]
