@@ -29,7 +29,7 @@ data "aws_iam_policy_document" "github_actions_assume_role" {
     condition {
       test     = "StringLike"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:${var.github_repo}:*"]
+      values   = ["repo:${var.GITHUB_REPO}:*"]
     }
 
     condition {
@@ -42,7 +42,7 @@ data "aws_iam_policy_document" "github_actions_assume_role" {
 
 # 3. Role: Auditor (Read-Only/Security Checks)
 resource "aws_iam_role" "auditor" {
-  name               = "${var.project_name}-gh-auditor"
+  name               = "${var.PROJECT_NAME}-gh-auditor"
   assume_role_policy = data.aws_iam_policy_document.github_actions_assume_role.json
 
   managed_policy_arns = [
@@ -53,7 +53,7 @@ resource "aws_iam_role" "auditor" {
 
 # 4. Role: Deployer (Restricted to main branch)
 resource "aws_iam_role" "deployer" {
-  name = "${var.project_name}-gh-deployer"
+  name = "${var.PROJECT_NAME}-gh-deployer"
   
   # Restricted Trust Policy: Only 'main' branch can deploy
   assume_role_policy = jsonencode({
@@ -70,7 +70,7 @@ resource "aws_iam_role" "deployer" {
             "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
           }
           StringLike = {
-            "token.actions.githubusercontent.com:sub": "repo:${var.github_repo}:ref:refs/heads/main"
+            "token.actions.githubusercontent.com:sub": "repo:${var.GITHUB_REPO}:ref:refs/heads/main"
           }
         }
       }

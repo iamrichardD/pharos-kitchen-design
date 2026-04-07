@@ -10,14 +10,14 @@
 
 # 1. S3 Bucket for Terraform State
 resource "aws_s3_bucket" "terraform_state" {
-  bucket = "${var.project_name}-tf-state-${var.aws_account_id}"
+  bucket = "${var.PROJECT_NAME}-tf-state-${var.AWS_ACCOUNT_ID}"
 
   # Prevent accidental deletion
   lifecycle {
     prevent_destroy = true
   }
 
-  tags = var.common_tags
+  tags = var.COMMON_TAGS
 }
 
 # 2. Enable Versioning
@@ -51,7 +51,7 @@ resource "aws_s3_bucket_public_access_block" "state_access" {
 
 # 5. DynamoDB for State Locking
 resource "aws_dynamodb_table" "terraform_locks" {
-  name         = "${var.project_name}-tf-locks"
+  name         = "${var.PROJECT_NAME}-tf-locks"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "LockID"
 
@@ -60,5 +60,5 @@ resource "aws_dynamodb_table" "terraform_locks" {
     type = "S"
   }
 
-  tags = var.common_tags
+  tags = var.COMMON_TAGS
 }

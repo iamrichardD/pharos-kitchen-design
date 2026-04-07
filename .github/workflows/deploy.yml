@@ -1,63 +1,64 @@
-name: Deploy Marketing Site to GitHub Pages
+# ========================================================================
+# Project: Pharos Kitchen Design (Project Prism)
+# Component: CI/CD / Deployment
+# File: deploy.yml
+# Author: Richard D. (https://github.com/iamrichardd)
+# License: FSL-1.1 (See LICENSE file for details)
+# Purpose: Orchestrates OIDC-based infrastructure deployment to AWS/Cloudflare.
+# Traceability: Issue #6, ADR 0016, ADR 0021
+# ========================================================================
+
+name: "🚀 Deploy Infrastructure"
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
     paths:
-      - 'apps/marketing/**'
-      - 'packages/auth-bridge/**'
-      - 'package.json'
-      - 'package-lock.json'
-      - '.github/workflows/deploy.yml'
-  workflow_dispatch:
+      - 'infra/cloud/**'
+  workflow_dispatch: # Allow manual trigger for emergency or testing
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-# Allow one concurrent deployment
-concurrency:
-  group: "pages"
-  cancel-in-progress: true
+  id-token: write # Required for requesting the JWT from GitHub's OIDC provider
+  contents: read  # Required for actions/checkout
 
 jobs:
-  build:
+  deploy-infra:
+    name: "Deploy Cloud Infrastructure"
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-          cache: 'npm'
-          cache-dependency-path: 'package-lock.json'
-          
-      - name: Install dependencies
-        run: npm ci
-        
-      - name: Build with Astro
-        run: npm run build
-        working-directory: ./apps/marketing
-        
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./apps/marketing/dist
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    environment: production # Requires the 'production' environment secrets/approval
     
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-      
+    defaults:
+      run:
+        working-directory: infra/cloud
+
     steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: "🛒 Checkout Code"
+        uses: actions/checkout@v4
+
+      - name: "🏗️ Setup OpenTofu"
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: 1.9.0
+
+      - name: "🔐 Configure AWS Credentials (OIDC)"
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/pkd-prism-gh-deployer
+          aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
+
+      - name: "🔄 Initialize OpenTofu"
+        run: tofu init
+
+      - name: "📋 Infrastructure Plan"
+        run: tofu plan -out=tfplan
+        env:
+          TF_VAR_AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+          TF_VAR_GITHUB_REPO: ${{ github.repository }}
+
+      - name: "🚀 Apply Infrastructure Changes"
+        if: github.ref == 'refs/heads/main'
+        run: tofu apply -auto-approve tfplan
+        env:
+          TF_VAR_AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+          TF_VAR_GITHUB_REPO: ${{ github.repository }}

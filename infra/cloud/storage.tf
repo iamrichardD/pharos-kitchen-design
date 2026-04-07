@@ -10,6 +10,6 @@
 
 # 1. Cloudflare D1 Database for Auth Bridge
 resource "cloudflare_d1_database" "auth_db" {
-  account_id = var.cloudflare_account_id
-  name       = "${var.project_name}-auth"
+  account_id = var.CLOUDFLARE_ACCOUNT_ID
+  name       = "${var.PROJECT_NAME}-auth"
 }

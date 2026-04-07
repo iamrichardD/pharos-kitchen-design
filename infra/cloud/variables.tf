@@ -4,40 +4,40 @@
  * File: variables.tf
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
- * Purpose: Variable definitions for OIDC Federation. 
- * Note: Sensitive values (aws_account_id) should be injected via TF_VAR_.
- * Traceability: ADR 0016, ADR 0020
+ * Purpose: Variable definitions for Project Prism IaC.
+ * Note: Uppercase keys used for compatibility with strict env parsers.
+ * Traceability: ADR 0016, ADR 0020, Issue #5
  * ======================================================================== */
 
-variable "aws_account_id" {
+variable "AWS_ACCOUNT_ID" {
   description = "The AWS Account ID (Injected at runtime)."
   type        = string
 }
 
-variable "cloudflare_account_id" {
+variable "CLOUDFLARE_ACCOUNT_ID" {
   description = "The Cloudflare Account ID (Injected at runtime)."
   type        = string
 }
 
-variable "github_repo" {
+variable "GITHUB_REPO" {
   description = "The GitHub repository path (e.g., owner/repo)."
   type        = string
   default     = "iamrichardD/pharos-kitchen-design"
 }
 
-variable "project_name" {
+variable "PROJECT_NAME" {
   description = "The project name used for resource naming."
   type        = string
   default     = "pkd-prism"
 }
 
-variable "region" {
+variable "REGION" {
   description = "The AWS region for resource deployment."
   type        = string
   default     = "us-east-1"
 }
 
-variable "common_tags" {
+variable "COMMON_TAGS" {
   description = "Common tags to apply to all resources."
   type        = map(string)
   default = {

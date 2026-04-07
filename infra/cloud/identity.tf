@@ -10,7 +10,7 @@
 
 # 1. Cognito User Pool
 resource "aws_cognito_user_pool" "pool" {
-  name = "${var.project_name}-user-pool"
+  name = "${var.PROJECT_NAME}-user-pool"
 
   alias_attributes         = ["email"]
   auto_verified_attributes = ["email"]
@@ -20,7 +20,7 @@ resource "aws_cognito_user_pool" "pool" {
     prevent_destroy = true
   }
 
-  tags = var.common_tags
+  tags = var.COMMON_TAGS
 
   password_policy {
     minimum_length    = 12
@@ -53,7 +53,7 @@ resource "aws_cognito_user_pool" "pool" {
 
 # 2. App Client for Public Clients (CLI / Revit / Web)
 resource "aws_cognito_user_pool_client" "client" {
-  name = "${var.project_name}-public-client"
+  name = "${var.PROJECT_NAME}-public-client"
 
   user_pool_id = aws_cognito_user_pool.pool.id
 
@@ -83,6 +83,6 @@ resource "aws_cognito_user_pool_client" "client" {
 
 # 3. Cognito Domain (Required for some OIDC flows)
 resource "aws_cognito_user_pool_domain" "main" {
-  domain       = "${var.project_name}-auth"
+  domain       = "${var.PROJECT_NAME}-auth"
   user_pool_id = aws_cognito_user_pool.pool.id
 }
