@@ -20,3 +20,9 @@ wrangler-*.log
 
 # Playwright MCP Tooling
 .playwright-mcp/
+
+# OpenTofu / Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+.terraform.lock.hcl
