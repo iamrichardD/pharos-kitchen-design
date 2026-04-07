@@ -8,7 +8,7 @@
 - [ ] Enhance the Maturity Matrix with live crawler data integration.
 
 ### Phase 2: Metadata Core & Identity (Project Prism)
-- [ ] Issue #5: Provision AWS Cognito & Cloudflare D1 (OpenTofu).
+- [x] Issue #5: Provision AWS Cognito & Cloudflare D1 (OpenTofu).
 - [x] Issue #6: Establish GitHub-to-AWS OIDC Federation (Security).
 - [ ] Issue #7: Integrate Auth Bridge with Live Cognito (Real JWTs).
 - [ ] Implement `keyring-rs` integration in Rust CLI for secure token storage.

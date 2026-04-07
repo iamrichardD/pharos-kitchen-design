@@ -23,8 +23,8 @@
 - [x] Integration: RFC 8628 Handshake Validation.
 - [x] UI: Technical Roadmap (`roadmap.astro`) implemented.
 
-### Sprint 3: Infrastructure Finalization (2026-04-06) - 🔄 Active
-- [ ] Issue #5: Provision AWS Cognito & Cloudflare D1 (OpenTofu).
+### Sprint 3: Infrastructure Finalization (2026-04-06) - ✅ COMPLETED
+- [x] Issue #5: Provision AWS Cognito & Cloudflare D1 (OpenTofu).
 - [x] Issue #6: Establish GitHub-to-AWS OIDC Federation (Security).
 - [ ] Issue #7: Integrate Auth Bridge with Live Cognito (Real JWTs).
 
@@ -33,6 +33,6 @@
 ## 🏗️ Active Development
 
 ### Marketing & Identity
+- [ ] Issue #7: Integrate Auth Bridge with Live Cognito (Real JWTs).
 - [ ] Custom Auth UI (Astro + Amplify SDK).
 - [ ] Integration tests for RFC 8628.
-- [ ] Issue #5: OpenTofu IaC for Cognito and Cloudflare.
