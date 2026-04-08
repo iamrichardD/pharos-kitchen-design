@@ -82,10 +82,8 @@ resource "aws_iam_role" "deployer" {
           }
           StringLike = {
             "token.actions.githubusercontent.com:sub": [
-              "repo:${var.GITHUB_REPO}:ref:refs/heads/main",
-              "repo:${lower(var.GITHUB_REPO)}:ref:refs/heads/main",
-              "repo:${var.GITHUB_REPO}:environment:production",
-              "repo:${lower(var.GITHUB_REPO)}:environment:production"
+              "repo:${var.GITHUB_REPO}:*",
+              "repo:${lower(var.GITHUB_REPO)}:*"
             ]
           }
         }
