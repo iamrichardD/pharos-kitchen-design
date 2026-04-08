@@ -26,6 +26,7 @@ jobs:
   deploy-infra:
     name: "Deploy Cloud Infrastructure"
     runs-on: ubuntu-latest
+    environment: production
     
     defaults:
       run:
