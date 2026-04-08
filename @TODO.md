@@ -5,6 +5,15 @@
  * Purpose: Central tracking for Phase-specific tasks and issues.
  * ======================================================================== */
 
+<!-- 
+  AI_AGENT_PROTOCOL: @TODO.md
+  1. SOURCE OF TRUTH: This document is the logical authority for the backlog.
+  2. PRE-FLIGHT CHECK: Tasks must be defined here and approved by the user BEFORE implementation begins.
+  3. TRACEABILITY: Ensure every active task has an associated #IssueID once the branch is created.
+  4. PURGE TRACKING: Explicitly log deleted files/logic in the 'Purge/Stale' section to prevent "Ghost References" in future research.
+  5. ATOMICITY: Focus on one Phase/Task at a time. Do not "scatter" progress across unrelated silos.
+-->
+
 # @TODO: Pharos Kitchen Design (Project Prism)
 
 ## ✅ Completed (Verified)

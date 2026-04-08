@@ -5,6 +5,15 @@
  * Purpose: Iterative log of project milestones and sprint outcomes.
  * ======================================================================== */
 
+<!-- 
+  AI_AGENT_PROTOCOL: @PROGRESS.md
+  1. HISTORICAL INTEGRITY: This is an additive log. NEVER truncate, delete, or overwrite previous Sprints.
+  2. SPRINT TRANSITION: When a task is completed, append it to the current Sprint or create a new one.
+  3. SYNC MANDATE: Any update here MUST be mirrored in @TODO.md (moving items to 'Completed').
+  4. ZERO-HOST VALIDATION: Do not mark a task as [x] unless behavioral correctness was verified in a Podman container.
+  5. DORA ALIGNMENT: Update Lead Time and Change Failure Rate in the session summary after significant merges.
+-->
+
 # @PROGRESS: Pharos Kitchen Design (Project Prism)
 
 ## 🎯 Current Milestone: Phase 3 - The CLI Bridge
