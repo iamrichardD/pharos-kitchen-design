@@ -5,18 +5,47 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Cloudflare Worker implementing the RFC 8628 bridge at the edge.
- * Traceability: ADR 0019, ADR 0021
+ * Traceability: ADR 0019, ADR 0021, Issue #7
  * ======================================================================== */
 
 import { Router } from 'itty-router';
 import { nanoid } from 'nanoid';
+import { createRemoteJWKSet, jwtVerify } from 'jose';
+import { AuthRepository } from './db';
 
 interface Env {
   DB: D1Database;
   VERIFICATION_URI: string;
+  COGNITO_USER_POOL_ID: string;
+  COGNITO_CLIENT_ID: string;
+  COGNITO_REGION: string;
+  DEBUG?: string; // Flag to enable mock endpoints for local dev
+}
+
+interface ConfirmPayload {
+  user_code: string;
+  id_token: string;
+  access_token: string;
+  refresh_token: string;
 }
 
 const router = Router();
+
+/**
+ * Helper: Verify Cognito ID Token
+ */
+async function verifyIdToken(token: string, env: Env) {
+  const JWKS = createRemoteJWKSet(
+    new URL(`https://cognito-idp.${env.COGNITO_REGION}.amazonaws.com/${env.COGNITO_USER_POOL_ID}/.well-known/jwks.json`)
+  );
+
+  const { payload } = await jwtVerify(token, JWKS, {
+    issuer: `https://cognito-idp.${env.COGNITO_REGION}.amazonaws.com/${env.COGNITO_USER_POOL_ID}`,
+    audience: env.COGNITO_CLIENT_ID,
+  });
+
+  return payload;
+}
 
 /**
  * RFC 8628: Device Authorization Endpoint
@@ -29,12 +58,10 @@ router.post('/auth/device', async (request, env: Env) => {
 
   const device_code = nanoid(32);
   const user_code = nanoid(8).toUpperCase();
-  const ttl = Math.floor(Date.now() / 1000) + 600; // 10 minute expiry
+  const repo = new AuthRepository(env.DB);
 
   try {
-    await env.DB.prepare(
-      "INSERT INTO auth_codes (device_code, user_code, status, ttl) VALUES (?, ?, 'PENDING', ?)"
-    ).bind(device_code, user_code, ttl).run();
+    await repo.createSession(device_code, user_code);
 
     return new Response(JSON.stringify({
       device_code,
@@ -59,10 +86,10 @@ router.post('/auth/token', async (request, env: Env) => {
     return new Response(JSON.stringify({ error: 'unsupported_grant_type' }), { status: 400 });
   }
 
+  const repo = new AuthRepository(env.DB);
+
   try {
-    const session = await env.DB.prepare(
-      "SELECT * FROM auth_codes WHERE device_code = ? AND ttl > ?"
-    ).bind(device_code, Math.floor(Date.now() / 1000)).first();
+    const session = await repo.getSession(device_code);
 
     if (!session) {
       return new Response(JSON.stringify({ error: 'invalid_grant' }), { status: 400 });
@@ -91,44 +118,48 @@ router.post('/auth/token', async (request, env: Env) => {
 
 /**
  * Web Handshake: Confirmation Endpoint
- * User visits /verify on the marketing site, which calls this.
  */
 router.post('/auth/confirm', async (request, env: Env) => {
-  const { user_code, sub, access_token, id_token, refresh_token } = await request.json() as any;
+  const { user_code, id_token, access_token, refresh_token } = await request.json() as ConfirmPayload;
   
   try {
-    const result = await env.DB.prepare(
-      "UPDATE auth_codes SET status = 'APPROVED', sub = ?, access_token = ?, id_token = ?, refresh_token = ? WHERE user_code = ? AND status = 'PENDING'"
-    ).bind(sub, access_token, id_token, refresh_token, user_code.toUpperCase()).run();
+    // 1. Verify the ID Token from Cognito
+    const payload = await verifyIdToken(id_token, env);
+    const sub = payload.sub;
 
-    if (result.meta.changes === 0) {
-      return new Response(JSON.stringify({ error: 'invalid_code' }), { status: 400 });
+    if (!sub) {
+        return new Response(JSON.stringify({ error: 'invalid_token_payload' }), { status: 400 });
+    }
+
+    // 2. Update the repository
+    const repo = new AuthRepository(env.DB);
+    const success = await repo.approveSession(user_code, sub, access_token, id_token, refresh_token);
+
+    if (!success) {
+      return new Response(JSON.stringify({ error: 'invalid_code_or_expired' }), { status: 400 });
     }
 
     return new Response(JSON.stringify({ message: 'Success' }));
   } catch (e) {
     console.error(e);
-    return new Response(JSON.stringify({ error: 'server_error' }), { status: 500 });
+    return new Response(JSON.stringify({ error: 'server_error', details: e.message }), { status: 500 });
   }
 });
 
 /**
  * Local-only MOCK: Approval via device_code
+ * Guarded by env.DEBUG flag.
  */
 router.post('/auth/mock-approve', async (request, env: Env) => {
-  const { device_code, sub, access_token, id_token, refresh_token } = await request.json() as any;
+  if (env.DEBUG !== 'true') {
+    return new Response(JSON.stringify({ error: 'forbidden' }), { status: 403 });
+  }
+
+  const { device_code, sub } = await request.json() as any;
+  const repo = new AuthRepository(env.DB);
   
   try {
-    await env.DB.prepare(
-      "UPDATE auth_codes SET status = 'APPROVED', sub = ?, access_token = ?, id_token = ?, refresh_token = ? WHERE device_code = ?"
-    ).bind(
-      sub, 
-      access_token || `mock_access_token_for_${sub}`, 
-      id_token || `mock_id_token_for_${sub}`, 
-      refresh_token || `mock_refresh_token_for_${sub}`, 
-      device_code
-    ).run();
-
+    await repo.mockApprove(device_code, sub);
     return new Response(JSON.stringify({ message: 'Mock approval successful' }));
   } catch (e) {
     console.error(e);

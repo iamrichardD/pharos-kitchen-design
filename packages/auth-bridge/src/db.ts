@@ -4,75 +4,72 @@
  * File: src/db.ts
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
- * Purpose: DynamoDB Client & CRUD operations for the RFC 8628 bridge.
- * Traceability: ADR 0019
+ * Purpose: Unified D1 Database provider for the RFC 8628 bridge.
+ * Traceability: ADR 0019, ADR 0021, Issue #7
  * ======================================================================== */
-
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { 
-  DynamoDBDocumentClient, 
-  PutCommand, 
-  GetCommand, 
-  UpdateCommand 
-} from "@aws-sdk/lib-dynamodb";
-
-const endpoint = process.env.DYNAMODB_ENDPOINT || "http://localhost:8000";
-const region = process.env.AWS_REGION || "us-east-1";
-
-const client = new DynamoDBClient({
-  endpoint,
-  region,
-  credentials: {
-    accessKeyId: "mock",
-    secretAccessKey: "mock"
-  }
-});
-
-export const db = DynamoDBDocumentClient.from(client);
-
-export const TABLE_NAME = "pharos-auth-codes";
 
 export interface AuthCode {
   device_code: string;
   user_code: string;
   status: 'PENDING' | 'APPROVED' | 'EXPIRED' | 'USED';
   sub?: string;
+  access_token?: string;
+  id_token?: string;
+  refresh_token?: string;
   ttl: number;
 }
 
-/**
- * Creates a new pending auth session in DynamoDB.
- */
-export async function createAuthSession(device_code: string, user_code: string): Promise<void> {
-  const ttl = Math.floor(Date.now() / 1000) + 600; // 10 minute TTL
-  await db.send(new PutCommand({
-    TableName: TABLE_NAME,
-    Item: {
-      device_code,
-      user_code,
-      status: 'PENDING',
-      ttl
-    }
-  }));
-}
+export class AuthRepository {
+  constructor(private db: D1Database) {}
 
-/**
- * Retrieves an auth session by device_code for polling.
- */
-export async function getAuthSession(device_code: string): Promise<AuthCode | null> {
-  const result = await db.send(new GetCommand({
-    TableName: TABLE_NAME,
-    Key: { device_code }
-  }));
-  return (result.Item as AuthCode) || null;
-}
+  /**
+   * Creates a new pending auth session.
+   */
+  async createSession(device_code: string, user_code: string): Promise<void> {
+    const ttl = Math.floor(Date.now() / 1000) + 600; // 10 minute TTL
+    await this.db.prepare(
+      "INSERT INTO auth_codes (device_code, user_code, status, ttl) VALUES (?, ?, 'PENDING', ?)"
+    ).bind(device_code, user_code, ttl).run();
+  }
 
-/**
- * Updates an auth session status (Web Handshake).
- */
-export async function approveAuthSession(user_code: string, sub: string): Promise<void> {
-  // Note: In a real implementation, we would use a GSI to find the record by user_code.
-  // For the initial "Crucible Slice," we assume approval happens via the device_code for simplicity
-  // or a direct PK lookup if we change the schema.
-  // TODO: Add GSI support for user_code lookups.
+  /**
+   * Retrieves an auth session by device_code for polling.
+   */
+  async getSession(device_code: string): Promise<AuthCode | null> {
+    return await this.db.prepare(
+      "SELECT * FROM auth_codes WHERE device_code = ? AND ttl > ?"
+    ).bind(device_code, Math.floor(Date.now() / 1000)).first<AuthCode>();
+  }
+
+  /**
+   * Updates an auth session status (Web Handshake).
+   */
+  async approveSession(
+    user_code: string, 
+    sub: string, 
+    access_token: string, 
+    id_token: string, 
+    refresh_token: string
+  ): Promise<boolean> {
+    const result = await this.db.prepare(
+      "UPDATE auth_codes SET status = 'APPROVED', sub = ?, access_token = ?, id_token = ?, refresh_token = ? WHERE user_code = ? AND status = 'PENDING'"
+    ).bind(sub, access_token, id_token, refresh_token, user_code).run();
+
+    return result.meta.changes > 0;
+  }
+
+  /**
+   * Local-only: Approve via device_code for testing.
+   */
+  async mockApprove(device_code: string, sub: string): Promise<void> {
+    await this.db.prepare(
+      "UPDATE auth_codes SET status = 'APPROVED', sub = ?, access_token = ?, id_token = ?, refresh_token = ? WHERE device_code = ?"
+    ).bind(
+        sub, 
+        `mock_access_${sub}`, 
+        `mock_id_${sub}`, 
+        `mock_refresh_${sub}`, 
+        device_code
+    ).run();
+  }
 }

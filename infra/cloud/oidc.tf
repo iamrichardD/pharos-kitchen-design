@@ -30,18 +30,16 @@ data "aws_iam_policy_document" "github_actions_assume_role" {
     }
 
     condition {
-      test     = "StringLike"
-      variable = "token.actions.githubusercontent.com:sub"
-      values   = [
-        "repo:${var.GITHUB_REPO}:*",
-        "repo:${lower(var.GITHUB_REPO)}:*"
-      ]
-    }
-
-    condition {
       test     = "StringEquals"
       variable = "token.actions.githubusercontent.com:aud"
       values   = ["sts.amazonaws.com"]
+    }
+
+    # Simplified Case-Standardized Repo Match
+    condition {
+      test     = "StringEquals"
+      variable = "token.actions.githubusercontent.com:sub"
+      values   = ["repo:${var.GITHUB_REPO}:*"]
     }
   }
 }
@@ -66,7 +64,7 @@ resource "aws_iam_role_policy_attachment" "auditor_security_audit" {
 resource "aws_iam_role" "deployer" {
   name = "${var.PROJECT_NAME}-gh-deployer"
   
-  # Restricted Trust Policy: Only 'main' branch can deploy
+  # Restricted Trust Policy: Exact matches for main and production environment
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -79,11 +77,9 @@ resource "aws_iam_role" "deployer" {
         Condition = {
           StringEquals = {
             "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
-          }
-          StringLike = {
             "token.actions.githubusercontent.com:sub": [
-              "repo:${var.GITHUB_REPO}:*",
-              "repo:${lower(var.GITHUB_REPO)}:*"
+              "repo:${var.GITHUB_REPO}:ref:refs/heads/main",
+              "repo:${var.GITHUB_REPO}:environment:production"
             ]
           }
         }
@@ -92,8 +88,6 @@ resource "aws_iam_role" "deployer" {
   })
 }
 
-# Attach Deployer permissions (Administrator is high, but common for IaC Bootstrap)
-# In production, we'd refine this to specific services (Cognito, Cloudflare)
 resource "aws_iam_role_policy_attachment" "deployer_admin" {
   role       = aws_iam_role.deployer.name
   policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"

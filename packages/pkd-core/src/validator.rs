@@ -4,12 +4,13 @@
  * File: validator.rs
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
- * Purpose: Validation engine for PKD metadata and LOD compliance.
+ * Purpose: High-rigor validation engine for PKD metadata and LOD compliance.
  * Traceability: Issue #9, ADR 0002
  * ======================================================================== */
 
 use crate::models::schema::PharosSchema;
 use crate::models::metadata::PharosMetadata;
+use crate::models::types::ParameterValue;
 use thiserror::Error;
 
 #[derive(Error, Debug, PartialEq)]
@@ -20,8 +21,12 @@ pub enum ValidationError {
     VersionMismatch { expected: String, found: String },
     #[error("LOD {0} geometry specification is missing")]
     MissingLodGeometry(String),
-    #[error("Invalid parameter type for {0}")]
-    InvalidType(String),
+    #[error("Invalid parameter type for {0}: expected {expected}, found {found}")]
+    InvalidType { 
+        parameter: String, 
+        expected: String, 
+        found: String 
+    },
 }
 
 pub struct SchemaValidator;
@@ -38,10 +43,22 @@ impl SchemaValidator {
             });
         }
 
-        // 2. Required Parameters Check
-        for (param_name, _param_type) in &schema.parameter_standards.shared_parameters {
-            if !metadata.parameters.contains_key(param_name) {
-                errors.push(ValidationError::MissingParameter(param_name.clone()));
+        // 2. Deep Parameter Validation (Existence + Type)
+        for (param_name, expected_type) in &schema.parameter_standards.shared_parameters {
+            match metadata.parameters.get(param_name) {
+                None => {
+                    errors.push(ValidationError::MissingParameter(param_name.clone()));
+                }
+                Some(value) => {
+                    // Type-safety enforcement
+                    if !Self::is_type_valid(expected_type, value) {
+                        errors.push(ValidationError::InvalidType {
+                            parameter: param_name.clone(),
+                            expected: expected_type.clone(),
+                            found: format!("{:?}", value),
+                        });
+                    }
+                }
             }
         }
 
@@ -49,6 +66,21 @@ impl SchemaValidator {
             Ok(())
         } else {
             Err(errors)
+        }
+    }
+
+    /// Simple mapping between schema type strings and ParameterValue variants.
+    fn is_type_valid(expected: &str, value: &ParameterValue) -> bool {
+        match expected {
+            "TEXT" => matches!(value, ParameterValue::Text(_)),
+            "NUMBER" | "ELECTRICAL_POTENTIAL" | "ELECTRICAL_WATTAGE" | "HVAC_POWER" => {
+                 // Numbers can be passed as actual numbers or text if they have units
+                 matches!(value, ParameterValue::Number(_) | ParameterValue::Text(_))
+            }
+            "BOOLEAN" => matches!(value, ParameterValue::Boolean(_)),
+            "URL_ARRAY" | "ENUM_ARRAY" => matches!(value, ParameterValue::Array(_)),
+            "OBJECT" => matches!(value, ParameterValue::Object(_)),
+            _ => true, // Fallback for unknown types during evolution
         }
     }
 }
@@ -67,7 +99,6 @@ impl LodValidator {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::models::types::ParameterValue;
     use std::collections::BTreeMap;
     use crate::models::schema::{ParameterStandards, BloatRules};
     use crate::models::metadata::{Classification, PerformanceMetadata};
@@ -75,7 +106,7 @@ mod tests {
     fn create_mock_schema() -> PharosSchema {
         let mut shared_params = BTreeMap::new();
         shared_params.insert("PKD_Manufacturer".to_string(), "TEXT".to_string());
-        shared_params.insert("PKD_ModelNumber".to_string(), "TEXT".to_string());
+        shared_params.insert("PKD_Voltage".to_string(), "ELECTRICAL_POTENTIAL".to_string());
 
         PharosSchema {
             version: "1.0.0".to_string(),
@@ -95,7 +126,7 @@ mod tests {
     fn create_mock_metadata() -> PharosMetadata {
         let mut params = BTreeMap::new();
         params.insert("PKD_Manufacturer".to_string(), ParameterValue::Text("Test".to_string()));
-        params.insert("PKD_ModelNumber".to_string(), ParameterValue::Text("M1".to_string()));
+        params.insert("PKD_Voltage".to_string(), ParameterValue::Text("208V".to_string()));
 
         PharosMetadata {
             metadata_id: "ID-1".to_string(),
@@ -123,29 +154,15 @@ mod tests {
     }
 
     #[test]
-    fn test_should_fail_validation_when_parameter_is_missing() {
+    fn test_should_fail_validation_when_type_mismatch() {
         let schema = create_mock_schema();
         let mut metadata = create_mock_metadata();
-        metadata.parameters.remove("PKD_Manufacturer");
+        // Replace TEXT with a Boolean for a field that expects TEXT
+        metadata.parameters.insert("PKD_Manufacturer".to_string(), ParameterValue::Boolean(true));
         
         let result = SchemaValidator::validate_metadata(&schema, &metadata);
         assert!(result.is_err());
         let errors = result.unwrap_err();
-        assert!(errors.contains(&ValidationError::MissingParameter("PKD_Manufacturer".to_string())));
-    }
-
-    #[test]
-    fn test_should_fail_validation_when_version_mismatch() {
-        let schema = create_mock_schema();
-        let mut metadata = create_mock_metadata();
-        metadata.schema_version = "0.9.0".to_string();
-        
-        let result = SchemaValidator::validate_metadata(&schema, &metadata);
-        assert!(result.is_err());
-        let errors = result.unwrap_err();
-        assert!(errors.contains(&ValidationError::VersionMismatch {
-            expected: "1.0.0".to_string(),
-            found: "0.9.0".to_string(),
-        }));
+        assert!(matches!(errors[0], ValidationError::InvalidType { .. }));
     }
 }

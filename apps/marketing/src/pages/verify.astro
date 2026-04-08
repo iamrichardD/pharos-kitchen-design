@@ -24,7 +24,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
           VERIFY_DEVICE
         </h1>
         <p class="text-gray-400 mb-10 text-sm leading-relaxed font-mono">
-          Enter the code displayed on your device to synchronize your Pharos persona.
+          Enter the code displayed on your device and authenticate to link your identity.
         </p>
 
         <form id="verify-form" class="space-y-6">
@@ -41,6 +41,18 @@ import BaseLayout from "../layouts/BaseLayout.astro";
               maxlength="9"
               required
             />
+          </div>
+
+          <!-- Added Email/Password fields for direct SRP login -->
+          <div class="space-y-4 text-left">
+            <div class="space-y-2">
+                <label for="email" class="block text-[10px] font-mono text-ph-blue uppercase tracking-widest">[IDENTITY_EMAIL]</label>
+                <input type="email" id="email" name="email" required class="w-full bg-black/60 border border-ph-blue/20 px-3 py-2 font-mono text-white text-sm focus:outline-none focus:border-ph-orange" />
+            </div>
+            <div class="space-y-2">
+                <label for="password" class="block text-[10px] font-mono text-ph-blue uppercase tracking-widest">[IDENTITY_SECRET]</label>
+                <input type="password" id="password" name="password" required class="w-full bg-black/60 border border-ph-blue/20 px-3 py-2 font-mono text-white text-sm focus:outline-none focus:border-ph-orange" />
+            </div>
           </div>
 
           <div id="status-container" class="hidden text-xs font-mono py-2 px-4 border-l-2 border-ph-orange bg-ph-orange/10 text-ph-orange text-left mb-6">
@@ -60,7 +72,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
             <div class="text-emerald-500 text-6xl mb-4">✓</div>
             <h2 class="text-2xl font-bold text-white uppercase tracking-tighter">Device Authorized</h2>
             <p class="text-gray-400 text-sm leading-relaxed font-mono">
-              The handshake is complete. You can now return to your device.
+              The cryptographic handshake is complete. You can now return to your device.
             </p>
             <a href="/pharos-kitchen-design/roadmap" class="inline-block mt-8 text-ph-blue hover:text-white transition-colors font-mono text-xs uppercase tracking-widest">
                 Return to Matrix >>
@@ -72,8 +84,18 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 </BaseLayout>
 
 <script>
-  // Note: Amplify configuration would typically happen in a shared module.
-  // For the "Technical Blueprint" slice, we implement the logic directly.
+  import { Amplify } from 'aws-amplify';
+  import { signIn, fetchAuthSession } from 'aws-amplify/auth';
+
+  // Configure Amplify from env variables (Astro handles these)
+  Amplify.configure({
+    Auth: {
+      Cognito: {
+        userPoolId: import.meta.env.PUBLIC_COGNITO_USER_POOL_ID,
+        userPoolClientId: import.meta.env.PUBLIC_COGNITO_CLIENT_ID,
+      }
+    }
+  });
   
   const form = document.getElementById('verify-form') as HTMLFormElement;
   const statusContainer = document.getElementById('status-container');
@@ -92,38 +114,48 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     e.preventDefault();
     const formData = new FormData(form);
     const user_code = formData.get('user_code') as string;
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
 
     submitBtn.disabled = true;
     submitBtn.innerText = "AUTHORIZING...";
-    showStatus("Initializing Cognito Handshake...");
+    showStatus("Initiating Cognito SRP Handshake...");
 
     try {
-        // --- MOCK IDENTITY FLOW (To be replaced with real Amplify calls) ---
-        // In a real implementation:
-        // const user = await Auth.signIn(...);
-        // const tokens = await Auth.currentSession();
+        // 1. Authenticate with Cognito
+        const { isSignedIn, nextStep } = await signIn({ username: email, password });
         
-        // Simulating delay for effect
-        await new Promise(r => setTimeout(r, 1500));
+        if (!isSignedIn) {
+            throw new Error(`Authentication incomplete: ${nextStep.signInStep}`);
+        }
+
+        showStatus("Persona Verified. Retrieving Cryptographic Proof...");
         
-        showStatus("Persona Verified. Linking Edge Bridge...");
+        // 2. Get the current session tokens
+        const session = await fetchAuthSession();
+        const idToken = session.tokens?.idToken?.toString();
+        const accessToken = session.tokens?.accessToken?.toString();
+        const refreshToken = session.tokens?.accessToken?.toString(); // Cognito Refresh is handled differently but we pass it for the bridge
+        const sub = session.userSub;
+
+        showStatus("Linking Edge Bridge...");
         
-        // Call the Auth Bridge (Worker)
-        const response = await fetch('http://localhost:3001/auth/confirm', {
+        // 3. Call the Auth Bridge (Worker) to approve the device code
+        const response = await fetch('https://auth.iamrichardd.com/auth/confirm', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 user_code: user_code.replace('-', '').toUpperCase(),
-                sub: "9345-4337-I-AM-RICHARD-D", // Mock Sub
-                access_token: "pkd_mock_access_" + Date.now(),
-                id_token: "pkd_mock_id_" + Date.now(),
-                refresh_token: "pkd_mock_refresh_" + Date.now()
+                sub,
+                access_token: accessToken,
+                id_token: idToken,
+                refresh_token: refreshToken
             })
         });
 
         if (!response.ok) {
             const err = await response.json() as any;
-            throw new Error(err.error || "Handshake failed");
+            throw new Error(err.error || "Bridge handshake failed");
         }
 
         form.classList.add('hidden');

@@ -1,11 +1,14 @@
 name = "auth-bridge"
 main = "src/index.ts"
-compatibility_date = "2024-01-01"
+compatibility_date = "2024-04-01"
+
+[vars]
+VERIFICATION_URI = "https://iamrichardd.com/pharos-kitchen-design/verify"
+COGNITO_REGION = "us-east-1"
+COGNITO_USER_POOL_ID = "us-east-1_xxxxxx"
+COGNITO_CLIENT_ID = "xxxxxx"
 
 [[d1_databases]]
 binding = "DB"
 database_name = "pharos-auth"
-database_id = "local-db"
-
-[vars]
-VERIFICATION_URI = "http://localhost:4321/verify"
+database_id = "xxxxxx"

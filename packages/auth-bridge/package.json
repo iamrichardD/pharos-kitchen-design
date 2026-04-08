@@ -9,8 +9,10 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "nanoid": "^5.0.0",
-    "itty-router": "^4.0.23"
+    "express": "^5.2.1",
+    "itty-router": "^4.0.23",
+    "jose": "^6.2.2",
+    "nanoid": "^5.0.0"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240101.0",
