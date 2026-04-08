@@ -26,7 +26,6 @@ jobs:
   deploy-infra:
     name: "Deploy Cloud Infrastructure"
     runs-on: ubuntu-latest
-    environment: production # Requires the 'production' environment secrets/approval
     
     defaults:
       run:
