@@ -28,6 +28,7 @@
 - [x] Issue #6: GitHub-to-AWS OIDC Federation (Security).
 - [x] Issue #7: Integrate Auth Bridge with Live Cognito (Real JWTs).
 - [x] Issue #9: Implement `pkd-core` Truth Engine (Rust/WASM).
+- [x] Issue #10: RFC 8628 Auth: Implement local `auth login` flow with secure token storage (`keyring-rs`).
 - [x] Deep Validation: Semantic type-checking for shared parameters.
 - [x] CI Remediation: Resolved IAM Trust Policy case-sensitivity/Wildcard warnings.
 
@@ -36,12 +37,17 @@
 ## 📋 Active Backlog
 
 ### Phase 3: The CLI Bridge (Admin Control Plane)
-- [ ] **Scaffold pkd-cli:** Rust binary with `clap` and the 5 `pkd_role` variants (IKD, OEM, VDC, ADMIN, AUDITOR, BOT).
-- [ ] **RFC 8628 Auth:** Implement local `auth login` flow with secure token storage (`keyring-rs`).
+- [x] **Scaffold pkd-cli:** Rust binary with `clap` and the 5 `pkd_role` variants (IKD, OEM, VDC, ADMIN, AUDITOR, BOT).
 - [ ] **Admin Control Plane:** Implement `pkd admin users` for Cognito orchestration and attribute management.
 - [ ] **Handshake Remediation:** Update `handshake.test.ts` to target local Worker environment in Podman.
 - [ ] **X-Pharos-Impersonate:** Implement administrative impersonation logic in the Auth Bridge.
 - [ ] **Command Guards:** Enforce role-based access for local CLI subcommands.
+
+### Sprint 3.5: Audit Remediation (Architectural & Security)
+- [ ] **Remediate [GOV-001]:** Standardized File Prologue Sweep (All `.rs` and `.ts` files).
+- [ ] **Remediate [SEC-001/002]:** Implement `Containerfile.ts` and Zero-Host TS enforcement.
+- [ ] **Remediate [GOV-002]:** Documentation Pass for "Why" Mandate (Public APIs).
+- [ ] **Remediate [GOV-003]:** Refactor legacy tests to Atomic Semantic Naming standard.
 
 ### Phase 4: Revit & Web Interop (The Three Pillars)
 - [ ] **Revit Embedded Bridge:** Initial C# scaffold with floating `Cmd+K` palette.

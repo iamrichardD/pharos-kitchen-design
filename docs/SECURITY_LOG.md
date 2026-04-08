@@ -58,3 +58,19 @@ This log provides a transparent history of security audits conducted across the 
 
 ---
 *This document is managed by the Pharos Meta-Architect (PMA). AI agents MUST update this log after every non-trivial security audit.*
+
+### [2026-04-08] - Security Audit: Phase 3 RFC 8628 Implementation (CLI)
+- **Trigger**: Manual code review and architecture audit.
+- **Target**: `packages/pkd-cli/src/auth.rs`.
+- **Actions Taken**:
+    - Evaluated RFC 8628 (Device Authorization Grant) handshake.
+    - Audited token storage via `keyring-rs`.
+- **Findings**:
+    - [PASS] **Token Storage**: Native keyring integration prevents plain-text exposure on disk.
+    - [PASS] **Transport**: `rustls-tls` enforced for all Identity Bridge communications.
+    - [INFO] **JWT Validation**: Insecure decoding (`insecure_disable_signature_validation`) used ONLY for `whoami` informational display; server-side validation remains the authority.
+    - [RISK] **URL Spoofing**: `PHAROS_AUTH_URL` environment override allows arbitrary bridge targets (Phishing vector).
+- **Remediation Path**:
+    - [ ] Sprint 4: Enforce HTTPS-only schemes for `PHAROS_AUTH_URL` overrides.
+    - [ ] Sprint 4: Implement TLS pinning or certificate pinning for the production bridge.
+- **Status**: 🟡 **ACCEPTED (Informational/Low Risk)**

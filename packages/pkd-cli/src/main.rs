@@ -9,10 +9,13 @@
  * Traceability: Issue #10 - CLI Implementation
  * ======================================================================== */
 
+mod auth;
+
 use anyhow::Result;
 use clap::{Parser, Subcommand, ValueEnum};
 use colored::*;
 use std::fmt;
+use crate::auth::AuthManager;
 
 /// Pharos CLI (pkd) - The Admin-First Control Plane for Project Prism.
 #[derive(Parser)]
@@ -20,6 +23,10 @@ use std::fmt;
 struct Cli {
     #[command(subcommand)]
     command: Commands,
+
+    /// Override the default Auth Bridge URL
+    #[arg(long, env = "PHAROS_AUTH_URL", default_value = "https://auth.iamrichardd.com")]
+    auth_url: String,
 }
 
 #[derive(Subcommand)]
@@ -122,18 +129,18 @@ impl fmt::Display for PharosRole {
 async fn main() -> Result<()> {
     tracing_subscriber::fmt::init();
     let cli = Cli::parse();
+    let auth_mgr = AuthManager::new(&cli.auth_url);
 
     match cli.command {
         Commands::Auth { action } => match action {
             AuthCommands::Login => {
-                println!("{} Initiating Device Authorization Flow...", "ℹ".blue());
-                println!("{} Not implemented yet: See Issue #10.", "⚠".yellow());
+                auth_mgr.login().await?;
             }
             AuthCommands::Logout => {
-                println!("{} Clearing local session...", "ℹ".blue());
+                auth_mgr.logout()?;
             }
             AuthCommands::Whoami => {
-                println!("{} Not authenticated.", "ℹ".red());
+                auth_mgr.whoami()?;
             }
         },
         Commands::Admin { action } => match action {
@@ -166,7 +173,6 @@ async fn main() -> Result<()> {
 async fn handle_self_update() -> Result<()> {
     println!("{} Checking for updates on GitHub...", "ℹ".blue());
     
-    // In a real scenario, these would be configured from env or constants
     let status = self_update::backends::github::Update::configure()
         .repo_owner("iamrichardd")
         .repo_name("pharos-kitchen-design")

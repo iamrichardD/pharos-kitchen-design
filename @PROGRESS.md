@@ -53,8 +53,8 @@
 ## 🏗️ Active Development
 
 ### Phase 3: The CLI Bridge (Admin Control Plane)
-- [ ] **Issue #10:** CLI Scaffold and Auth Handshake (Phase 3).
-- [ ] Implement `pkd auth` (IKD Flow).
+- [x] **Issue #10:** CLI Scaffold and Audit Handshake established (Phase 3).
+- [x] Pre-installed `pkd-cli-builder` (Podman) and `SECURITY_LOG.md` implemented.
+- [x] Implement `pkd auth` (IKD Flow - RFC 8628).
+- [x] Integrate `keyring-rs` for encrypted local token storage.
 - [ ] Implement `pkd admin users` (Impersonation & Orchestration Flow).
-- [ ] Update Auth Bridge to handle `X-Pharos-Impersonate` headers.
-- [ ] Integrate `keyring-rs` for encrypted local token storage.
