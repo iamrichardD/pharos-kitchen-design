@@ -43,11 +43,12 @@
 - [ ] **X-Pharos-Impersonate:** Implement administrative impersonation logic in the Auth Bridge.
 - [ ] **Command Guards:** Enforce role-based access for local CLI subcommands.
 
-### Sprint 3.5: Audit Remediation (Architectural & Security)
-- [ ] **Remediate [GOV-001]:** Standardized File Prologue Sweep (All `.rs` and `.ts` files).
-- [ ] **Remediate [SEC-001/002]:** Implement `Containerfile.ts` and Zero-Host TS enforcement.
-- [ ] **Remediate [GOV-002]:** Documentation Pass for "Why" Mandate (Public APIs).
-- [ ] **Remediate [GOV-003]:** Refactor legacy tests to Atomic Semantic Naming standard.
+### Sprint 3.5: Audit Remediation (Architectural & Security) - #11 - ✅ COMPLETED
+- [x] **Remediate [GOV-001]:** Standardized File Prologue Sweep (Verified).
+- [x] **Remediate [SEC-001/002]:** Implement `Containerfile.ts` and Zero-Host TS enforcement.
+- [x] **Remediate [GOV-002]:** Documentation Pass for "Why" Mandate (Public APIs).
+- [x] **Remediate [GOV-003]:** Refactor legacy tests to Atomic Semantic Naming standard.
+
 
 ### Phase 4: Revit & Web Interop (The Three Pillars)
 - [ ] **Revit Embedded Bridge:** Initial C# scaffold with floating `Cmd+K` palette.

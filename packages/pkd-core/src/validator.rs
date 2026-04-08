@@ -29,9 +29,20 @@ pub enum ValidationError {
     },
 }
 
+/// The Truth Engine's core validator for Pharos Metadata.
+/// 
+/// Purpose: To prevent "BIM Bloat" and ensure interoperability by 
+/// strictly validating metadata against a defined PharosSchema. 
+/// This is the primary gatekeeper for the Project Prism ecosystem.
 pub struct SchemaValidator;
 
 impl SchemaValidator {
+    /// Validates a PharosMetadata instance against a PharosSchema.
+    /// 
+    /// Why: In a multi-platform environment (Revit, Web, CLI), we must 
+    /// ensure that the Single Source of Truth remains consistent. This 
+    /// method performs deep validation of shared parameters, ensuring both 
+    /// existence and type-safety.
     pub fn validate_metadata(schema: &PharosSchema, metadata: &PharosMetadata) -> Result<(), Vec<ValidationError>> {
         let mut errors = Vec::new();
 
@@ -69,7 +80,12 @@ impl SchemaValidator {
         }
     }
 
-    /// Simple mapping between schema type strings and ParameterValue variants.
+    /// Enforcement logic for parameter type-safety.
+    /// 
+    /// Why: Legacy AEC software often uses loosely-typed XML/ASHH data. 
+    /// Pharos enforces strong semantic typing (TEXT, NUMBER, BOOLEAN) 
+    /// to eliminate the "Hallucination Gap" during automated equipment 
+    /// specification and procurement.
     fn is_type_valid(expected: &str, value: &ParameterValue) -> bool {
         match expected {
             "TEXT" => matches!(value, ParameterValue::Text(_)),

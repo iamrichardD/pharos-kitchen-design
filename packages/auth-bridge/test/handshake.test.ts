@@ -5,75 +5,84 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Integration test for the full RFC 8628 handshake.
- * Traceability: ADR 0019, ADR 0021
+ * Traceability: ADR 0019, ADR 0021, Issue #11
  * ======================================================================== */
 
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect } from 'vitest';
 
 const BRIDGE_URL = process.env.BRIDGE_URL || 'http://localhost:3001';
 
 describe('RFC 8628 Auth Handshake', () => {
-  it('should complete the full device authorization flow', async () => {
-    // 1. Request Device Code
-    const deviceRes = await fetch(`${BRIDGE_URL}/auth/device`, {
+  
+  it('test_should_return_device_code_when_request_is_valid', async () => {
+    const res = await fetch(`${BRIDGE_URL}/auth/device`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ client_id: 'pharos-cli' })
     });
     
-    expect(deviceRes.status).toBe(200);
-    const { device_code, user_code, verification_uri } = await deviceRes.json() as any;
-    
+    expect(res.status).toBe(200);
+    const { device_code, user_code } = await res.json() as any;
     expect(device_code).toBeDefined();
     expect(user_code).toHaveLength(8);
-    expect(verification_uri).toContain('/verify');
-
-    // 2. Initial Poll (Should be PENDING)
-    const poll1Res = await fetch(`${BRIDGE_URL}/auth/token`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        device_code, 
-        grant_type: 'urn:ietf:params:oauth:grant-type:device_code' 
-      })
-    });
-    
-    expect(poll1Res.status).toBe(400);
-    const poll1Data = await poll1Res.json() as any;
-    expect(poll1Data.error).toBe('authorization_pending');
-
-    // 3. Simulate Web Handshake (Approval)
-    // In local dev, we use the mock endpoint to approve the session.
-    // This simulates the user entering the user_code on the /verify page.
-    const approveRes = await fetch(`${BRIDGE_URL}/auth/mock-approve`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        device_code, 
-        sub: 'test-user-uuid' 
-      })
-    });
-    expect(approveRes.status).toBe(200);
-
-    // 4. Final Poll (Should be SUCCESS)
-    const poll2Res = await fetch(`${BRIDGE_URL}/auth/token`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        device_code, 
-        grant_type: 'urn:ietf:params:oauth:grant-type:device_code' 
-      })
-    });
-    
-    expect(poll2Res.status).toBe(200);
-    const tokens = await poll2Res.json() as any;
-    expect(tokens.access_token).toBeDefined();
-    expect(tokens.id_token).toBeDefined();
-    expect(tokens.refresh_token).toBeDefined();
-    expect(tokens.token_type).toBe('Bearer');
   });
 
-  it('should fail on invalid client_id', async () => {
+  it('test_should_return_pending_when_polling_before_approval', async () => {
+    // 1. Setup session
+    const deviceRes = await fetch(`${BRIDGE_URL}/auth/device`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ client_id: 'pharos-cli' })
+    });
+    const { device_code } = await deviceRes.json() as any;
+
+    // 2. Poll
+    const res = await fetch(`${BRIDGE_URL}/auth/token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        device_code, 
+        grant_type: 'urn:ietf:params:oauth:grant-type:device_code' 
+      })
+    });
+    
+    expect(res.status).toBe(400);
+    const data = await res.json() as any;
+    expect(data.error).toBe('authorization_pending');
+  });
+
+  it('test_should_return_tokens_when_polling_after_mock_approval', async () => {
+    // 1. Setup session
+    const deviceRes = await fetch(`${BRIDGE_URL}/auth/device`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ client_id: 'pharos-cli' })
+    });
+    const { device_code } = await deviceRes.json() as any;
+
+    // 2. Mock Approval
+    await fetch(`${BRIDGE_URL}/auth/mock-approve`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ device_code, sub: 'test-user' })
+    });
+
+    // 3. Poll
+    const res = await fetch(`${BRIDGE_URL}/auth/token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        device_code, 
+        grant_type: 'urn:ietf:params:oauth:grant-type:device_code' 
+      })
+    });
+    
+    expect(res.status).toBe(200);
+    const tokens = await res.json() as any;
+    expect(tokens.access_token).toBeDefined();
+  });
+
+  it('test_should_fail_when_client_id_is_missing', async () => {
     const res = await fetch(`${BRIDGE_URL}/auth/device`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

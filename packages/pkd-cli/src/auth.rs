@@ -56,6 +56,11 @@ struct Claims {
     exp: usize,
 }
 
+/// Implementation of the Pharos Identity Bridge client.
+/// 
+/// Purpose: Manages the lifecycle of a CLI session, including RFC 8628 
+/// authorization, secure token storage in the system keyring, and 
+/// identity display.
 pub struct AuthManager {
     client: Client,
     base_url: String,
@@ -69,6 +74,12 @@ impl AuthManager {
         }
     }
 
+    /// Initiates the RFC 8628 Device Authorization Flow.
+    /// 
+    /// Why: This flow is essential for CLI-based identity without local 
+    /// browser redirection. It ensures that designers can authenticate on 
+    /// restricted workstations (e.g., BIM managers' machines) while 
+    /// approving the session via a secure personal device.
     pub async fn login(&self) -> Result<()> {
         println!("{} Connecting to Pharos Identity Bridge...", "ℹ".blue());
 
@@ -119,6 +130,11 @@ impl AuthManager {
         }
     }
 
+    /// Revokes the local session and clears the system keyring.
+    /// 
+    /// Why: To ensure that abandoned CLI sessions do not become permanent 
+    /// attack vectors. Clearing the keyring is the primary security gate 
+    /// for Pharos local-host integrity.
     pub fn logout(&self) -> Result<()> {
         let entry_access = Entry::new(AUTH_SERVICE, TOKEN_KEY)?;
         let entry_id = Entry::new(AUTH_SERVICE, ID_TOKEN_KEY)?;
@@ -132,6 +148,11 @@ impl AuthManager {
         Ok(())
     }
 
+    /// Displays the current identity and roles for the active session.
+    /// 
+    /// Why: Provides immediate feedback to the user on their authorization 
+    /// state (e.g., verifying their role as IKD or ADMIN) without performing 
+    /// a full server-side signature check, reducing latency.
     pub fn whoami(&self) -> Result<()> {
         let entry = Entry::new(AUTH_SERVICE, ID_TOKEN_KEY)?;
         match entry.get_password() {
