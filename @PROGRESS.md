@@ -1,7 +1,14 @@
+/* ========================================================================
+ * Project: Pharos Kitchen Design (Project Prism)
+ * Component: Project Management / Progress
+ * File: @PROGRESS.md
+ * Purpose: Iterative log of project milestones and sprint outcomes.
+ * ======================================================================== */
+
 # @PROGRESS: Pharos Kitchen Design (Project Prism)
 
-## 🎯 Current Milestone: Phase 1 - Marketing & Foundation
-**Status**: 🔄 In Progress (Milestone 1 Completion)
+## 🎯 Current Milestone: Phase 3 - The CLI Bridge
+**Status**: 🔄 In Progress (Admin-First Control Plane Strategy)
 
 ---
 
@@ -12,28 +19,33 @@
 - [x] Marketing Site implemented (Astro 5.4.1, Tailwind CSS, Technical Blueprint).
 - [x] Security: Shift-Left Audit codified in Container cycle (ADR 0016).
 - [x] CI: Deployment workflow established and verified for iamrichardd.com.
-- [x] Ops: GitHub Action caching and esbuild mismatches resolved.
 
-### Sprint 2: Edge Identity & Branded Auth (2026-04-06) - ✅ COMPLETED
+### Sprint 2: Edge Identity & Branded Auth (2026-04-06)
 - [x] Issue #20: RFC 8628 Edge Identity Bridge (Cloudflare).
 - [x] ADR-0018/0019/0020: Identity & IaC Strategy Approved.
 - [x] ADR-0021: Cloudflare Edge Pivot (Workers + D1).
-- [x] Scaffold: `@pkd/auth-bridge` (Cloudflare Worker).
 - [x] Local Dev: Podman Compose with Wrangler/D1.
-- [x] Integration: RFC 8628 Handshake Validation.
 - [x] UI: Technical Roadmap (`roadmap.astro`) implemented.
 
-### Sprint 3: Infrastructure Finalization (2026-04-06) - ✅ COMPLETED
+### Sprint 3: Infrastructure Finalization (2026-04-06)
 - [x] Issue #5: Provision AWS Cognito & Cloudflare D1 (OpenTofu).
 - [x] Issue #6: Establish GitHub-to-AWS OIDC Federation (Security).
 - [x] Issue #7: Integrate Auth Bridge with Live Cognito (Real JWTs).
+
+### Sprint 4: Metadata Core & "Truth Engine" (2026-04-07) - ✅ COMPLETED
+- [x] Issue #9: Implement `pkd-core` Metadata Engine (Rust/WASM).
+- [x] Validation Hardening: Implemented deep semantic type-checking (TEXT, NUMBER, BOOLEAN).
+- [x] Architecture Cleanup: Consolidated identity linking to D1/AuthRepository.
+- [x] CI Remediation: Resolved IAM OIDC Trust Policy case-sensitivity and environment subject mismatches.
+- [x] ADR 0006 Refinement: Unified "Three Pillars" Command UX strategy (Web/CLI/Revit).
 
 ---
 
 ## 🏗️ Active Development
 
-### Phase 2: Metadata Core & Identity
-- [ ] Implement `keyring-rs` integration in Rust CLI for secure token storage.
-- [ ] Develop the "Hero" protocol for manufacturer verification (ABAC).
-- [ ] Implement instructional content for "Ghost-Link" on `/bridge`.
-
+### Phase 3: The CLI Bridge (Admin Control Plane)
+- [ ] **Issue #10:** CLI Scaffold and Auth Handshake (Phase 3).
+- [ ] Implement `pkd auth` (IKD Flow).
+- [ ] Implement `pkd admin users` (Impersonation & Orchestration Flow).
+- [ ] Update Auth Bridge to handle `X-Pharos-Impersonate` headers.
+- [ ] Integrate `keyring-rs` for encrypted local token storage.
