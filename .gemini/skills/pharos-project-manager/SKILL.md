@@ -24,6 +24,10 @@ Track and coordinate tasks across the monorepo structure:
 3.  **Index**: Append a reference to the new ADR in the `.project/DECISION_LOG.md` table.
 
 ### 3. Engineering Rigor & QA
+- **Agentic Continuity & The "Why" Mandate**: Enforce the documentation of intent and rationale for all non-trivial code elements.
+    - **Method Level**: Use doc comments to explain strategic purpose and constraints.
+    - **Test Level (Atomic Verification)**: Tests MUST be atomic, verifying exactly ONE behavior, state, and expected outcome.
+    - **Logic Guards**: Use inline comments to explain why a specific implementation path was chosen over alternatives.
 - **Three-Option Crucible-Slice Rule**: Enforce the mandatory development of exactly three (or fewer) implementation options (Beck, Martin, Fowler) using isolated `git worktree` environments for **Non-Trivial** tasks (See ADR-0017).
     - **Triviality Gate**: Enforce the Crucible-Slice rule ONLY for changes to `pkd-core/`, `schema/`, **Shift-Left Security**, public APIs of **Vertical Slices**, or adding new dependencies.
     - **Surgical Strike (Single-Path)**: Allow single-path development for minor UI, documentation, or internal refactoring to maintain velocity.

@@ -1,0 +1,29 @@
+# ========================================================================
+# Project: Pharos Kitchen Design (Project Prism)
+# Component: DevSecOps / CI (CLI Builder)
+# File: Containerfile.cli
+# Author: Richard D. (https://github.com/iamrichardd)
+# License: FSL-1.1
+# Purpose: Optimized Zero-Host execution environment for the Pharos CLI (pkd).
+#          Pre-installs build-essential tools and security auditors to 
+#          reduce CI/CD "toil" and latency.
+# Traceability: ADR-0005, ADR-0014, ADR-0016
+# ========================================================================
+
+# Use public enterprise registry to avoid rate-limiting (ADR-0014)
+FROM public.ecr.aws/docker/library/rust:latest
+
+# Install build dependencies for OpenSSL and PKG-Config (Required by pkd-cli)
+RUN apt-get update && apt-get install -y \
+    pkg-config \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Pre-install cargo-audit to enforce Shift-Left Security (ADR-0016)
+# This reduces build time in the 'Act' phase of the development cycle.
+RUN cargo install cargo-audit
+
+WORKDIR /work
+
+# Default command: Audit then Build to ensure only secure binaries are produced.
+CMD ["sh", "-c", "cargo audit && cargo build"]

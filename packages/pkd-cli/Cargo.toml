@@ -1,0 +1,45 @@
+# ========================================================================
+# Project: Pharos Kitchen Design (Project Prism)
+# Component: Command-Line Interface (Control Plane)
+# File: packages/pkd-cli/Cargo.toml
+# Author: Richard D. (https://github.com/iamrichardd)
+# License: FSL-1.1 (See LICENSE file for details)
+# Purpose: Manifest for the Pharos CLI (pkd).
+# Traceability: Issue #10 - CLI Implementation
+# ========================================================================
+
+[package]
+name = "pkd"
+version = "0.1.0"
+edition = "2021"
+authors = ["Richard D. <https://github.com/iamrichardd>"]
+license = "FSL-1.1"
+
+[dependencies]
+# CLI & Error Handling
+clap = { version = "4.5.4", features = ["derive", "env"] }
+anyhow = "1.0.81"
+thiserror = "1.0.58"
+tokio = { version = "1.36.0", features = ["full"] }
+tracing = "0.1.40"
+tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
+colored = "2.1.0"
+indicatif = "0.17.8"
+self_update = { version = "0.41.0", features = ["archive-tar", "archive-zip", "compression-flate2", "rustls"] }
+
+# Auth & Identity
+keyring = "2.3.2"
+reqwest = { version = "0.12", features = ["json", "rustls-tls"], default-features = false }
+serde = { version = "1.0.197", features = ["derive"] }
+serde_json = "1.0.114"
+url = "2.5.0"
+
+# AWS SDK (Cognito Administration)
+aws-config = "1.1.7"
+aws-sdk-cognitoidentityprovider = "1.17.0"
+
+# Local Core
+pkd-core = { path = "../pkd-core" }
+
+[dev-dependencies]
+mockall = "0.12.1"

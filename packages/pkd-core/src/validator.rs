@@ -21,7 +21,7 @@ pub enum ValidationError {
     VersionMismatch { expected: String, found: String },
     #[error("LOD {0} geometry specification is missing")]
     MissingLodGeometry(String),
-    #[error("Invalid parameter type for {0}: expected {expected}, found {found}")]
+    #[error("Invalid parameter type for {parameter}: expected {expected}, found {found}")]
     InvalidType { 
         parameter: String, 
         expected: String, 

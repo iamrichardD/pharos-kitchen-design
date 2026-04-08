@@ -37,6 +37,10 @@ EVERY source file (JSON, RS, ASTRO) MUST begin with:
  * ======================================================================== */
 
 ### 2. Vertical Slice Architecture (VSA) & Clean Code
+- **Agentic Continuity & The "Why" Mandate**: To ensure seamless transitions between AI agent sessions, EVERY non-trivial function, class, or test MUST explicitly document its **"Why"** (intent and rationale).
+    - **Method Level**: Use doc comments (e.g., `///` in Rust) to explain the strategic purpose and constraints.
+    - **Test Level (Atomic Verification)**: Tests MUST be atomic, verifying exactly ONE behavior, state, and expected outcome. Use the semantic naming standard to explicitly state the invariant being guarded.
+    - **Logic Guards**: Use inline comments to explain why a specific implementation path was chosen over alternatives (e.g., security tradeoffs).
 - **The Three-Option Crucible-Slice Rule**: For every **Non-Trivial** coding task, the AI agent MUST develop exactly three (or fewer) implementation options (Beck, Martin, Fowler) using isolated `git worktree` environments (See ADR-0017).
     - **Triviality Gate (Non-Trivial if)**: Changes to `pkd-core/`, `schema/`, **Shift-Left Security**, public APIs of **Vertical Slices**, or adding new dependencies.
     - **Surgical Strike (Single-Path)**: Allowed for minor UI, documentation, or internal refactoring.
