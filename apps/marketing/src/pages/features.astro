@@ -40,10 +40,10 @@ import BlueprintCard from '../components/BlueprintCard.astro';
 				<div class="flex-1">
 					<h2 class="text-2xl text-ph-orange mb-4 uppercase tracking-wider italic">02 // COMMAND-FIRST SEARCH (Cmd+K)</h2>
 					<p class="text-gray-300 mb-6 leading-relaxed">
-						Folder-diving is a productivity killer. Our hybrid Spotlight search allows you to find, filter, and place manufacturer equipment in milliseconds.
+						Folder-diving is a productivity killer. Our hybrid Spotlight search allows you to find, filter, and place manufacturer equipment in milliseconds using the ergonomic RFC 2378 query syntax.
 					</p>
 					<div class="p-4 bg-ph-charcoal border border-white/5 font-mono text-xs text-gray-400">
-						<span class="text-ph-orange">></span> query "Vulcan 36 Range" <br/>
+						<span class="text-ph-orange">></span> manufacturer=hobart return name voltage <br/>
 						<span class="text-ph-blue">S: 102: Found 3 matches in 12ms.</span>
 					</div>
 				</div>
@@ -51,6 +51,30 @@ import BlueprintCard from '../components/BlueprintCard.astro';
 					<div class="blueprint-border p-4 bg-black/20 aspect-video flex items-center justify-center font-mono text-[10px] text-ph-orange/40 uppercase overflow-hidden">
 						<img src="/pharos-kitchen-design/assets/screenshots/spotlight-interaction.png" alt="Spotlight Interaction" class="w-full h-full object-cover opacity-70" />
 					</div>
+				</div>
+			</div>
+
+			<div class="flex flex-col md:flex-row gap-12 items-center">
+				<div class="flex-1 order-2 md:order-1">
+					<div class="blueprint-border p-4 bg-black/20 aspect-video flex items-center justify-center font-mono text-[10px] text-emerald-500/40 uppercase overflow-hidden">
+						<div class="p-6 border border-emerald-500/20 bg-emerald-500/5 font-mono text-[10px]">
+							<span class="text-emerald-500">[SENTINEL_ACTIVE]</span><br/>
+							<span class="text-gray-500">>> VALIDATING PKD_VOLTAGE...</span><br/>
+							<span class="text-red-400">!! FAIL_FAST: Missing required parameter [PKD_PHASE]</span><br/>
+							<span class="text-gray-500">>> ABORTING SYNC TO PREVENT BIM_BLOAT.</span>
+						</div>
+					</div>
+				</div>
+				<div class="flex-1 order-1 md:order-2">
+					<h2 class="text-2xl text-emerald-500 mb-4 uppercase tracking-wider italic">03 // FAIL-FAST ENGINEERING</h2>
+					<p class="text-gray-300 mb-6 leading-relaxed">
+						Legacy software often works around bad data, leading to mysterious failures downstream. Pharos implements a "Sentinel Strategy" (ADR 0023): we fail immediately and visibly at the source if metadata invariants are violated.
+					</p>
+					<ul class="space-y-3 font-mono text-[10px] uppercase text-gray-500">
+						<li>+ Immediate 30-Second Root Cause</li>
+						<li>+ Zero Masking of Data Corruption</li>
+						<li>+ Guaranteed Compliance for Revit Models</li>
+					</ul>
 				</div>
 			</div>
 		</div>

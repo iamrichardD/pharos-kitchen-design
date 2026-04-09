@@ -21,17 +21,31 @@ const roadmapItems = [
   },
   { 
     name: "RFC 8628 Edge Bridge", 
-    status: "In Construction", 
+    status: "Deployed", 
     phase: "Sprint 2", 
     tag: "IDENTITY",
     description: "Cross-platform identity handshake via Cloudflare Workers for sub-50ms polling." 
   },
   { 
     name: "WASM Bridge Core", 
-    status: "In Construction", 
+    status: "Deployed", 
     phase: "Sprint 2", 
     tag: "BRIDGE",
     description: "Rust-to-WASM interop layer for cross-OS performance and metadata normalization." 
+  },
+  { 
+    name: "Admin Control Plane", 
+    status: "Deployed", 
+    phase: "Sprint 3", 
+    tag: "CORE",
+    description: "Cognito orchestration and role-based access control for OEM/VDC administrators." 
+  },
+  { 
+    name: "Shared Protocol (ADR 0024)", 
+    status: "Deployed", 
+    phase: "Sprint 3", 
+    tag: "PROTOCOL",
+    description: "High-rigor RFC 2378 Rust implementation unified across the Pharos ecosystem." 
   },
   { 
     name: "Hero Protocol (ABAC)", 
