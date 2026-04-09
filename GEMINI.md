@@ -37,6 +37,11 @@ EVERY source file (JSON, RS, ASTRO) MUST begin with:
  * ======================================================================== */
 
 ### 2. Vertical Slice Architecture (VSA) & Clean Code
+- **Fail Fast Engineering (Immediate & Visible)**: Every component MUST implement "Fail Fast" practices (Shore, 2004) to detect defects immediately at the source.
+    - **Assertions as Sentinels**: Use `assert!` (Rust) and strict validation (TypeScript) at "system seams" (APIs, persistence, IPC) to verify invariants.
+    - **No Masking**: PROHIBITED from using "robust" workarounds (e.g., returning `null` or empty defaults for critical configuration) that result in "failing slowly."
+    - **Informative Failures**: Assertion messages MUST include context (e.g., "can't find [X] property in config file [Y]") for rapid root-cause analysis.
+    - **Global Exception Handlers**: Every application MUST implement a robust global exception handler to gracefully report these failures to developers.
 - **Agentic Continuity & The "Why" Mandate**: To ensure seamless transitions between AI agent sessions, EVERY non-trivial function, class, or test MUST explicitly document its **"Why"** (intent and rationale).
     - **Method Level**: Use doc comments (e.g., `///` in Rust) to explain the strategic purpose and constraints.
     - **Test Level (Atomic Verification)**: Tests MUST be atomic, verifying exactly ONE behavior, state, and expected outcome. Use the semantic naming standard to explicitly state the invariant being guarded.

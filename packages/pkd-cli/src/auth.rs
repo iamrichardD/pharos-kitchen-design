@@ -61,6 +61,7 @@ struct Claims {
 /// Purpose: Manages the lifecycle of a CLI session, including RFC 8628 
 /// authorization, secure token storage in the system keyring, and 
 /// identity display.
+#[derive(Clone)]
 pub struct AuthManager {
     client: Client,
     base_url: String,
@@ -180,6 +181,17 @@ impl AuthManager {
                 Ok(())
             }
         }
+    }
+
+    /// Retrieves the stored access token from the system keyring.
+    pub fn get_token(&self) -> Result<String> {
+        if std::env::var("CI").is_ok() {
+            if let Ok(token) = std::env::var("PHAROS_TEST_TOKEN") {
+                return Ok(token);
+            }
+        }
+        let entry = Entry::new(AUTH_SERVICE, TOKEN_KEY)?;
+        entry.get_password().map_err(|_| anyhow!("Not authenticated. Please run `pkd auth login`"))
     }
 
     fn store_tokens(&self, access: &str, id: &str, refresh: &str) -> Result<()> {

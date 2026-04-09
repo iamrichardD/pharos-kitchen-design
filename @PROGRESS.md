@@ -57,4 +57,7 @@
 - [x] Pre-installed `pkd-cli-builder` (Podman) and `SECURITY_LOG.md` implemented.
 - [x] Implement `pkd auth` (IKD Flow - RFC 8628).
 - [x] Integrate `keyring-rs` for encrypted local token storage.
-- [ ] Implement `pkd admin users` (Impersonation & Orchestration Flow).
+- [x] **Issue #12:** Implement `pkd admin users` (Impersonation & Orchestration Flow) - COMPLETED.
+- [x] **ADR 0024:** Extracted shared `pharos-protocol` library for ecosystem-wide parity.
+- [x] Zero-Host: Verified all TypeScript and Rust components inside Podman containers.
+- [x] UX: Implemented ergonomic RFC 2378 search syntax in `pkd core search`.

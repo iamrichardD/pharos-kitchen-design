@@ -38,10 +38,14 @@
 
 ### Phase 3: The CLI Bridge (Admin Control Plane)
 - [x] **Scaffold pkd-cli:** Rust binary with `clap` and the 5 `pkd_role` variants (IKD, OEM, VDC, ADMIN, AUDITOR, BOT).
-- [ ] **Admin Control Plane:** Implement `pkd admin users` for Cognito orchestration and attribute management.
-- [ ] **Handshake Remediation:** Update `handshake.test.ts` to target local Worker environment in Podman.
-- [ ] **X-Pharos-Impersonate:** Implement administrative impersonation logic in the Auth Bridge.
-- [ ] **Command Guards:** Enforce role-based access for local CLI subcommands.
+- [x] **Admin Control Plane:** Implement `pkd admin users` for Cognito orchestration and attribute management.
+- [x] **Handshake Remediation:** Update `handshake.test.ts` to target local Worker environment in Podman.
+- [x] **X-Pharos-Impersonate:** Implement administrative impersonation logic in the Auth Bridge.
+- [x] **Library Extraction (ADR 0024):** Extracted `pharos-protocol` crate for shared RFC 2378 logic.
+- [x] **Ergonomic Search:** Replaced flag-based search with RFC 2378 query syntax in `pkd core search`.
+- [ ] **Command Guards:** Implement local `Fail Fast` role-based access for CLI subcommands.
+- [ ] **Positional Fallback:** Implement `pkd <query>` as the default ergonomic entry point.
+- [ ] **Secret Audit:** Verify transition from plain environment variables to Cloudflare Secrets for AWS credentials.
 
 ### Sprint 3.5: Audit Remediation (Architectural & Security) - #11 - ✅ COMPLETED
 - [x] **Remediate [GOV-001]:** Standardized File Prologue Sweep (Verified).

@@ -8,10 +8,15 @@
  * Traceability: ADR 0019, ADR 0021, Issue #7
  * ======================================================================== */
 
-import { Router } from 'itty-router';
+import { Router, IRequest } from 'itty-router';
 import { nanoid } from 'nanoid';
 import { createRemoteJWKSet, jwtVerify } from 'jose';
 import { AuthRepository } from './db';
+import { 
+  CognitoIdentityProviderClient, 
+  ListUsersCommand, 
+  AdminUpdateUserAttributesCommand 
+} from '@aws-sdk/client-cognito-identity-provider';
 
 interface Env {
   DB: D1Database;
@@ -19,7 +24,14 @@ interface Env {
   COGNITO_USER_POOL_ID: string;
   COGNITO_CLIENT_ID: string;
   COGNITO_REGION: string;
+  AWS_ACCESS_KEY_ID: string;
+  AWS_SECRET_ACCESS_KEY: string;
   DEBUG?: string; // Flag to enable mock endpoints for local dev
+}
+
+interface PharosRequest extends IRequest {
+  user?: any;
+  impersonatedUser?: string;
 }
 
 interface ConfirmPayload {
@@ -32,19 +44,77 @@ interface ConfirmPayload {
 const router = Router();
 
 /**
+ * Middleware: Verify Bearer Token and handle Impersonation
+ */
+const withAuth = async (request: PharosRequest, env: Env) => {
+  const authHeader = request.headers.get('Authorization');
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return new Response(JSON.stringify({ 
+      error: 'unauthorized', 
+      message: 'Missing or invalid Authorization header. Run `pkd auth login`.' 
+    }), { status: 401 });
+  }
+
+  const token = authHeader.split(' ')[1];
+  try {
+    const payload = await verifyIdToken(token, env);
+    request.user = payload;
+
+    // Handle X-Pharos-Impersonate (Admin-only override)
+    const impersonateHeader = request.headers.get('X-Pharos-Impersonate');
+    if (impersonateHeader) {
+      if (payload['custom:role'] === 'ADMIN') {
+        request.impersonatedUser = impersonateHeader;
+        console.log(`[Impersonation] Admin ${payload.sub} is impersonating ${impersonateHeader}`);
+      } else {
+        return new Response(JSON.stringify({ 
+          error: 'forbidden', 
+          message: 'Security Violation: Only ADMIN can use X-Pharos-Impersonate.' 
+        }), { status: 403 });
+      }
+    }
+  } catch (e: any) {
+    return new Response(JSON.stringify({ 
+      error: 'unauthorized', 
+      message: e.message 
+    }), { status: 401 });
+  }
+};
+
+/**
+ * Middleware: Ensure ADMIN role
+ */
+const withAdmin = (request: PharosRequest) => {
+  if (request.user?.['custom:role'] !== 'ADMIN') {
+    return new Response(JSON.stringify({ error: 'forbidden', message: 'Admin role required' }), { status: 403 });
+  }
+};
+
+/**
  * Helper: Verify Cognito ID Token
+ * Why: Centralized identity verification. Failing fast here prevents 
+ *      unauthorized access from propagating into business logic.
  */
 async function verifyIdToken(token: string, env: Env) {
   const JWKS = createRemoteJWKSet(
     new URL(`https://cognito-idp.${env.COGNITO_REGION}.amazonaws.com/${env.COGNITO_USER_POOL_ID}/.well-known/jwks.json`)
   );
 
-  const { payload } = await jwtVerify(token, JWKS, {
-    issuer: `https://cognito-idp.${env.COGNITO_REGION}.amazonaws.com/${env.COGNITO_USER_POOL_ID}`,
-    audience: env.COGNITO_CLIENT_ID,
-  });
-
-  return payload;
+  try {
+    const { payload } = await jwtVerify(token, JWKS, {
+      issuer: `https://cognito-idp.${env.COGNITO_REGION}.amazonaws.com/${env.COGNITO_USER_POOL_ID}`,
+      audience: env.COGNITO_CLIENT_ID,
+    });
+    return payload;
+  } catch (e: any) {
+    if (e.code === 'ERR_JWT_EXPIRED') {
+      throw new Error('Identity session expired. Please run `pkd auth login` again.');
+    }
+    if (e.code === 'ERR_JWKS_FETCH_FAILED') {
+      throw new Error('Failed to connect to Pharos Identity Provider (Cognito).');
+    }
+    throw new Error(`Authentication failed: ${e.message}`);
+  }
 }
 
 /**
@@ -143,6 +213,72 @@ router.post('/auth/confirm', async (request, env: Env) => {
   } catch (e) {
     console.error(e);
     return new Response(JSON.stringify({ error: 'server_error', details: e.message }), { status: 500 });
+  }
+});
+
+/**
+ * Admin: List Users (Cognito Orchestration)
+ */
+router.get('/admin/users', withAuth, withAdmin, async (request: PharosRequest, env: Env) => {
+  const client = new CognitoIdentityProviderClient({
+    region: env.COGNITO_REGION,
+    credentials: {
+      accessKeyId: env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
+    }
+  });
+
+  try {
+    const command = new ListUsersCommand({
+      UserPoolId: env.COGNITO_USER_POOL_ID,
+    });
+    const response = await client.send(command);
+    
+    const users = response.Users?.map(u => ({
+      username: u.Username,
+      status: u.UserStatus,
+      created: u.UserCreateDate,
+      attributes: u.Attributes?.reduce((acc: any, attr) => {
+        acc[attr.Name!] = attr.Value;
+        return acc;
+      }, {})
+    }));
+
+    return new Response(JSON.stringify({ users }), { headers: { 'Content-Type': 'application/json' } });
+  } catch (e) {
+    console.error(e);
+    return new Response(JSON.stringify({ error: 'cognito_error', message: e.message }), { status: 500 });
+  }
+});
+
+/**
+ * Admin: Update User Attributes/Roles
+ */
+router.post('/admin/users/update', withAuth, withAdmin, async (request: PharosRequest, env: Env) => {
+  const { email, role } = await request.json() as { email: string, role: string };
+  
+  const client = new CognitoIdentityProviderClient({
+    region: env.COGNITO_REGION,
+    credentials: {
+      accessKeyId: env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
+    }
+  });
+
+  try {
+    const command = new AdminUpdateUserAttributesCommand({
+      UserPoolId: env.COGNITO_USER_POOL_ID,
+      Username: email,
+      UserAttributes: [
+        { Name: 'custom:role', Value: role }
+      ]
+    });
+    await client.send(command);
+
+    return new Response(JSON.stringify({ message: `Successfully updated user ${email} to role ${role}` }));
+  } catch (e) {
+    console.error(e);
+    return new Response(JSON.stringify({ error: 'cognito_error', message: e.message }), { status: 500 });
   }
 });
 

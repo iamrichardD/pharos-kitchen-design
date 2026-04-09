@@ -108,6 +108,13 @@ flowchart LR
     GP --> URL[iamrichardd.com/pharos-kitchen-design/]
 ```
 
+## 5. Fail Fast Engineering (The Sentinel Strategy)
+Pharos implements a "Fail Fast" strategy to eliminate the "Hallucination Gap" and reduce debugging toil.
+
+*   **System Seams:** Invariants are checked at every system boundary (CLI-to-Bridge, Bridge-to-Cognito, Core-to-Revit).
+*   **Informative Failure:** Errors MUST include specific context (e.g., specific missing field names or file paths) to ensure 30-second root-cause identification.
+*   **No Masking:** The system is prohibited from "failing slowly" through default values or `null` workarounds for critical data.
+
 ---
 ### Legal & Interoperability Compliance
 **Pharos Kitchen Design** (Project Prism) is an independent software development effort. Use of any third-party trademarks (e.g., KCL, AutoQuotes, Hobart, Vulcan) is strictly for **Nominative Fair Use** to identify compatibility and achieve software interoperability under **17 U.S.C. § 1201(f)**. Please see [DISCLAIMER.md](../DISCLAIMER.md) for full legal disclosures.

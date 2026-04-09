@@ -10,12 +10,16 @@
  * ======================================================================== */
 
 mod auth;
+mod admin;
+mod models;
 
-use anyhow::Result;
-use clap::{Parser, Subcommand, ValueEnum};
+use anyhow::{Result, anyhow};
+use clap::{Parser, Subcommand};
 use colored::*;
-use std::fmt;
+use pkd_core::{PharosSchema, PharosMetadata};
 use crate::auth::AuthManager;
+use crate::admin::AdminManager;
+use crate::models::PharosRole;
 
 /// Pharos CLI (pkd) - The Admin-First Control Plane for Project Prism.
 #[derive(Parser)]
@@ -94,35 +98,14 @@ enum CoreCommands {
         #[arg(short, long)]
         path: std::path::PathBuf,
     },
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq, ValueEnum)]
-enum PharosRole {
-    /// Independent Kitchen Designer
-    Ikd,
-    /// Original Equipment Manufacturer
-    Oem,
-    /// Virtual Design & Construction Professional
-    Vdc,
-    /// Platform Administrator
-    Admin,
-    /// Third-party Compliance Auditor
-    Auditor,
-    /// Automated Service Agent
-    Bot,
-}
-
-impl fmt::Display for PharosRole {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            PharosRole::Ikd => write!(f, "IKD"),
-            PharosRole::Oem => write!(f, "OEM"),
-            PharosRole::Vdc => write!(f, "VDC"),
-            PharosRole::Admin => write!(f, "ADMIN"),
-            PharosRole::Auditor => write!(f, "AUDITOR"),
-            PharosRole::Bot => write!(f, "BOT"),
-        }
-    }
+    /// Search the equipment registry using RFC 2378 query syntax
+    /// Examples: 
+    ///   pkd core search "manufacturer=3m return name"
+    ///   pkd core search manufacturer=3m voltage=208
+    Search {
+        /// The query string (e.g., 'manufacturer=3m return name')
+        query: Vec<String>,
+    },
 }
 
 #[tokio::main]
@@ -130,6 +113,7 @@ async fn main() -> Result<()> {
     tracing_subscriber::fmt::init();
     let cli = Cli::parse();
     let auth_mgr = AuthManager::new(&cli.auth_url);
+    let admin_mgr = AdminManager::new(&cli.auth_url, auth_mgr.clone());
 
     match cli.command {
         Commands::Auth { action } => match action {
@@ -146,25 +130,92 @@ async fn main() -> Result<()> {
         Commands::Admin { action } => match action {
             AdminCommands::Users { action } => match action {
                 UserCommands::List => {
-                    println!("{} Fetching user list from Cognito...", "ℹ".blue());
+                    admin_mgr.list_users().await?;
                 }
                 UserCommands::Update { email, role } => {
-                    println!("{} Updating {} to role: {}...", "ℹ".blue(), email.bold(), role.to_string().green());
+                    admin_mgr.update_user(&email, role).await?;
                 }
                 UserCommands::Impersonate { email } => {
-                    println!("{} Preparing impersonation for {}...", "ℹ".blue(), email.bold());
+                    admin_mgr.impersonate(&email)?;
                 }
             },
         },
         Commands::Core { action } => match action {
             CoreCommands::Validate { path } => {
-                println!("{} Validating metadata at {:?}...", "ℹ".blue(), path);
-                // This will eventually call pkd-core logic
+                handle_core_validate(path).await?;
+            }
+            CoreCommands::Search { query } => {
+                handle_core_search(query).await?;
             }
         },
         Commands::SelfUpdate => {
             handle_self_update().await?;
         }
+    }
+
+    Ok(())
+}
+
+async fn handle_core_validate(path: std::path::PathBuf) -> Result<()> {
+    println!("{} Validating metadata at {:?}...", "ℹ".blue(), path);
+    let content = std::fs::read_to_string(&path)?;
+    let metadata: PharosMetadata = serde_json::from_str(&content)?;
+    
+    // Load schema from embedded or local file (using embedded for now)
+    let schema_json = include_str!("../../pkd-core/schema/pharos-schema.json");
+    let schema: PharosSchema = serde_json::from_str(schema_json)?;
+
+    match pkd_core::validator::SchemaValidator::validate_metadata(&schema, &metadata) {
+        Ok(_) => println!("{} Metadata is valid and compliant.", "✔".green()),
+        Err(errors) => {
+            println!("{} Validation failed with {} errors:", "✘".red(), errors.len());
+            for err in errors {
+                println!("  - {}", err.to_string().yellow());
+            }
+            return Err(anyhow!("Validation failed"));
+        }
+    }
+    Ok(())
+}
+
+async fn handle_core_search(query_parts: Vec<String>) -> Result<()> {
+    if query_parts.is_empty() {
+        return Err(anyhow!("Search query is empty. Example: pkd core search manufacturer=3m"));
+    }
+
+    let raw_query = query_parts.join(" ");
+    
+    // 1. Fail Fast: Parse the query using the shared pharos-protocol library
+    let command = pharos_protocol::parse_command(&format!("query {}", raw_query))
+        .map_err(|e| anyhow!("Failed to parse query syntax: {}", e))?;
+
+    if let pharos_protocol::Command::Query { selections, returns } = command {
+        // 2. Fail Fast: Validate all selection fields against RFC 2378 attributes in schema
+        let schema_json = include_str!("../../pkd-core/schema/pharos-schema.json");
+        let schema: PharosSchema = serde_json::from_str(schema_json)?;
+
+        for (field_opt, _) in &selections {
+            if let Some(field) = field_opt {
+                let shared_param = schema.parameter_standards.shared_parameters.get(field)
+                    .ok_or_else(|| anyhow!("Field '{}' is not defined in the Pharos schema.", field))?;
+
+                if !shared_param.is_lookup() {
+                    return Err(anyhow!(
+                        "Field failure: '{}' is not marked as a 'Lookup' field. Search prohibited by ADR 0023.", 
+                        field
+                    ));
+                }
+            }
+        }
+
+        println!("{} Executing registry search...", "ℹ".blue());
+        println!("{} Query:   {}", "  -".blue(), raw_query.cyan());
+        if !returns.is_empty() {
+            println!("{} Returns: {}", "  -".blue(), returns.join(", ").yellow());
+        }
+        
+        // (Actual registry search via API will be implemented in a later sprint)
+        println!("\n{} Search syntax is valid and compliant with RFC 2378.", "✔".green());
     }
 
     Ok(())

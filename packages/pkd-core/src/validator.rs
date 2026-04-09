@@ -55,17 +55,17 @@ impl SchemaValidator {
         }
 
         // 2. Deep Parameter Validation (Existence + Type)
-        for (param_name, expected_type) in &schema.parameter_standards.shared_parameters {
+        for (param_name, shared_param) in &schema.parameter_standards.shared_parameters {
             match metadata.parameters.get(param_name) {
                 None => {
                     errors.push(ValidationError::MissingParameter(param_name.clone()));
                 }
                 Some(value) => {
                     // Type-safety enforcement
-                    if !Self::is_type_valid(expected_type, value) {
+                    if !Self::is_type_valid(&shared_param.param_type, value) {
                         errors.push(ValidationError::InvalidType {
                             parameter: param_name.clone(),
-                            expected: expected_type.clone(),
+                            expected: shared_param.param_type.clone(),
                             found: format!("{:?}", value),
                         });
                     }
@@ -89,7 +89,7 @@ impl SchemaValidator {
     fn is_type_valid(expected: &str, value: &ParameterValue) -> bool {
         match expected {
             "TEXT" => matches!(value, ParameterValue::Text(_)),
-            "NUMBER" | "ELECTRICAL_POTENTIAL" | "ELECTRICAL_WATTAGE" | "HVAC_POWER" => {
+            "NUMBER" | "ELECTRICAL_POTENTIAL" | "ELECTRICAL_WATTAGE" | "HVAC_POWER" | "PIPING_SIZE" => {
                  // Numbers can be passed as actual numbers or text if they have units
                  matches!(value, ParameterValue::Number(_) | ParameterValue::Text(_))
             }
@@ -116,13 +116,19 @@ impl LodValidator {
 mod tests {
     use super::*;
     use std::collections::BTreeMap;
-    use crate::models::schema::{ParameterStandards, BloatRules};
+    use crate::models::schema::{ParameterStandards, BloatRules, SharedParameter};
     use crate::models::metadata::{Classification, PerformanceMetadata};
 
     fn create_mock_schema() -> PharosSchema {
         let mut shared_params = BTreeMap::new();
-        shared_params.insert("PKD_Manufacturer".to_string(), "TEXT".to_string());
-        shared_params.insert("PKD_Voltage".to_string(), "ELECTRICAL_POTENTIAL".to_string());
+        shared_params.insert("PKD_Manufacturer".to_string(), SharedParameter {
+            param_type: "TEXT".to_string(),
+            attributes: vec!["Lookup".to_string()],
+        });
+        shared_params.insert("PKD_Voltage".to_string(), SharedParameter {
+            param_type: "ELECTRICAL_POTENTIAL".to_string(),
+            attributes: vec!["Lookup".to_string()],
+        });
 
         PharosSchema {
             version: "1.0.0".to_string(),
@@ -135,7 +141,9 @@ mod tests {
                 max_file_size_delta_kb: 50,
                 forbidden_metadata: Vec::new(),
                 regional_stripping_rules: BTreeMap::new(),
+                procedural_preference: true,
             },
+            unit_mapping: BTreeMap::new(),
         }
     }
 
