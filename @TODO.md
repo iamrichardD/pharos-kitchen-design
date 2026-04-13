@@ -62,6 +62,12 @@
 - [x] **CI/CD Decoupling:** Separated `deploy-infra.yml` and `deploy-site.yml` for independent delivery.
 
 
+### Sprint 3.7: Theme-Aware Infrastructure - #25 - ✅ COMPLETED
+- [x] **Semantic Token Bridge:** Implement CSS-variable driven color tokens in `global.css`.
+- [x] **Tailwind Abstraction:** Map Tailwind configuration to these semantic tokens.
+- [x] **Adaptive UI:** Refactor components to use theme-responsive classes (Zero-JS).
+- [x] **Vellum Aesthetic:** Implement the "Architectural Vellum" palette for light mode (ADR 0022).
+
 ### Phase 4: Revit & Web Interop (The Three Pillars)
 - [ ] **Revit Embedded Bridge:** Initial C# scaffold with floating `Cmd+K` palette.
 - [ ] **Ghost-Link Spoofer:** Implement logic to generate `Bridged-` placeholders.

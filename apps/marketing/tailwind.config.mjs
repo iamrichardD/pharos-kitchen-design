@@ -4,9 +4,14 @@ export default {
   theme: {
     extend: {
       colors: {
-        'ph-charcoal': '#1A1A1A',
-        'ph-orange': '#FF6B00',
-        'ph-blue': '#005FB8',
+        'ph-charcoal': 'var(--ph-charcoal)',
+        'ph-orange': 'var(--ph-orange)',
+        'ph-blue': 'var(--ph-blue)',
+        'bg-base': 'var(--bg-base)',
+        'text-base': 'var(--text-base)',
+        'text-muted': 'var(--text-muted)',
+        'grid-line': 'var(--grid-line)',
+        'border-blueprint': 'var(--border-blueprint)',
       },
       fontFamily: {
         'condensed': ['Roboto Condensed', 'sans-serif'],

@@ -12,8 +12,33 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    /* Foundation Colors */
+    --ph-charcoal: #1A1A1A;
+    --ph-orange: #FF6B00;
+    --ph-blue: #005FB8;
+
+    /* Theme Tokens (Default: Dark Mode) */
+    --bg-base: var(--ph-charcoal);
+    --text-base: #F3F4F6; /* slate-100 fallback */
+    --text-muted: #9CA3AF; /* gray-400 */
+    --grid-line: rgba(255, 255, 255, 0.05);
+    --border-blueprint: rgba(0, 95, 184, 0.3); /* ph-blue/30 */
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root {
+      /* Theme Tokens (Architectural Vellum - ADR 0022) */
+      --bg-base: #F8FAFC; /* slate-50 */
+      --text-base: #1A1A1A; /* ph-charcoal */
+      --text-muted: #4B5563; /* gray-600 */
+      --grid-line: rgba(0, 95, 184, 0.1); /* ph-blue at 10% */
+      --border-blueprint: rgba(0, 95, 184, 0.5); /* Higher contrast for light mode */
+    }
+  }
+
   body {
-    @apply bg-ph-charcoal text-gray-100 font-sans;
+    @apply bg-bg-base text-text-base font-sans transition-colors duration-300;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -24,22 +49,23 @@
 @layer components {
   .blueprint-grid {
     background-image: 
-      linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+      linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
     background-size: 20px 20px;
   }
 
   .blueprint-border {
-    @apply border border-ph-blue/30 relative;
+    border: 1px solid var(--border-blueprint);
+    @apply relative;
   }
 
   .blueprint-border::before {
     content: '';
-    @apply absolute -top-1 -left-1 w-2 h-2 bg-ph-blue;
+    @apply absolute -top-1 -left-1 w-2 h-2 bg-ph-orange;
   }
 
   .blueprint-border::after {
     content: '';
-    @apply absolute -bottom-1 -right-1 w-2 h-2 bg-ph-blue;
+    @apply absolute -bottom-1 -right-1 w-2 h-2 bg-ph-orange;
   }
 }
