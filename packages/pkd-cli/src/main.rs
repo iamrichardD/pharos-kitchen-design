@@ -12,6 +12,7 @@
 mod auth;
 mod admin;
 mod models;
+mod guard;
 
 use anyhow::{Result, anyhow};
 use clap::{Parser, Subcommand};
@@ -20,6 +21,7 @@ use pkd_core::{PharosSchema, PharosMetadata};
 use crate::auth::AuthManager;
 use crate::admin::AdminManager;
 use crate::models::PharosRole;
+use crate::guard::{Guard, Authorizable};
 
 /// Pharos CLI (pkd) - The Admin-First Control Plane for Project Prism.
 #[derive(Parser)]
@@ -75,6 +77,14 @@ enum AdminCommands {
         #[command(subcommand)]
         action: UserCommands,
     },
+}
+
+impl Authorizable for AdminCommands {
+    fn required_roles(&self) -> Vec<PharosRole> {
+        match self {
+            AdminCommands::Users { .. } => vec![PharosRole::Admin, PharosRole::Auditor],
+        }
+    }
 }
 
 #[derive(Subcommand)]
@@ -134,7 +144,8 @@ async fn main() -> Result<()> {
             },
             Commands::Admin { action } => {
                 // Fail Fast: Ensure user has sufficient permissions for Admin commands
-                check_role(&auth_mgr, &[PharosRole::Admin, PharosRole::Auditor])?;
+                // Decoupled Policy: Enforced by the Authorizable trait (ADR-0017)
+                Guard::enforce(&auth_mgr, &action)?;
 
                 match action {
                     AdminCommands::Users { action } => match action {
@@ -176,23 +187,6 @@ async fn main() -> Result<()> {
     }
 
     Ok(())
-}
-
-fn check_role(auth: &AuthManager, allowed: &[PharosRole]) -> Result<()> {
-    let current_role = auth.get_current_role()?;
-    
-    match current_role {
-        Some(role) if allowed.contains(&role) => Ok(()),
-        Some(role) => Err(anyhow!(
-            "{} Unauthorized: Your current role ({}) does not have permission for this command.",
-            "✘".red(),
-            role.to_string().yellow()
-        )),
-        None => Err(anyhow!(
-            "{} Authentication required: Run `pkd auth login` to access this command.",
-            "✘".red()
-        )),
-    }
 }
 
 async fn handle_core_validate(path: std::path::PathBuf) -> Result<()> {
