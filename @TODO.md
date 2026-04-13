@@ -55,10 +55,11 @@
 - [x] **Process Hardening**: Implemented Research Hard Gate and Three-Option Rule in `GEMINI.md`.
 - [x] **Documentation & Marketing**: Updated `ARCHITECTURE.md`, `roadmap.astro`, and created `CLI_REFERENCE.md`.
 
-### Sprint 3.6: IKD-Centric Messaging Pivot - #13
-- [ ] **Content Refactor:** Pivot `index.astro`, `features.astro`, and `bridge.astro` to designer-centric utility.
-- [ ] **Asset Validation:** Ensure all placeholder screenshots are correctly tagged for IKD utility.
-- [ ] **Zero-Host Build:** Verify the marketing site still builds correctly in `Containerfile.ts`.
+### Sprint 3.6: IKD-Centric Messaging Pivot - #13 - ✅ COMPLETED
+- [x] **Content Refactor:** Pivot `index.astro`, `features.astro`, and `bridge.astro` to designer-centric utility.
+- [x] **Asset Validation:** Ensure all placeholder screenshots are correctly tagged for IKD utility.
+- [x] **Zero-Host Build:** Verify the marketing site still builds correctly in `Containerfile.ts`.
+- [x] **CI/CD Decoupling:** Separated `deploy-infra.yml` and `deploy-site.yml` for independent delivery.
 
 
 ### Phase 4: Revit & Web Interop (The Three Pillars)
