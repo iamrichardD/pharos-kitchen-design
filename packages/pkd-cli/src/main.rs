@@ -26,11 +26,15 @@ use crate::models::PharosRole;
 #[command(name = "pkd", version, about, long_about = None)]
 struct Cli {
     #[command(subcommand)]
-    command: Commands,
+    command: Option<Commands>,
 
     /// Override the default Auth Bridge URL
     #[arg(long, env = "PHAROS_AUTH_URL", default_value = "https://auth.iamrichardd.com")]
     auth_url: String,
+
+    /// Positional fallback for RFC 2378 search (e.g., 'pkd manufacturer=3m')
+    #[arg(trailing_var_arg = true)]
+    query: Vec<String>,
 }
 
 #[derive(Subcommand)]
@@ -116,44 +120,79 @@ async fn main() -> Result<()> {
     let admin_mgr = AdminManager::new(&cli.auth_url, auth_mgr.clone());
 
     match cli.command {
-        Commands::Auth { action } => match action {
-            AuthCommands::Login => {
-                auth_mgr.login().await?;
-            }
-            AuthCommands::Logout => {
-                auth_mgr.logout()?;
-            }
-            AuthCommands::Whoami => {
-                auth_mgr.whoami()?;
-            }
-        },
-        Commands::Admin { action } => match action {
-            AdminCommands::Users { action } => match action {
-                UserCommands::List => {
-                    admin_mgr.list_users().await?;
+        Some(command) => match command {
+            Commands::Auth { action } => match action {
+                AuthCommands::Login => {
+                    auth_mgr.login().await?;
                 }
-                UserCommands::Update { email, role } => {
-                    admin_mgr.update_user(&email, role).await?;
+                AuthCommands::Logout => {
+                    auth_mgr.logout()?;
                 }
-                UserCommands::Impersonate { email } => {
-                    admin_mgr.impersonate(&email)?;
+                AuthCommands::Whoami => {
+                    auth_mgr.whoami()?;
                 }
             },
-        },
-        Commands::Core { action } => match action {
-            CoreCommands::Validate { path } => {
-                handle_core_validate(path).await?;
+            Commands::Admin { action } => {
+                // Fail Fast: Ensure user has sufficient permissions for Admin commands
+                check_role(&auth_mgr, &[PharosRole::Admin, PharosRole::Auditor])?;
+
+                match action {
+                    AdminCommands::Users { action } => match action {
+                        UserCommands::List => {
+                            admin_mgr.list_users().await?;
+                        }
+                        UserCommands::Update { email, role } => {
+                            admin_mgr.update_user(&email, role).await?;
+                        }
+                        UserCommands::Impersonate { email } => {
+                            admin_mgr.impersonate(&email)?;
+                        }
+                    },
+                }
             }
-            CoreCommands::Search { query } => {
-                handle_core_search(query).await?;
+            Commands::Core { action } => match action {
+                CoreCommands::Validate { path } => {
+                    handle_core_validate(path).await?;
+                }
+                CoreCommands::Search { query } => {
+                    handle_core_search(query).await?;
+                }
+            },
+            Commands::SelfUpdate => {
+                handle_self_update().await?;
             }
         },
-        Commands::SelfUpdate => {
-            handle_self_update().await?;
+        None => {
+            // Task 2: Positional Fallback (ADR 0006)
+            // If no subcommand is provided but query parts exist, default to 'core search'
+            if !cli.query.is_empty() {
+                handle_core_search(cli.query).await?;
+            } else {
+                // No command and no query: show help
+                use clap::CommandFactory;
+                Cli::command().print_help()?;
+            }
         }
     }
 
     Ok(())
+}
+
+fn check_role(auth: &AuthManager, allowed: &[PharosRole]) -> Result<()> {
+    let current_role = auth.get_current_role()?;
+    
+    match current_role {
+        Some(role) if allowed.contains(&role) => Ok(()),
+        Some(role) => Err(anyhow!(
+            "{} Unauthorized: Your current role ({}) does not have permission for this command.",
+            "✘".red(),
+            role.to_string().yellow()
+        )),
+        None => Err(anyhow!(
+            "{} Authentication required: Run `pkd auth login` to access this command.",
+            "✘".red()
+        )),
+    }
 }
 
 async fn handle_core_validate(path: std::path::PathBuf) -> Result<()> {
@@ -240,4 +279,33 @@ async fn handle_self_update() -> Result<()> {
     }
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use clap::Parser;
+
+    #[test]
+    fn test_should_fallback_to_search_when_no_subcommand_provided() {
+        // Simulate 'pkd manufacturer=3m'
+        let args = vec!["pkd", "manufacturer=3m"];
+        let cli = Cli::try_parse_from(args).unwrap();
+        
+        assert!(cli.command.is_none());
+        assert_eq!(cli.query, vec!["manufacturer=3m".to_string()]);
+    }
+
+    #[test]
+    fn test_should_prefer_subcommand_over_query() {
+        // Simulate 'pkd auth login'
+        let args = vec!["pkd", "auth", "login"];
+        let cli = Cli::try_parse_from(args).unwrap();
+        
+        match cli.command {
+            Some(Commands::Auth { action: AuthCommands::Login }) => (),
+            _ => panic!("Expected Auth Login subcommand"),
+        }
+        assert!(cli.query.is_empty());
+    }
 }

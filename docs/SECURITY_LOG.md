@@ -22,6 +22,17 @@ This log provides a transparent history of security audits conducted across the 
 
 ## 🛡️ Active Audit History
 
+### [2026-04-13] - Phase 3 Secret Audit: Cloudflare Edge Credentials
+- **Trigger**: Sprint 3.5 Security Verification.
+- **Target**: `packages/auth-bridge`.
+- **Actions Taken**:
+    - Audited `packages/auth-bridge/wrangler.toml` for plain-text secrets.
+    - Verified `Env` interface in `packages/auth-bridge/src/index.ts` for AWS credential injection.
+- **Findings**:
+    - [PASS] **AWS Credentials**: `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` are NOT stored in `wrangler.toml`. They are correctly defined in the `Env` interface, indicating they are managed via Cloudflare Secrets (`wrangler secret put`).
+    - [PASS] **D1 Database**: `database_id` is public/non-secret, which is standard for Cloudflare D1.
+- **Status**: 🟢 **PASS** (Zero-Host Secrets Verified)
+
 ### [2026-04-08] - Phase 3 CLI Security Hardening & CI Optimization
 - **Trigger**: `cargo audit` in `Containerfile.cli` (Pre-installed builder image).
 - **Target**: `packages/pkd-cli`.

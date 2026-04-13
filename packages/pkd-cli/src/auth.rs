@@ -8,6 +8,7 @@
  * Traceability: Issue #10 - Auth Handshake
  * ======================================================================== */
 
+use crate::models::PharosRole;
 use anyhow::{Result, anyhow};
 use keyring::Entry;
 use reqwest::Client;
@@ -48,12 +49,12 @@ enum TokenResponse {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct Claims {
-    sub: String,
-    email: Option<String>,
+pub(crate) struct Claims {
+    pub sub: String,
+    pub email: Option<String>,
     #[serde(rename = "custom:role")]
-    role: Option<String>,
-    exp: usize,
+    pub role: Option<String>,
+    pub exp: usize,
 }
 
 /// Implementation of the Pharos Identity Bridge client.
@@ -158,20 +159,9 @@ impl AuthManager {
         let entry = Entry::new(AUTH_SERVICE, ID_TOKEN_KEY)?;
         match entry.get_password() {
             Ok(token) => {
-                // Decode JWT (Insecurely for display, real validation happens at the edge)
-                let header = decode_header(&token)?;
-                let mut validation = Validation::new(header.alg);
-                validation.validate_exp = false; // We just want to see who we are even if expired
-                validation.insecure_disable_signature_validation();
-
-                let token_data = decode::<Claims>(
-                    &token, 
-                    &DecodingKey::from_secret("".as_ref()), // Key not needed for insecure decode
-                    &validation
-                )?;
-
-                println!("{} Authenticated as: {}", "✔".green(), token_data.claims.email.unwrap_or_else(|| token_data.claims.sub.clone()).bold());
-                if let Some(role) = token_data.claims.role {
+                let claims = self.decode_id_token_insecure(&token)?;
+                println!("{} Authenticated as: {}", "✔".green(), claims.email.unwrap_or_else(|| claims.sub.clone()).bold());
+                if let Some(role) = claims.role {
                     println!("{} Role: {}", "ℹ".blue(), role.yellow());
                 }
                 Ok(())
@@ -181,6 +171,43 @@ impl AuthManager {
                 Ok(())
             }
         }
+    }
+
+    /// Retrieves the current role from the stored ID token.
+    /// 
+    /// Why: Enables local "Fail Fast" authorization checks before making 
+    /// expensive network calls to the Auth Bridge.
+    pub fn get_current_role(&self) -> Result<Option<PharosRole>> {
+        let entry = Entry::new(AUTH_SERVICE, ID_TOKEN_KEY)?;
+        match entry.get_password() {
+            Ok(token) => {
+                let claims = self.decode_id_token_insecure(&token)?;
+                match claims.role {
+                    Some(role_str) => {
+                        // Cognito roles are stored as SCREAMING_SNAKE_CASE strings
+                        let role: PharosRole = serde_json::from_str(&format!("\"{}\"", role_str))
+                            .map_err(|e| anyhow!("Unknown Pharos role '{}': {}", role_str, e))?;
+                        Ok(Some(role))
+                    }
+                    None => Ok(None),
+                }
+            }
+            Err(_) => Ok(None),
+        }
+    }
+
+    pub(crate) fn decode_id_token_insecure(&self, token: &str) -> Result<Claims> {
+        let header = decode_header(token)?;
+        let mut validation = Validation::new(header.alg);
+        validation.validate_exp = false; // We want to check roles even if session is stale
+        validation.insecure_disable_signature_validation();
+
+        let token_data = decode::<Claims>(
+            token, 
+            &DecodingKey::from_secret("".as_ref()),
+            &validation
+        )?;
+        Ok(token_data.claims)
     }
 
     /// Retrieves the stored access token from the system keyring.
@@ -219,6 +246,28 @@ mod tests {
     use wiremock::MockServer;
     use wiremock::matchers::{method, path, body_json};
     use wiremock::{ResponseTemplate, Mock};
+
+    #[tokio::test]
+    async fn test_should_return_role_when_id_token_contains_it() {
+        let auth_mgr = AuthManager::new("http://localhost");
+        
+        // For this unit test, we'll verify the parsing logic in get_current_role
+        let claims_decoded = auth_mgr.decode_id_token_insecure(&format_mock_token("ADMIN")).unwrap();
+        assert_eq!(claims_decoded.role, Some("ADMIN".to_string()));
+    }
+
+    fn format_mock_token(role: &str) -> String {
+        let claims = serde_json::json!({
+            "sub": "123",
+            "email": "test@example.com",
+            "custom:role": role,
+            "exp": 9999999999u64
+        });
+        // This is a minimal JWT format for insecure decoding (UrlSafeNoPad)
+        use base64::{Engine as _, engine::general_purpose};
+        let payload = general_purpose::URL_SAFE_NO_PAD.encode(serde_json::to_string(&claims).unwrap());
+        format!("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.{}.signature", payload)
+    }
 
     #[tokio::test]
     async fn test_should_return_tokens_when_auth_successful() {

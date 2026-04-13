@@ -52,7 +52,7 @@
 
 ## 🏗️ Active Development
 
-### Phase 3: The CLI Bridge (Admin Control Plane)
+### Phase 3: The CLI Bridge (Admin Control Plane) - ✅ COMPLETED
 - [x] **Issue #10:** CLI Scaffold and Audit Handshake established (Phase 3).
 - [x] Pre-installed `pkd-cli-builder` (Podman) and `SECURITY_LOG.md` implemented.
 - [x] Implement `pkd auth` (IKD Flow - RFC 8628).
@@ -61,3 +61,6 @@
 - [x] **ADR 0024:** Extracted shared `pharos-protocol` library for ecosystem-wide parity.
 - [x] Zero-Host: Verified all TypeScript and Rust components inside Podman containers.
 - [x] UX: Implemented ergonomic RFC 2378 search syntax in `pkd core search`.
+- [x] **Security:** Implemented local `Fail Fast` role-based access for CLI subcommands.
+- [x] **UX:** Enabled positional fallback for ergonomic search (e.g., `pkd manufacturer=3m`).
+- [x] **Secret Audit:** Verified Cloudflare Secrets transition for AWS credentials.

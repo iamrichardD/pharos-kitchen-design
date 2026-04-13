@@ -60,7 +60,15 @@ EVERY source file (JSON, RS, ASTRO) MUST begin with:
     - `test_should_[expected_behavior]_when_[state_under_test]`
 - **Versioning:** Strictly adhere to **Semantic Versioning (SemVer)** (e.g., `v1.0.0`).
 
-### 3. Automated Audits & Production Verification
+### 3. The Research Hard Gate
+Before moving from **Research** to **Strategy/Execution**, you MUST explicitly confirm compliance with the following checklist:
+- [ ] **Issue Authority:** A GitHub Issue exists and is linked in the prologue of all modified files.
+- [ ] **Branch Integrity:** All changes are occurring on a `feat/issue-X` or `fix/issue-X` branch.
+- [ ] **Triviality Gate:** Explicitly state if the task is **Trivial** (Surgical Strike) or **Non-Trivial** (ADR-0017 Three-Option Rule).
+- [ ] **Shift-Left Security:** Document potential attack vectors identified during research.
+- [ ] **TDD Strategy:** Define the atomic test cases that will be implemented *before* the code changes.
+
+### 4. Automated Audits & Production Verification
 - **Automated Audits:** Utilize tools like `cargo audit`, `npm audit`, and security-focused linters within the Podman environment to identify vulnerabilities during development.
 - **Production Verification:** Before task closure, verify that the static build renders correctly at `iamrichardd.com/pharos-kitchen-design/demo` using `web_fetch`.
 

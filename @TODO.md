@@ -43,15 +43,17 @@
 - [x] **X-Pharos-Impersonate:** Implement administrative impersonation logic in the Auth Bridge.
 - [x] **Library Extraction (ADR 0024):** Extracted `pharos-protocol` crate for shared RFC 2378 logic.
 - [x] **Ergonomic Search:** Replaced flag-based search with RFC 2378 query syntax in `pkd core search`.
-- [ ] **Command Guards:** Implement local `Fail Fast` role-based access for CLI subcommands.
-- [ ] **Positional Fallback:** Implement `pkd <query>` as the default ergonomic entry point.
-- [ ] **Secret Audit:** Verify transition from plain environment variables to Cloudflare Secrets for AWS credentials.
+- [x] **Command Guards:** Implement local `Fail Fast` role-based access for CLI subcommands.
+- [x] **Positional Fallback:** Implement `pkd <query>` as the default ergonomic entry point.
+- [x] **Secret Audit:** Verify transition from plain environment variables to Cloudflare Secrets for AWS credentials.
 
 ### Sprint 3.5: Audit Remediation (Architectural & Security) - #11 - ✅ COMPLETED
 - [x] **Remediate [GOV-001]:** Standardized File Prologue Sweep (Verified).
 - [x] **Remediate [SEC-001/002]:** Implement `Containerfile.ts` and Zero-Host TS enforcement.
 - [x] **Remediate [GOV-002]:** Documentation Pass for "Why" Mandate (Public APIs).
 - [x] **Remediate [GOV-003]:** Refactor legacy tests to Atomic Semantic Naming standard.
+- [x] **Process Hardening:** Updated `GEMINI.md` and `SKILL.md` to enforce Research Hard Gates and Three-Option Rule.
+- [x] **Phase 3 Verification:** Implemented atomic tests for CLI security guards and positional fallback.
 
 
 ### Phase 4: Revit & Web Interop (The Three Pillars)
