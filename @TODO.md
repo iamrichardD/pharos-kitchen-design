@@ -52,8 +52,8 @@
 - [x] **Remediate [SEC-001/002]:** Implement `Containerfile.ts` and Zero-Host TS enforcement.
 - [x] **Remediate [GOV-002]:** Documentation Pass for "Why" Mandate (Public APIs).
 - [x] **Remediate [GOV-003]:** Refactor legacy tests to Atomic Semantic Naming standard.
-- [x] **Process Hardening:** Updated `GEMINI.md` and `SKILL.md` to enforce Research Hard Gates and Three-Option Rule.
-- [x] **Phase 3 Verification:** Implemented atomic tests for CLI security guards and positional fallback.
+- [x] **Process Hardening**: Implemented Research Hard Gate and Three-Option Rule in `GEMINI.md`.
+- [x] **Documentation & Marketing**: Updated `ARCHITECTURE.md`, `roadmap.astro`, and created `CLI_REFERENCE.md`.
 
 
 ### Phase 4: Revit & Web Interop (The Three Pillars)

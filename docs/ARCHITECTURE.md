@@ -108,7 +108,35 @@ flowchart LR
     GP --> URL[iamrichardd.com/pharos-kitchen-design/]
 ```
 
-## 5. Fail Fast Engineering (The Sentinel Strategy)
+## 5. RFC 8628 Identity Bridge (Device Authorization)
+Pharos uses the Device Authorization Grant to enable secure authentication for CLI and BIM plugin users without requiring a local web server.
+
+```mermaid
+sequenceDiagram
+    participant CLI as pkd-cli
+    participant B as Auth Bridge (Cloudflare)
+    participant C as AWS Cognito
+    participant D as Designer Device (Mobile/Browser)
+
+    CLI->>B: POST /auth/device (client_id: pkd-cli)
+    B->>B: Generate device_code / user_code
+    B->>CLI: Return codes + verification_uri
+    CLI-->>Designer: Display user_code + URL
+
+    Designer->>D: Open URL + Enter user_code
+    D->>C: Authenticate (Email/Password)
+    C-->>B: Post confirmation (JWTs)
+    B->>B: Approve Session (sub, status: APPROVED)
+
+    loop Polling
+        CLI->>B: POST /auth/token (device_code)
+        B-->>CLI: Return JWTs (If APPROVED)
+    end
+    
+    CLI->>CLI: Store tokens in Secure Keyring
+```
+
+## 6. Fail Fast Engineering (The Sentinel Strategy)
 Pharos implements a "Fail Fast" strategy to eliminate the "Hallucination Gap" and reduce debugging toil.
 
 *   **System Seams:** Invariants are checked at every system boundary (CLI-to-Bridge, Bridge-to-Cognito, Core-to-Revit).

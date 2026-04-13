@@ -48,6 +48,13 @@
 - [x] CI Remediation: Resolved IAM OIDC Trust Policy case-sensitivity and environment subject mismatches.
 - [x] ADR 0006 Refinement: Unified "Three Pillars" Command UX strategy (Web/CLI/Revit).
 
+### Sprint 3.5: Audit Remediation & Documentation (2026-04-13) - ✅ COMPLETED
+- [x] **Remediate [GOV-001/002/003]**: Standardized File Prologues, "Why" doc comments, and Atomic Test Naming.
+- [x] **Remediate [SEC-001/002]**: Implemented `Containerfile.ts` and Zero-Host TS enforcement.
+- [x] **Process Hardening**: Implemented Research Hard Gate and Three-Option Rule in `GEMINI.md`.
+- [x] **Documentation Patch**: Updated `ARCHITECTURE.md` with RFC 8628 diagrams and created `CLI_REFERENCE.md`.
+- [x] **Marketing Sync**: Updated `roadmap.astro` to reflect Phase 3 completion and functional CLI capability.
+
 ---
 
 ## 🏗️ Active Development

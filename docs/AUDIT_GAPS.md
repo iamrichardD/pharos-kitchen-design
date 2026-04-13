@@ -31,8 +31,9 @@ The following gaps represent deviations from the strict mandates defined in `GEM
 
 ## 🔵 MINOR: Workflow Integrity
 - **[WRK-001] Three-Option Crucible-Slice Rule**: Recent Phase 2/3 core changes were executed as single-path surgical strikes.
-    - *Remediation*: Re-commit to ADR-0017 for all future core schema or API changes.
+    - *Remediation*: **DONE** (Implemented strict **Research Hard Gate** in `GEMINI.md` and `SKILL.md` to enforce ADR-0017 compliance. Verified via `feat/issue-15-guard-refactor` session).
 
 ---
-**Status**: 🆕 Open (Pending Remediation in Phase 3.5)
+**Status**: ✅ **CLOSED** (Phase 3.5 Remediation Verified)
 **Auditor**: Pharos Meta-Architect (PMA)
+**Completion Date**: 2026-04-13
