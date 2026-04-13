@@ -55,6 +55,11 @@
 - [x] **Documentation Patch**: Updated `ARCHITECTURE.md` with RFC 8628 diagrams and created `CLI_REFERENCE.md`.
 - [x] **Marketing Sync**: Updated `roadmap.astro` to reflect Phase 3 completion and functional CLI capability.
 
+### Sprint 3.6: IKD-Centric Messaging Pivot (#13) - 🔄 In Progress
+- [ ] Implement designer-centric language across all primary marketing pages.
+- [ ] Replace technical jargon (RFC 2378, WASM Core, etc.) with functional utility descriptions.
+- [ ] Perform Zero-Host validation of the marketing build.
+
 ---
 
 ## 🏗️ Active Development
