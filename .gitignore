@@ -29,3 +29,16 @@ wrangler-*.log
 
 # Local Secrets
 .env.secret
+
+# .NET / C#
+bin/
+obj/
+TestResults/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+.vs/
+.history/
+*.nupkg
+

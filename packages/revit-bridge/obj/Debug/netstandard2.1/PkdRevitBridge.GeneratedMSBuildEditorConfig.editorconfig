@@ -1,5 +1,0 @@
-is_global = true
-build_property.RootNamespace = Pkd.RevitBridge
-build_property.ProjectDir = /src/packages/revit-bridge/
-build_property.EnableComHosting = 
-build_property.EnableGeneratedComInterfaceComImportInterop = 
