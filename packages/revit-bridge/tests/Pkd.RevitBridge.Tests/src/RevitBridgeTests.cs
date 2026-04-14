@@ -46,7 +46,15 @@ namespace Pkd.RevitBridge.Tests
         [Fact]
         public void TestShould_ReturnVersion_When_Requested()
         {
-            Assert.Equal("0.2.0", _bridge.GetVersion());
+            Assert.Equal("0.2.1", _bridge.GetVersion());
+        }
+
+        [Fact]
+        public void TestShould_HandlePanic_When_RustCoreFails()
+        {
+            ValidationResponse result = _bridge.TriggerPanic();
+            Assert.Equal("PANIC", result.Status);
+            Assert.Contains("Rust core panicked", result.Errors[0].Details.GetString());
         }
 
         [Fact]
