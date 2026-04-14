@@ -24,12 +24,19 @@ namespace Pkd.RevitBridge
     [Transaction(TransactionMode.ReadOnly)]
     public class ValidateSelectionCommand : IExternalCommand
     {
+        // Metadata request structure for safe serialization
+        private record MetadataRequest(
+            [property: JsonPropertyName("metadata_id")] string MetadataId,
+            [property: JsonPropertyName("name")] string Name,
+            [property: JsonPropertyName("parameters")] Dictionary<string, object> Parameters
+        );
+
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             UIDocument uiDoc = commandData.Application.ActiveUIDocument;
             Document doc = uiDoc.Document;
 
-            // 1. Filter selection for Specialty Equipment (most foodservice category)
+            // 1. Filter selection
             ICollection<ElementId> selectedIds = uiDoc.Selection.GetElementIds();
             
             if (selectedIds.Count == 0)
@@ -46,15 +53,14 @@ namespace Pkd.RevitBridge
             {
                 Element element = doc.GetElement(id);
                 
-                // Extract minimal metadata for verification (Placeholder for full extraction logic)
-                // Why: Metadata-First Truth (ADR-0002) - we start with ID and Version.
+                // Shift-Left Security: Use JsonSerializer to prevent injection vulnerabilities
                 string metadataId = element.get_Parameter(BuiltInParameter.ALL_MODEL_MARK)?.AsString() ?? "Unknown";
-                string metadataJson = "{\"metadata_id\":\"" + metadataId + "\",\"name\":\"" + element.Name + "\",\"parameters\":{}}";
+                var request = new MetadataRequest(metadataId, element.Name, new Dictionary<string, object>());
+                string metadataJson = JsonSerializer.Serialize(request);
 
                 // Validation Handshake (Hardened with SafeHandle)
-                // Why: We use the stateless ValidateMetadata for now; later we will use handles.
-                // Note: In a real scenario, we'd load the schema once.
-                var response = bridge.ValidateMetadata("{}", metadataJson); // Empty schema for base validation
+                // Note: Using a minimal empty schema for the scaffold phase
+                var response = bridge.ValidateMetadata("{}", metadataJson); 
 
                 if (response.IsValid)
                 {
