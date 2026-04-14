@@ -16,8 +16,8 @@
 
 # @PROGRESS: Pharos Kitchen Design (Project Prism)
 
-## 🎯 Current Milestone: Phase 3 - The CLI Bridge
-**Status**: 🔄 In Progress (Admin-First Control Plane Strategy)
+## 🎯 Current Milestone: Phase 4 - Revit & Web Interop
+**Status**: 🔄 In Progress (Logic Bridge & Interop Stability)
 
 ---
 
@@ -61,20 +61,24 @@
 - [x] Perform Zero-Host validation of the marketing build.
 - [x] Decoupled CI/CD: Restored `deploy-site.yml` and separated infrastructure to `deploy-infra.yml`.
 
-### Sprint 3.7: Phase 4 Foundations & Interop (#28, #29, #30, #31) - ✅ COMPLETED
-- [x] **Issue #31 (Log Sync)**: Synchronized `docs/DECISION_LOG.md` with ADR-0023 and ADR-0024.
-- [x] **Issue #29 (SRI Rectification)**: Verified SRI hash for Umami and implemented "Fail Fast" prebuild verification.
-- [x] **Issue #28 (Interop Scaffold)**: Initialized `packages/revit-bridge` (.NET 8/Standard 2.1) and `apps/demo` (Astro Shell).
-- [x] **Issue #30 (VSA Refactor)**: Transitioned `pkd-core` to category-based Vertical Slices (Warewashing slice implemented).
-- [x] **Issue #36 (VSA Dispatcher)**: Implemented `SliceDispatcher` for dynamic category routing in `pkd-core`.
-- [x] **Issue #39 (Distribution Pipeline)**: Implemented MSBuild `AfterBuild` target to automate native binary copying.
-- [x] **Zero-Host Verification**: All new components verified via Podman (Rust, Node, .NET).
+### Sprint 3.7: Phase 4 Foundations & Interop (2026-04-13) - ✅ COMPLETED
+- [x] **Issue #20 (Log Sync)**: Synchronized `docs/DECISION_LOG.md` with ADR-0023, ADR-0024, and ADR-0025.
+- [x] **Issue #18 (SRI Rectification)**: Verified SRI hash for Umami and implemented "Fail Fast" prebuild verification.
+- [x] **Issue #17 (Interop Scaffold)**: Initialized `packages/revit-bridge` (.NET 8) and `apps/demo` (Astro Shell).
+- [x] **Issue #19 (VSA Refactor)**: Transitioned `pkd-core` to category-based Vertical Slices (Warewashing slice implemented).
+- [x] **Issue #21 (Interop Bridge)**: Established memory-safe UTF-8 FFI between Rust and .NET 8.
+- [x] **Issue #22 (VSA Dispatcher)**: Implemented `SliceDispatcher` for dynamic category routing in `pkd-core`.
+- [x] **Issue #23 (Distribution Pipeline)**: Implemented MSBuild `AfterBuild` target to automate native binary copying.
+- [x] **Issue #24 (Integration Smoke Test)**: Full-circuit verification of C# -> Rust interop boundary.
+- [x] **Issue #25/26 (Build Fixes)**: Restored SRI script and corrected shell syntax for CI parity.
+- [x] **Zero-Host Verification**: All components verified via Podman (Rust, Node, .NET 8).
 
 ---
 
 ## 🏗️ Active Development
 
 ### Phase 4: Revit & Web Interop (Project Prism Bridge)
-- [ ] **Issue #32**: Implement `pkd-core` WASM bindings for C# interop.
-- [ ] **Issue #33**: Scaffold Revit Ribbon UI in `revit-bridge`.
-- [ ] **Issue #34**: Implement basic "Ghost Link" metadata sync between Revit and Demo site.
+- [ ] **Issue #32**: Implement `pkd-core` JSON error serialization for FFI.
+- [ ] **Issue #29**: Scaffold Revit Ribbon UI and initial command palette.
+- [ ] **Issue #30**: Implement "Ghost Link" metadata sync between Revit and Demo site.
+- [ ] **Issue #33**: Integrated CI script for automated cross-language validation.

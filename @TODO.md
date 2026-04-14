@@ -60,58 +60,25 @@
 - [x] Jargon removal & functional utility mapping.
 
 ### Phase 4: Revit & Web Interop (Project Prism Bridge)
-- [x] **Issue #31 (Log Sync)**: Synchronized Decision Log with ADR-0023/24.
-- [x] **Issue #29 (SRI)**: Rectified Umami SRI and implemented Fail-Fast build check.
-- [x] **Issue #28 (Scaffold)**: Revit Bridge (.NET) and Demo Site (Astro) initialized.
-- [x] **Issue #30 (VSA)**: `pkd-core` refactored for category-based Vertical Slices.
-- [x] **Issue #32**: Implement `pkd-core` WASM bindings for C# interop (Interop Bridge) - **UTF-8 FIXED**.
-- [x] **Issue #36**: Implement VSA Mapping & Category Registry in `pkd-core` (Logic Bridge).
-- [ ] **Issue #37**: Initialize C# Test Suite (xUnit) for `revit-bridge` (Validation Bridge).
-- [ ] **Issue #38**: Shared Design System Extraction (UI/UX Bridge).
-- [x] **Issue #39**: Distribution Pipeline (Rust Binary -> C# Build Artifacts).
-- [ ] **Issue #40**: Integration Smoke Test (C# Cross-Language Handshake).
-- [ ] **Issue #33**: Scaffold Revit Ribbon UI & Command logic.
-- [ ] **Issue #34**: Implement "Ghost Link" prototype (Metadata sync).
-- [ ] **Issue #35**: Verify end-to-end "Revit -> Bridge -> Web" metadata flow.
+- [x] **Issue #20 (Log Sync)**: Synchronized Decision Log with ADR-0023/24/25.
+- [x] **Issue #18 (SRI)**: Rectified Umami SRI and implemented Fail-Fast build check.
+- [x] **Issue #17 (Scaffold)**: Revit Bridge (.NET 8) and Demo Site (Astro) initialized.
+- [x] **Issue #19 (VSA)**: `pkd-core` refactored for category-based Vertical Slices.
+- [x] **Issue #21 (Interop Bridge)**: Established memory-safe UTF-8 FFI boundary.
+- [x] **Issue #22 (VSA Dispatcher)**: Logic routing for vertical slices.
+- [x] **Issue #23 (Distribution Pipeline)**: Automated native binary distribution.
+- [x] **Issue #24 (Integration Smoke Test)**: Cross-language handshake verification.
+- [x] **Issue #25/26 (Build Fixes)**: Resolved SRI script syntax and tracking.
+- [ ] **Issue #32**: Implement `pkd-core` JSON error serialization for FFI (Interop Bridge).
+- [ ] **Issue #27**: Initialize expanded xUnit coverage for `revit-bridge` (Validation Bridge).
+- [ ] **Issue #28**: Shared Design System Extraction (UI/UX Bridge).
+- [ ] **Issue #29**: Scaffold Revit Ribbon UI & Command logic.
+- [ ] **Issue #30**: Implement "Ghost Link" prototype (Metadata sync).
+- [ ] **Issue #31**: Verify end-to-end "Revit -> Bridge -> Web" metadata flow.
+- [ ] **Issue #33**: Integrated CI script for cross-language validation.
 
 ---
 
 ## 🗑️ Purge/Stale Logic
 - [x] **ADR-0019**: Superseded by ADR-0021 (Cloudflare Edge Pivot).
-- [x] **pkd-core legacy parser**: Refactored in favor of Vertical Slices (Issue #30).
-*Content Refactor:** Pivot `index.astro`, `features.astro`, and `bridge.astro` to designer-centric utility.
-- [x] **Asset Validation:** Ensure all placeholder screenshots are correctly tagged for IKD utility.
-- [x] **Zero-Host Build:** Verify the marketing site still builds correctly in `Containerfile.ts`.
-- [x] **CI/CD Decoupling:** Separated `deploy-infra.yml` and `deploy-site.yml` for independent delivery.
-
-
-### Sprint 3.7: Theme-Aware Infrastructure - #25 - ✅ COMPLETED
-- [x] **Semantic Token Bridge:** Implement CSS-variable driven color tokens in `global.css`.
-- [x] **Tailwind Abstraction:** Map Tailwind configuration to these semantic tokens.
-- [x] **Adaptive UI:** Refactor components to use theme-responsive classes (Zero-JS).
-- [x] **Vellum Aesthetic:** Implement the "Architectural Vellum" palette for light mode (ADR 0022).
-
-### Sprint 3.8: Theme Hardening & Production Integrity - #26 - ✅ COMPLETED
-- [x] **Global Recursive Refactor:** Eliminate hardcoded dark-theme classes in `features.astro`, `bridge.astro`, and `roadmap.astro`.
-- [x] **RGB Token Standard:** Refactor `global.css` to use space-separated RGB values for reliable Tailwind opacity modifiers.
-- [x] **Decoration Normalization:** Centralize custom blueprint decorations from `bridge.astro` and `roadmap.astro` into `global.css`.
-- [x] **Security Hardening (SRI):** Implement Subresource Integrity (SRI) hashes for external fonts and scripts.
-- [x] **Automated Theme Audit:** Add a "Fail Fast" build step to detect hardcoded legacy color classes in `src/`.
-- [x] **WCAG Verification:** Verify contrast ratios for the "Architectural Vellum" palette meet AA standards.
-
-### Sprint 3.9: Asset Pipeline Hardening - #27 - ✅ COMPLETED
-- [x] **Asset Generation:** Utilize Playwright to capture high-fidelity forensic screenshots from the live `/command-v1/` demo (Light/Dark variants).
-- [x] **Asset Audit:** Implement a "Fail Fast" build step to verify all referenced images exist in the public directory.
-- [x] **Zero-Host Build:** Pass both theme and asset audits in the Podman environment.
-
-### Phase 4: Revit & Web Interop (The Three Pillars)
-- [ ] **Revit Embedded Bridge:** Initial C# scaffold with floating `Cmd+K` palette.
-- [ ] **Ghost-Link Spoofer:** Implement logic to generate `Bridged-` placeholders.
-- [ ] **Web Registry:** Transition the demo site to a live registry view using D1 and `pkd-core` WASM.
-- [ ] **Agentic Specification:** Implement the WebMCP interface for AI equipment queries.
-
----
-
-## 🗑️ Purged / Stale
-- [x] Removed `local-server.ts` (Deprecated in favor of D1/AuthRepository).
-- [x] Removed `db.ts` DynamoDB logic (Consolidated to D1).
+- [x] **pkd-core legacy parser**: Refactored in favor of Vertical Slices (Issue #19).
