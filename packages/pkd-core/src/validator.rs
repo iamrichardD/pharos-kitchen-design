@@ -33,6 +33,12 @@ pub enum ValidationError {
         expected: String, 
         found: String 
     },
+    #[error("Invalid category: expected {expected}, got {found}")]
+    #[serde(rename = "INVALID_CATEGORY")]
+    InvalidCategory { expected: String, found: String },
+    #[error("Invalid ID prefix: expected {expected}, got {found}")]
+    #[serde(rename = "INVALID_ID_PREFIX")]
+    InvalidIdPrefix { expected: String, found: String },
     #[error("Vertical Slice Validation Error: {0}")]
     #[serde(rename = "SLICE_VALIDATION_ERROR")]
     SliceError(String),

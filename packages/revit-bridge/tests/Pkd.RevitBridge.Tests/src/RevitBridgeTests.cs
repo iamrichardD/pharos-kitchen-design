@@ -12,6 +12,7 @@ using Xunit;
 using Pkd.RevitBridge;
 using System.IO;
 using System.Text.Json;
+using System.Linq;
 
 namespace Pkd.RevitBridge.Tests
 {
@@ -53,13 +54,10 @@ namespace Pkd.RevitBridge.Tests
         [Fact]
         public void test_should_fail_when_invalid_json_provided()
         {
-            string result = _bridge.ValidateMetadata(LoadSchema(), "invalid");
-            using JsonDocument doc = JsonDocument.Parse(result);
-            Assert.Equal("ERROR", doc.RootElement.GetProperty("status").GetString());
-            
-            var errors = doc.RootElement.GetProperty("errors");
-            Assert.True(errors.GetArrayLength() > 0);
-            Assert.Equal("SLICE_VALIDATION_ERROR", errors[0].GetProperty("code").GetString());
+            ValidationResponse result = _bridge.ValidateMetadata(LoadSchema(), "invalid");
+            Assert.Equal("ERROR", result.Status);
+            Assert.NotEmpty(result.Errors);
+            Assert.Equal("SLICE_VALIDATION_ERROR", result.Errors[0].Code);
         }
 
         /// <summary>
@@ -70,12 +68,10 @@ namespace Pkd.RevitBridge.Tests
         public void test_should_handle_utf8_special_characters_in_metadata()
         {
             string metadata = "{\"metadata_id\":\"PHX-DW-999\",\"name\":\"UTF8-Test-Ø-2\\\"-NPT\",\"parameters\":{}}";
-            string result = _bridge.ValidateMetadata(LoadSchema(), metadata);
+            ValidationResponse result = _bridge.ValidateMetadata(LoadSchema(), metadata);
             
             // Should not crash and should correctly handle the Ø and " characters.
-            Assert.NotNull(result);
-            using JsonDocument doc = JsonDocument.Parse(result);
-            Assert.NotNull(doc.RootElement.GetProperty("status").GetString());
+            Assert.NotNull(result.Status);
         }
 
         /// <summary>
@@ -109,25 +105,13 @@ namespace Pkd.RevitBridge.Tests
                 "\"performance_metadata\":{\"estimated_rfa_size_kb\":34,\"procedural_lod_enabled\":true,\"ghost_link_active\":true}" +
                 "}";
             
-            string result = _bridge.ValidateMetadata(LoadSchema(), metadata);
+            ValidationResponse result = _bridge.ValidateMetadata(LoadSchema(), metadata);
             
-            using JsonDocument doc = JsonDocument.Parse(result);
-            Assert.Equal("ERROR", doc.RootElement.GetProperty("status").GetString());
+            Assert.Equal("ERROR", result.Status);
+            Assert.NotEmpty(result.Errors);
             
-            var errors = doc.RootElement.GetProperty("errors");
-            Assert.True(errors.GetArrayLength() > 0);
-            
-            bool foundIdError = false;
-            foreach (var error in errors.EnumerateArray())
-            {
-                if (error.GetProperty("code").GetString() == "SLICE_VALIDATION_ERROR" && 
-                    error.GetProperty("details").GetString().Contains("Invalid ID prefix"))
-                {
-                    foundIdError = true;
-                    break;
-                }
-            }
-            Assert.True(foundIdError, "Expected 'Invalid ID prefix' error was not found in the response.");
+            bool foundIdError = result.Errors.Any(e => e.Code == "INVALID_ID_PREFIX");
+            Assert.True(foundIdError, "Expected 'INVALID_ID_PREFIX' error was not found in the response.");
         }
 
         /// <summary>
@@ -161,10 +145,9 @@ namespace Pkd.RevitBridge.Tests
                 "\"performance_metadata\":{\"estimated_rfa_size_kb\":34,\"procedural_lod_enabled\":true,\"ghost_link_active\":true}" +
                 "}";
             
-            string result = _bridge.ValidateMetadata(LoadSchema(), metadata);
-            using JsonDocument doc = JsonDocument.Parse(result);
-            Assert.Equal("OK", doc.RootElement.GetProperty("status").GetString());
-            Assert.Empty(doc.RootElement.GetProperty("errors").EnumerateArray());
+            ValidationResponse result = _bridge.ValidateMetadata(LoadSchema(), metadata);
+            Assert.True(result.IsValid);
+            Assert.Empty(result.Errors);
         }
     }
 }

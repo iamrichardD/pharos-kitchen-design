@@ -9,6 +9,7 @@
  * ======================================================================== */
 
 use super::models::WarewashingMetadata;
+use crate::validator::ValidationError;
 
 pub struct WarewashingValidator;
 
@@ -17,12 +18,12 @@ impl WarewashingValidator {
     /// 
     /// Why: Vertical slice validation ensures that domain-specific constraints 
     /// (like category matching) are enforced before processing.
-    pub fn validate_category(metadata: &WarewashingMetadata) -> Result<(), String> {
+    pub fn validate_category(metadata: &WarewashingMetadata) -> Result<(), ValidationError> {
         if metadata.parameters.main_category != "Dishwashers" {
-            return Err(format!(
-                "Invalid category: expected 'Dishwashers', got '{}'",
-                metadata.parameters.main_category
-            ));
+            return Err(ValidationError::InvalidCategory {
+                expected: "Dishwashers".to_string(),
+                found: metadata.parameters.main_category.clone(),
+            });
         }
         Ok(())
     }
@@ -31,12 +32,12 @@ impl WarewashingValidator {
     ///
     /// Why: Standardization of metadata IDs (e.g., PHX-DW) ensures searchability 
     /// and logical grouping in the database.
-    pub fn validate_id_prefix(metadata: &WarewashingMetadata) -> Result<(), String> {
+    pub fn validate_id_prefix(metadata: &WarewashingMetadata) -> Result<(), ValidationError> {
         if !metadata.metadata_id.starts_with("PHX-DW") {
-            return Err(format!(
-                "Invalid ID prefix: expected 'PHX-DW', got '{}'",
-                metadata.metadata_id
-            ));
+            return Err(ValidationError::InvalidIdPrefix {
+                expected: "PHX-DW".to_string(),
+                found: metadata.metadata_id.clone(),
+            });
         }
         Ok(())
     }

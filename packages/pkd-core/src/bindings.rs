@@ -73,7 +73,7 @@ pub extern "C" fn pkd_validate_metadata_json(schema_json: *const c_char, metadat
             status: "ERROR".to_string(),
             errors: vec![ValidationError::SliceError("Null pointer provided".to_string())],
         };
-        return CString::new(serde_json::to_string(&resp).unwrap()).unwrap().into_raw();
+        return serialize_interop_response(&resp);
     }
 
     let schema_cstr = unsafe { CStr::from_ptr(schema_json) };
@@ -86,7 +86,7 @@ pub extern "C" fn pkd_validate_metadata_json(schema_json: *const c_char, metadat
                 status: "ERROR".to_string(),
                 errors: vec![ValidationError::SliceError("Invalid UTF-8 in schema".to_string())],
             };
-            return CString::new(serde_json::to_string(&resp).unwrap()).unwrap().into_raw();
+            return serialize_interop_response(&resp);
         }
     };
 
@@ -97,7 +97,7 @@ pub extern "C" fn pkd_validate_metadata_json(schema_json: *const c_char, metadat
                 status: "ERROR".to_string(),
                 errors: vec![ValidationError::SliceError("Invalid UTF-8 in metadata".to_string())],
             };
-            return CString::new(serde_json::to_string(&resp).unwrap()).unwrap().into_raw();
+            return serialize_interop_response(&resp);
         }
     };
 
@@ -108,7 +108,7 @@ pub extern "C" fn pkd_validate_metadata_json(schema_json: *const c_char, metadat
                 status: "ERROR".to_string(),
                 errors: vec![ValidationError::SliceError(format!("Invalid schema JSON: {}", e))],
             };
-            return CString::new(serde_json::to_string(&resp).unwrap()).unwrap().into_raw();
+            return serialize_interop_response(&resp);
         }
     };
 
@@ -119,7 +119,7 @@ pub extern "C" fn pkd_validate_metadata_json(schema_json: *const c_char, metadat
                 status: "ERROR".to_string(),
                 errors: vec![ValidationError::SliceError(format!("Invalid metadata JSON: {}", e))],
             };
-            return CString::new(serde_json::to_string(&resp).unwrap()).unwrap().into_raw();
+            return serialize_interop_response(&resp);
         }
     };
 
@@ -147,7 +147,18 @@ pub extern "C" fn pkd_validate_metadata_json(schema_json: *const c_char, metadat
         }
     };
 
-    CString::new(serde_json::to_string(&resp).unwrap()).unwrap().into_raw()
+    serialize_interop_response(&resp)
+}
+
+/// Safely serializes the response for C-ABI consumption.
+/// Why: Prevents panics across FFI boundaries by providing a hardcoded fallback.
+fn serialize_interop_response(resp: &InteropResponse) -> *mut c_char {
+    match serde_json::to_string(resp) {
+        Ok(json) => CString::new(json).unwrap_or_else(|_| {
+            CString::new("{\"status\":\"ERROR\",\"errors\":[{\"code\":\"SLICE_VALIDATION_ERROR\",\"details\":\"Null byte in JSON\"}]}").unwrap()
+        }).into_raw(),
+        Err(_) => CString::new("{\"status\":\"ERROR\",\"errors\":[{\"code\":\"SLICE_VALIDATION_ERROR\",\"details\":\"Serialization failed\"}]}").unwrap().into_raw()
+    }
 }
 
 #[no_mangle]

@@ -36,7 +36,7 @@ impl SliceDispatcher {
         match category {
             "Dishwashers" => {
                 if let Err(e) = Self::validate_warewashing(metadata) {
-                    errors.push(ValidationError::SliceError(e));
+                    errors.extend(e);
                 }
             }
             _ => {} // Fallback for categories without slices.
@@ -49,7 +49,7 @@ impl SliceDispatcher {
         }
     }
 
-    fn validate_warewashing(metadata: &PharosMetadata) -> Result<(), String> {
+    fn validate_warewashing(metadata: &PharosMetadata) -> Result<(), Vec<ValidationError>> {
         // Map generic PharosMetadata to WarewashingMetadata
         // Why: VSA mandate requires transforming generic data into domain-specific types.
         let warewashing = WarewashingMetadata {
@@ -84,10 +84,19 @@ impl SliceDispatcher {
             },
         };
 
-        WarewashingValidator::validate_id_prefix(&warewashing)?;
-        WarewashingValidator::validate_category(&warewashing)?;
+        let mut errors = Vec::new();
+        if let Err(e) = WarewashingValidator::validate_id_prefix(&warewashing) {
+            errors.push(e);
+        }
+        if let Err(e) = WarewashingValidator::validate_category(&warewashing) {
+            errors.push(e);
+        }
         
-        Ok(())
+        if errors.is_empty() {
+            Ok(())
+        } else {
+            Err(errors)
+        }
     }
 }
 
