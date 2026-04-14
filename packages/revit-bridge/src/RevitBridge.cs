@@ -10,6 +10,8 @@
 
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Pkd.RevitBridge
 {
@@ -28,11 +30,12 @@ namespace Pkd.RevitBridge
         /// <summary>
         /// Validates metadata JSON against a schema JSON using the Pharos core (Rust).
         /// Why: Ensures Revit-side metadata compliance without duplicating complex Rust logic.
+        /// This method now returns a structured JSON string.
         /// </summary>
         public string ValidateMetadata(string schemaJson, string metadataJson)
         {
             IntPtr ptr = pkd_validate_metadata_json(schemaJson, metadataJson);
-            if (ptr == IntPtr.Zero) return "Error: Null pointer returned from core";
+            if (ptr == IntPtr.Zero) return "{\"status\":\"ERROR\",\"errors\":[{\"code\":\"SLICE_VALIDATION_ERROR\",\"details\":\"Null pointer returned from core\"}]}";
 
             try
             {

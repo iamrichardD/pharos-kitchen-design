@@ -11,6 +11,7 @@
 using Xunit;
 using Pkd.RevitBridge;
 using System.IO;
+using System.Text.Json;
 
 namespace Pkd.RevitBridge.Tests
 {
@@ -53,7 +54,12 @@ namespace Pkd.RevitBridge.Tests
         public void test_should_fail_when_invalid_json_provided()
         {
             string result = _bridge.ValidateMetadata(LoadSchema(), "invalid");
-            Assert.Contains("Error", result);
+            using JsonDocument doc = JsonDocument.Parse(result);
+            Assert.Equal("ERROR", doc.RootElement.GetProperty("status").GetString());
+            
+            var errors = doc.RootElement.GetProperty("errors");
+            Assert.True(errors.GetArrayLength() > 0);
+            Assert.Equal("SLICE_VALIDATION_ERROR", errors[0].GetProperty("code").GetString());
         }
 
         /// <summary>
@@ -68,6 +74,8 @@ namespace Pkd.RevitBridge.Tests
             
             // Should not crash and should correctly handle the Ø and " characters.
             Assert.NotNull(result);
+            using JsonDocument doc = JsonDocument.Parse(result);
+            Assert.NotNull(doc.RootElement.GetProperty("status").GetString());
         }
 
         /// <summary>
@@ -103,8 +111,23 @@ namespace Pkd.RevitBridge.Tests
             
             string result = _bridge.ValidateMetadata(LoadSchema(), metadata);
             
-            // Expected failure from WarewashingValidator
-            Assert.Contains("Invalid ID prefix", result);
+            using JsonDocument doc = JsonDocument.Parse(result);
+            Assert.Equal("ERROR", doc.RootElement.GetProperty("status").GetString());
+            
+            var errors = doc.RootElement.GetProperty("errors");
+            Assert.True(errors.GetArrayLength() > 0);
+            
+            bool foundIdError = false;
+            foreach (var error in errors.EnumerateArray())
+            {
+                if (error.GetProperty("code").GetString() == "SLICE_VALIDATION_ERROR" && 
+                    error.GetProperty("details").GetString().Contains("Invalid ID prefix"))
+                {
+                    foundIdError = true;
+                    break;
+                }
+            }
+            Assert.True(foundIdError, "Expected 'Invalid ID prefix' error was not found in the response.");
         }
 
         /// <summary>
@@ -139,7 +162,9 @@ namespace Pkd.RevitBridge.Tests
                 "}";
             
             string result = _bridge.ValidateMetadata(LoadSchema(), metadata);
-            Assert.Equal("OK", result);
+            using JsonDocument doc = JsonDocument.Parse(result);
+            Assert.Equal("OK", doc.RootElement.GetProperty("status").GetString());
+            Assert.Empty(doc.RootElement.GetProperty("errors").EnumerateArray());
         }
     }
 }

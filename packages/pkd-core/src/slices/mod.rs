@@ -14,6 +14,7 @@ use crate::models::metadata::PharosMetadata;
 use crate::models::types::ParameterValue;
 use crate::slices::warewashing::models::{WarewashingMetadata, WarewashingParameters};
 use crate::slices::warewashing::validator::WarewashingValidator;
+use crate::validator::ValidationError;
 
 pub struct SliceDispatcher;
 
@@ -22,7 +23,7 @@ impl SliceDispatcher {
     /// 
     /// Why: Centralizes the routing logic to ensure that "Specialty Equipment" 
     /// categories (like Warewashing) receive deep domain validation.
-    pub fn dispatch_validation(metadata: &PharosMetadata) -> Result<(), Vec<String>> {
+    pub fn dispatch_validation(metadata: &PharosMetadata) -> Result<(), Vec<ValidationError>> {
         let mut errors = Vec::new();
 
         // 1. Extract the Main Category
@@ -35,7 +36,7 @@ impl SliceDispatcher {
         match category {
             "Dishwashers" => {
                 if let Err(e) = Self::validate_warewashing(metadata) {
-                    errors.push(e);
+                    errors.push(ValidationError::SliceError(e));
                 }
             }
             _ => {} // Fallback for categories without slices.
