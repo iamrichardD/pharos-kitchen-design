@@ -68,107 +68,127 @@ pub struct InteropResponse {
     pub errors: Vec<ValidationError>,
 }
 
+use std::panic::catch_unwind;
+
 /// Loads a PharosSchema from JSON and returns an opaque handle.
 /// Why: Eliminates redundant schema parsing overhead for high-frequency validation.
-/// Safety: Returns null if JSON is invalid or exceeds MAX_JSON_SIZE.
+/// Safety: Returns null if JSON is invalid, exceeds MAX_JSON_SIZE, or panics.
 #[no_mangle]
 pub extern "C" fn pkd_load_schema(schema_json: *const c_char) -> *mut PharosSchema {
-    if schema_json.is_null() {
-        return std::ptr::null_mut();
+    let result = catch_unwind(|| {
+        if schema_json.is_null() {
+            return std::ptr::null_mut();
+        }
+
+        let schema_cstr = unsafe { CStr::from_ptr(schema_json) };
+        let bytes = schema_cstr.to_bytes();
+        
+        // Shift-Left Security: Prevent DoS via massive JSON payloads
+        if bytes.len() > MAX_JSON_SIZE {
+            return std::ptr::null_mut();
+        }
+
+        let schema_str = match schema_cstr.to_str() {
+            Ok(s) => s,
+            Err(_) => return std::ptr::null_mut(),
+        };
+
+        let schema: PharosSchema = match serde_json::from_str(schema_str) {
+            Ok(s) => s,
+            Err(_) => return std::ptr::null_mut(),
+        };
+
+        Box::into_raw(Box::new(schema))
+    });
+
+    match result {
+        Ok(ptr) => ptr,
+        Err(_) => std::ptr::null_mut(),
     }
-
-    let schema_cstr = unsafe { CStr::from_ptr(schema_json) };
-    let bytes = schema_cstr.to_bytes();
-    
-    // Shift-Left Security: Prevent DoS via massive JSON payloads
-    if bytes.len() > MAX_JSON_SIZE {
-        return std::ptr::null_mut();
-    }
-
-    let schema_str = match schema_cstr.to_str() {
-        Ok(s) => s,
-        Err(_) => return std::ptr::null_mut(),
-    };
-
-    let schema: PharosSchema = match serde_json::from_str(schema_str) {
-        Ok(s) => s,
-        Err(_) => return std::ptr::null_mut(),
-    };
-
-    Box::into_raw(Box::new(schema))
 }
 
 /// Validates metadata JSON against a pre-loaded schema handle.
 /// Why: High-performance validation path for geometry/metadata streams.
+/// Safety: Catches panics to prevent host process (Revit) from crashing.
 #[no_mangle]
 pub extern "C" fn pkd_validate_with_handle(handle: *mut PharosSchema, metadata_json: *const c_char) -> *mut c_char {
-    if handle.is_null() || metadata_json.is_null() {
-        let resp = InteropResponse {
-            status: "ERROR".to_string(),
-            errors: vec![ValidationError::SliceError("Null pointer provided".to_string())],
-        };
-        return serialize_interop_response(&resp);
-    }
-
-    let schema = unsafe { &*handle };
-    let metadata_cstr = unsafe { CStr::from_ptr(metadata_json) };
-    
-    // Shift-Left Security: Limit metadata size to prevent memory exhaustion
-    if metadata_cstr.to_bytes().len() > MAX_JSON_SIZE {
-        let resp = InteropResponse {
-            status: "ERROR".to_string(),
-            errors: vec![ValidationError::SliceError("Metadata exceeds 1MB limit".to_string())],
-        };
-        return serialize_interop_response(&resp);
-    }
-
-    let metadata_str = match metadata_cstr.to_str() {
-        Ok(s) => s,
-        Err(_) => {
+    let result = catch_unwind(|| {
+        if handle.is_null() || metadata_json.is_null() {
             let resp = InteropResponse {
                 status: "ERROR".to_string(),
-                errors: vec![ValidationError::SliceError("Invalid UTF-8 in metadata".to_string())],
+                errors: vec![ValidationError::SliceError("Null pointer provided".to_string())],
             };
             return serialize_interop_response(&resp);
         }
-    };
 
-    let metadata: PharosMetadata = match serde_json::from_str(metadata_str) {
-        Ok(m) => m,
-        Err(e) => {
+        let schema = unsafe { &*handle };
+        let metadata_cstr = unsafe { CStr::from_ptr(metadata_json) };
+        
+        // Shift-Left Security: Limit metadata size to prevent memory exhaustion
+        if metadata_cstr.to_bytes().len() > MAX_JSON_SIZE {
             let resp = InteropResponse {
                 status: "ERROR".to_string(),
-                errors: vec![ValidationError::SliceError(format!("Invalid metadata JSON: {}", e))],
+                errors: vec![ValidationError::SliceError("Metadata exceeds 1MB limit".to_string())],
             };
             return serialize_interop_response(&resp);
         }
-    };
 
-    let mut all_errors = Vec::new();
+        let metadata_str = match metadata_cstr.to_str() {
+            Ok(s) => s,
+            Err(_) => {
+                let resp = InteropResponse {
+                    status: "ERROR".to_string(),
+                    errors: vec![ValidationError::SliceError("Invalid UTF-8 in metadata".to_string())],
+                };
+                return serialize_interop_response(&resp);
+            }
+        };
 
-    // 1. Core Schema Validation
-    if let Err(errors) = SchemaValidator::validate_metadata(schema, &metadata) {
-        all_errors.extend(errors);
-    }
+        let metadata: PharosMetadata = match serde_json::from_str(metadata_str) {
+            Ok(m) => m,
+            Err(e) => {
+                let resp = InteropResponse {
+                    status: "ERROR".to_string(),
+                    errors: vec![ValidationError::SliceError(format!("Invalid metadata JSON: {}", e))],
+                };
+                return serialize_interop_response(&resp);
+            }
+        };
 
-    // 2. Vertical Slice Dispatch
-    if let Err(errors) = crate::slices::SliceDispatcher::dispatch_validation(&metadata) {
-        all_errors.extend(errors);
-    }
+        let mut all_errors = Vec::new();
 
-    let resp = if all_errors.is_empty() {
-        InteropResponse {
-            status: "OK".to_string(),
-            errors: Vec::new(),
+        // 1. Core Schema Validation
+        if let Err(errors) = SchemaValidator::validate_metadata(schema, &metadata) {
+            all_errors.extend(errors);
         }
-    } else {
-        InteropResponse {
-            status: "ERROR".to_string(),
-            errors: all_errors,
-        }
-    };
 
-    serialize_interop_response(&resp)
+        // 2. Vertical Slice Dispatch
+        if let Err(errors) = crate::slices::SliceDispatcher::dispatch_validation(&metadata) {
+            all_errors.extend(errors);
+        }
+
+        let resp = if all_errors.is_empty() {
+            InteropResponse {
+                status: "OK".to_string(),
+                errors: Vec::new(),
+            }
+        } else {
+            InteropResponse {
+                status: "ERROR".to_string(),
+                errors: all_errors,
+            }
+        };
+
+        serialize_interop_response(&resp)
+    });
+
+    match result {
+        Ok(ptr) => ptr,
+        Err(_) => serialize_interop_response(&InteropResponse {
+            status: "PANIC".to_string(),
+            errors: vec![ValidationError::SliceError("Rust core panicked during validation".to_string())],
+        }),
+    }
 }
 
 /// Frees the memory associated with a PharosSchema handle.
@@ -215,5 +235,23 @@ pub extern "C" fn pkd_free_string(s: *mut c_char) {
         unsafe {
             let _ = CString::from_raw(s);
         }
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn pkd_trigger_panic() -> *mut c_char {
+    let result = catch_unwind(|| {
+        panic!("Manual panic triggered for FFI boundary testing.");
+    });
+
+    match result {
+        Ok(_) => serialize_interop_response(&InteropResponse {
+            status: "OK".to_string(),
+            errors: Vec::new(),
+        }),
+        Err(_) => serialize_interop_response(&InteropResponse {
+            status: "PANIC".to_string(),
+            errors: vec![ValidationError::SliceError("Rust core panicked (Verified)".to_string())],
+        }),
     }
 }

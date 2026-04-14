@@ -65,6 +65,29 @@ namespace Pkd.RevitBridge
         }
     }
 
+    /// <summary>
+    /// SafeHandle for strings allocated by the Rust core.
+    /// Why: Automates string memory cleanup via pkd_free_string.
+    /// </summary>
+    public class SafeStringHandle : SafeHandleZeroOrMinusOneIsInvalid
+    {
+        private SafeStringHandle() : base(true) { }
+
+        [DllImport("pkd_core", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void pkd_free_string(IntPtr ptr);
+
+        protected override bool ReleaseHandle()
+        {
+            pkd_free_string(handle);
+            return true;
+        }
+
+        public string? GetString()
+        {
+            return IsInvalid ? null : Marshal.PtrToStringUTF8(handle);
+        }
+    }
+
     public class RevitBridge
     {
         private const string LibName = "pkd_core";
@@ -73,15 +96,23 @@ namespace Pkd.RevitBridge
         private static extern PharosSchemaHandle pkd_load_schema(string schemaJson);
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern IntPtr pkd_validate_with_handle(PharosSchemaHandle handle, string metadataJson);
+        private static extern SafeStringHandle pkd_validate_with_handle(PharosSchemaHandle handle, string metadataJson);
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern IntPtr pkd_validate_metadata_json(string schemaJson, string metadataJson);
+        private static extern SafeStringHandle pkd_validate_metadata_json(string schemaJson, string metadataJson);
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern void pkd_free_string(IntPtr ptr);
+        private static extern SafeStringHandle pkd_trigger_panic();
 
-        public string GetVersion() => "0.2.0";
+        public ValidationResponse TriggerPanic()
+        {
+            using (var result = pkd_trigger_panic())
+            {
+                return ProcessRawResponse(result);
+            }
+        }
+
+        public string GetVersion() => "0.2.1";
 
         /// <summary>
         /// Loads a schema into resident memory.
@@ -105,33 +136,33 @@ namespace Pkd.RevitBridge
             if (handle == null || handle.IsInvalid)
                 throw new ArgumentException("Invalid schema handle");
 
-            IntPtr ptr = pkd_validate_with_handle(handle, metadataJson);
-            return ProcessRawResponse(ptr);
+            using (var result = pkd_validate_with_handle(handle, metadataJson))
+            {
+                return ProcessRawResponse(result);
+            }
         }
 
         public ValidationResponse ValidateMetadata(string schemaJson, string metadataJson)
         {
-            IntPtr ptr = pkd_validate_metadata_json(schemaJson, metadataJson);
-            return ProcessRawResponse(ptr);
+            using (var result = pkd_validate_metadata_json(schemaJson, metadataJson))
+            {
+                return ProcessRawResponse(result);
+            }
         }
 
-        private ValidationResponse ProcessRawResponse(IntPtr ptr)
+        private ValidationResponse ProcessRawResponse(SafeStringHandle handle)
         {
-            if (ptr == IntPtr.Zero) 
-                return CreateErrorResponse("Null pointer returned from core");
+            if (handle.IsInvalid) 
+                return CreateErrorResponse("Null pointer or invalid handle returned from core");
 
             try
             {
-                string json = Marshal.PtrToStringUTF8(ptr) ?? string.Empty;
+                string json = handle.GetString() ?? string.Empty;
                 return JsonSerializer.Deserialize<ValidationResponse>(json) ?? CreateErrorResponse("Failed to deserialize core response");
             }
             catch (JsonException ex)
             {
                 return CreateErrorResponse(ex.Message);
-            }
-            finally
-            {
-                pkd_free_string(ptr);
             }
         }
 
