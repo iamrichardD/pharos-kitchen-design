@@ -76,6 +76,11 @@
 - [x] **Automated Theme Audit:** Add a "Fail Fast" build step to detect hardcoded legacy color classes in `src/`.
 - [x] **WCAG Verification:** Verify contrast ratios for the "Architectural Vellum" palette meet AA standards.
 
+### Sprint 3.9: Asset Pipeline Hardening - #27 - ✅ COMPLETED
+- [x] **Asset Generation:** Utilize Playwright to generate theme-aware placeholders for missing screenshots.
+- [x] **Asset Audit:** Implement a "Fail Fast" build step to verify all referenced images exist in the public directory.
+- [x] **Zero-Host Build:** Pass both theme and asset audits in the Podman environment.
+
 ### Phase 4: Revit & Web Interop (The Three Pillars)
 - [ ] **Revit Embedded Bridge:** Initial C# scaffold with floating `Cmd+K` palette.
 - [ ] **Ghost-Link Spoofer:** Implement logic to generate `Bridged-` placeholders.
