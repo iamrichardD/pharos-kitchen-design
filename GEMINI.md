@@ -66,6 +66,7 @@ Before moving from **Research** to **Strategy/Execution**, you MUST explicitly c
 - [ ] **Branch Integrity:** All changes are occurring on a `feat/issue-X` or `fix/issue-X` branch.
 - [ ] **Triviality Gate:** Explicitly state if the task is **Trivial** (Surgical Strike) or **Non-Trivial** (ADR-0017 Three-Option Rule).
 - [ ] **Shift-Left Security:** Document potential attack vectors identified during research.
+- [ ] **Fix Summary Readiness:** Prepare a "Brutally Honest" summary of the resolution and its impact.
 - [ ] **TDD Strategy:** Define the atomic test cases that will be implemented *before* the code changes.
 
 ### 4. Automated Audits & Production Verification

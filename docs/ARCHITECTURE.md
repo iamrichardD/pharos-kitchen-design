@@ -35,7 +35,29 @@ graph TD
     RC -.->|Compiled to| W
 ```
 
-## 2. Command-First UX Workflow (IKD Empowerment)
+## 2. Day in the Life of a Designer (Visual Storyboard)
+The following storyboard illustrates the transition from legacy "BIM Bloat" to the Pharos "Truth Engine" UX.
+
+```mermaid
+graph TD
+    A[Designer: Needs Hobart Dishwasher] --> B{Legacy Workflow}
+    B --> C[Hunt for RFA on Vendor Portal]
+    C --> D[Download 12MB Bloated Family]
+    D --> E[Revit: Manual Dimension Check]
+    E --> F[RFI: 'Wait, is the drain 2\" or 1.5\"?']
+    F --> G[Project Delay]
+
+    A --> H{Pharos Workflow}
+    H --> I[Open Pharos Ribbon in Revit]
+    I --> J[Search 'Dishwasher' in Palette]
+    J --> K[Pharos Core: Validates Handle/Schema]
+    K --> L[Metadata-First Match: Hobart PHX-1]
+    L --> M[One-Click Placement: Verified Specs]
+    M --> N[Ghost Link: Syncs to Site for IKD Approval]
+    N --> O[Project Confidence: Delivered on Time]
+```
+
+## 3. Command-First UX Workflow (IKD Empowerment)
 Visualizes the "Hybrid Spotlight" interaction designed to eliminate search-and-click toil for Independent Kitchen Designers.
 
 ```mermaid
