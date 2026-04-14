@@ -25,4 +25,4 @@ RUN npm install -g wrangler
 WORKDIR /work
 
 # Default command: Audit then verify build
-CMD ["sh", "-c", "npm audit --audit-level=high && npm install && npm run build"]
+CMD ["sh", "-c", "npm audit --audit-level=high && (grep -rnE \"bg-ph-charcoal|text-gray-300|text-gray-400|text-gray-500|bg-black/20|bg-black/40\" apps/marketing/src/ && echo 'FAILED: Legacy theme classes detected' && exit 1 || echo 'Theme Audit: PASSED') && npm install && npm run build"]

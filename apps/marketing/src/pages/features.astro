@@ -19,16 +19,19 @@ import BlueprintCard from '../components/BlueprintCard.astro';
 		<div class="space-y-20">
 			<div class="flex flex-col md:flex-row gap-12 items-center">
 				<div class="flex-1 order-2 md:order-1">
-					<div class="blueprint-border p-4 bg-black/20 aspect-video flex items-center justify-center font-mono text-[10px] text-ph-blue/40 uppercase overflow-hidden">
-						<img src="/pharos-kitchen-design/assets/screenshots/ghost-link-metadata.png" alt="Equipment Metadata" class="w-full h-full object-cover opacity-70" />
+					<div class="blueprint-border p-4 bg-bg-base/20 aspect-video flex items-center justify-center font-mono text-[10px] text-ph-blue/40 uppercase overflow-hidden">
+						<picture class="w-full h-full">
+							<source srcset="/pharos-kitchen-design/assets/screenshots/ghost-link-metadata-light.png" media="(prefers-color-scheme: light)">
+							<img src="/pharos-kitchen-design/assets/screenshots/ghost-link-metadata-dark.png" alt="Equipment Metadata" class="w-full h-full object-cover opacity-70" />
+						</picture>
 					</div>
 				</div>
 				<div class="flex-1 order-1 md:order-2">
 					<h2 class="text-2xl text-ph-blue mb-4 uppercase tracking-wider italic">01 // UNIVERSAL EQUIPMENT DNA</h2>
-					<p class="text-gray-300 mb-6 leading-relaxed">
+					<p class="text-text-base/80 mb-6 leading-relaxed">
 						Specifications usually break when you export your project. Pharos ensures that your equipment model numbers, electrical requirements, and brand details stay connected as you move between design and management software.
 					</p>
-					<ul class="space-y-3 font-mono text-[10px] uppercase text-gray-500">
+					<ul class="space-y-3 font-mono text-[10px] uppercase text-text-muted">
 						<li>+ Persistent Equipment Identification</li>
 						<li>+ Accurate Attribution Across Tools</li>
 						<li>+ Zero-Manual Data Re-entry</li>
@@ -39,38 +42,41 @@ import BlueprintCard from '../components/BlueprintCard.astro';
 			<div class="flex flex-col md:flex-row gap-12 items-center">
 				<div class="flex-1">
 					<h2 class="text-2xl text-ph-orange mb-4 uppercase tracking-wider italic">02 // INSTANT EQUIPMENT DISCOVERY</h2>
-					<p class="text-gray-300 mb-6 leading-relaxed">
+					<p class="text-text-base/80 mb-6 leading-relaxed">
 						Don't waste time hunting through folders. Our professional search allows you to find and place manufacturer equipment in milliseconds. It's like having every catalog memorized and ready to use.
 					</p>
-					<div class="p-4 bg-ph-charcoal border border-white/5 font-mono text-xs text-gray-400">
+					<div class="p-4 bg-bg-base/60 border border-border-blueprint/20 font-mono text-xs text-text-muted">
 						<span class="text-ph-orange">></span> manufacturer=hobart search dishwasher <br/>
 						<span class="text-ph-blue">S: Found 3 professional matches in 12ms.</span>
 					</div>
 				</div>
 				<div class="flex-1">
-					<div class="blueprint-border p-4 bg-black/20 aspect-video flex items-center justify-center font-mono text-[10px] text-ph-orange/40 uppercase overflow-hidden">
-						<img src="/pharos-kitchen-design/assets/screenshots/spotlight-interaction.png" alt="Search Interaction" class="w-full h-full object-cover opacity-70" />
+					<div class="blueprint-border p-4 bg-bg-base/20 aspect-video flex items-center justify-center font-mono text-[10px] text-ph-orange/40 uppercase overflow-hidden">
+						<picture class="w-full h-full">
+							<source srcset="/pharos-kitchen-design/assets/screenshots/spotlight-interaction-light.png" media="(prefers-color-scheme: light)">
+							<img src="/pharos-kitchen-design/assets/screenshots/spotlight-interaction-dark.png" alt="Search Interaction" class="w-full h-full object-cover opacity-70" />
+						</picture>
 					</div>
 				</div>
 			</div>
 
 			<div class="flex flex-col md:flex-row gap-12 items-center">
 				<div class="flex-1 order-2 md:order-1">
-					<div class="blueprint-border p-4 bg-black/20 aspect-video flex items-center justify-center font-mono text-[10px] text-emerald-500/40 uppercase overflow-hidden">
+					<div class="blueprint-border p-4 bg-bg-base/20 aspect-video flex items-center justify-center font-mono text-[10px] text-emerald-500/40 uppercase overflow-hidden">
 						<div class="p-6 border border-emerald-500/20 bg-emerald-500/5 font-mono text-[10px]">
 							<span class="text-emerald-500">[SAFETY_CHECK_ACTIVE]</span><br/>
-							<span class="text-gray-500">>> VERIFYING ELECTRICAL SPECS...</span><br/>
+							<span class="text-text-muted">>> VERIFYING ELECTRICAL SPECS...</span><br/>
 							<span class="text-red-400">!! WARNING: Missing Phase Connection</span><br/>
-							<span class="text-gray-500">>> PREVENTING SPECIFICATION ERROR.</span>
+							<span class="text-text-muted">>> PREVENTING SPECIFICATION ERROR.</span>
 						</div>
 					</div>
 				</div>
 				<div class="flex-1 order-1 md:order-2">
 					<h2 class="text-2xl text-emerald-500 mb-4 uppercase tracking-wider italic">03 // BUILT-IN ERROR PROTECTION</h2>
-					<p class="text-gray-300 mb-6 leading-relaxed">
+					<p class="text-text-base/80 mb-6 leading-relaxed">
 						Pharos acts as your digital safety net. We double-check every equipment connection and dimension at the source. If something is missing or incorrect, you'll know immediately—long before it reaches the field.
 					</p>
-					<ul class="space-y-3 font-mono text-[10px] uppercase text-gray-500">
+					<ul class="space-y-3 font-mono text-[10px] uppercase text-text-muted">
 						<li>+ Instant Accuracy Checks</li>
 						<li>+ No More Hidden Data Errors</li>
 						<li>+ Guaranteed Professional Compliance</li>

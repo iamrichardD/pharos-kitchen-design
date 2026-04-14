@@ -68,6 +68,14 @@
 - [x] **Adaptive UI:** Refactor components to use theme-responsive classes (Zero-JS).
 - [x] **Vellum Aesthetic:** Implement the "Architectural Vellum" palette for light mode (ADR 0022).
 
+### Sprint 3.8: Theme Hardening & Production Integrity - #26 - ✅ COMPLETED
+- [x] **Global Recursive Refactor:** Eliminate hardcoded dark-theme classes in `features.astro`, `bridge.astro`, and `roadmap.astro`.
+- [x] **RGB Token Standard:** Refactor `global.css` to use space-separated RGB values for reliable Tailwind opacity modifiers.
+- [x] **Decoration Normalization:** Centralize custom blueprint decorations from `bridge.astro` and `roadmap.astro` into `global.css`.
+- [x] **Security Hardening (SRI):** Implement Subresource Integrity (SRI) hashes for external fonts and scripts.
+- [x] **Automated Theme Audit:** Add a "Fail Fast" build step to detect hardcoded legacy color classes in `src/`.
+- [x] **WCAG Verification:** Verify contrast ratios for the "Architectural Vellum" palette meet AA standards.
+
 ### Phase 4: Revit & Web Interop (The Three Pillars)
 - [ ] **Revit Embedded Bridge:** Initial C# scaffold with floating `Cmd+K` palette.
 - [ ] **Ghost-Link Spoofer:** Implement logic to generate `Bridged-` placeholders.

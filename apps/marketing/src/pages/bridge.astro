@@ -13,15 +13,15 @@ import BlueprintCard from "../components/BlueprintCard.astro";
 ---
 
 <BaseLayout title="The Bridge | Designer Connectivity">
-  <section class="py-20 bg-ph-charcoal/60 relative overflow-hidden">
+  <section class="py-20 bg-bg-base/60 relative overflow-hidden transition-colors duration-300">
     <div class="container mx-auto px-4 relative z-10">
       <h1 class="text-6xl font-bold mb-6 font-mono tracking-tighter italic">THE_BRIDGE</h1>
-      <p class="text-xl text-gray-400 max-w-2xl leading-relaxed">
+      <p class="text-xl text-text-muted max-w-2xl leading-relaxed">
         Pharos eliminates the gap between your web tools and your desktop design software. Our connectivity layer ensures your professional persona is available wherever you work—from the web portal to the Revit command line.
       </p>
     </div>
     <!-- Blueprint Grid Decoration -->
-    <div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image: linear-gradient(#1e293b 1px, transparent 1px), linear-gradient(90deg, #1e293b 1px, transparent 1px); background-size: 50px 50px;"></div>
+    <div class="absolute inset-0 blueprint-grid-lg opacity-20 pointer-events-none"></div>
   </section>
 
   <section class="py-20 container mx-auto px-4">
@@ -30,15 +30,15 @@ import BlueprintCard from "../components/BlueprintCard.astro";
       <div class="space-y-8">
         <div class="text-ph-orange font-mono text-sm tracking-widest uppercase">01 // DESIGNER IDENTITY</div>
         <h2 class="text-4xl font-bold">One Login, <span class="text-ph-blue">Any Platform.</span></h2>
-        <p class="text-gray-300 leading-relaxed text-lg">
+        <p class="text-text-base/80 leading-relaxed text-lg">
           Stop managing separate passwords for every design tool. Pharos uses professional identity standards to synchronize your profile across your entire workflow.
         </p>
-        <div class="bg-black/40 border-l-4 border-ph-orange p-6 font-mono text-xs space-y-2">
-          <div class="text-gray-500">>> Initializing Designer Handshake...</div>
+        <div class="bg-bg-base/40 border-l-4 border-ph-orange p-6 font-mono text-xs space-y-2">
+          <div class="text-text-muted">>> Initializing Designer Handshake...</div>
           <div class="text-ph-blue">S: Identity Verified: ABCD-1234</div>
-          <div class="text-gray-500">>> Connection established on all devices.</div>
+          <div class="text-text-muted">>> Connection established on all devices.</div>
         </div>
-        <p class="text-gray-500 text-sm italic">
+        <p class="text-text-muted text-sm italic">
           Optimized for global performance, ensuring you're always connected.
         </p>
       </div>
@@ -47,18 +47,21 @@ import BlueprintCard from "../components/BlueprintCard.astro";
       <div class="space-y-8">
         <div class="text-ph-blue font-mono text-sm tracking-widest uppercase">02 // CONNECTED SPECIFICATIONS</div>
         <h2 class="text-4xl font-bold">Deterministic <span class="text-ph-orange">Accuracy.</span></h2>
-        <p class="text-gray-300 leading-relaxed text-lg">
+        <p class="text-text-base/80 leading-relaxed text-lg">
           Your equipment details shouldn't vanish when you export a project. Pharos ensures that manufacturer attributes and GUIDs stay locked to your 3D models, surviving the transition between design and project management.
         </p>
-        <div class="blueprint-border p-4 bg-black/20 aspect-video flex items-center justify-center">
-            <img src="/pharos-kitchen-design/assets/screenshots/ghost-link-metadata.png" alt="Connected Specifications" class="w-full h-full object-cover opacity-60" />
+        <div class="blueprint-border p-4 bg-bg-base/20 aspect-video flex items-center justify-center">
+            <picture class="w-full h-full">
+              <source srcset="/pharos-kitchen-design/assets/screenshots/ghost-link-metadata-light.png" media="(prefers-color-scheme: light)">
+              <img src="/pharos-kitchen-design/assets/screenshots/ghost-link-metadata-dark.png" alt="Connected Specifications" class="w-full h-full object-cover opacity-60" />
+            </picture>
         </div>
       </div>
     </div>
   </section>
 
   <!-- CTA Section -->
-  <section class="py-20 border-t border-white/5">
+  <section class="py-20 border-t border-border-blueprint/20">
     <div class="container mx-auto px-4 text-center">
         <h3 class="text-2xl mb-8 font-mono tracking-widest uppercase">Status: <span class="text-emerald-500">Global Connectivity Active</span></h3>
         <a href="/pharos-kitchen-design/roadmap" class="inline-block bg-ph-blue text-ph-charcoal font-bold px-10 py-4 hover:bg-white transition-colors uppercase tracking-widest text-sm">
@@ -69,18 +72,5 @@ import BlueprintCard from "../components/BlueprintCard.astro";
 </BaseLayout>
 
 <style>
-  .blueprint-border {
-    border: 1px solid rgba(59, 130, 246, 0.2);
-    position: relative;
-  }
-  .blueprint-border::after {
-    content: "";
-    position: absolute;
-    top: -5px;
-    left: -5px;
-    width: 10px;
-    height: 10px;
-    border-top: 2px solid #3b82f6;
-    border-left: 2px solid #3b82f6;
-  }
+  /* Local overrides removed in favor of global blueprint-border and blueprint-grid classes */
 </style>

@@ -4,14 +4,14 @@ export default {
   theme: {
     extend: {
       colors: {
-        'ph-charcoal': 'var(--ph-charcoal)',
-        'ph-orange': 'var(--ph-orange)',
-        'ph-blue': 'var(--ph-blue)',
-        'bg-base': 'var(--bg-base)',
-        'text-base': 'var(--text-base)',
-        'text-muted': 'var(--text-muted)',
-        'grid-line': 'var(--grid-line)',
-        'border-blueprint': 'var(--border-blueprint)',
+        'ph-charcoal': 'rgb(var(--ph-charcoal))',
+        'ph-orange': 'rgb(var(--ph-orange))',
+        'ph-blue': 'rgb(var(--ph-blue))',
+        'bg-base': 'rgb(var(--bg-base))',
+        'text-base': 'rgb(var(--text-base))',
+        'text-muted': 'rgb(var(--text-muted))',
+        'grid-line': 'rgb(var(--grid-line))',
+        'border-blueprint': 'rgb(var(--border-blueprint))',
       },
       fontFamily: {
         'condensed': ['Roboto Condensed', 'sans-serif'],
