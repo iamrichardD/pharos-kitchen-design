@@ -72,6 +72,14 @@ Before moving from **Research** to **Strategy/Execution**, you MUST explicitly c
 - **Automated Audits:** Utilize tools like `cargo audit`, `npm audit`, and security-focused linters within the Podman environment to identify vulnerabilities during development.
 - **Production Verification:** Before task closure, verify that the static build renders correctly at `iamrichardd.com/pharos-kitchen-design/demo` using `web_fetch`.
 
+### 5. Pharos Handover & Mentorship Protocol
+Every non-trivial task completion MUST follow this workflow:
+- **Brutal Self-Critique:** Before finalizing, perform a "Brutally Honest" gap and security analysis to identify technical debt or edge cases.
+- **Structured PR:** Create a Pull Request with a dedicated "Implementation Summary," "Security Review," and "DORA Metrics" section.
+- **Instructive Peer Review:** Provide inline code comments that act as teaching tools.
+    - **No Meta-Labels:** Prohibited from using "The Why/How," "Teachable Moment," or other prompt-leaking labels that signal "AI Slop."
+    - **Integrated Mentorship:** Weave the technical rationale, safety implications, and alternative patterns directly into the critique (e.g., "We should avoid [X] here because [Y] results in [Z]. A more resilient approach is [A]...").
+
 ## DevSecOps & Workflow
 - **Git Flow:** Utilize feature branches tied directly to GitHub Issues (e.g., `feat/issue-4-tcp-listener`). Merge to `main` only after validation in Podman.
 - **AI-Handover:** Every task closure requires a `gh` issue update with a **Fix Summary**, **Security Review**, and **DORA Metric** check.
