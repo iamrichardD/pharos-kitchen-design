@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+  <AddIn Type="Application">
+    <Name>Pharos Kitchen Design</Name>
+    <Assembly>Pkd.RevitBridge.dll</Assembly>
+    <FullClassName>Pkd.RevitBridge.PharosApp</FullClassName>
+    <ClientId>e2105edf-7072-4f1a-b08e-c35a8f9c1234</ClientId>
+    <VendorId>iamrichardd</VendorId>
+    <VendorDescription>Richard D. https://github.com/iamrichardd</VendorDescription>
+  </AddIn>
+</RevitAddIns>
