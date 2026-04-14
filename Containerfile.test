@@ -7,7 +7,8 @@
 # Purpose: Zero-Host execution environment for PKD validation.
 # ========================================================================
 
-FROM public.ecr.aws/docker/library/rust:latest AS rust-builder
+# Stage 1: Rust Builder (Metadata Core)
+FROM public.ecr.aws/docker/library/rust@sha256:72724f1a416c449b405a2b7ed6bac56058163e6dfb1b5ccb40839882141dd237 AS rust-builder
 
 # Install build dependencies
 RUN apt-get update && apt-get install -y \
