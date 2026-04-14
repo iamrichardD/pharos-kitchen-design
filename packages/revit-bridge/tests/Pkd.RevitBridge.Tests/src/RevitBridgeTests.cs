@@ -11,6 +11,8 @@
 using Xunit;
 using Pkd.RevitBridge;
 using System.IO;
+using System.Text.Json;
+using System.Linq;
 
 namespace Pkd.RevitBridge.Tests
 {
@@ -52,8 +54,10 @@ namespace Pkd.RevitBridge.Tests
         [Fact]
         public void test_should_fail_when_invalid_json_provided()
         {
-            string result = _bridge.ValidateMetadata(LoadSchema(), "invalid");
-            Assert.Contains("Error", result);
+            ValidationResponse result = _bridge.ValidateMetadata(LoadSchema(), "invalid");
+            Assert.Equal("ERROR", result.Status);
+            Assert.NotEmpty(result.Errors);
+            Assert.Equal("SLICE_VALIDATION_ERROR", result.Errors[0].Code);
         }
 
         /// <summary>
@@ -64,10 +68,10 @@ namespace Pkd.RevitBridge.Tests
         public void test_should_handle_utf8_special_characters_in_metadata()
         {
             string metadata = "{\"metadata_id\":\"PHX-DW-999\",\"name\":\"UTF8-Test-Ø-2\\\"-NPT\",\"parameters\":{}}";
-            string result = _bridge.ValidateMetadata(LoadSchema(), metadata);
+            ValidationResponse result = _bridge.ValidateMetadata(LoadSchema(), metadata);
             
             // Should not crash and should correctly handle the Ø and " characters.
-            Assert.NotNull(result);
+            Assert.NotNull(result.Status);
         }
 
         /// <summary>
@@ -101,10 +105,13 @@ namespace Pkd.RevitBridge.Tests
                 "\"performance_metadata\":{\"estimated_rfa_size_kb\":34,\"procedural_lod_enabled\":true,\"ghost_link_active\":true}" +
                 "}";
             
-            string result = _bridge.ValidateMetadata(LoadSchema(), metadata);
+            ValidationResponse result = _bridge.ValidateMetadata(LoadSchema(), metadata);
             
-            // Expected failure from WarewashingValidator
-            Assert.Contains("Invalid ID prefix", result);
+            Assert.Equal("ERROR", result.Status);
+            Assert.NotEmpty(result.Errors);
+            
+            bool foundIdError = result.Errors.Any(e => e.Code == "INVALID_ID_PREFIX");
+            Assert.True(foundIdError, "Expected 'INVALID_ID_PREFIX' error was not found in the response.");
         }
 
         /// <summary>
@@ -138,8 +145,9 @@ namespace Pkd.RevitBridge.Tests
                 "\"performance_metadata\":{\"estimated_rfa_size_kb\":34,\"procedural_lod_enabled\":true,\"ghost_link_active\":true}" +
                 "}";
             
-            string result = _bridge.ValidateMetadata(LoadSchema(), metadata);
-            Assert.Equal("OK", result);
+            ValidationResponse result = _bridge.ValidateMetadata(LoadSchema(), metadata);
+            Assert.True(result.IsValid);
+            Assert.Empty(result.Errors);
         }
     }
 }

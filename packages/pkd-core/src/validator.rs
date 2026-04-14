@@ -12,21 +12,36 @@ use crate::models::schema::PharosSchema;
 use crate::models::metadata::PharosMetadata;
 use crate::models::types::ParameterValue;
 use thiserror::Error;
+use serde::Serialize;
 
-#[derive(Error, Debug, PartialEq)]
+#[derive(Error, Debug, PartialEq, Serialize)]
+#[serde(tag = "code", content = "details")]
 pub enum ValidationError {
     #[error("Missing required PKD parameter: {0}")]
+    #[serde(rename = "MISSING_PARAMETER")]
     MissingParameter(String),
     #[error("Schema version mismatch: expected {expected}, found {found}")]
+    #[serde(rename = "VERSION_MISMATCH")]
     VersionMismatch { expected: String, found: String },
     #[error("LOD {0} geometry specification is missing")]
+    #[serde(rename = "MISSING_LOD_GEOMETRY")]
     MissingLodGeometry(String),
     #[error("Invalid parameter type for {parameter}: expected {expected}, found {found}")]
+    #[serde(rename = "INVALID_TYPE")]
     InvalidType { 
         parameter: String, 
         expected: String, 
         found: String 
     },
+    #[error("Invalid category: expected {expected}, got {found}")]
+    #[serde(rename = "INVALID_CATEGORY")]
+    InvalidCategory { expected: String, found: String },
+    #[error("Invalid ID prefix: expected {expected}, got {found}")]
+    #[serde(rename = "INVALID_ID_PREFIX")]
+    InvalidIdPrefix { expected: String, found: String },
+    #[error("Vertical Slice Validation Error: {0}")]
+    #[serde(rename = "SLICE_VALIDATION_ERROR")]
+    SliceError(String),
 }
 
 /// The Truth Engine's core validator for Pharos Metadata.

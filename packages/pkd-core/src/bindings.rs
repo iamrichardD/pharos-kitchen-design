@@ -22,12 +22,22 @@ pub fn validate_metadata_wasm(schema_js: JsValue, metadata_js: JsValue) -> Resul
     let metadata: PharosMetadata = serde_wasm_bindgen::from_value(metadata_js)
         .map_err(|e| JsValue::from_str(&format!("Invalid metadata format: {}", e)))?;
 
-    match SchemaValidator::validate_metadata(&schema, &metadata) {
-        Ok(_) => Ok(JsValue::TRUE),
-        Err(errors) => {
-            let err_msgs: Vec<String> = errors.into_iter().map(|e| e.to_string()).collect();
-            Err(serde_wasm_bindgen::to_value(&err_msgs).unwrap())
-        }
+    let mut all_errors = Vec::new();
+
+    // 1. Core Schema Validation
+    if let Err(errors) = SchemaValidator::validate_metadata(&schema, &metadata) {
+        all_errors.extend(errors);
+    }
+
+    // 2. Vertical Slice Dispatch
+    if let Err(errors) = crate::slices::SliceDispatcher::dispatch_validation(&metadata) {
+        all_errors.extend(errors);
+    }
+
+    if all_errors.is_empty() {
+        Ok(JsValue::TRUE)
+    } else {
+        Err(serde_wasm_bindgen::to_value(&all_errors).unwrap())
     }
 }
 
@@ -47,11 +57,23 @@ pub fn verify_lod_wasm(metadata_js: JsValue, target_lod: String) -> Result<bool,
 
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
+use serde::Serialize;
+use crate::validator::ValidationError;
+
+#[derive(Serialize)]
+pub struct InteropResponse {
+    pub status: String,
+    pub errors: Vec<ValidationError>,
+}
 
 #[no_mangle]
 pub extern "C" fn pkd_validate_metadata_json(schema_json: *const c_char, metadata_json: *const c_char) -> *mut c_char {
     if schema_json.is_null() || metadata_json.is_null() {
-        return CString::new("Error: Null pointer provided").unwrap().into_raw();
+        let resp = InteropResponse {
+            status: "ERROR".to_string(),
+            errors: vec![ValidationError::SliceError("Null pointer provided".to_string())],
+        };
+        return serialize_interop_response(&resp);
     }
 
     let schema_cstr = unsafe { CStr::from_ptr(schema_json) };
@@ -59,36 +81,83 @@ pub extern "C" fn pkd_validate_metadata_json(schema_json: *const c_char, metadat
 
     let schema_str = match schema_cstr.to_str() {
         Ok(s) => s,
-        Err(_) => return CString::new("Error: Invalid UTF-8 in schema").unwrap().into_raw(),
+        Err(_) => {
+            let resp = InteropResponse {
+                status: "ERROR".to_string(),
+                errors: vec![ValidationError::SliceError("Invalid UTF-8 in schema".to_string())],
+            };
+            return serialize_interop_response(&resp);
+        }
     };
 
     let metadata_str = match metadata_cstr.to_str() {
         Ok(s) => s,
-        Err(_) => return CString::new("Error: Invalid UTF-8 in metadata").unwrap().into_raw(),
+        Err(_) => {
+            let resp = InteropResponse {
+                status: "ERROR".to_string(),
+                errors: vec![ValidationError::SliceError("Invalid UTF-8 in metadata".to_string())],
+            };
+            return serialize_interop_response(&resp);
+        }
     };
 
     let schema: PharosSchema = match serde_json::from_str(schema_str) {
         Ok(s) => s,
-        Err(e) => return CString::new(format!("Error: Invalid schema JSON: {}", e)).unwrap().into_raw(),
+        Err(e) => {
+            let resp = InteropResponse {
+                status: "ERROR".to_string(),
+                errors: vec![ValidationError::SliceError(format!("Invalid schema JSON: {}", e))],
+            };
+            return serialize_interop_response(&resp);
+        }
     };
 
     let metadata: PharosMetadata = match serde_json::from_str(metadata_str) {
         Ok(m) => m,
-        Err(e) => return CString::new(format!("Error: Invalid metadata JSON: {}", e)).unwrap().into_raw(),
+        Err(e) => {
+            let resp = InteropResponse {
+                status: "ERROR".to_string(),
+                errors: vec![ValidationError::SliceError(format!("Invalid metadata JSON: {}", e))],
+            };
+            return serialize_interop_response(&resp);
+        }
     };
 
-    match SchemaValidator::validate_metadata(&schema, &metadata) {
-        Ok(_) => {
-            // Dispatch to category-specific vertical slices for deep validation
-            match crate::slices::SliceDispatcher::dispatch_validation(&metadata) {
-                Ok(_) => CString::new("OK").unwrap().into_raw(),
-                Err(errors) => CString::new(errors.join("; ")).unwrap().into_raw()
-            }
-        },
-        Err(errors) => {
-            let err_msg = errors.into_iter().map(|e| e.to_string()).collect::<Vec<String>>().join("; ");
-            CString::new(err_msg).unwrap().into_raw()
+    let mut all_errors = Vec::new();
+
+    // 1. Core Schema Validation
+    if let Err(errors) = SchemaValidator::validate_metadata(&schema, &metadata) {
+        all_errors.extend(errors);
+    }
+
+    // 2. Vertical Slice Dispatch
+    if let Err(errors) = crate::slices::SliceDispatcher::dispatch_validation(&metadata) {
+        all_errors.extend(errors);
+    }
+
+    let resp = if all_errors.is_empty() {
+        InteropResponse {
+            status: "OK".to_string(),
+            errors: Vec::new(),
         }
+    } else {
+        InteropResponse {
+            status: "ERROR".to_string(),
+            errors: all_errors,
+        }
+    };
+
+    serialize_interop_response(&resp)
+}
+
+/// Safely serializes the response for C-ABI consumption.
+/// Why: Prevents panics across FFI boundaries by providing a hardcoded fallback.
+fn serialize_interop_response(resp: &InteropResponse) -> *mut c_char {
+    match serde_json::to_string(resp) {
+        Ok(json) => CString::new(json).unwrap_or_else(|_| {
+            CString::new("{\"status\":\"ERROR\",\"errors\":[{\"code\":\"SLICE_VALIDATION_ERROR\",\"details\":\"Null byte in JSON\"}]}").unwrap()
+        }).into_raw(),
+        Err(_) => CString::new("{\"status\":\"ERROR\",\"errors\":[{\"code\":\"SLICE_VALIDATION_ERROR\",\"details\":\"Serialization failed\"}]}").unwrap().into_raw()
     }
 }
 
