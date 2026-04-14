@@ -77,7 +77,7 @@
 - [x] **WCAG Verification:** Verify contrast ratios for the "Architectural Vellum" palette meet AA standards.
 
 ### Sprint 3.9: Asset Pipeline Hardening - #27 - ✅ COMPLETED
-- [x] **Asset Generation:** Utilize Playwright to generate theme-aware placeholders for missing screenshots.
+- [x] **Asset Generation:** Utilize Playwright to capture high-fidelity forensic screenshots from the live `/command-v1/` demo (Light/Dark variants).
 - [x] **Asset Audit:** Implement a "Fail Fast" build step to verify all referenced images exist in the public directory.
 - [x] **Zero-Host Build:** Pass both theme and asset audits in the Podman environment.
 
