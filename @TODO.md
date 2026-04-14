@@ -64,11 +64,11 @@
 - [x] **Issue #29 (SRI)**: Rectified Umami SRI and implemented Fail-Fast build check.
 - [x] **Issue #28 (Scaffold)**: Revit Bridge (.NET) and Demo Site (Astro) initialized.
 - [x] **Issue #30 (VSA)**: `pkd-core` refactored for category-based Vertical Slices.
-- [ ] **Issue #32**: Implement `pkd-core` WASM bindings for C# interop (Interop Bridge) - **UTF-8 FIX PENDING**.
-- [ ] **Issue #36**: Implement VSA Mapping & Category Registry in `pkd-core` (Logic Bridge).
+- [x] **Issue #32**: Implement `pkd-core` WASM bindings for C# interop (Interop Bridge) - **UTF-8 FIXED**.
+- [x] **Issue #36**: Implement VSA Mapping & Category Registry in `pkd-core` (Logic Bridge).
 - [ ] **Issue #37**: Initialize C# Test Suite (xUnit) for `revit-bridge` (Validation Bridge).
 - [ ] **Issue #38**: Shared Design System Extraction (UI/UX Bridge).
-- [ ] **Issue #39**: Distribution Pipeline (Rust Binary -> C# Build Artifacts).
+- [x] **Issue #39**: Distribution Pipeline (Rust Binary -> C# Build Artifacts).
 - [ ] **Issue #40**: Integration Smoke Test (C# Cross-Language Handshake).
 - [ ] **Issue #33**: Scaffold Revit Ribbon UI & Command logic.
 - [ ] **Issue #34**: Implement "Ghost Link" prototype (Metadata sync).

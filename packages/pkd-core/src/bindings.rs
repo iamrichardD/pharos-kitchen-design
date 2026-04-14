@@ -78,7 +78,13 @@ pub extern "C" fn pkd_validate_metadata_json(schema_json: *const c_char, metadat
     };
 
     match SchemaValidator::validate_metadata(&schema, &metadata) {
-        Ok(_) => CString::new("OK").unwrap().into_raw(),
+        Ok(_) => {
+            // Dispatch to category-specific vertical slices for deep validation
+            match crate::slices::SliceDispatcher::dispatch_validation(&metadata) {
+                Ok(_) => CString::new("OK").unwrap().into_raw(),
+                Err(errors) => CString::new(errors.join("; ")).unwrap().into_raw()
+            }
+        },
         Err(errors) => {
             let err_msg = errors.into_iter().map(|e| e.to_string()).collect::<Vec<String>>().join("; ");
             CString::new(err_msg).unwrap().into_raw()

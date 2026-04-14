@@ -66,6 +66,8 @@
 - [x] **Issue #29 (SRI Rectification)**: Verified SRI hash for Umami and implemented "Fail Fast" prebuild verification.
 - [x] **Issue #28 (Interop Scaffold)**: Initialized `packages/revit-bridge` (.NET 8/Standard 2.1) and `apps/demo` (Astro Shell).
 - [x] **Issue #30 (VSA Refactor)**: Transitioned `pkd-core` to category-based Vertical Slices (Warewashing slice implemented).
+- [x] **Issue #36 (VSA Dispatcher)**: Implemented `SliceDispatcher` for dynamic category routing in `pkd-core`.
+- [x] **Issue #39 (Distribution Pipeline)**: Implemented MSBuild `AfterBuild` target to automate native binary copying.
 - [x] **Zero-Host Verification**: All new components verified via Podman (Rust, Node, .NET).
 
 ---
