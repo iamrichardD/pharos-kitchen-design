@@ -1,9 +1,8 @@
-## Implementation Summary
-<!-- Provide a high-level overview of the changes and the "Why" behind them. Reference specific ADRs or Issues. -->
+## 🎯 Fix Summary (Mandatory)
+<!-- Provide a concise, high-signal overview of what was resolved and WHY. Reference ADRs or Issues. This is a foundational mandate of Pharos Handover Protocol. -->
 
 ### Changes in [Component Name]
-- [ ] List significant logical updates
-- [ ] Note any new dependencies or architectural shifts
+- [ ] List logical updates and why they were necessary.
 
 ## 🚀 ADR-0017: Implementation Strategy
 <!-- Document the Three-Option Crucible-Slice evaluation if non-trivial (ADR-0017). -->

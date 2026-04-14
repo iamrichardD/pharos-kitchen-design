@@ -75,7 +75,7 @@ Before moving from **Research** to **Strategy/Execution**, you MUST explicitly c
 ### 5. Pharos Handover & Mentorship Protocol
 Every non-trivial task completion MUST follow this workflow:
 - **Brutal Self-Critique:** Before finalizing, perform a "Brutally Honest" gap and security analysis to identify technical debt or edge cases.
-- **Structured PR:** Create a Pull Request with a dedicated "Implementation Summary," "Security Review," and "DORA Metrics" section.
+- **Structured PR:** Create a Pull Request with a dedicated **'Fix Summary'**, **'Security Review'**, and **'DORA Metrics'** section. The 'Fix Summary' must provide a concise, brutally honest record of the changes and their impact.
 - **Instructive Peer Review:** Provide inline code comments that act as teaching tools.
     - **No Meta-Labels:** Prohibited from using "The Why/How," "Teachable Moment," or other prompt-leaking labels that signal "AI Slop."
     - **Integrated Mentorship:** Weave the technical rationale, safety implications, and alternative patterns directly into the critique (e.g., "We should avoid [X] here because [Y] results in [Z]. A more resilient approach is [A]...").
