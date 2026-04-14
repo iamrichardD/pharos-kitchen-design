@@ -69,8 +69,8 @@
 - [x] **Issue #23 (Distribution Pipeline)**: Automated native binary distribution.
 - [x] **Issue #24 (Integration Smoke Test)**: Cross-language handshake verification.
 - [x] **Issue #25/26 (Build Fixes)**: Resolved SRI script syntax and tracking.
+- [x] **Issue #27**: Remediate Revit Bridge governance gaps and implement Zero-Host container validation.
 - [ ] **Issue #32**: Implement `pkd-core` JSON error serialization for FFI (Interop Bridge).
-- [ ] **Issue #27**: Initialize expanded xUnit coverage for `revit-bridge` (Validation Bridge).
 - [ ] **Issue #28**: Shared Design System Extraction (UI/UX Bridge).
 - [ ] **Issue #29**: Scaffold Revit Ribbon UI & Command logic.
 - [ ] **Issue #30**: Implement "Ghost Link" prototype (Metadata sync).

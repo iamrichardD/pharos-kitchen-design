@@ -73,6 +73,12 @@
 - [x] **Issue #25/26 (Build Fixes)**: Restored SRI script and corrected shell syntax for CI parity.
 - [x] **Zero-Host Verification**: All components verified via Podman (Rust, Node, .NET 8).
 
+### Sprint 3.8: Bridge Governance & Containerization (2026-04-14) - ✅ COMPLETED
+- [x] **Issue #27 (Governance)**: Remediated Revit Bridge test naming and added "Why" rationale (Agentic Continuity).
+- [x] **Issue #27 (Security)**: Implemented `Containerfile.bridge` for Zero-Host .NET validation.
+- [x] **Issue #27 (Stability)**: Hardened all `podman build` scripts with `seccomp=unconfined` for environment parity.
+- [x] **Verification**: Full integration handshake verified green in Podman container.
+
 ---
 
 ## 🏗️ Active Development

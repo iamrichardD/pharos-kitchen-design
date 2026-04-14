@@ -1,0 +1,32 @@
+# ========================================================================
+# Project: Pharos Kitchen Design (Project Prism)
+# Component: DevSecOps / Bridge
+# File: Containerfile.bridge
+# Author: Richard D. (https://github.com/iamrichardd)
+# License: FSL-1.1
+# Purpose: Zero-Host execution environment for Revit-to-Rust Interop.
+# ========================================================================
+
+FROM mcr.microsoft.com/dotnet/sdk:8.0
+
+# Install build dependencies for Rust
+RUN apt-get update && apt-get install -y \
+    curl \
+    build-essential \
+    pkg-config \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Rust toolchain
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+WORKDIR /work
+COPY . .
+
+# Ensure the native library is built before running .NET tests
+# The .csproj AfterBuild target will copy it automatically.
+RUN cd packages/pkd-core && cargo build
+
+# Default command: Run Revit Bridge Integration Tests
+CMD ["dotnet", "test", "packages/revit-bridge/tests/Pkd.RevitBridge.Tests/Pkd.RevitBridge.Tests.csproj"]

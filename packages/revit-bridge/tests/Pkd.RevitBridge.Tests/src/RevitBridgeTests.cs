@@ -5,7 +5,7 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Integration tests for the Revit-to-Rust Interop boundary.
- * Traceability: Issue #40, ADR 0025
+ * Traceability: Issue #27, ADR 0025
  * ======================================================================== */
 
 using Xunit;
@@ -36,14 +36,22 @@ namespace Pkd.RevitBridge.Tests
             "\"unit_mapping\":{}" +
         "}";
 
+        /// <summary>
+        /// Verifies the bridge version is correctly reported.
+        /// Why: Ensures the interop assembly version is consistent with build targets.
+        /// </summary>
         [Fact]
-        public void Test_should_return_version_when_requested()
+        public void test_should_return_version_when_requested()
         {
             Assert.Equal("0.1.0", _bridge.GetVersion());
         }
 
+        /// <summary>
+        /// Verifies the bridge fails gracefully when invalid JSON is provided.
+        /// Why: Fail-Fast principle (Shore, 2004) - detect defects immediately at the source.
+        /// </summary>
         [Fact]
-        public void Test_should_fail_when_invalid_json_provided()
+        public void test_should_fail_when_invalid_json_provided()
         {
             string result = _bridge.ValidateMetadata("{}", "invalid");
             Assert.Contains("Error", result);
@@ -54,7 +62,7 @@ namespace Pkd.RevitBridge.Tests
         /// Why: Ensures high-fidelity metadata transfer as mandated by ADR 0025.
         /// </summary>
         [Fact]
-        public void Test_should_handle_utf8_special_characters_in_metadata()
+        public void test_should_handle_utf8_special_characters_in_metadata()
         {
             string metadata = "{\"metadata_id\":\"PHX-DW-999\",\"name\":\"UTF8-Test-Ø-2\\\"-NPT\",\"parameters\":{}}";
             string result = _bridge.ValidateMetadata(MockSchema, metadata);
@@ -68,7 +76,7 @@ namespace Pkd.RevitBridge.Tests
         /// Why: Proves that the "Truth Engine" correctly routes to domain-specific logic.
         /// </summary>
         [Fact]
-        public void Test_should_fail_when_warewashing_id_is_invalid()
+        public void test_should_fail_when_warewashing_id_is_invalid()
         {
             string metadata = "{" +
                 "\"metadata_id\":\"INVALID-PREFIX-001\"," +
@@ -86,8 +94,12 @@ namespace Pkd.RevitBridge.Tests
             Assert.Contains("Invalid ID prefix", result);
         }
 
+        /// <summary>
+        /// Verifies that valid warewashing metadata passes validation.
+        /// Why: Confirms the happy path for the first vertical slice in Project Prism.
+        /// </summary>
         [Fact]
-        public void Test_should_pass_when_warewashing_is_valid()
+        public void test_should_pass_when_warewashing_is_valid()
         {
              string metadata = "{" +
                 "\"metadata_id\":\"PHX-DW-001\"," +
