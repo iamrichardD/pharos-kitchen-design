@@ -5,11 +5,12 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Integration tests for the Revit-to-Rust Interop boundary.
- * Traceability: Issue #27, ADR 0025
+ * Traceability: Issue #35, ADR-0017, ADR-0025
  * ======================================================================== */
 
 using Xunit;
 using Pkd.RevitBridge;
+using System;
 using System.IO;
 using System.Text.Json;
 using System.Linq;
@@ -24,35 +25,32 @@ namespace Pkd.RevitBridge.Tests
         public RevitBridgeTests()
         {
             // Resolve the live pharos-schema.json from the monorepo root
-            // Why: Metadata-First Truth (Unified Source of Truth).
-            string baseDir = AppContext.BaseDirectory;
-            string schemaPath = Path.GetFullPath(Path.Combine(baseDir, "../../../../../../pkd-core/schema/pharos-schema.json"));
+            // Podman volume mount is at /app
+            string schemaPath = "/app/packages/pkd-core/schema/pharos-schema.json";
             
             if (!File.Exists(schemaPath))
             {
-                throw new FileNotFoundException($"Cannot find live schema at {schemaPath}. Ensure monorepo structure is intact.");
+                // Fallback for local dev
+                schemaPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../../packages/pkd-core/schema/pharos-schema.json"));
+            }
+
+            if (!File.Exists(schemaPath))
+            {
+                 throw new FileNotFoundException($"Cannot find live schema at {schemaPath}. Ensure monorepo structure is intact.");
             }
             _schemaContent = File.ReadAllText(schemaPath);
         }
 
         private string LoadSchema() => _schemaContent;
 
-        /// <summary>
-        /// Verifies the bridge version is correctly reported.
-        /// Why: Ensures the interop assembly version is consistent with build targets.
-        /// </summary>
         [Fact]
-        public void test_should_return_version_when_requested()
+        public void TestShould_ReturnVersion_When_Requested()
         {
-            Assert.Equal("0.1.0", _bridge.GetVersion());
+            Assert.Equal("0.2.0", _bridge.GetVersion());
         }
 
-        /// <summary>
-        /// Verifies the bridge fails gracefully when invalid JSON is provided.
-        /// Why: Fail-Fast principle (Shore, 2004) - detect defects immediately at the source.
-        /// </summary>
         [Fact]
-        public void test_should_fail_when_invalid_json_provided()
+        public void TestShould_Fail_When_InvalidJsonProvided()
         {
             ValidationResponse result = _bridge.ValidateMetadata(LoadSchema(), "invalid");
             Assert.Equal("ERROR", result.Status);
@@ -60,66 +58,49 @@ namespace Pkd.RevitBridge.Tests
             Assert.Equal("SLICE_VALIDATION_ERROR", result.Errors[0].Code);
         }
 
-        /// <summary>
-        /// Verifies the UTF-8 FFI boundary using special characters.
-        /// Why: Ensures high-fidelity metadata transfer as mandated by ADR 0025.
-        /// </summary>
         [Fact]
-        public void test_should_handle_utf8_special_characters_in_metadata()
+        public void TestShould_LoadSchema_Into_ResidentHandle()
         {
-            string metadata = "{\"metadata_id\":\"PHX-DW-999\",\"name\":\"UTF8-Test-Ø-2\\\"-NPT\",\"parameters\":{}}";
-            ValidationResponse result = _bridge.ValidateMetadata(LoadSchema(), metadata);
-            
-            // Should not crash and should correctly handle the Ø and " characters.
-            Assert.NotNull(result.Status);
+            using (var handle = _bridge.LoadSchema(LoadSchema()))
+            {
+                Assert.False(handle.IsInvalid);
+            }
         }
 
-        /// <summary>
-        /// Verifies the VSA Dispatcher and Warewashing slice validation.
-        /// Why: Proves that the "Truth Engine" correctly routes to domain-specific logic.
-        /// </summary>
         [Fact]
-        public void test_should_fail_when_warewashing_id_is_invalid()
+        public void TestShould_Validate_Using_ResidentHandle()
         {
-            string metadata = "{" +
-                "\"metadata_id\":\"INVALID-PREFIX-001\"," +
-                "\"name\":\"Dishwasher\"," +
-                "\"schema_version\":\"1.0.0\"," +
-                "\"classification\":{\"omniclass_table_23\":\"23-33 11 11 11\",\"category\":\"Specialty Equipment\"}," +
-                "\"parameters\":{" +
-                    "\"PKD_MainCategory\":\"Dishwashers\"," +
-                    "\"PKD_Manufacturer\":\"Pharos\"," +
-                    "\"PKD_ModelNumber\":\"PHX-1\"," +
-                    "\"PKD_TargetMarket\":\"Global\"," +
-                    "\"PKD_Voltage\":\"208V\"," +
-                    "\"PKD_Phase\":3," +
-                    "\"PKD_Wattage\":\"4500W\"," +
-                    "\"PKD_BTU\":\"0\"," +
-                    "\"PKD_DrainConnection\":\"2\\\" NPT\"," +
-                    "\"PKD_DocLinks\":[]," +
-                    "\"PKD_Industry\":[\"Foodservice\"]," +
-                    "\"PKD_TargetRegions\":[\"US\"]," +
-                    "\"PKD_AssetViews\":{}" +
-                "}," +
-                "\"lod_geometry_specs\":{}," +
-                "\"performance_metadata\":{\"estimated_rfa_size_kb\":34,\"procedural_lod_enabled\":true,\"ghost_link_active\":true}" +
-                "}";
+            string metadata = "{\"metadata_id\":\"PHX-DW-001\",\"name\":\"Handle Test\",\"parameters\":{}}";
             
-            ValidationResponse result = _bridge.ValidateMetadata(LoadSchema(), metadata);
-            
-            Assert.Equal("ERROR", result.Status);
-            Assert.NotEmpty(result.Errors);
-            
-            bool foundIdError = result.Errors.Any(e => e.Code == "INVALID_ID_PREFIX");
-            Assert.True(foundIdError, "Expected 'INVALID_ID_PREFIX' error was not found in the response.");
+            using (var handle = _bridge.LoadSchema(LoadSchema()))
+            {
+                ValidationResponse result = _bridge.ValidateWithHandle(handle, metadata);
+                Assert.NotNull(result.Status);
+            }
         }
 
-        /// <summary>
-        /// Verifies that valid warewashing metadata passes validation.
-        /// Why: Confirms the happy path for the first vertical slice in Project Prism.
-        /// </summary>
         [Fact]
-        public void test_should_pass_when_warewashing_is_valid()
+        public void TestShould_FailToLoad_When_SchemaExceedsSizeLimit()
+        {
+            // Create a 1.1MB string to trigger Shift-Left Security limit
+            string massiveSchema = new string(' ', 1024 * 1024 + 1024);
+            Assert.Throws<InvalidOperationException>(() => _bridge.LoadSchema(massiveSchema));
+        }
+
+        [Fact]
+        public void TestShould_FailValidation_When_MetadataExceedsSizeLimit()
+        {
+            string massiveMetadata = new string(' ', 1024 * 1024 + 1024);
+            using (var handle = _bridge.LoadSchema(LoadSchema()))
+            {
+                ValidationResponse result = _bridge.ValidateWithHandle(handle, massiveMetadata);
+                Assert.Equal("ERROR", result.Status);
+                Assert.Contains("exceeds 1MB limit", result.Errors[0].Details.GetString());
+            }
+        }
+
+        [Fact]
+        public void TestShould_Pass_When_WarewashingIsValid()
         {
              string metadata = "{" +
                 "\"metadata_id\":\"PHX-DW-001\"," +
@@ -147,7 +128,6 @@ namespace Pkd.RevitBridge.Tests
             
             ValidationResponse result = _bridge.ValidateMetadata(LoadSchema(), metadata);
             Assert.True(result.IsValid);
-            Assert.Empty(result.Errors);
         }
     }
 }

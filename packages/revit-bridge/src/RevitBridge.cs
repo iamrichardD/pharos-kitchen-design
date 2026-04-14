@@ -13,9 +13,20 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Collections.Generic;
+using Microsoft.Win32.SafeHandles;
 
 namespace Pkd.RevitBridge
 {
+    /* ========================================================================
+     * Project: Pharos Kitchen Design (Project Prism)
+     * Component: Bridge-Revit / Memory Hardening
+     * File: RevitBridge.cs
+     * Author: Richard D. (https://github.com/iamrichardd)
+     * License: FSL-1.1 (See LICENSE file for details)
+     * Purpose: Resident core bridge with SafeHandle memory management.
+     * Traceability: Issue #35, ADR-0017
+     * ======================================================================== */
+
     public class ValidationResponse
     {
         [JsonPropertyName("status")]
@@ -36,9 +47,33 @@ namespace Pkd.RevitBridge
         public JsonElement Details { get; set; }
     }
 
+    /// <summary>
+    /// Opaque handle to a PharosSchema resident in Rust memory.
+    /// Why: Prevents memory leaks by ensuring pkd_free_schema is called by the GC.
+    /// </summary>
+    public class PharosSchemaHandle : SafeHandleZeroOrMinusOneIsInvalid
+    {
+        private PharosSchemaHandle() : base(true) { }
+
+        [DllImport("pkd_core", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void pkd_free_schema(IntPtr handle);
+
+        protected override bool ReleaseHandle()
+        {
+            pkd_free_schema(handle);
+            return true;
+        }
+    }
+
     public class RevitBridge
     {
         private const string LibName = "pkd_core";
+
+        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
+        private static extern PharosSchemaHandle pkd_load_schema(string schemaJson);
+
+        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
+        private static extern IntPtr pkd_validate_with_handle(PharosSchemaHandle handle, string metadataJson);
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr pkd_validate_metadata_json(string schemaJson, string metadataJson);
@@ -46,50 +81,67 @@ namespace Pkd.RevitBridge
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern void pkd_free_string(IntPtr ptr);
 
-        public string GetVersion() => "0.1.0";
+        public string GetVersion() => "0.2.0";
 
         /// <summary>
-        /// Validates metadata JSON against a schema JSON and returns a typed response.
-        /// Why: Eliminates manual JSON parsing for .NET consumers and provides a type-safe API.
+        /// Loads a schema into resident memory.
+        /// Why: Allows re-use of schema across multiple validations for high performance.
         /// </summary>
-        public ValidationResponse ValidateMetadata(string schemaJson, string metadataJson)
+        public PharosSchemaHandle LoadSchema(string schemaJson)
         {
-            string json = ValidateMetadataJson(schemaJson, metadataJson);
-            try
+            var handle = pkd_load_schema(schemaJson);
+            if (handle.IsInvalid)
             {
-                return JsonSerializer.Deserialize<ValidationResponse>(json) ?? new ValidationResponse 
-                { 
-                    Status = "ERROR", 
-                    Errors = new List<ValidationError> { new ValidationError { Code = "SLICE_VALIDATION_ERROR", Details = JsonSerializer.SerializeToElement("Failed to deserialize core response") } } 
-                };
+                throw new InvalidOperationException("Failed to load Pharos Schema. Ensure JSON is valid and under 1MB.");
             }
-            catch (JsonException ex)
-            {
-                return new ValidationResponse 
-                { 
-                    Status = "ERROR", 
-                    Errors = new List<ValidationError> { new ValidationError { Code = "SLICE_VALIDATION_ERROR", Details = JsonSerializer.SerializeToElement(ex.Message) } } 
-                };
-            }
+            return handle;
         }
 
         /// <summary>
-        /// Validates metadata JSON against a schema JSON and returns the raw JSON string.
-        /// Why: Provides a low-level bridge for environments that prefer raw JSON handling.
+        /// Validates metadata against a resident schema handle.
         /// </summary>
-        public string ValidateMetadataJson(string schemaJson, string metadataJson)
+        public ValidationResponse ValidateWithHandle(PharosSchemaHandle handle, string metadataJson)
+        {
+            if (handle == null || handle.IsInvalid)
+                throw new ArgumentException("Invalid schema handle");
+
+            IntPtr ptr = pkd_validate_with_handle(handle, metadataJson);
+            return ProcessRawResponse(ptr);
+        }
+
+        public ValidationResponse ValidateMetadata(string schemaJson, string metadataJson)
         {
             IntPtr ptr = pkd_validate_metadata_json(schemaJson, metadataJson);
-            if (ptr == IntPtr.Zero) return "{\"status\":\"ERROR\",\"errors\":[{\"code\":\"SLICE_VALIDATION_ERROR\",\"details\":\"Null pointer returned from core\"}]}";
+            return ProcessRawResponse(ptr);
+        }
+
+        private ValidationResponse ProcessRawResponse(IntPtr ptr)
+        {
+            if (ptr == IntPtr.Zero) 
+                return CreateErrorResponse("Null pointer returned from core");
 
             try
             {
-                return Marshal.PtrToStringUTF8(ptr) ?? string.Empty;
+                string json = Marshal.PtrToStringUTF8(ptr) ?? string.Empty;
+                return JsonSerializer.Deserialize<ValidationResponse>(json) ?? CreateErrorResponse("Failed to deserialize core response");
+            }
+            catch (JsonException ex)
+            {
+                return CreateErrorResponse(ex.Message);
             }
             finally
             {
                 pkd_free_string(ptr);
             }
+        }
+
+        private ValidationResponse CreateErrorResponse(string message)
+        {
+            return new ValidationResponse 
+            { 
+                Status = "ERROR", 
+                Errors = new List<ValidationError> { new ValidationError { Code = "SLICE_VALIDATION_ERROR", Details = JsonSerializer.SerializeToElement(message) } } 
+            };
         }
     }
 }

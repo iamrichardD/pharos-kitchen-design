@@ -60,15 +60,49 @@ use std::os::raw::c_char;
 use serde::Serialize;
 use crate::validator::ValidationError;
 
+const MAX_JSON_SIZE: usize = 1024 * 1024; // 1MB Limit for Shift-Left Security (ADR-0016)
+
 #[derive(Serialize)]
 pub struct InteropResponse {
     pub status: String,
     pub errors: Vec<ValidationError>,
 }
 
+/// Loads a PharosSchema from JSON and returns an opaque handle.
+/// Why: Eliminates redundant schema parsing overhead for high-frequency validation.
+/// Safety: Returns null if JSON is invalid or exceeds MAX_JSON_SIZE.
 #[no_mangle]
-pub extern "C" fn pkd_validate_metadata_json(schema_json: *const c_char, metadata_json: *const c_char) -> *mut c_char {
-    if schema_json.is_null() || metadata_json.is_null() {
+pub extern "C" fn pkd_load_schema(schema_json: *const c_char) -> *mut PharosSchema {
+    if schema_json.is_null() {
+        return std::ptr::null_mut();
+    }
+
+    let schema_cstr = unsafe { CStr::from_ptr(schema_json) };
+    let bytes = schema_cstr.to_bytes();
+    
+    // Shift-Left Security: Prevent DoS via massive JSON payloads
+    if bytes.len() > MAX_JSON_SIZE {
+        return std::ptr::null_mut();
+    }
+
+    let schema_str = match schema_cstr.to_str() {
+        Ok(s) => s,
+        Err(_) => return std::ptr::null_mut(),
+    };
+
+    let schema: PharosSchema = match serde_json::from_str(schema_str) {
+        Ok(s) => s,
+        Err(_) => return std::ptr::null_mut(),
+    };
+
+    Box::into_raw(Box::new(schema))
+}
+
+/// Validates metadata JSON against a pre-loaded schema handle.
+/// Why: High-performance validation path for geometry/metadata streams.
+#[no_mangle]
+pub extern "C" fn pkd_validate_with_handle(handle: *mut PharosSchema, metadata_json: *const c_char) -> *mut c_char {
+    if handle.is_null() || metadata_json.is_null() {
         let resp = InteropResponse {
             status: "ERROR".to_string(),
             errors: vec![ValidationError::SliceError("Null pointer provided".to_string())],
@@ -76,19 +110,17 @@ pub extern "C" fn pkd_validate_metadata_json(schema_json: *const c_char, metadat
         return serialize_interop_response(&resp);
     }
 
-    let schema_cstr = unsafe { CStr::from_ptr(schema_json) };
+    let schema = unsafe { &*handle };
     let metadata_cstr = unsafe { CStr::from_ptr(metadata_json) };
-
-    let schema_str = match schema_cstr.to_str() {
-        Ok(s) => s,
-        Err(_) => {
-            let resp = InteropResponse {
-                status: "ERROR".to_string(),
-                errors: vec![ValidationError::SliceError("Invalid UTF-8 in schema".to_string())],
-            };
-            return serialize_interop_response(&resp);
-        }
-    };
+    
+    // Shift-Left Security: Limit metadata size to prevent memory exhaustion
+    if metadata_cstr.to_bytes().len() > MAX_JSON_SIZE {
+        let resp = InteropResponse {
+            status: "ERROR".to_string(),
+            errors: vec![ValidationError::SliceError("Metadata exceeds 1MB limit".to_string())],
+        };
+        return serialize_interop_response(&resp);
+    }
 
     let metadata_str = match metadata_cstr.to_str() {
         Ok(s) => s,
@@ -96,17 +128,6 @@ pub extern "C" fn pkd_validate_metadata_json(schema_json: *const c_char, metadat
             let resp = InteropResponse {
                 status: "ERROR".to_string(),
                 errors: vec![ValidationError::SliceError("Invalid UTF-8 in metadata".to_string())],
-            };
-            return serialize_interop_response(&resp);
-        }
-    };
-
-    let schema: PharosSchema = match serde_json::from_str(schema_str) {
-        Ok(s) => s,
-        Err(e) => {
-            let resp = InteropResponse {
-                status: "ERROR".to_string(),
-                errors: vec![ValidationError::SliceError(format!("Invalid schema JSON: {}", e))],
             };
             return serialize_interop_response(&resp);
         }
@@ -126,7 +147,7 @@ pub extern "C" fn pkd_validate_metadata_json(schema_json: *const c_char, metadat
     let mut all_errors = Vec::new();
 
     // 1. Core Schema Validation
-    if let Err(errors) = SchemaValidator::validate_metadata(&schema, &metadata) {
+    if let Err(errors) = SchemaValidator::validate_metadata(schema, &metadata) {
         all_errors.extend(errors);
     }
 
@@ -148,6 +169,33 @@ pub extern "C" fn pkd_validate_metadata_json(schema_json: *const c_char, metadat
     };
 
     serialize_interop_response(&resp)
+}
+
+/// Frees the memory associated with a PharosSchema handle.
+/// Why: Prevents memory leaks by returning ownership to Rust for explicit cleanup.
+#[no_mangle]
+pub extern "C" fn pkd_free_schema(handle: *mut PharosSchema) {
+    if !handle.is_null() {
+        unsafe {
+            let _ = Box::from_raw(handle);
+        }
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn pkd_validate_metadata_json(schema_json: *const c_char, metadata_json: *const c_char) -> *mut c_char {
+    let handle = pkd_load_schema(schema_json);
+    if handle.is_null() {
+         let resp = InteropResponse {
+            status: "ERROR".to_string(),
+            errors: vec![ValidationError::SliceError("Failed to load schema (Null or Invalid)".to_string())],
+        };
+        return serialize_interop_response(&resp);
+    }
+
+    let result = pkd_validate_with_handle(handle, metadata_json);
+    pkd_free_schema(handle);
+    result
 }
 
 /// Safely serializes the response for C-ABI consumption.
