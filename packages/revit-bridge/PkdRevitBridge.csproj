@@ -1,15 +1,25 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFrameworks>net8.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">net8.0;net8.0-windows</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <UseWPF Condition="'$(TargetFramework)' == 'net8.0-windows'">true</UseWPF>
     <RootNamespace>Pkd.RevitBridge</RootNamespace>
     <AssemblyName>Pkd.RevitBridge</AssemblyName>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net8.0-windows'">
+    <DefineConstants>REVIT_UI</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Remove="tests\**" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0-windows'">
+    <PackageReference Include="Autodesk.Revit.SDK" Version="2025.0.1" />
   </ItemGroup>
 
   <Target Name="CopyNativeBinary" AfterTargets="AfterBuild">
