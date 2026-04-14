@@ -1,7 +1,7 @@
 .artifacts/
 !.artifacts/ux/
 .project/
-scripts/
+# scripts/  <-- Removed to allow CI scripts
 node_modules/
 dist/
 target/

@@ -10,31 +10,30 @@
 
 using Xunit;
 using Pkd.RevitBridge;
+using System.IO;
 
 namespace Pkd.RevitBridge.Tests
 {
     public class RevitBridgeTests
     {
         private readonly RevitBridge _bridge = new RevitBridge();
-        private const string MockSchema = "{" +
-            "\"version\":\"1.0.0\"," +
-            "\"lod_definitions\":{}," +
-            "\"parameter_standards\":{" +
-                "\"classification\":\"OmniClass\"," +
-                "\"shared_parameters\":{" +
-                    "\"PKD_Manufacturer\":{\"type\":\"TEXT\",\"attributes\":[]}," +
-                    "\"PKD_ModelNumber\":{\"type\":\"TEXT\",\"attributes\":[]}," +
-                    "\"PKD_MainCategory\":{\"type\":\"TEXT\",\"attributes\":[]}" +
-                "}" +
-            "}," +
-            "\"bloat_rules\":{" +
-                "\"max_file_size_delta_kb\":50," +
-                "\"forbidden_metadata\":[]," +
-                "\"regional_stripping_rules\":{}," +
-                "\"procedural_preference\":true" +
-            "}," +
-            "\"unit_mapping\":{}" +
-        "}";
+        private readonly string _schemaContent;
+
+        public RevitBridgeTests()
+        {
+            // Resolve the live pharos-schema.json from the monorepo root
+            // Why: Metadata-First Truth (Unified Source of Truth).
+            string baseDir = AppContext.BaseDirectory;
+            string schemaPath = Path.GetFullPath(Path.Combine(baseDir, "../../../../../../pkd-core/schema/pharos-schema.json"));
+            
+            if (!File.Exists(schemaPath))
+            {
+                throw new FileNotFoundException($"Cannot find live schema at {schemaPath}. Ensure monorepo structure is intact.");
+            }
+            _schemaContent = File.ReadAllText(schemaPath);
+        }
+
+        private string LoadSchema() => _schemaContent;
 
         /// <summary>
         /// Verifies the bridge version is correctly reported.
@@ -53,7 +52,7 @@ namespace Pkd.RevitBridge.Tests
         [Fact]
         public void test_should_fail_when_invalid_json_provided()
         {
-            string result = _bridge.ValidateMetadata("{}", "invalid");
+            string result = _bridge.ValidateMetadata(LoadSchema(), "invalid");
             Assert.Contains("Error", result);
         }
 
@@ -65,7 +64,7 @@ namespace Pkd.RevitBridge.Tests
         public void test_should_handle_utf8_special_characters_in_metadata()
         {
             string metadata = "{\"metadata_id\":\"PHX-DW-999\",\"name\":\"UTF8-Test-Ø-2\\\"-NPT\",\"parameters\":{}}";
-            string result = _bridge.ValidateMetadata(MockSchema, metadata);
+            string result = _bridge.ValidateMetadata(LoadSchema(), metadata);
             
             // Should not crash and should correctly handle the Ø and " characters.
             Assert.NotNull(result);
@@ -83,12 +82,26 @@ namespace Pkd.RevitBridge.Tests
                 "\"name\":\"Dishwasher\"," +
                 "\"schema_version\":\"1.0.0\"," +
                 "\"classification\":{\"omniclass_table_23\":\"23-33 11 11 11\",\"category\":\"Specialty Equipment\"}," +
-                "\"parameters\":{\"PKD_MainCategory\":\"Dishwashers\",\"PKD_Manufacturer\":\"Pharos\",\"PKD_ModelNumber\":\"PHX-1\"}," +
+                "\"parameters\":{" +
+                    "\"PKD_MainCategory\":\"Dishwashers\"," +
+                    "\"PKD_Manufacturer\":\"Pharos\"," +
+                    "\"PKD_ModelNumber\":\"PHX-1\"," +
+                    "\"PKD_TargetMarket\":\"Global\"," +
+                    "\"PKD_Voltage\":\"208V\"," +
+                    "\"PKD_Phase\":3," +
+                    "\"PKD_Wattage\":\"4500W\"," +
+                    "\"PKD_BTU\":\"0\"," +
+                    "\"PKD_DrainConnection\":\"2\\\" NPT\"," +
+                    "\"PKD_DocLinks\":[]," +
+                    "\"PKD_Industry\":[\"Foodservice\"]," +
+                    "\"PKD_TargetRegions\":[\"US\"]," +
+                    "\"PKD_AssetViews\":{}" +
+                "}," +
                 "\"lod_geometry_specs\":{}," +
                 "\"performance_metadata\":{\"estimated_rfa_size_kb\":34,\"procedural_lod_enabled\":true,\"ghost_link_active\":true}" +
                 "}";
             
-            string result = _bridge.ValidateMetadata(MockSchema, metadata);
+            string result = _bridge.ValidateMetadata(LoadSchema(), metadata);
             
             // Expected failure from WarewashingValidator
             Assert.Contains("Invalid ID prefix", result);
@@ -106,12 +119,26 @@ namespace Pkd.RevitBridge.Tests
                 "\"name\":\"Valid Dishwasher\"," +
                 "\"schema_version\":\"1.0.0\"," +
                 "\"classification\":{\"omniclass_table_23\":\"23-33 11 11 11\",\"category\":\"Specialty Equipment\"}," +
-                "\"parameters\":{\"PKD_MainCategory\":\"Dishwashers\",\"PKD_Manufacturer\":\"Pharos\",\"PKD_ModelNumber\":\"PHX-1\"}," +
+                "\"parameters\":{" +
+                    "\"PKD_MainCategory\":\"Dishwashers\"," +
+                    "\"PKD_Manufacturer\":\"Pharos\"," +
+                    "\"PKD_ModelNumber\":\"PHX-1\"," +
+                    "\"PKD_TargetMarket\":\"Global\"," +
+                    "\"PKD_Voltage\":\"208V\"," +
+                    "\"PKD_Phase\":3," +
+                    "\"PKD_Wattage\":\"4500W\"," +
+                    "\"PKD_BTU\":\"0\"," +
+                    "\"PKD_DrainConnection\":\"2\\\" NPT\"," +
+                    "\"PKD_DocLinks\":[]," +
+                    "\"PKD_Industry\":[\"Foodservice\"]," +
+                    "\"PKD_TargetRegions\":[\"US\"]," +
+                    "\"PKD_AssetViews\":{}" +
+                "}," +
                 "\"lod_geometry_specs\":{}," +
                 "\"performance_metadata\":{\"estimated_rfa_size_kb\":34,\"procedural_lod_enabled\":true,\"ghost_link_active\":true}" +
                 "}";
             
-            string result = _bridge.ValidateMetadata(MockSchema, metadata);
+            string result = _bridge.ValidateMetadata(LoadSchema(), metadata);
             Assert.Equal("OK", result);
         }
     }
