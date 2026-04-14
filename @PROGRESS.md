@@ -61,19 +61,18 @@
 - [x] Perform Zero-Host validation of the marketing build.
 - [x] Decoupled CI/CD: Restored `deploy-site.yml` and separated infrastructure to `deploy-infra.yml`.
 
+### Sprint 3.7: Phase 4 Foundations & Interop (#28, #29, #30, #31) - ✅ COMPLETED
+- [x] **Issue #31 (Log Sync)**: Synchronized `docs/DECISION_LOG.md` with ADR-0023 and ADR-0024.
+- [x] **Issue #29 (SRI Rectification)**: Verified SRI hash for Umami and implemented "Fail Fast" prebuild verification.
+- [x] **Issue #28 (Interop Scaffold)**: Initialized `packages/revit-bridge` (.NET 8/Standard 2.1) and `apps/demo` (Astro Shell).
+- [x] **Issue #30 (VSA Refactor)**: Transitioned `pkd-core` to category-based Vertical Slices (Warewashing slice implemented).
+- [x] **Zero-Host Verification**: All new components verified via Podman (Rust, Node, .NET).
+
 ---
 
 ## 🏗️ Active Development
 
-### Phase 3: The CLI Bridge (Admin Control Plane) - ✅ COMPLETED
-- [x] **Issue #10:** CLI Scaffold and Audit Handshake established (Phase 3).
-- [x] Pre-installed `pkd-cli-builder` (Podman) and `SECURITY_LOG.md` implemented.
-- [x] Implement `pkd auth` (IKD Flow - RFC 8628).
-- [x] Integrate `keyring-rs` for encrypted local token storage.
-- [x] **Issue #12:** Implement `pkd admin users` (Impersonation & Orchestration Flow) - COMPLETED.
-- [x] **ADR 0024:** Extracted shared `pharos-protocol` library for ecosystem-wide parity.
-- [x] Zero-Host: Verified all TypeScript and Rust components inside Podman containers.
-- [x] UX: Implemented ergonomic RFC 2378 search syntax in `pkd core search`.
-- [x] **Security:** Implemented local `Fail Fast` role-based access for CLI subcommands.
-- [x] **UX:** Enabled positional fallback for ergonomic search (e.g., `pkd manufacturer=3m`).
-- [x] **Secret Audit:** Verified Cloudflare Secrets transition for AWS credentials.
+### Phase 4: Revit & Web Interop (Project Prism Bridge)
+- [ ] **Issue #32**: Implement `pkd-core` WASM bindings for C# interop.
+- [ ] **Issue #33**: Scaffold Revit Ribbon UI in `revit-bridge`.
+- [ ] **Issue #34**: Implement basic "Ghost Link" metadata sync between Revit and Demo site.

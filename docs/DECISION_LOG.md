@@ -26,6 +26,8 @@ This log provides an index of the technical and architectural decisions made for
 | **[ADR-0020]** | 2026-04-06 | Approved | [Infrastructure as Code (IaC) Strategy](docs/adr/0020-infrastructure-as-code-strategy.md) |
 | **[ADR-0021]** | 2026-04-06 | Approved | [Cloudflare Edge Auth Bridge](docs/adr/0021-cloudflare-edge-auth-bridge.md) |
 | **[ADR-0022]** | 2026-04-06 | Proposed | [System-Triggered Light Mode](docs/adr/0022-system-triggered-light-mode.md) |
+| **[ADR-0023]** | 2026-04-13 | Proposed | [RFC 2378 Search Metadata & Fail Fast Engineering](docs/adr/0023-rfc2378-and-fail-fast-integration.md) |
+| **[ADR-0024]** | 2026-04-13 | Proposed | [Shared RFC 2378 Protocol Library Extraction](docs/adr/0024-rfc2378-library-extraction.md) |
 
 ---
 *To add a new decision, create a new file in `docs/adr/` following the established template and append it to this index.*

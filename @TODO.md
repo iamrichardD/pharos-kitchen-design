@@ -56,7 +56,25 @@
 - [x] **Documentation & Marketing**: Updated `ARCHITECTURE.md`, `roadmap.astro`, and created `CLI_REFERENCE.md`.
 
 ### Sprint 3.6: IKD-Centric Messaging Pivot - #13 - ✅ COMPLETED
-- [x] **Content Refactor:** Pivot `index.astro`, `features.astro`, and `bridge.astro` to designer-centric utility.
+- [x] Designer-centric language audit.
+- [x] Jargon removal & functional utility mapping.
+
+### Phase 4: Revit & Web Interop (Project Prism Bridge)
+- [x] **Issue #31 (Log Sync)**: Synchronized Decision Log with ADR-0023/24.
+- [x] **Issue #29 (SRI)**: Rectified Umami SRI and implemented Fail-Fast build check.
+- [x] **Issue #28 (Scaffold)**: Revit Bridge (.NET) and Demo Site (Astro) initialized.
+- [x] **Issue #30 (VSA)**: `pkd-core` refactored for category-based Vertical Slices.
+- [ ] **Issue #32**: Implement `pkd-core` WASM bindings for C# interop.
+- [ ] **Issue #33**: Scaffold Revit Ribbon UI & Command logic.
+- [ ] **Issue #34**: Implement "Ghost Link" prototype (Metadata sync).
+- [ ] **Issue #35**: Verify end-to-end "Revit -> Bridge -> Web" metadata flow.
+
+---
+
+## 🗑️ Purge/Stale Logic
+- [x] **ADR-0019**: Superseded by ADR-0021 (Cloudflare Edge Pivot).
+- [x] **pkd-core legacy parser**: Refactored in favor of Vertical Slices (Issue #30).
+*Content Refactor:** Pivot `index.astro`, `features.astro`, and `bridge.astro` to designer-centric utility.
 - [x] **Asset Validation:** Ensure all placeholder screenshots are correctly tagged for IKD utility.
 - [x] **Zero-Host Build:** Verify the marketing site still builds correctly in `Containerfile.ts`.
 - [x] **CI/CD Decoupling:** Separated `deploy-infra.yml` and `deploy-site.yml` for independent delivery.

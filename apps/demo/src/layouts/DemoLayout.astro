@@ -1,0 +1,45 @@
+---
+/* ========================================================================
+ * Project: Pharos Kitchen Design (Project Prism)
+ * Component: Demo / Layout
+ * File: DemoLayout.astro
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * License: FSL-1.1 (See LICENSE file for details)
+ * Purpose: Global shell for the PKD demo sandbox.
+ * Traceability: Priority 3, Issue #28
+ * ======================================================================== */
+
+interface Props {
+	title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title} | PKD Demo</title>
+		<style is:global>
+			:root {
+				--bg-ph-charcoal: #121212;
+				--ph-orange: #ff6b00;
+				--ph-blue: #0070f3;
+				--text-light: #f5f5f5;
+			}
+			body {
+				background-color: var(--bg-ph-charcoal);
+				color: var(--text-light);
+				font-family: 'Inter', system-ui, sans-serif;
+				margin: 0;
+			}
+		</style>
+	</head>
+	<body>
+		<slot />
+	</body>
+</html>

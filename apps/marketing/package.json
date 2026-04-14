@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
+    "prebuild": "bash scripts/verify-sri.sh",
     "dev": "astro dev",
     "start": "astro dev",
     "build": "astro build",

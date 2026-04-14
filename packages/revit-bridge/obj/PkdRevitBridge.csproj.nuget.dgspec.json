@@ -1,0 +1,92 @@
+{
+  "format": 1,
+  "restore": {
+    "/src/packages/revit-bridge/PkdRevitBridge.csproj": {}
+  },
+  "projects": {
+    "/src/packages/revit-bridge/PkdRevitBridge.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/src/packages/revit-bridge/PkdRevitBridge.csproj",
+        "projectName": "Pkd.RevitBridge",
+        "projectPath": "/src/packages/revit-bridge/PkdRevitBridge.csproj",
+        "packagesPath": "/root/.nuget/packages/",
+        "outputPath": "/src/packages/revit-bridge/obj/",
+        "projectStyle": "PackageReference",
+        "crossTargeting": true,
+        "configFilePaths": [
+          "/root/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0",
+          "netstandard2.1"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {}
+          },
+          "netstandard2.1": {
+            "targetAlias": "netstandard2.1",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/8.0.419/PortableRuntimeIdentifierGraph.json"
+        },
+        "netstandard2.1": {
+          "targetAlias": "netstandard2.1",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "NETStandard.Library": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/8.0.419/RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

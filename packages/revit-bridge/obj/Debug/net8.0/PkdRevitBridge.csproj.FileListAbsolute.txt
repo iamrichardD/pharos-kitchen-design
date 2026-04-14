@@ -1,0 +1,12 @@
+/src/packages/revit-bridge/bin/Debug/net8.0/Pkd.RevitBridge.deps.json
+/src/packages/revit-bridge/bin/Debug/net8.0/Pkd.RevitBridge.dll
+/src/packages/revit-bridge/bin/Debug/net8.0/Pkd.RevitBridge.pdb
+/src/packages/revit-bridge/obj/Debug/net8.0/PkdRevitBridge.GeneratedMSBuildEditorConfig.editorconfig
+/src/packages/revit-bridge/obj/Debug/net8.0/PkdRevitBridge.AssemblyInfoInputs.cache
+/src/packages/revit-bridge/obj/Debug/net8.0/PkdRevitBridge.AssemblyInfo.cs
+/src/packages/revit-bridge/obj/Debug/net8.0/PkdRevitBridge.csproj.CoreCompileInputs.cache
+/src/packages/revit-bridge/obj/Debug/net8.0/PkdRevitBridge.sourcelink.json
+/src/packages/revit-bridge/obj/Debug/net8.0/Pkd.RevitBridge.dll
+/src/packages/revit-bridge/obj/Debug/net8.0/refint/Pkd.RevitBridge.dll
+/src/packages/revit-bridge/obj/Debug/net8.0/Pkd.RevitBridge.pdb
+/src/packages/revit-bridge/obj/Debug/net8.0/ref/Pkd.RevitBridge.dll

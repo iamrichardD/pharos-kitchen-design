@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;netstandard2.1</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>12.0</LangVersion>
+    <RootNamespace>Pkd.RevitBridge</RootNamespace>
+    <AssemblyName>Pkd.RevitBridge</AssemblyName>
+  </PropertyGroup>
+
+</Project>
