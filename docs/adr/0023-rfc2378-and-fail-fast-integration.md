@@ -2,7 +2,7 @@
  * Project: Pharos Kitchen Design (Project Prism)
  * Component: Documentation / Strategy
  * File: docs/adr/0023-rfc2378-and-fail-fast-integration.md
- * Status: Proposed
+ * Status: Active
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Codifying RFC 2378 search metadata and Fail Fast engineering practices.

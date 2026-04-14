@@ -2,7 +2,7 @@
  * Project: Pharos Kitchen Design (Project Prism)
  * Component: Documentation / Strategy
  * File: docs/adr/0024-rfc2378-library-extraction.md
- * Status: Proposed
+ * Status: Active
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Strategy for extracting RFC 2378 logic into a shared Rust crate.
