@@ -1,13 +1,13 @@
 #!/bin/bash
-/* ========================================================================
- * Project: Pharos Kitchen Design (Project Prism)
- * Component: Security / Audit
- * File: apps/marketing/scripts/verify-sri.sh
- * Author: Richard D. (https://github.com/iamrichardd)
- * License: FSL-1.1 (See LICENSE file for details)
- * Purpose: Fail Fast verification of third-party script integrity.
- * Traceability: Priority 2, Issue #29
- * ======================================================================== */
+# ========================================================================
+# Project: Pharos Kitchen Design (Project Prism)
+# Component: Security / Audit
+# File: apps/marketing/scripts/verify-sri.sh
+# Author: Richard D. (https://github.com/iamrichardd)
+# License: FSL-1.1 (See LICENSE file for details)
+# Purpose: Fail Fast verification of third-party script integrity.
+# Traceability: Priority 2, Issue #29
+# ========================================================================
 
 EXPECTED_HASH="yRsxKUe1uwvKWyAzDiU58FsIbO8orQJUzy1kPcDQAfAuaczzL5MxTlI4K/AABHhq"
 URL="https://cloud.umami.is/script.js"
