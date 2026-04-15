@@ -46,9 +46,19 @@ jobs:
           node-version: '24'
           cache: 'npm'
           cache-dependency-path: 'package-lock.json'
-          
+
+      - name: "🦀 Setup Rust and wasm-pack"
+        run: |
+          curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+      - name: "🏗️ Build WASM Core"
+        run: wasm-pack build packages/pkd-core --target nodejs
+
       - name: "📦 Install Dependencies"
         run: npm ci
+        
+      - name: "🧪 Run Validation"
+        run: npm test --workspaces
         
       - name: "🚀 Build with Astro"
         run: npm run build

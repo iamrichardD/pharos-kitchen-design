@@ -2,13 +2,17 @@
   "name": "@pkd/marketing",
   "version": "0.1.0",
   "type": "module",
+  "engines": {
+    "node": ">=24.0.0"
+  },
   "scripts": {
     "prebuild": "bash scripts/verify-sri.sh",
     "dev": "astro dev",
     "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "test": "astro check && vitest run"
   },
   "dependencies": {
     "@astrojs/tailwind": "^6.0.0",
@@ -16,5 +20,9 @@
     "astro": "^5.18.1",
     "aws-amplify": "^6.16.3",
     "tailwindcss": "^3.4.0"
+  },
+  "devDependencies": {
+    "@vitest/ui": "^4.1.4",
+    "vitest": "^4.1.4"
   }
 }

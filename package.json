@@ -12,8 +12,8 @@
   },
   "scripts": {
     "pulse": "bash scripts/pulse.sh",
-    "audit": "npm audit --workspaces && cargo audit",
-    "test": "npm test --workspaces --if-present",
+    "audit": "npm audit --workspaces && cargo-audit",
+    "test": "npm test --workspaces",
     "test:container": "echo 'Deprecated: Use npm run pulse' && exit 1",
     "test:bridge": "echo 'Deprecated: Use npm run pulse' && exit 1",
     "infra:build": "podman build --security-opt seccomp=unconfined -t pkd-infra -f Containerfile.infra .",
