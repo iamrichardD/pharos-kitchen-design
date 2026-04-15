@@ -170,7 +170,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
   // Auto-format user_code (ABCD-1234)
   const input = document.getElementById('user_code') as HTMLInputElement;
-  input?.addEventListener('input', (e) => {
+  input?.addEventListener('input', () => {
     let value = input.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
     if (value.length > 4) {
       value = value.slice(0, 4) + '-' + value.slice(4, 8);

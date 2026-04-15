@@ -7,7 +7,7 @@
   "exports": {
     ".": "./pkg/pkd_core.js",
     "./pkg/*": "./pkg/*.js",
-    "./schema/*": "./schema/*.json"
+    "./schema/*": "./schema/*"
   },
   "files": [
     "pkg/",

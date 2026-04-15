@@ -16,7 +16,6 @@ interface Props {
 }
 
 const { title, description = "Pharos Kitchen Design: Metadata-First Truth for the Independent Kitchen Designer." } = Astro.props;
-const siteUrl = 'https://iamrichardd.com/pharos-kitchen-design';
 ---
 
 <!doctype html>
@@ -35,7 +34,7 @@ const siteUrl = 'https://iamrichardd.com/pharos-kitchen-design';
 		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Roboto+Condensed:wght@700&display=swap" rel="stylesheet">
 
 		<!-- Umami Analytics (Hardened with SRI) -->
-				<script defer src="https://cloud.umami.is/script.js" data-website-id="72cdde11-d1e4-4a33-9cc3-a00d5fe4651b" integrity="sha384-yRsxKUe1uwvKWyAzDiU58FsIbO8orQJUzy1kPcDQAfAuaczzL5MxTlI4K/AABHhq" crossorigin="anonymous"></script>
+		<script is:inline defer src="https://cloud.umami.is/script.js" data-website-id="72cdde11-d1e4-4a33-9cc3-a00d5fe4651b" integrity="sha384-yRsxKUe1uwvKWyAzDiU58FsIbO8orQJUzy1kPcDQAfAuaczzL5MxTlI4K/AABHhq" crossorigin="anonymous"></script>
 	</head>
 	<body class="blueprint-grid min-h-screen flex flex-col">
 		<header class="border-b border-border-blueprint py-4 bg-bg-base/80 backdrop-blur-sm sticky top-0 z-50 transition-colors duration-300">
