@@ -1,0 +1,86 @@
+{
+  "$id": "1",
+  "Category": null,
+  "MediaInfos": [
+    {
+      "$id": "2",
+      "MediaLocation": "Mfr_40$_0$GALLON$_0$RO$_0$TANK$_0$FRP$_4$SpecSheet",
+      "type": 1,
+      "PageCount": 2,
+      "Descr": "Spec Sheet"
+    },
+    {
+      "$id": "3",
+      "MediaLocation": "970ada39-2d5b-4516-93d4-a2f657471925",
+      "type": 0,
+      "PageCount": 0,
+      "Descr": "Image"
+    },
+    {
+      "$id": "4",
+      "MediaLocation": "970ada392d5b451693d4a2f657471925/2021_$$RGVmYXVsdFR5cGU=_rfa_7b697db6-3e83-41b1-9cf7-31a02334c0a7",
+      "type": 3,
+      "PageCount": 0,
+      "Descr": "Revit 2021=DefaultType"
+    },
+    {
+      "$id": "5",
+      "MediaLocation": "970ada392d5b451693d4a2f657471925/2022_$$RGVmYXVsdFR5cGU=_rfa_7b697db6-3e83-41b1-9cf7-31a02334c0a7",
+      "type": 3,
+      "PageCount": 0,
+      "Descr": "Revit 2022=DefaultType"
+    },
+    {
+      "$id": "6",
+      "MediaLocation": "970ada392d5b451693d4a2f657471925/KCL-3M-40 GALLON RO TANK-VP",
+      "type": 2,
+      "PageCount": 0,
+      "Descr": "Plan 25 5/8\"W x 24 1/4\"D"
+    },
+    {
+      "$id": "7",
+      "MediaLocation": "970ada392d5b451693d4a2f657471925/40 GALLON TANK FRP_R3",
+      "type": 2,
+      "PageCount": 0,
+      "Descr": "3D \"W x \"D x 51 7/8\"H"
+    },
+    {
+      "$id": "8",
+      "MediaLocation": "970ada392d5b451693d4a2f657471925/KCL-3M-40 GALLON RO TANK-VE",
+      "type": 2,
+      "PageCount": 0,
+      "Descr": "Front 24 3/8\"W x 51 7/8\"H"
+    },
+    {
+      "$id": "9",
+      "MediaLocation": "970ada392d5b451693d4a2f657471925/KCL-3M-40 GALLON RO TANK-VS",
+      "type": 2,
+      "PageCount": 0,
+      "Descr": "Side 25 5/8\"D x 51 7/8\"H"
+    }
+  ],
+  "Manufacturer": "3M Purification",
+  "Model": "40$_0$GALLON$_0$TANK$_0$FRP",
+  "Utils": "",
+  "DocLinks": [],
+  "Descr": "(5598409) 3M™ Water Filtration Products Reverse Osmosis Storage Tank, 51.8\"H x 24.2\" dia., 40 gallons capacity @ 60 PSI, accepts 3/8\" or 1/2\" tubing, fiberglass hydro-pneumatic tank (FRP), 100% butyl diaphragm, anti-microbial polypropylene lower chamber, 125 PSI max pressure at 100°F (fittings designed to accept plumbing from all 3M™ RO units), WQA Gold Seal Certified",
+  "MfrPath": "CU",
+  "Price": 0,
+  "ItemNumber": 93454339,
+  "MfrLogo": "3MPurifica.png",
+  "RepLogo": "",
+  "RepName": "",
+  "RepURL": "",
+  "RepPhone": null,
+  "AgentLogo": "",
+  "AgentName": "",
+  "AgentURL": "",
+  "Rep2Logo": null,
+  "Rep2Name": null,
+  "Rep2URL": null,
+  "Rep2Phone": null,
+  "Rep3Logo": null,
+  "Rep3Name": null,
+  "Rep3URL": null,
+  "Rep3Phone": null
+}

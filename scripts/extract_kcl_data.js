@@ -4,10 +4,10 @@ const path = require('path');
 const BASE_URL = 'https://app.kclcad.com/www';
 const ASSET_URL = 'https://app.kclcad.com/kustomdrawing';
 const IMAGE_URL = 'https://app.kclcad.com/kustomimage';
-const DATA_DIR = path.join(__dirname, '../.artifacts/applications/app.kclcad.com/data');
-const ASSET_DIR = path.join(DATA_DIR, 'assets');
+const DATA_DIR = path.join(__dirname, '../apps/marketing/public/assets/kcl-catalog/metadata');
+const ASSET_DIR = path.join(__dirname, '../apps/marketing/public/assets/kcl-catalog/media');
 
-// Ensure the data and asset directories exist
+// Ensure the metadata and media directories exist
 [DATA_DIR, ASSET_DIR].forEach(dir => {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });

@@ -1,3 +1,14 @@
+<!--
+  ========================================================================
+  Project: Pharos Kitchen Design (Project Prism)
+  Component: Marketing-Prototype
+  File: apps/marketing/public/command-v1/index.html
+  Author: Richard D. (https://github.com/iamrichardd)
+  License: FSL-1.1 (See LICENSE file for details)
+  Purpose: Command-First UX Prototype for Equipment Selection.
+  Traceability: Fixes #40
+  ========================================================================
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -265,7 +276,7 @@
             selectedIndex = -1;
             
             const img = document.getElementById('asset-image');
-            if (model.asset) { img.src = `../applications/app.kclcad.com/data/assets/${model.asset}`; img.classList.add('active'); }
+            if (model.asset) { img.src = `../assets/kcl-catalog/media/${model.asset}`; img.classList.add('active'); }
             else { img.classList.remove('active'); }
 
             const rect = document.getElementById('blueprint-rect');

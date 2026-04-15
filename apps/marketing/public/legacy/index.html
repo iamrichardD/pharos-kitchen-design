@@ -1,3 +1,14 @@
+<!--
+  ========================================================================
+  Project: Pharos Kitchen Design (Project Prism)
+  Component: Marketing-Prototype
+  File: apps/marketing/public/legacy/index.html
+  Author: Richard D. (https://github.com/iamrichardd)
+  License: FSL-1.1 (See LICENSE file for details)
+  Purpose: Legacy UX Prototype for Equipment Selection.
+  Traceability: Fixes #40
+  ========================================================================
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -183,7 +194,7 @@
             
             // Sync Asset
             const img = document.getElementById('asset-image');
-            if (data.asset) { img.src = `../applications/app.kclcad.com/data/assets/${data.asset}`; img.classList.add('active'); }
+            if (data.asset) { img.src = `../assets/kcl-catalog/media/${data.asset}`; img.classList.add('active'); }
             else { img.classList.remove('active'); }
 
             // Sync Spatial Footprint (SVG)
