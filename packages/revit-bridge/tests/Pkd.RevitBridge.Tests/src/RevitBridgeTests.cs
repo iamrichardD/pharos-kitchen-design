@@ -25,13 +25,13 @@ namespace Pkd.RevitBridge.Tests
         public RevitBridgeTests()
         {
             // Resolve the live pharos-schema.json from the monorepo root
-            // Podman volume mount is at /app
-            string schemaPath = "/app/packages/pkd-core/schema/pharos-schema.json";
+            // Podman volume mount/WORKDIR is at /work
+            string schemaPath = "/work/packages/pkd-core/schema/pharos-schema.json";
             
             if (!File.Exists(schemaPath))
             {
-                // Fallback for local dev
-                schemaPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../../packages/pkd-core/schema/pharos-schema.json"));
+                // Fallback for local dev (go up 5 levels from net8.0 to packages root)
+                schemaPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../pkd-core/schema/pharos-schema.json"));
             }
 
             if (!File.Exists(schemaPath))

@@ -11,9 +11,11 @@
     "node": ">=24.0.0"
   },
   "scripts": {
+    "pulse": "bash scripts/pulse.sh",
     "audit": "npm audit --workspaces && cargo audit",
-    "test:container": "podman build --security-opt seccomp=unconfined -t pkd-test -f Containerfile.test . && podman run --rm pkd-test",
-    "test:bridge": "bash scripts/test-bridge.sh",
+    "test": "npm test --workspaces --if-present",
+    "test:container": "echo 'Deprecated: Use npm run pulse' && exit 1",
+    "test:bridge": "echo 'Deprecated: Use npm run pulse' && exit 1",
     "infra:build": "podman build --security-opt seccomp=unconfined -t pkd-infra -f Containerfile.infra .",
     "infra": "podman run --rm -it --security-opt seccomp=unconfined -v $(pwd)/infra/cloud:/infra:Z -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_REGION -e CLOUDFLARE_API_TOKEN -e TF_VAR_AWS_ACCOUNT_ID -e TF_VAR_CLOUDFLARE_ACCOUNT_ID pkd-infra",
     "audit:registries": "grep -E '^FROM\\s+([^/.]+|docker\\.io)/' $(find . -maxdepth 3 -name 'Containerfile*') && echo 'Violation: Low-Rigor registry found.' && exit 1 || echo 'Registry audit passed.'"

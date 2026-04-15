@@ -133,6 +133,6 @@ describe('Admin Control Plane Endpoints', () => {
     const res = await router.fetch(req, mockEnv);
     expect(res.status).toBe(403);
     const data = await res.json() as any;
-    expect(data.message).toBe('Only ADMIN can impersonate');
+    expect(data.message).toBe('Security Violation: Only ADMIN can use X-Pharos-Impersonate.');
   });
 });

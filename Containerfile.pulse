@@ -1,0 +1,43 @@
+# ========================================================================
+# Project: Pharos Kitchen Design (Project Prism)
+# Component: DevSecOps / CI
+# File: Containerfile.pulse
+# Author: Richard D. (https://github.com/iamrichardd)
+# License: FSL-1.1
+# Purpose: Unified "Pulse" validation for Rust, .NET, and TypeScript.
+# Why: ADR-0017 (Multi-Stage chaining) ensures cross-language FFI stability.
+# ========================================================================
+
+# Stage 1: Rust Builder (Metadata Core)
+FROM public.ecr.aws/docker/library/rust@sha256:72724f1a416c449b405a2b7ed6bac56058163e6dfb1b5ccb40839882141dd237 AS rust-builder
+WORKDIR /work
+COPY . .
+# Install cargo-audit for security scanning
+RUN cargo install cargo-audit
+# Run Rust unit tests, compile core, and perform security audit.
+RUN cd packages/pkd-core && cargo test && cargo build && cargo audit
+
+# Stage 2: Node.js (TypeScript & Security Audit)
+FROM public.ecr.aws/docker/library/node:24-slim AS ts-auditor
+WORKDIR /work
+COPY . .
+# Perform dependency audit and TS unit tests.
+RUN npm install && npm audit --workspaces && npm test
+
+# Stage 3: .NET SDK (Integrated "Pulse" Handshake)
+# We use the official .NET 8 SDK and chain the Rust artifact for the FFI validation.
+FROM mcr.microsoft.com/dotnet/sdk@sha256:3e7b0cefe1b00a350ffb0e06b4e1271a4e791df6b8ac4239be05f1ae2736fcff AS pulse-final
+WORKDIR /work
+COPY . .
+
+# COPY THE HANDSHAKE ARTIFACT:
+# We pull the exact libpkd_core.so built in the Rust stage to verify the P/Invoke boundary.
+COPY --from=rust-builder /work/packages/pkd-core/target/debug/libpkd_core.so /work/packages/pkd-core/target/debug/libpkd_core.so
+
+# Ensure the ts-auditor stage also completed successfully.
+# Why: While ts-auditor runs in parallel, we want the final build to depend on its success.
+COPY --from=ts-auditor /work/package.json /work/ts-auditor-marker
+
+# Default entrypoint: Run the Revit Bridge integration tests.
+# These tests specifically exercise the P/Invoke boundary against the compiled Rust library.
+CMD ["dotnet", "test", "packages/revit-bridge/tests/Pkd.RevitBridge.Tests/Pkd.RevitBridge.Tests.csproj"]

@@ -77,14 +77,19 @@
 - [x] **Issue #27 (Governance)**: Remediated Revit Bridge test naming and added "Why" rationale (Agentic Continuity).
 - [x] **Issue #27 (Security)**: Implemented `Containerfile.bridge` for Zero-Host .NET validation.
 - [x] **Issue #27 (Stability)**: Hardened all `podman build` scripts with `seccomp=unconfined` for environment parity.
+- [x] **Issue #32 (Interop)**: Implemented `pkd-core` JSON error serialization and handle-based validation for FFI.
 - [x] **Verification**: Full integration handshake verified green in Podman container.
+
+### Sprint 3.9: Revit Ribbon & Command Infrastructure (2026-04-15) - ✅ COMPLETED
+- [x] **Issue #29 (UI)**: Scaffolded Revit Ribbon UI with "Pharos Design" tab and "Truth Engine" panel.
+- [x] **Issue #29 (Commands)**: Implemented `ValidateSelectionCommand` with Revit-to-Rust bridge integration.
+- [x] **Issue #33 (CI)**: Implemented unified "Pulse" validation system (`scripts/pulse.sh`).
+- [x] **Verification**: Cross-language handshake verified green in a single multi-stage Podman transaction.
 
 ---
 
 ## 🏗️ Active Development
 
 ### Phase 4: Revit & Web Interop (Project Prism Bridge)
-- [ ] **Issue #32**: Implement `pkd-core` JSON error serialization for FFI.
-- [ ] **Issue #29**: Scaffold Revit Ribbon UI and initial command palette.
 - [ ] **Issue #30**: Implement "Ghost Link" metadata sync between Revit and Demo site.
-- [ ] **Issue #33**: Integrated CI script for automated cross-language validation.
+- [ ] **Issue #28**: Shared Design System Extraction (UI/UX Bridge).
