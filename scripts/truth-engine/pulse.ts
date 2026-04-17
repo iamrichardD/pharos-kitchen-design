@@ -18,13 +18,18 @@ async function main() {
     const db = new Database('data/truth_engine.db');
 
     // 1. Seed Manufacturer if missing (Development)
-    const mfrSeed = db.prepare("INSERT OR IGNORE INTO manufacturers (name, base_url) VALUES ('Frymaster', 'https://www.frymaster.com/products')");
+    const mfrSeed = db.prepare(`
+        INSERT OR IGNORE INTO manufacturers (name, scheme, host, catalog_path) 
+        VALUES ('Frymaster', 'https', 'www.frymaster.com', '/products')
+    `);
     mfrSeed.run();
 
-    // 2. Register the base URL as a resource if it's the first run
-    const baseUri = 'https://www.frymaster.com/products';
-    const registerBase = db.prepare("INSERT OR IGNORE INTO resources (mfr_id, resource_type, uri, sync_state) SELECT id, 'HTML', ?, 'STALE' FROM manufacturers WHERE name = 'Frymaster'");
-    registerBase.run(baseUri);
+    // 2. Register the catalog page as a resource if it's the first run
+    const registerBase = db.prepare(`
+        INSERT OR IGNORE INTO resources (mfr_id, resource_type, uri, sync_state) 
+        SELECT id, 'HTML', base_url, 'STALE' FROM manufacturers WHERE name = 'Frymaster'
+    `);
+    registerBase.run();
 
     // 3. Process STALE resources
     const staleResources = db.prepare("SELECT * FROM resources WHERE sync_state = 'STALE'").all() as any[];

@@ -37,7 +37,10 @@ export class TruthEngine {
             CREATE TABLE IF NOT EXISTS manufacturers (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL UNIQUE,
-                base_url TEXT NOT NULL
+                scheme TEXT NOT NULL DEFAULT 'https',
+                host TEXT NOT NULL,
+                catalog_path TEXT NOT NULL DEFAULT '/',
+                base_url TEXT GENERATED ALWAYS AS (scheme || '://' || host || catalog_path) VIRTUAL
             );
             CREATE TABLE IF NOT EXISTS resources (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -123,17 +126,18 @@ export class TruthEngine {
      * Registers a discovered resource if it passes the SSRF Domain Sentinel.
      */
     public registerResource(mfrId: number, uri: string, type: string) {
-        const mfr = this.db.prepare('SELECT base_url FROM manufacturers WHERE id = ?').get(mfrId) as any;
+        const mfr = this.db.prepare('SELECT host FROM manufacturers WHERE id = ?').get(mfrId) as any;
         if (!mfr) {
             console.warn(`[Security] Blocked resource registration for unknown manufacturer ID: ${mfrId}`);
             return;
         }
 
         const url = new URL(uri);
-        const mfrHost = new URL(mfr.base_url).hostname;
+        const mfrHost = mfr.host;
+        const baseDomain = mfrHost.startsWith('www.') ? mfrHost.substring(4) : mfrHost;
 
-        // SSRF Sentinel: Only allow the manufacturer's own domain
-        if (url.hostname !== mfrHost && !url.hostname.endsWith(`.${mfrHost}`)) {
+        // SSRF Sentinel: Only allow the manufacturer's own domain or subdomains
+        if (url.hostname !== mfrHost && url.hostname !== baseDomain && !url.hostname.endsWith(`.${baseDomain}`)) {
             console.warn(`[Security] Blocked unauthorized resource URI (Domain Mismatch): ${uri}`);
             return;
         }

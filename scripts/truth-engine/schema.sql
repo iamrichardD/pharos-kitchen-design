@@ -5,14 +5,17 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: State machine schema for tracking manufacturer data vitality.
- * Traceability: Issue #46, ADR-0015, ADR-0017
+ * Traceability: Issue #47, ADR-0015, ADR-0017
  * ======================================================================== */
 
 -- Manufacturers Table
 CREATE TABLE IF NOT EXISTS manufacturers (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL UNIQUE,
-    base_url TEXT NOT NULL,
+    scheme TEXT NOT NULL DEFAULT 'https',
+    host TEXT NOT NULL,
+    catalog_path TEXT NOT NULL DEFAULT '/',
+    base_url TEXT GENERATED ALWAYS AS (scheme || '://' || host || catalog_path) VIRTUAL,
     last_crawl_at DATETIME,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
@@ -45,5 +48,5 @@ CREATE TABLE IF NOT EXISTS sync_logs (
 );
 
 -- Initial Seed
-INSERT OR IGNORE INTO manufacturers (name, base_url) 
-VALUES ('Frymaster', 'https://www.frymaster.com/products');
+INSERT OR IGNORE INTO manufacturers (name, scheme, host, catalog_path) 
+VALUES ('Frymaster', 'https', 'www.frymaster.com', '/products');

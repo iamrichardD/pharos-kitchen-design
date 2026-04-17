@@ -28,8 +28,11 @@ describe('TruthEngine', () => {
         engine = new TruthEngine(TEST_DB);
         db = new Database(TEST_DB);
         
-        // Seed a manufacturer
-        db.prepare("INSERT INTO manufacturers (name, base_url) VALUES ('Frymaster', 'https://www.frymaster.com')").run();
+        // Seed manufacturer with componentized URI
+        db.prepare(`
+            INSERT INTO manufacturers (name, scheme, host, catalog_path) 
+            VALUES ('Frymaster', 'https', 'www.frymaster.com', '/products')
+        `).run();
     });
 
     afterEach(() => {
@@ -37,12 +40,25 @@ describe('TruthEngine', () => {
         if (existsSync(TEST_DB)) rmSync(TEST_DB);
     });
 
+    it('test_should_reconstruct_full_uri_from_components', () => {
+        const mfr = db.prepare('SELECT base_url FROM manufacturers WHERE name = ?').get('Frymaster') as any;
+        expect(mfr.base_url).toBe('https://www.frymaster.com/products');
+    });
+
     it('test_should_block_unauthorized_domain_when_registering_resource', () => {
-        const maliciousUri = 'http://169.254.169.254/latest/meta-data/';
-        engine.registerResource(1, maliciousUri, 'HTML');
+        const maliciousUri = 'https://malicious-site.com/malware.pdf';
+        engine.registerResource(1, maliciousUri, 'PDF');
         
         const resource = db.prepare('SELECT * FROM resources WHERE uri = ?').get(maliciousUri);
         expect(resource).toBeUndefined();
+    });
+
+    it('test_should_allow_subdomain_of_authorized_host', () => {
+        const subdomainUri = 'https://assets.frymaster.com/spec.pdf';
+        engine.registerResource(1, subdomainUri, 'PDF');
+        
+        const resource = db.prepare('SELECT * FROM resources WHERE uri = ?').get(subdomainUri) as any;
+        expect(resource).toBeDefined();
     });
 
     it('test_should_allow_authorized_domain_when_registering_resource', () => {
