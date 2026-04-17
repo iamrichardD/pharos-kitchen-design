@@ -1,0 +1,17 @@
+{
+  "name": "@pkd/truth-engine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.5.0",
+    "@playwright/test": "^1.59.1"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "vitest": "^4.1.4"
+  }
+}

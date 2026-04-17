@@ -1,0 +1,31 @@
+{
+  "pkd_prologue": {
+    "project": "Pharos Kitchen Design (Project Prism)",
+    "component": "Truth Engine / Patterns",
+    "file": "frymaster.json",
+    "author": "Richard D. (https://github.com/iamrichardd)",
+    "license": "FSL-1.1 (See LICENSE file for details)",
+    "purpose": "Deterministic regex dialects for Frymaster equipment metadata.",
+    "traceability": "Issue #48, ADR-0017"
+  },
+  "manufacturer": "Frymaster",
+  "rules": [
+    {
+      "id": "elec-standard-v1",
+      "weight": 100,
+      "mappings": {
+        "voltage": "(\\d{3})V",
+        "phase": "(\\d)PH",
+        "hertz": "(\\d{2})HZ"
+      }
+    },
+    {
+      "id": "elec-verbose-v1",
+      "weight": 50,
+      "mappings": {
+        "voltage": "(\\d{3})\\s*Volts",
+        "phase": "(\\d)\\s*Phase"
+      }
+    }
+  ]
+}

@@ -1,0 +1,863 @@
+diff --git a/.gemini/skills/pharos-crucible/SKILL.md b/.gemini/skills/pharos-crucible/SKILL.md
+new file mode 100644
+index 0000000..e58d52c
+--- /dev/null
++++ b/.gemini/skills/pharos-crucible/SKILL.md
+@@ -0,0 +1,52 @@
++---
++name: pharos-crucible
++description: Automate the Pharos 'Builder-to-Auditor' transition and perform high-rigor PR audits. Use this skill when a feature or bug fix implementation is complete to verify adherence to PRACTICES.md and CRUCIBLE_HEURISTICS.md.
++---
++
++# Pharos Crucible: Automated Audit Engine
++
++This skill enforces the "Pharos Green" standard by automating the transition from the **Builder** persona to a fresh **Auditor** persona.
++
++## 🛑 STRICT MANDATE: CONTEXT RESET
++The **Auditor** MUST be a fresh instance of the `generalist` sub-agent. This ensures the review is objective and free from the "Builder's" implementation bias.
++
++## Core Workflows
++
++### 1. The Audit Loop (`crucible-audit`)
++When an implementation is complete and ready for review:
++1.  **Diff Collection:** Collect the `git diff` of the current feature branch against `main` (or the base branch).
++    ```bash
++    git diff main...HEAD
++    ```
++2.  **Heuristic Loading:** Read the project's philosophical constitution and operational manual.
++    -   `[PRACTICES.md](.github/PRACTICES.md)`
++    -   `[CRUCIBLE_HEURISTICS.md](.github/CRUCIBLE_HEURISTICS.md)`
++3.  **Auditor Delegation:** Invoke the `generalist` sub-agent with the following prompt:
++    > "You are the **Pharos Auditor**. Perform a **Brutally Honest** gap analysis of the provided diff against the project's **PRACTICES.md** and **CRUCIBLE_HEURISTICS.md**. 
++    > 
++    > **Your Constraints:**
++    > 1.  **Voice:** Senior Staff Engineer / Mentorship-focused.
++    > 2.  **Output:** Provide a 'Fix Summary', 'Security Review', and a list of 'Instructive Peer Review' items following the standard pattern.
++    > 3.  **Final Verdict:** Explicitly state if the code is 'Pharos Green' or needs 'Remediation'.
++    > 
++    > **Input Data:**
++    > [CONTENT_OF_PRACTICES.md]
++    > [CONTENT_OF_HEURISTICS.md]
++    > [GIT_DIFF_OUTPUT]"
++4.  **Reporting:** Post the Auditor's report as a comment on the GitHub PR and update the `⚔️ The Pharos Crucible (Audit Log)` section in the PR body.
++
++### 2. The Remediation Loop (`crucible-fix`)
++If the Auditor identifies gaps:
++1.  **Implementation:** The **Builder** (a separate agent instance) resolves the identified items.
++2.  **Re-Audit:** Repeat the `crucible-audit` workflow until the "Pharos Green" status is achieved.
++
++### 3. Final Verification (`crucible-green`)
++1.  **Pulse Check:** Run `scripts/pulse.sh` to ensure all tests and "Process Linting" checks pass.
++2.  **HitL Authorization:** Present the final Auditor's report to the human Meta-Architect for the final merge decision.
++
++## Auditor Persona Heuristics
++- **TDD:** No test, no merge.
++- **YAGNI:** Remove any "just-in-case" flexibility.
++- **VSA:** Ensure logic is strictly encapsulated in its vertical slice.
++- **Fail-Fast:** Verify sentinels at all system seams.
++- **Mentorship:** Every critique must explain the "Why" and "How."
+diff --git a/.gemini/skills/pharos-sync/SKILL.md b/.gemini/skills/pharos-sync/SKILL.md
+new file mode 100644
+index 0000000..aade351
+--- /dev/null
++++ b/.gemini/skills/pharos-sync/SKILL.md
+@@ -0,0 +1,67 @@
++---
++name: pharos-sync
++description: Synchronize Pharos Kitchen Design (PKD) project state between @TODO.md, @PROGRESS.md, and GitHub Issues. Use this skill when starting new tasks, completing work, or performing end-of-session state reconciliation. Also use this skill as a GATEKEEPER when a prompt starts with "bug report", "feature request", or "feature update request" to enforce documentation before implementation.
++---
++
++# Pharos Synchronization Protocol
++
++This skill enforces the "Single Source of Truth" for the Pharos Kitchen Design (PKD) project by reconciling local tracking files with the GitHub issue tracker.
++
++## 🛑 STRICT MANDATE: THE GATEKEEPER
++When a user starts a prompt with **"bug report"**, **"feature request"**, **"feature update request"**, or when the agent identifies a **tracking intent** (creating a log or issue), you MUST follow the **Document then Stop** workflow:
++1. **Document**: 
++    - **Check Existing**: Search GitHub Issues and local tracking files (`@TODO.md`, `@PROGRESS.md`) for a related open issue.
++    - **Scope Expansion**: If a related issue exists, document the new findings or requirements as a detailed comment on the existing issue to expand its scope.
++    - **New Task**: If no related issue exists, execute the `sync-init` workflow (Create GH Issue, update `@TODO.md` and `@PROGRESS.md`).
++2. **Summarize**: Provide a concise summary of the documented task (or scope expansion) and the verification strategy.
++3. **STOP**: Do NOT proceed to implementation. Inform the user that the task is documented and you are stopping to allow for a clean session transition.
++
++## Core Workflows
++
++### 1. Task Initialization (`sync-init`)
++When starting a new task from the backlog:
++- **Pre-check Naming Protocol**: You MUST read `@TODO.md` before calling `gh issue create` to ensure the **Task ID** (e.g., `1.4`) and title alignment follow existing patterns.
++- **Search Mandate**: Search BOTH `@TODO.md` and `@PROGRESS.md` for the proposed Task ID and Issue ID to ensure they are not already in use.
++- **ID Assignment**: If a task is new and not in the backlog, assign the next available incremental ID for that phase.
++- **Label Validation**: Always run `gh label list` before creating an issue. If a required label is missing, you MUST create it using `gh label create [NAME] --color [HEX]`.
++- **Mandate**: Use `gh issue create` with the prefix `Task X.Y: [Title]`, `Bug #Z: [Title]`, or `Debt #A: [Title]`.
++- **Update**: Immediately add the resulting `(Issue #ID)` to the corresponding line in `@TODO.md`.
++- **Assignment**: Ensure the issue is assigned to the current agent and tagged with the correct `phase-X` label.
++
++### 2. Progress Documentation (`sync-update`)
++During active development:
++- **Commentary**: Periodically update the GitHub issue with progress comments to ensure "Human/AI Handover" continuity.
++- **Traceability**: Ensure every commit message references the Task ID (e.g., `feat(core): add validator logic (Task 1.4)`).
++
++### 3. Task Closure (`sync-close`)
++When a task meets the "Definition of Done":
++- **Verification**: MUST perform **Production Verification**. Use `web_fetch` to confirm changes are live and functional on `https://iamrichardd.com/pharos-kitchen-design/`.
++- **Summary**: Extract the "Fix Summary" and "Verification Prompt" from the implemented changes.
++- **GitHub**: Post a final comment on the GitHub issue containing:
++  - **Fix Summary**: High-level description.
++  - **Security Review**: Explicit confirmation that the implementation adheres to `SECURITY.md`.
++  - **Production Verification**: Confirmation that the live site was inspected and is correct.
++  - **AI-Ready Verification Prompt**: The exact Podman command for local verification.
++- **Close**: Close the GitHub issue.
++- **TODO**: Mark the checkbox `[x]` in `@TODO.md`.
++
++### 4. Reconciliation Sweep (`sync-audit`)
++Before concluding a session:
++- **Compare**: List all open/closed issues on GitHub and compare them against `@TODO.md` and `@PROGRESS.md`.
++- **Repair**:
++  - If GH is closed but TODO is `[ ]`, mark TODO complete.
++  - If TODO is `[x]` but GH is open, close the GH issue with a summary.
++  - If prefixes are missing from GH titles, add them using `gh issue edit`.
++
++## Standards & Formatting
++
++- **GitHub Titles**: MUST start with `Task X.Y: `, `Bug #Z: `, or `Debt #A: `.
++- **Issue Labels**: `enhancement`, `bug`, `documentation`, `phase-X`.
++- **Closure Comment**:
++  ```markdown
++  **Fix Summary**
++  [Clear, high-level description of what changed]
++
++  **AI-Ready Verification Prompt**
++  `podman run --rm ... [exact command]`
++  ```
+diff --git a/.github/CRUCIBLE_HEURISTICS.md b/.github/CRUCIBLE_HEURISTICS.md
+new file mode 100644
+index 0000000..b39de0c
+--- /dev/null
++++ b/.github/CRUCIBLE_HEURISTICS.md
+@@ -0,0 +1,50 @@
++/* ========================================================================
++ * Project: Pharos Kitchen Design (Project Prism)
++ * Component: Governance / Heuristics
++ * File: CRUCIBLE_HEURISTICS.md
++ * Author: Richard D. (https://github.com/iamrichardd)
++ * License: FSL-1.1 (See LICENSE file for details)
++ * Purpose: Public Auditor Operational Manual & Heuristics
++ * Traceability: Task 4.6 (Issue #44)
++ * ======================================================================== */
++
++# Pharos Crucible: Auditor Operational Heuristics
++
++This document provides the specific heuristics and instructions used by the Pharos Auditor (AI or Human) to evaluate code contributions. These heuristics are derived from the core philosophies defined in **[PRACTICES.md](./PRACTICES.md)**.
++
++## 1. The Review Persona
++- **Voice:** Senior Staff Engineer / Mentorship-focused.
++- **Tone (Internal/Discussion):** Brutally Honest. Point out flaws without sugar-coating.
++- **Tone (Public/PR):** Instructive and professional. Always explain the "Why" and the "How" behind a critique.
++- **Goal:** To achieve "Pharos Green" status (Zero-Host verified, VSA-compliant, principle-aligned).
++
++## 2. Core Review Heuristics
++
++### A. Economic & Feedback (Beck Heuristics)
++- **The TDD Traceability:** Does the PR include a test that verifies the behavioral change? If no test exists, the code is incomplete.
++- **The YAGNI Check:** Are there any abstractions, parameters, or "helper functions" that are not currently used by the core logic or tests? If so, flag them for removal.
++- **Simplicity Audit:** Can this logic be expressed in fewer lines or with less cognitive load?
++
++### B. Structural Integrity (Martin Heuristics)
++- **SRP Enforcement:** Does this vertical slice attempt to modify shared logic outside of its domain?
++- **Sentinel Verification:** Are FFI boundaries (Rust <-> C#), API endpoints, and persistence layers guarded by explicit input validation and handle-based error checking?
++- **DIP Check:** Is the implementation depending on a specific UI framework or vendor-locked detail instead of a core schema?
++
++### C. Evolutionary Quality (Fowler Heuristics)
++- **Refactoring Integrity:** Does the change improve the existing design, or does it add "architectural debt" to solve a localized problem?
++- **Ubiquitous Language:** Are variables, functions, and modules named according to the Independent Kitchen Designer (IKD) domain? (e.g., `warewashing_validator` vs. `json_parser_v2`).
++- **VSA Isolation:** Is the feature encapsulated within its own slice, preventing side effects in unrelated areas?
++
++## 3. The "Pharos Green" Definition of Done (DoD)
++Code is considered "Pharos Green" only when:
++1. All Podman-based `pulse.sh` tests pass with zero warnings.
++2. The Auditor has confirmed that all **[PRACTICES.md](./PRACTICES.md)** mandates are met.
++3. The Human-in-the-Loop (HitL) has acknowledged the Auditor's report and authorized the merge.
++4. The PR includes an updated **Fix Summary** and **DORA Metric** assessment.
++
++## 4. Instructive Comment Pattern
++When flagging an issue in a PR, use the following pattern:
++> "Applying the **[PRINCIPLE_NAME]** here to ensure **[TECHNICAL_BENEFIT]**. This avoids **[NEGATIVE_OUTCOME]**. See **[PRACTICES.md#SECTION]** for our standard on this pattern."
++
++Example:
++> "Applying the **'Fail-Fast Sentinel'** pattern here to ensure we reject malformed Revit metadata at the FFI boundary. This prevents 'hallucination gaps' in the Rust core. See **PRACTICES.md#2-the-structural-mandate** for our project's standard on this requirement."
+diff --git a/.github/PRACTICES.md b/.github/PRACTICES.md
+new file mode 100644
+index 0000000..08e6937
+--- /dev/null
++++ b/.github/PRACTICES.md
+@@ -0,0 +1,52 @@
++/* ========================================================================
++ * Project: Pharos Kitchen Design (Project Prism)
++ * Component: Governance / Practices
++ * File: PRACTICES.md
++ * Author: Richard D. (https://github.com/iamrichardd)
++ * License: FSL-1.1 (See LICENSE file for details)
++ * Purpose: Philosophical Constitution (Beck, Martin, Fowler)
++ * Traceability: Task 4.6 (Issue #44)
++ * ======================================================================== */
++
++# Pharos Engineering Practices (The Crucible Constitution)
++
++This document codifies the core engineering philosophies of the Pharos Kitchen Design (PKD) project. All contributions, automated audits, and human reviews are measured against these foundational mandates.
++
++## 1. The Feedback & Economic Mandate (Kent Beck)
++*Simplicity is the highest form of sophistication. We write code for humans to read and machines to execute.*
++
++- **Test-Driven Design (TDD):** Every feature or bug fix MUST begin with a failing test case that defines the desired behavior and economic value. Tests are not "afterthoughts"; they are the "design specification." If a test is difficult to write, the design is flawed.
++- **YAGNI (You Ain't Gonna Need It):** Implement only what is required for the current task. Do not add "hooks for the future" or "flexible abstractions" that are not currently exercised by a test.
++- **Communication over Complexity:** Code that is clever but hard to read is a liability. Prefer explicit, readable logic over "brilliant" hacks.
++
++## 2. The Structural Mandate (Robert C. Martin)
++*Clean code is not written by followers of rules, but by practitioners of principles.*
++
++- **SOLID Principles:** 
++    - **Single Responsibility (SRP):** Each vertical slice or module must have exactly one reason to change.
++    - **Dependency Inversion (DIP):** Depend on abstractions (the Truth Engine schemas), not on concretions (specific vendor APIs or UI frameworks).
++- **Fail-Fast Sentinels:** System seams (FFI boundaries, API endpoints, persistence layers) MUST implement strict input validation and return informative errors immediately. A system that masks an error is a system that lies.
++- **The Boy Scout Rule:** Always leave the code a little cleaner than you found it, but stay strictly within the scope of your vertical slice.
++
++## 3. The Evolutionary Mandate (Martin Fowler)
++*Any fool can write code that a computer can understand. Good programmers write code that humans can understand.*
++
++- **Continuous Refactoring:** Refactoring is the act of improving the design of existing code without changing its observable behavior. It is an integral part of the development cycle, not a separate task.
++- **Ubiquitous Language (DDD):** The codebase must use terms that reflect the domain of the Independent Kitchen Designer (IKD), not the jargon of the software engineer.
++- **Vertical Slice Architecture (VSA):** We organize code by business capability, not by technical layer. This ensures that a change to a single feature doesn't ripple across unrelated silos.
++
++## 4. The Mentorship Standard
++*We do not just build software; we build engineers.*
++
++- **Instructive Peer Review:** Code reviews are teaching moments. Every critique should explain the "Why" and the "How," referencing the principles in this document.
++- **Transparency of Process:** The auditor's heuristics, the CI/CD pipelines, and the decision logs are open-source and publicly auditable.
++
++---
++### Compliance Check
++Before submitting a PR, ask yourself:
++1. Does this implementation have a corresponding test? (**Beck**)
++2. Is there any "just-in-case" code I can remove? (**Beck**)
++3. Does this change violate the Single Responsibility Principle? (**Martin**)
++4. Have I implemented a "Fail-Fast Sentinel" at the system seam? (**Martin**)
++5. Does the naming reflect the IKD domain language? (**Fowler**)
++6. Is this the simplest design that fulfills the requirement? (**Fowler**)
+diff --git a/.github/pull_request_template.md b/.github/pull_request_template.md
+index 3e94f8b..60ff72f 100644
+--- a/.github/pull_request_template.md
++++ b/.github/pull_request_template.md
+@@ -10,6 +10,19 @@
+ - **Rationale:** Why was this path promoted over others?
+ - **Alternatives Evaluated:** Briefly describe the discarded options.
+ 
++## ⚔️ The Pharos Crucible (Audit Log)
++<!-- This section is populated by the Auditor Agent and verified by the HitL. 
++     Refer to [.github/PRACTICES.md](.github/PRACTICES.md) and [.github/CRUCIBLE_HEURISTICS.md](.github/CRUCIBLE_HEURISTICS.md) -->
++- [ ] **Beck (Feedback):** TDD traceability and YAGNI compliance confirmed.
++- [ ] **Martin (Structure):** SOLID/SRP and Fail-Fast Sentinels verified.
++- [ ] **Fowler (Evolution):** Ubiquitous Language and VSA isolation confirmed.
++- [ ] **Zero-Host:** Verified in Podman container (`scripts/pulse.sh`).
++
++## 🎓 Instructive Peer Review Log
++<!-- Summarize the key mentorship-focused inline comments provided during the review loop. -->
++- [ ] [Comment 1 Summary: The Why & How]
++- [ ] [Comment 2 Summary: The Why & How]
++
+ ## 🛡️ Security Review (Shift-Left)
+ <!-- Document potential attack vectors identified and mitigated during the Research phase. -->
+ - [ ] **Input Validation:** How are malformed or malicious inputs handled?
+@@ -21,9 +34,4 @@
+ - **Change Failure Rate:** [Results from Podman/Zero-Host test verification]
+ - **Deployment Frequency:** [Branch status / Release readiness]
+ 
+-## 🧩 Interoperability & Quality Check
+-- [ ] Verified in Podman Zero-Host environment (`scripts/test-bridge.sh`).
+-- [ ] Schema compliance confirmed against `pkd-core/schema/pharos-schema.json`.
+-- [ ] **Mentorship:** Inline comments provide "Why/How" without meta-labels.
+-
+ Closes #[Issue Number]
+diff --git a/@PROGRESS.md b/@PROGRESS.md
+index 228681f..658f119 100644
+--- a/@PROGRESS.md
++++ b/@PROGRESS.md
+@@ -84,6 +84,7 @@
+ - [x] **Issue #29 (UI)**: Scaffolded Revit Ribbon UI with "Pharos Design" tab and "Truth Engine" panel.
+ - [x] **Issue #29 (Commands)**: Implemented `ValidateSelectionCommand` with Revit-to-Rust bridge integration.
+ - [x] **Issue #33 (CI)**: Implemented unified "Pulse" validation system (`scripts/pulse.sh`).
++- [x] **Issue #43 (Process)**: Implement Pharos Synchronization Protocol (Task 4.1).
+ - [x] **Verification**: Cross-language handshake verified green in a single multi-stage Podman transaction.
+ 
+ ---
+@@ -91,5 +92,10 @@
+ ## 🏗️ Active Development
+ 
+ ### Phase 4: Revit & Web Interop (Project Prism Bridge)
+-- [ ] **Issue #30**: Implement "Ghost Link" metadata sync between Revit and Demo site.
+-- [ ] **Issue #28**: Shared Design System Extraction (UI/UX Bridge).
++- [ ] **Issue #31**: Verify End-to-End Revit -> Bridge -> Web Flow (Task 4.2).
++- [ ] **Issue #30**: Implement Ghost Link Prototype (Task 4.3).
++- [ ] **Issue #28**: Shared Design System Extraction (Task 4.4).
++- [ ] **Issue #42**: Audit Remediation: SRI, SEO, and WASM Bridge (Task 4.5).
++- [ ] **Issue #41**: Marketing Site CI/CD Build Failure (Bug #41).
++- [x] **Issue #44**: Implement Pharos Crucible Process (Task 4.6).
++- [x] **Issue #45**: Implement Pharos Crucible Enforcement Layer (Task 4.7).
+diff --git a/@TODO.md b/@TODO.md
+index c53c138..9f492f2 100644
+--- a/@TODO.md
++++ b/@TODO.md
+@@ -73,7 +73,14 @@
+ - [x] **Issue #32**: Implement `pkd-core` JSON error serialization for FFI (Interop Bridge).
+ - [x] **Issue #29**: Scaffold Revit Ribbon UI & Command logic.
+ - [x] **Issue #33**: Integrated CI script for automated cross-language validation.
+-- [ ] **Issue #28**: Shared Design System Extraction (UI/UX Bridge).
++- [x] **Issue #43**: Implement Pharos Synchronization Protocol (Task 4.1).
++- [ ] **Issue #31**: Verify End-to-End Revit -> Bridge -> Web Flow (Task 4.2).
++- [ ] **Issue #30**: Implement Ghost Link Prototype (Task 4.3).
++- [ ] **Issue #28**: Shared Design System Extraction (Task 4.4).
++- [ ] **Issue #42**: Audit Remediation: SRI, SEO, and WASM Bridge (Task 4.5).
++- [ ] **Issue #41**: Marketing Site CI/CD Build Failure (Bug #41).
++- [x] **Issue #44**: Implement Pharos Crucible Process (Task 4.6).
++- [x] **Issue #45**: Implement Pharos Crucible Enforcement Layer (Task 4.7).
+ 
+ ---
+ 
+diff --git a/Containerfile.truth-engine b/Containerfile.truth-engine
+new file mode 100644
+index 0000000..79dc3fd
+--- /dev/null
++++ b/Containerfile.truth-engine
+@@ -0,0 +1,33 @@
++# ========================================================================
++# Project: Pharos Kitchen Design (Project Prism)
++# Component: Truth Engine / Crawler Environment
++# File: Containerfile.truth-engine
++# Author: Richard D. (https://github.com/iamrichardd)
++# License: FSL-1.1 (See LICENSE file for details)
++# Purpose: Execution environment for the Playwright-based Truth Engine.
++# Traceability: Issue #46, ADR-0014
++# ========================================================================
++
++FROM mcr.microsoft.com/playwright:v1.59.1-noble
++
++# Force Node 24 installation
++RUN apt-get update && apt-get install -y curl && \
++    curl -fsSL https://deb.nodesource.com/setup_24.x | bash - && \
++    apt-get install -y nodejs python3 make g++ && \
++    rm -rf /var/lib/apt/lists/*
++
++# Use a separate directory for dependencies
++WORKDIR /deps
++COPY package*.json ./
++COPY packages/truth-engine/package*.json ./packages/truth-engine/
++RUN npm install && npm rebuild better-sqlite3
++
++WORKDIR /work
++COPY . .
++
++# CRITICAL: Remove host-polluted node_modules if any were copied
++RUN rm -rf /work/node_modules
++
++# Use the dependencies from /deps
++ENV NODE_PATH=/deps/node_modules
++CMD ["/deps/node_modules/.bin/tsx", "scripts/truth-engine/pulse.ts"]
+diff --git a/GEMINI.md b/GEMINI.md
+index aa96ac6..6cff578 100644
+--- a/GEMINI.md
++++ b/GEMINI.md
+@@ -82,11 +82,42 @@ Every non-trivial task completion MUST follow this workflow:
+     - **Integrated Mentorship:** Weave the technical rationale, safety implications, and alternative patterns directly into the critique (e.g., "We should avoid [X] here because [Y] results in [Z]. A more resilient approach is [A]...").
+ 
+ ## DevSecOps & Workflow
++
++### 1. The Pharos Development Lifecycle
++Every task MUST progress through the following four phases. Failure to complete a phase's requirements is a violation of the Pharos Standard.
++
++1.  **Phase 1: Research & Issue Authority:**
++    *   **Gate:** Create a GitHub Issue (The Logical Authority).
++    *   **Security:** Perform "Shift-Left" security analysis to identify attack vectors.
++    *   **TDD:** Define atomic test cases *before* any implementation begins.
++2.  **Phase 2: Strategy & The Three-Option Crucible:**
++    *   **Gate:** For non-trivial tasks (ADR-0017), develop exactly three implementation options.
++    *   **Evaluation:** Provide a "Brutally Honest" assessment of the options before promotion.
++3.  **Phase 3: Execution (Surgical Implementation):**
++    *   **Gate:** Implement logic and tests in isolated `git worktree` environments.
++    *   **Validation:** Verify behavioral correctness in a Podman container via `scripts/pulse.sh`.
++4.  **Phase 4: The Crucible Audit (The Hard Gate):**
++    *   **Gate:** Transition from "Builder" to "Auditor" persona.
++    *   **Review:** Perform a "Brutally Honest" gap analysis using **[.github/CRUCIBLE_HEURISTICS.md](.github/CRUCIBLE_HEURISTICS.md)**.
++    *   **Mentorship:** Provide instructive peer review comments in the GitHub PR.
++    *   **Finality:** Merge only after HitL approval and "Pharos Green" verification.
++
++### 2. Sub-Agent Delegation Matrix (The Context Reset)
++To prevent "Persona Schizophrenia" and ensure objective verification, the **Builder** and the **Auditor** MUST be separate, isolated sub-agent instances.
++
++| Role | Responsibility | Tool / Mandate |
++| :--- | :--- | :--- |
++| **Orchestrator** | **Me (The PMA)** | Mental Map, HitL Liaison, Delegation Logic. |
++| **Builder** | Implementation | `generalist` (fresh context) |
++| **Auditor** | Crucible Review | `generalist` (fresh context) + HEURISTICS. |
++
++- **Context Reset:** Every transition from Phase 3 (Execution) to Phase 4 (Crucible) REQUIRE a context reset. I MUST NOT review my own implementation logic. I MUST delegate the audit to a sub-agent with no prior memory of the Builder's work.
++
++### 3. Git Flow & CI/CD
+ - **Git Flow:** Utilize feature branches tied directly to GitHub Issues (e.g., `feat/issue-4-tcp-listener`). Merge to `main` only after validation in Podman.
+ - **AI-Handover:** Every task closure requires a `gh` issue update with a **Fix Summary**, **Security Review**, and **DORA Metric** check.
+-- **Issue-First Mandate:** EVERY feature request or bug fix MUST begin with the creation of a GitHub Issue. This issue serves as the **Logical Authority** for the change.
+-    - **Branching**: All branches MUST follow the `feat/issue-X-description` or `fix/issue-X-description` naming convention.
+-    - **Traceability**: All Pull Requests MUST reference the corresponding issue (e.g., `Closes #X`) to ensure complete architectural and requirement traceability.
++- **Issue-First Mandate:** EVERY feature request or bug fix MUST begin with the creation of a GitHub Issue. 
++    - **Traceability**: All Pull Requests MUST reference the corresponding issue (e.g., `Closes #X`).
+ - **CI/CD:** Utilize GitHub Actions for cross-compiling the Tauri binary and deploying the Astro site.
+ 
+ ---
+diff --git a/data/truth_engine.db b/data/truth_engine.db
+new file mode 100644
+index 0000000..dfdd329
+Binary files /dev/null and b/data/truth_engine.db differ
+diff --git a/package.json b/package.json
+index 99cb366..60ebf68 100644
+--- a/package.json
++++ b/package.json
+@@ -23,6 +23,11 @@
+   "author": "Richard D. (https://github.com/iamrichardd)",
+   "license": "FSL-1.1",
+   "devDependencies": {
+-    "@playwright/test": "^1.59.1"
++    "@playwright/test": "^1.59.1",
++    "@types/better-sqlite3": "^7.6.13",
++    "tsx": "^4.21.0"
++  },
++  "dependencies": {
++    "better-sqlite3": "^12.9.0"
+   }
+ }
+diff --git a/packages/truth-engine/package.json b/packages/truth-engine/package.json
+new file mode 100644
+index 0000000..1d03e1d
+--- /dev/null
++++ b/packages/truth-engine/package.json
+@@ -0,0 +1,17 @@
++{
++  "name": "@pkd/truth-engine",
++  "version": "0.1.0",
++  "private": true,
++  "type": "module",
++  "scripts": {
++    "test": "vitest run"
++  },
++  "dependencies": {
++    "better-sqlite3": "^11.5.0",
++    "@playwright/test": "^1.59.1"
++  },
++  "devDependencies": {
++    "@types/better-sqlite3": "^7.6.13",
++    "vitest": "^4.1.4"
++  }
++}
+diff --git a/packages/truth-engine/src/engine.test.ts b/packages/truth-engine/src/engine.test.ts
+new file mode 100644
+index 0000000..b7fd504
+--- /dev/null
++++ b/packages/truth-engine/src/engine.test.ts
+@@ -0,0 +1,79 @@
++/* ========================================================================
++ * Project: Pharos Kitchen Design (Project Prism)
++ * Component: Truth Engine / Tests
++ * File: engine.test.ts
++ * Author: Richard D. (https://github.com/iamrichardd)
++ * License: FSL-1.1 (See LICENSE file for details)
++ * Purpose: Atomic verification of the Truth Engine state machine.
++ * Traceability: Issue #46, PRACTICES.md#1 (TDD Traceability)
++ * ======================================================================== */
++
++import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
++import { TruthEngine } from './engine.js';
++import Database from 'better-sqlite3';
++import { rmSync, existsSync, mkdirSync } from 'node:fs';
++import { dirname } from 'node:path';
++
++const TEST_DB = 'data/test_truth_engine.db';
++
++describe('TruthEngine', () => {
++    let engine: TruthEngine;
++    let db: Database.Database;
++
++    beforeEach(() => {
++        if (existsSync(TEST_DB)) rmSync(TEST_DB);
++        const dir = dirname(TEST_DB);
++        if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
++        
++        engine = new TruthEngine(TEST_DB);
++        db = new Database(TEST_DB);
++        
++        // Seed a manufacturer
++        db.prepare("INSERT INTO manufacturers (name, base_url) VALUES ('Frymaster', 'https://www.frymaster.com')").run();
++    });
++
++    afterEach(() => {
++        db.close();
++        if (existsSync(TEST_DB)) rmSync(TEST_DB);
++    });
++
++    it('test_should_block_unauthorized_domain_when_registering_resource', () => {
++        const maliciousUri = 'http://169.254.169.254/latest/meta-data/';
++        // @ts-ignore
++        engine.registerResource(1, maliciousUri, 'HTML');
++        
++        const resource = db.prepare('SELECT * FROM resources WHERE uri = ?').get(maliciousUri);
++        expect(resource).toBeUndefined();
++    });
++
++    it('test_should_allow_authorized_domain_when_registering_resource', () => {
++        const validUri = 'https://www.frymaster.com/products/spec.pdf';
++        // @ts-ignore
++        engine.registerResource(1, validUri, 'PDF');
++        
++        const resource = db.prepare('SELECT * FROM resources WHERE uri = ?').get(validUri) as any;
++        expect(resource).toBeDefined();
++        expect(resource.sync_state).toBe('STALE');
++    });
++
++    it('test_should_transition_to_healthy_when_etag_matches', async () => {
++        global.fetch = vi.fn().mockResolvedValue({
++            ok: true,
++            headers: new Map([
++                ['etag', 'match'],
++                ['last-modified', 'today']
++            ])
++        });
++
++        // @ts-ignore
++        engine.registerResource(1, 'https://www.frymaster.com/spec.pdf', 'PDF');
++        const resource = db.prepare('SELECT * FROM resources LIMIT 1').get() as any;
++        
++        engine.updateState(resource.id, 'STALE', { etag: 'match', last_modified: 'today' });
++        
++        const updatedResource = db.prepare('SELECT * FROM resources LIMIT 1').get() as any;
++        const nextState = await engine.checkVitality(updatedResource);
++        
++        expect(nextState).toBe('HEALTHY');
++    });
++});
+diff --git a/packages/truth-engine/src/engine.ts b/packages/truth-engine/src/engine.ts
+new file mode 100644
+index 0000000..e193a7d
+--- /dev/null
++++ b/packages/truth-engine/src/engine.ts
+@@ -0,0 +1,136 @@
++/* ========================================================================
++ * Project: Pharos Kitchen Design (Project Prism)
++ * Component: Truth Engine / Core
++ * File: engine.ts
++ * Author: Richard D. (https://github.com/iamrichardd)
++ * License: FSL-1.1 (See LICENSE file for details)
++ * Purpose: Event-driven state machine for manufacturer data synchronization.
++ * Traceability: Issue #46, ADR-0017 (Option 3)
++ * ======================================================================== */
++
++import Database from 'better-sqlite3';
++import { chromium } from '@playwright/test';
++
++// State Types
++export type SyncState = 'STALE' | 'PENDING_VERIFICATION' | 'DIVE_REQUIRED' | 'HEALTHY' | 'BROKEN';
++
++export interface Resource {
++    id: number;
++    mfr_id: number;
++    resource_type: string;
++    uri: string;
++    etag?: string;
++    last_modified?: string;
++    sync_state: SyncState;
++}
++
++export class TruthEngine {
++    private db: Database.Database;
++
++    constructor(dbPath: string = 'data/truth_engine.db') {
++        this.db = new Database(dbPath);
++        this.initializeSchema();
++    }
++
++    private initializeSchema() {
++        const schema = `
++            CREATE TABLE IF NOT EXISTS manufacturers (
++                id INTEGER PRIMARY KEY AUTOINCREMENT,
++                name TEXT NOT NULL UNIQUE,
++                base_url TEXT NOT NULL
++            );
++            CREATE TABLE IF NOT EXISTS resources (
++                id INTEGER PRIMARY KEY AUTOINCREMENT,
++                mfr_id INTEGER NOT NULL,
++                resource_type TEXT NOT NULL,
++                uri TEXT NOT NULL UNIQUE,
++                etag TEXT,
++                last_modified TEXT,
++                content_hash TEXT,
++                sync_state TEXT DEFAULT 'STALE',
++                last_checked_at DATETIME
++            );
++        `;
++        this.db.exec(schema);
++    }
++
++    async sleep(min = 2000, max = 5000) {
++        const ms = Math.floor(Math.random() * (max - min + 1) + min);
++        return new Promise(resolve => setTimeout(resolve, ms));
++    }
++
++    async checkVitality(resource: Resource): Promise<SyncState> {
++        try {
++            const response = await fetch(resource.uri, { method: 'HEAD' });
++            
++            if (!response.ok) {
++                return response.status === 404 ? 'BROKEN' : 'STALE';
++            }
++
++            const newEtag = response.headers.get('etag');
++            const newLastMod = response.headers.get('last-modified');
++
++            if (newEtag === resource.etag && newLastMod === resource.last_modified) {
++                return 'HEALTHY';
++            }
++
++            return 'DIVE_REQUIRED';
++        } catch (error) {
++            return 'BROKEN';
++        }
++    }
++
++    updateState(id: number, state: SyncState, metadata?: { etag?: string, last_modified?: string }) {
++        const stmt = this.db.prepare(`
++            UPDATE resources 
++            SET sync_state = ?, etag = ?, last_modified = ?, last_checked_at = CURRENT_TIMESTAMP 
++            WHERE id = ?
++        `);
++        stmt.run(state, metadata?.etag || null, metadata?.last_modified || null, id);
++    }
++
++    async discover(mfrName: string) {
++        const mfr = this.db.prepare('SELECT * FROM manufacturers WHERE name = ?').get(mfrName) as any;
++        if (!mfr) throw new Error(`Manufacturer ${mfrName} not found in Truth Engine.`);
++
++        const browser = await chromium.launch({ headless: true });
++        const context = await browser.newContext({
++            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
++        });
++        const page = await context.newPage();
++
++        page.on('response', response => {
++            const url = response.url();
++            if (url.endsWith('.pdf') || url.match(/\.(jpg|jpeg|png|webp)$/i)) {
++                this.registerResource(mfr.id, url, url.endsWith('.pdf') ? 'PDF' : 'IMAGE');
++            }
++        });
++
++        await page.goto(mfr.base_url);
++        await this.sleep(3000, 6000);
++        
++        await page.evaluate(async () => {
++            for (let i = 0; i < 3; i++) {
++                window.scrollBy(0, window.innerHeight);
++                await new Promise(r => setTimeout(r, 1000));
++            }
++        });
++
++        await browser.close();
++    }
++
++    private registerResource(mfrId: number, uri: string, type: string) {
++        // SSRF Sentinel: Only allow known manufacturer domains
++        const url = new URL(uri);
++        const allowedDomains = ['www.frymaster.com', 'frymaster.com'];
++        if (!allowedDomains.includes(url.hostname)) {
++            return;
++        }
++
++        const stmt = this.db.prepare(`
++            INSERT OR IGNORE INTO resources (mfr_id, resource_type, uri, sync_state)
++            VALUES (?, ?, ?, 'STALE')
++        `);
++        stmt.run(mfrId, type, uri);
++    }
++}
+diff --git a/packages/truth-engine/vitest.config.ts b/packages/truth-engine/vitest.config.ts
+new file mode 100644
+index 0000000..2964a42
+--- /dev/null
++++ b/packages/truth-engine/vitest.config.ts
+@@ -0,0 +1,18 @@
++/* ========================================================================
++ * Project: Pharos Kitchen Design (Project Prism)
++ * Component: Truth Engine / Tests
++ * File: vitest.config.ts
++ * Author: Richard D. (https://github.com/iamrichardd)
++ * License: FSL-1.1 (See LICENSE file for details)
++ * Purpose: Vitest configuration for the Truth Engine vertical slice.
++ * ======================================================================== */
++
++import { defineConfig } from 'vitest/config';
++
++export default defineConfig({
++    test: {
++        environment: 'node',
++        globals: true,
++        include: ['src/**/*.test.ts'],
++    },
++});
+diff --git a/pharos-sync.skill b/pharos-sync.skill
+new file mode 100644
+index 0000000..d09b019
+Binary files /dev/null and b/pharos-sync.skill differ
+diff --git a/scripts/pulse.sh b/scripts/pulse.sh
+index c8f88f3..1631fca 100755
+--- a/scripts/pulse.sh
++++ b/scripts/pulse.sh
+@@ -25,4 +25,32 @@ podman run --rm \
+     --security-opt seccomp=unconfined \
+     pkd-pulse
+ 
+-echo "✅ Pulse Complete: Ecosystem Stability Verified."
++echo "🔍 Starting Pharos Process Linting: Governance Verification"
++
++# 3. Process Linting (Pharos Standard)
++
++# Check 1: Branch Naming (Task/Bug ID Traceability)
++CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
++if [[ ! $CURRENT_BRANCH =~ ^(feat|fix|debt)/issue-[0-9]+ ]]; then
++    echo "❌ Error: Branch '$CURRENT_BRANCH' violates naming standard (feat|fix|debt)/issue-X."
++    exit 1
++fi
++
++# Check 2: PR Marker Verification (The Crucible Audit)
++if gh pr view --json body > /dev/null 2>&1; then
++    PR_BODY=$(gh pr view --json body -q '.body')
++    if [[ ! "$PR_BODY" == *"## ⚔️ The Pharos Crucible (Audit Log)"* ]]; then
++        echo "❌ Error: Pull Request body is missing the mandatory 'Pharos Crucible' audit log."
++        exit 1
++    fi
++fi
++
++# Check 3: TDD Traceability (Basic Check for Test Inclusion)
++# Ensure any change to src/ includes a corresponding change in tests/ or src/*.test.ts
++CHANGED_FILES=$(git diff --name-only main...HEAD)
++if [[ "$CHANGED_FILES" == *"src/"* ]] && [[ ! "$CHANGED_FILES" == *"test"* ]]; then
++    echo "⚠️ Warning: Changes to 'src/' detected without corresponding 'test' updates."
++    echo "   Ensure TDD traceability (Beck Principle) is maintained."
++fi
++
++echo "✅ Pulse Complete: Ecosystem & Process Stability Verified."
+diff --git a/scripts/truth-engine/pulse.ts b/scripts/truth-engine/pulse.ts
+new file mode 100644
+index 0000000..c17e063
+--- /dev/null
++++ b/scripts/truth-engine/pulse.ts
+@@ -0,0 +1,52 @@
++/* ========================================================================
++ * Project: Pharos Kitchen Design (Project Prism)
++ * Component: Truth Engine / Execution
++ * File: pulse.ts
++ * Author: Richard D. (https://github.com/iamrichardd)
++ * License: FSL-1.1 (See LICENSE file for details)
++ * Purpose: Entry point for the Truth Engine synchronization loop.
++ * Traceability: Issue #46, ADR-0015
++ * ======================================================================== */
++
++import { TruthEngine } from '../../packages/truth-engine/src/engine.js';
++import Database from 'better-sqlite3';
++
++async function main() {
++    console.log('🚀 Pharos Truth Engine: Starting Pulse Cycle');
++    
++    const engine = new TruthEngine('data/truth_engine.db');
++    const db = new Database('data/truth_engine.db');
++
++    // 1. Seed Manufacturer if missing (Development)
++    const mfrSeed = db.prepare("INSERT OR IGNORE INTO manufacturers (name, base_url) VALUES ('Frymaster', 'https://www.frymaster.com/products')");
++    mfrSeed.run();
++
++    // 2. Register the base URL as a resource if it's the first run
++    const baseUri = 'https://www.frymaster.com/products';
++    const registerBase = db.prepare("INSERT OR IGNORE INTO resources (mfr_id, resource_type, uri, sync_state) SELECT id, 'HTML', ?, 'STALE' FROM manufacturers WHERE name = 'Frymaster'");
++    registerBase.run(baseUri);
++
++    // 3. Process STALE resources
++    const staleResources = db.prepare("SELECT * FROM resources WHERE sync_state = 'STALE'").all() as any[];
++    
++    for (const resource of staleResources) {
++        const nextState = await engine.checkVitality(resource);
++        
++        if (nextState === 'DIVE_REQUIRED' || resource.resource_type === 'HTML') {
++            // If it's the main catalog page, we ALWAYS dive for discovery in v1
++            await engine.discover('Frymaster');
++            engine.updateState(resource.id, 'HEALTHY');
++        } else {
++            engine.updateState(resource.id, nextState);
++        }
++        
++        await engine.sleep(1000, 2000);
++    }
++
++    console.log('✅ Pulse Cycle Complete.');
++}
++
++main().catch(err => {
++    console.error('❌ Pulse Cycle Failed:', err);
++    process.exit(1);
++});
+diff --git a/scripts/truth-engine/schema.sql b/scripts/truth-engine/schema.sql
+new file mode 100644
+index 0000000..b6a4b03
+--- /dev/null
++++ b/scripts/truth-engine/schema.sql
+@@ -0,0 +1,49 @@
++/* ========================================================================
++ * Project: Pharos Kitchen Design (Project Prism)
++ * Component: Truth Engine / Persistence
++ * File: schema.sql
++ * Author: Richard D. (https://github.com/iamrichardd)
++ * License: FSL-1.1 (See LICENSE file for details)
++ * Purpose: State machine schema for tracking manufacturer data vitality.
++ * Traceability: Issue #46, ADR-0015, ADR-0017
++ * ======================================================================== */
++
++-- Manufacturers Table
++CREATE TABLE IF NOT EXISTS manufacturers (
++    id INTEGER PRIMARY KEY AUTOINCREMENT,
++    name TEXT NOT NULL UNIQUE,
++    base_url TEXT NOT NULL,
++    last_crawl_at DATETIME,
++    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
++);
++
++-- Resources Table (The State Machine)
++-- States: 'STALE', 'PENDING_VERIFICATION', 'DIVE_REQUIRED', 'HEALTHY', 'BROKEN'
++CREATE TABLE IF NOT EXISTS resources (
++    id INTEGER PRIMARY KEY AUTOINCREMENT,
++    mfr_id INTEGER NOT NULL,
++    resource_type TEXT NOT NULL, -- 'HTML', 'PDF', 'IMAGE', 'RFA'
++    uri TEXT NOT NULL UNIQUE,
++    etag TEXT,
++    last_modified TEXT,
++    content_hash TEXT, -- SHA-256 for binary assets
++    sync_state TEXT DEFAULT 'STALE',
++    last_checked_at DATETIME,
++    failure_count INTEGER DEFAULT 0,
++    FOREIGN KEY (mfr_id) REFERENCES manufacturers(id)
++);
++
++-- Sync Logs (Audit Trail)
++CREATE TABLE IF NOT EXISTS sync_logs (
++    id INTEGER PRIMARY KEY AUTOINCREMENT,
++    resource_id INTEGER NOT NULL,
++    status_code INTEGER,
++    action_taken TEXT, -- 'HEAD_CHECK', 'FULL_DOWNLOAD', 'ABORTED'
++    message TEXT,
++    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
++    FOREIGN KEY (resource_id) REFERENCES resources(id)
++);
++
++-- Initial Seed
++INSERT OR IGNORE INTO manufacturers (name, base_url) 
++VALUES ('Frymaster', 'https://www.frymaster.com/products');

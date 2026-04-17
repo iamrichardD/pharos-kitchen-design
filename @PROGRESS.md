@@ -84,6 +84,7 @@
 - [x] **Issue #29 (UI)**: Scaffolded Revit Ribbon UI with "Pharos Design" tab and "Truth Engine" panel.
 - [x] **Issue #29 (Commands)**: Implemented `ValidateSelectionCommand` with Revit-to-Rust bridge integration.
 - [x] **Issue #33 (CI)**: Implemented unified "Pulse" validation system (`scripts/pulse.sh`).
+- [x] **Issue #43 (Process)**: Implement Pharos Synchronization Protocol (Task 4.1).
 - [x] **Verification**: Cross-language handshake verified green in a single multi-stage Podman transaction.
 
 ---
@@ -91,5 +92,23 @@
 ## 🏗️ Active Development
 
 ### Phase 4: Revit & Web Interop (Project Prism Bridge)
-- [ ] **Issue #30**: Implement "Ghost Link" metadata sync between Revit and Demo site.
-- [ ] **Issue #28**: Shared Design System Extraction (UI/UX Bridge).
+- [ ] **Issue #31**: Verify End-to-End Revit -> Bridge -> Web Flow (Task 4.2).
+- [ ] **Issue #30**: Implement Ghost Link Prototype (Task 4.3).
+- [ ] **Issue #28**: Shared Design System Extraction (Task 4.4).
+- [ ] **Issue #42**: Audit Remediation: SRI, SEO, and WASM Bridge (Task 4.5).
+- [ ] **Issue #41**: Marketing Site CI/CD Build Failure (Bug #41).
+- [x] **Issue #44**: Implement Pharos Crucible Process (Task 4.6).
+- [x] **Issue #45**: Implement Pharos Crucible Enforcement Layer (Task 4.7).
+
+### Sprint 4.0: Truth Engine & Crawler Logic (2026-04-16) - ✅ COMPLETED
+- [x] **Issue #46 (Core)**: Implemented Playwright-based crawler and state machine.
+- [x] **Issue #46 (Security)**: SSRF Sentinel and Zero-Host isolation verified.
+- [x] **Issue #46 (Governance)**: Clean Architecture (Public APIs) and TDD Traceability (3 tests passed).
+- [x] **Verification**: Pharos Green status confirmed in Podman Node 24.
+
+### Sprint 4.1: Transformation & Forensic Mapping (2026-04-17) - ✅ COMPLETED
+- [x] **Issue #48 (Forensics)**: Implemented `ForensicNormalizer` and JSON-based pattern sovereignty.
+- [x] **Issue #48 (Hardening)**: Implemented "Forensic Isolation Ward" with transaction-hardened schema and UNIQUE hash constraints.
+- [x] **Issue #48 (Security)**: Implemented "Regex Warden" with pre-compiled patterns and ReDoS length/timeout gates.
+- [x] **Issue #48 (Traceability)**: Linked forensic investigations to parent resources for automated promotion.
+- [x] **Verification**: Zero-Host verification successful (12 tests passed) in Node 24/Playwright container.

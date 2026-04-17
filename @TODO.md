@@ -60,6 +60,7 @@
 - [x] Jargon removal & functional utility mapping.
 
 ### Phase 4: Revit & Web Interop (Project Prism Bridge)
+- [x] **Issue #46**: Implement Pharos Truth Engine Crawler Logic (Frymaster) (Task 4.8).
 - [x] **Issue #20 (Log Sync)**: Synchronized Decision Log with ADR-0023/24/25.
 - [x] **Issue #18 (SRI)**: Rectified Umami SRI and implemented Fail-Fast build check.
 - [x] **Issue #17 (Scaffold)**: Revit Bridge (.NET 8) and Demo Site (Astro) initialized.
@@ -73,7 +74,14 @@
 - [x] **Issue #32**: Implement `pkd-core` JSON error serialization for FFI (Interop Bridge).
 - [x] **Issue #29**: Scaffold Revit Ribbon UI & Command logic.
 - [x] **Issue #33**: Integrated CI script for automated cross-language validation.
-- [ ] **Issue #28**: Shared Design System Extraction (UI/UX Bridge).
+- [x] **Issue #43**: Implement Pharos Synchronization Protocol (Task 4.1).
+- [ ] **Issue #31**: Verify End-to-End Revit -> Bridge -> Web Flow (Task 4.2).
+- [ ] **Issue #30**: Implement Ghost Link Prototype (Task 4.3).
+- [ ] **Issue #28**: Shared Design System Extraction (Task 4.4).
+- [ ] **Issue #42**: Audit Remediation: SRI, SEO, and WASM Bridge (Task 4.5).
+- [ ] **Issue #41**: Marketing Site CI/CD Build Failure (Bug #41).
+- [x] **Issue #44**: Implement Pharos Crucible Process (Task 4.6).
+- [x] **Issue #45**: Implement Pharos Crucible Enforcement Layer (Task 4.7).
 
 ---
 
