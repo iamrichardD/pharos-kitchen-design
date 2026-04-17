@@ -10,6 +10,9 @@
 
 import Database from 'better-sqlite3';
 import { chromium } from '@playwright/test';
+import { ForensicNormalizer, NormalizationResult } from './normalizer.js';
+import { join } from 'node:path';
+import { createHash } from 'node:crypto';
 
 // State Types
 export type SyncState = 'STALE' | 'PENDING_VERIFICATION' | 'DIVE_REQUIRED' | 'HEALTHY' | 'BROKEN';
@@ -26,10 +29,15 @@ export interface Resource {
 
 export class TruthEngine {
     private db: Database.Database;
+    private normalizer: ForensicNormalizer;
 
     constructor(dbPath: string = 'data/truth_engine.db') {
         this.db = new Database(dbPath);
         this.initializeSchema();
+        
+        // Pattern registry location relative to this file
+        const patternDir = join(process.cwd(), 'patterns');
+        this.normalizer = new ForensicNormalizer(patternDir);
     }
 
     private initializeSchema() {
@@ -56,6 +64,20 @@ export class TruthEngine {
                 last_checked_at DATETIME,
                 failure_count INTEGER DEFAULT 0,
                 FOREIGN KEY (mfr_id) REFERENCES manufacturers(id)
+            );
+            CREATE TABLE IF NOT EXISTS forensic_investigations (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                mfr_id INTEGER NOT NULL,
+                resource_id INTEGER NOT NULL,
+                raw_input TEXT NOT NULL,
+                raw_input_hash TEXT NOT NULL,
+                source_uri TEXT NOT NULL,
+                rejection_reason TEXT NOT NULL,
+                investigation_status TEXT DEFAULT 'PENDING',
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (mfr_id) REFERENCES manufacturers(id),
+                FOREIGN KEY (resource_id) REFERENCES resources(id),
+                UNIQUE(mfr_id, raw_input_hash)
             );
             CREATE TABLE IF NOT EXISTS sync_logs (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -103,6 +125,45 @@ export class TruthEngine {
             WHERE id = ?
         `);
         stmt.run(state, metadata?.etag || null, metadata?.last_modified || null, id);
+    }
+
+    /**
+     * Transforms raw strings into structured metadata.
+     * Implements the "Forensic Isolation Ward" for unmatched data.
+     */
+    public handleTransformation(resourceId: number, rawInput: string): NormalizationResult {
+        const resource = this.db.prepare('SELECT * FROM resources WHERE id = ?').get(resourceId) as Resource;
+        if (!resource) throw new Error(`Resource ${resourceId} not found.`);
+
+        const mfr = this.db.prepare('SELECT name FROM manufacturers WHERE id = ?').get(resource.mfr_id) as any;
+        const result = this.normalizer.normalize(resource.mfr_id, mfr.name, rawInput, resource.uri);
+
+        if (result.status === 'UNVERIFIED_RAW_DATA') {
+            const hash = createHash('sha256').update(rawInput).digest('hex');
+            
+            // Atomic Transaction: Forensic Deferral
+            const transaction = this.db.transaction(() => {
+                // Log the investigation
+                this.db.prepare(`
+                    INSERT OR IGNORE INTO forensic_investigations (
+                        mfr_id, resource_id, raw_input, raw_input_hash, source_uri, rejection_reason
+                    ) VALUES (?, ?, ?, ?, ?, ?)
+                `).run(resource.mfr_id, resourceId, rawInput, hash, resource.uri, result.rejection_reason || 'Unknown');
+
+                // Update sync log
+                this.db.prepare(`
+                    INSERT INTO sync_logs (resource_id, status_code, action_taken, message)
+                    VALUES (?, 202, 'FORENSIC_DEFERRAL', ?)
+                `).run(resourceId, `Transformation failed: ${result.rejection_reason}`);
+
+                // Move state machine to DIVE_REQUIRED
+                this.updateState(resourceId, 'DIVE_REQUIRED');
+            });
+
+            transaction();
+        }
+
+        return result;
     }
 
     async discover(mfrName: string) {

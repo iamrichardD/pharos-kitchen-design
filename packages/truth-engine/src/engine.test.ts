@@ -107,4 +107,48 @@ describe('TruthEngine', () => {
         expect(log).toBeDefined();
         expect(log.message).toContain('Domain Mismatch');
     });
+
+    it('test_should_handle_unverified_raw_data_with_forensic_isolation', () => {
+        const uri = 'https://www.frymaster.com/manual.pdf';
+        engine.registerResource(1, uri, 'PDF');
+        // @ts-ignore
+        const resource = engine.db.prepare('SELECT id FROM resources WHERE uri = ?').get(uri) as any;
+        
+        const rawInput = "BAD_DATA_999";
+        const result = engine.handleTransformation(resource.id, rawInput);
+        
+        expect(result.status).toBe('UNVERIFIED_RAW_DATA');
+        
+        // Verify database side-effects
+        // @ts-ignore
+        const investigation = engine.db.prepare('SELECT * FROM forensic_investigations WHERE resource_id = ?').get(resource.id) as any;
+        expect(investigation).toBeDefined();
+        expect(investigation.raw_input).toBe(rawInput);
+        expect(investigation.rejection_reason).toBe('No pattern match');
+
+        // @ts-ignore
+        const log = engine.db.prepare('SELECT * FROM sync_logs WHERE resource_id = ? AND action_taken = ?').get(resource.id, 'FORENSIC_DEFERRAL') as any;
+        expect(log).toBeDefined();
+
+        // @ts-ignore
+        const updatedResource = engine.db.prepare('SELECT sync_state FROM resources WHERE id = ?').get(resource.id) as any;
+        expect(updatedResource.sync_state).toBe('DIVE_REQUIRED');
+    });
+
+    it('test_should_be_deterministic_when_pattern_matches_exactly', () => {
+        const uri = 'https://www.frymaster.com/spec.pdf';
+        engine.registerResource(1, uri, 'PDF');
+        // @ts-ignore
+        const resource = engine.db.prepare('SELECT id FROM resources WHERE uri = ?').get(uri) as any;
+        
+        const rawInput = "208V 3PH 60HZ";
+        const result = engine.handleTransformation(resource.id, rawInput);
+        
+        expect(result.status).toBe('HEALTHY');
+        expect(result.data).toEqual({
+            voltage: "208",
+            phase: "3",
+            hertz: "60"
+        });
+    });
 });

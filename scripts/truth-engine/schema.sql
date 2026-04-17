@@ -4,8 +4,8 @@
 -- File: schema.sql
 -- Author: Richard D. (https://github.com/iamrichardd)
 -- License: FSL-1.1 (See LICENSE file for details)
--- Purpose: State machine schema for tracking manufacturer data vitality.
--- Traceability: Issue #47, ADR-0015, ADR-0017
+-- Purpose: State machine schema for tracking manufacturer data vitality and forensics.
+-- Traceability: Issue #47, Issue #48, ADR-0015, ADR-0017
 -- ========================================================================
 
 -- Manufacturers Table
@@ -36,12 +36,28 @@ CREATE TABLE IF NOT EXISTS resources (
     FOREIGN KEY (mfr_id) REFERENCES manufacturers(id)
 );
 
+-- Forensic Isolation Ward
+CREATE TABLE IF NOT EXISTS forensic_investigations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    mfr_id INTEGER NOT NULL,
+    resource_id INTEGER NOT NULL,
+    raw_input TEXT NOT NULL,
+    raw_input_hash TEXT NOT NULL, -- SHA-256 hash for unique constraint
+    source_uri TEXT NOT NULL,
+    rejection_reason TEXT NOT NULL,
+    investigation_status TEXT DEFAULT 'PENDING', -- PENDING, RESOLVED, IGNORED
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (mfr_id) REFERENCES manufacturers(id),
+    FOREIGN KEY (resource_id) REFERENCES resources(id),
+    UNIQUE(mfr_id, raw_input_hash)
+);
+
 -- Sync Logs (Audit Trail)
 CREATE TABLE IF NOT EXISTS sync_logs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     resource_id INTEGER, -- NULL indicates a global system event
     status_code INTEGER,
-    action_taken TEXT, -- 'HEAD_CHECK', 'FULL_DOWNLOAD', 'ABORTED', 'BLOCKED'
+    action_taken TEXT, -- 'HEAD_CHECK', 'FULL_DOWNLOAD', 'ABORTED', 'BLOCKED', 'FORENSIC_DEFERRAL'
     message TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (resource_id) REFERENCES resources(id)
