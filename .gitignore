@@ -42,3 +42,4 @@ TestResults/
 .history/
 *.nupkg
 
+data/*.db

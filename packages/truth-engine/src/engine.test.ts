@@ -5,12 +5,11 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Atomic verification of the Truth Engine state machine.
- * Traceability: Issue #46, PRACTICES.md#1 (TDD Traceability)
+ * Traceability: Issue #46, Issue #47, PRACTICES.md#1
  * ======================================================================== */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { TruthEngine } from './engine.js';
-import Database from 'better-sqlite3';
 import { rmSync, existsSync, mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 
@@ -18,7 +17,6 @@ const TEST_DB = 'data/test_truth_engine.db';
 
 describe('TruthEngine', () => {
     let engine: TruthEngine;
-    let db: Database.Database;
 
     beforeEach(() => {
         if (existsSync(TEST_DB)) rmSync(TEST_DB);
@@ -26,22 +24,26 @@ describe('TruthEngine', () => {
         if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
         
         engine = new TruthEngine(TEST_DB);
-        db = new Database(TEST_DB);
         
-        // Seed manufacturer with componentized URI
+        // Use the internal DB connection for seeding to prevent locking/conflicts
+        // @ts-ignore: Accessing private db for testing seeding
+        const db = engine.db;
+        
         db.prepare(`
-            INSERT INTO manufacturers (name, scheme, host, catalog_path) 
-            VALUES ('Frymaster', 'https', 'www.frymaster.com', '/products')
+            INSERT INTO manufacturers (id, name, scheme, host, catalog_path) 
+            VALUES (1, 'Frymaster', 'https', 'www.frymaster.com', '/products')
         `).run();
     });
 
     afterEach(() => {
-        db.close();
+        // @ts-ignore
+        engine.db.close();
         if (existsSync(TEST_DB)) rmSync(TEST_DB);
     });
 
     it('test_should_reconstruct_full_uri_from_components', () => {
-        const mfr = db.prepare('SELECT base_url FROM manufacturers WHERE name = ?').get('Frymaster') as any;
+        // @ts-ignore
+        const mfr = engine.db.prepare('SELECT base_url FROM manufacturers WHERE name = ?').get('Frymaster') as any;
         expect(mfr.base_url).toBe('https://www.frymaster.com/products');
     });
 
@@ -49,7 +51,8 @@ describe('TruthEngine', () => {
         const maliciousUri = 'https://malicious-site.com/malware.pdf';
         engine.registerResource(1, maliciousUri, 'PDF');
         
-        const resource = db.prepare('SELECT * FROM resources WHERE uri = ?').get(maliciousUri);
+        // @ts-ignore
+        const resource = engine.db.prepare('SELECT * FROM resources WHERE uri = ?').get(maliciousUri);
         expect(resource).toBeUndefined();
     });
 
@@ -57,7 +60,8 @@ describe('TruthEngine', () => {
         const subdomainUri = 'https://assets.frymaster.com/spec.pdf';
         engine.registerResource(1, subdomainUri, 'PDF');
         
-        const resource = db.prepare('SELECT * FROM resources WHERE uri = ?').get(subdomainUri) as any;
+        // @ts-ignore
+        const resource = engine.db.prepare('SELECT * FROM resources WHERE uri = ?').get(subdomainUri) as any;
         expect(resource).toBeDefined();
     });
 
@@ -65,7 +69,8 @@ describe('TruthEngine', () => {
         const validUri = 'https://www.frymaster.com/products/spec.pdf';
         engine.registerResource(1, validUri, 'PDF');
         
-        const resource = db.prepare('SELECT * FROM resources WHERE uri = ?').get(validUri) as any;
+        // @ts-ignore
+        const resource = engine.db.prepare('SELECT * FROM resources WHERE uri = ?').get(validUri) as any;
         expect(resource).toBeDefined();
         expect(resource.sync_state).toBe('STALE');
     });
@@ -80,13 +85,30 @@ describe('TruthEngine', () => {
         });
 
         engine.registerResource(1, 'https://www.frymaster.com/spec.pdf', 'PDF');
-        const resource = db.prepare('SELECT * FROM resources LIMIT 1').get() as any;
+        // @ts-ignore
+        const resource = engine.db.prepare('SELECT * FROM resources LIMIT 1').get() as any;
         
         engine.updateState(resource.id, 'STALE', { etag: 'match', last_modified: 'today' });
         
-        const updatedResource = db.prepare('SELECT * FROM resources LIMIT 1').get() as any;
+        // @ts-ignore
+        const updatedResource = engine.db.prepare('SELECT * FROM resources LIMIT 1').get() as any;
         const nextState = await engine.checkVitality(updatedResource);
         
         expect(nextState).toBe('HEALTHY');
+    });
+
+    it('test_should_log_security_violation_to_sync_logs', () => {
+        const maliciousUri = 'https://malicious-site.com/malware.pdf';
+        
+        // Seed a dummy root HTML resource for the log linkage
+        // @ts-ignore
+        engine.db.prepare("INSERT INTO resources (mfr_id, resource_type, uri, sync_state) VALUES (1, 'HTML', 'https://www.frymaster.com/products', 'STALE')").run();
+        
+        engine.registerResource(1, maliciousUri, 'PDF');
+        
+        // @ts-ignore
+        const log = engine.db.prepare('SELECT * FROM sync_logs WHERE action_taken = ?').get('BLOCKED') as any;
+        expect(log).toBeDefined();
+        expect(log.message).toContain('Domain Mismatch');
     });
 });

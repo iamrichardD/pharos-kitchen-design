@@ -40,7 +40,9 @@ export class TruthEngine {
                 scheme TEXT NOT NULL DEFAULT 'https',
                 host TEXT NOT NULL,
                 catalog_path TEXT NOT NULL DEFAULT '/',
-                base_url TEXT GENERATED ALWAYS AS (scheme || '://' || host || catalog_path) VIRTUAL
+                base_url TEXT GENERATED ALWAYS AS (scheme || '://' || host || catalog_path) VIRTUAL,
+                last_crawl_at DATETIME,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             );
             CREATE TABLE IF NOT EXISTS resources (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -51,7 +53,18 @@ export class TruthEngine {
                 last_modified TEXT,
                 content_hash TEXT,
                 sync_state TEXT DEFAULT 'STALE',
-                last_checked_at DATETIME
+                last_checked_at DATETIME,
+                failure_count INTEGER DEFAULT 0,
+                FOREIGN KEY (mfr_id) REFERENCES manufacturers(id)
+            );
+            CREATE TABLE IF NOT EXISTS sync_logs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                resource_id INTEGER NOT NULL,
+                status_code INTEGER,
+                action_taken TEXT,
+                message TEXT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (resource_id) REFERENCES resources(id)
             );
         `;
         this.db.exec(schema);
@@ -138,7 +151,16 @@ export class TruthEngine {
 
         // SSRF Sentinel: Only allow the manufacturer's own domain or subdomains
         if (url.hostname !== mfrHost && url.hostname !== baseDomain && !url.hostname.endsWith(`.${baseDomain}`)) {
-            console.warn(`[Security] Blocked unauthorized resource URI (Domain Mismatch): ${uri}`);
+            const msg = `Blocked unauthorized resource URI (Domain Mismatch): ${uri}`;
+            console.warn(`[Security] ${msg}`);
+            
+            // Persistent Security Logging (Issue #47 Audit)
+            // Note: We attempt to link this to the manufacturer's root HTML resource if it exists
+            this.db.prepare(`
+                INSERT INTO sync_logs (resource_id, status_code, action_taken, message)
+                SELECT id, 403, 'BLOCKED', ? FROM resources WHERE mfr_id = ? AND resource_type = 'HTML' LIMIT 1
+            `).run(msg, mfrId);
+            
             return;
         }
 
