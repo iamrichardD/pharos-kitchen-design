@@ -39,7 +39,6 @@ describe('TruthEngine', () => {
 
     it('test_should_block_unauthorized_domain_when_registering_resource', () => {
         const maliciousUri = 'http://169.254.169.254/latest/meta-data/';
-        // @ts-ignore
         engine.registerResource(1, maliciousUri, 'HTML');
         
         const resource = db.prepare('SELECT * FROM resources WHERE uri = ?').get(maliciousUri);
@@ -48,7 +47,6 @@ describe('TruthEngine', () => {
 
     it('test_should_allow_authorized_domain_when_registering_resource', () => {
         const validUri = 'https://www.frymaster.com/products/spec.pdf';
-        // @ts-ignore
         engine.registerResource(1, validUri, 'PDF');
         
         const resource = db.prepare('SELECT * FROM resources WHERE uri = ?').get(validUri) as any;
@@ -65,7 +63,6 @@ describe('TruthEngine', () => {
             ])
         });
 
-        // @ts-ignore
         engine.registerResource(1, 'https://www.frymaster.com/spec.pdf', 'PDF');
         const resource = db.prepare('SELECT * FROM resources LIMIT 1').get() as any;
         

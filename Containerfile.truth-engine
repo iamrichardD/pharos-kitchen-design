@@ -16,18 +16,18 @@ RUN apt-get update && apt-get install -y curl && \
     apt-get install -y nodejs python3 make g++ && \
     rm -rf /var/lib/apt/lists/*
 
-# Use a separate directory for dependencies
-WORKDIR /deps
-COPY package*.json ./
-COPY packages/truth-engine/package*.json ./packages/truth-engine/
-RUN npm install && npm rebuild better-sqlite3
-
 WORKDIR /work
+
+# Copy source code including all package.json files
 COPY . .
 
-# CRITICAL: Remove host-polluted node_modules if any were copied
-RUN rm -rf /work/node_modules
+# CRITICAL: Clean host node_modules and perform a fresh install inside the container
+RUN rm -rf node_modules apps/marketing/node_modules apps/demo/node_modules packages/*/node_modules && \
+    npm install && \
+    npm rebuild better-sqlite3
 
-# Use the dependencies from /deps
-ENV NODE_PATH=/deps/node_modules
-CMD ["/deps/node_modules/.bin/tsx", "scripts/truth-engine/pulse.ts"]
+# Ensure local binaries are in the path
+ENV PATH="/work/node_modules/.bin:$PATH"
+
+# Run the Truth Engine Pulse
+CMD ["tsx", "scripts/truth-engine/pulse.ts"]

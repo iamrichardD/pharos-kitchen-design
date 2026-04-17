@@ -119,11 +119,22 @@ export class TruthEngine {
         await browser.close();
     }
 
-    private registerResource(mfrId: number, uri: string, type: string) {
-        // SSRF Sentinel: Only allow known manufacturer domains
+    /**
+     * Registers a discovered resource if it passes the SSRF Domain Sentinel.
+     */
+    public registerResource(mfrId: number, uri: string, type: string) {
+        const mfr = this.db.prepare('SELECT base_url FROM manufacturers WHERE id = ?').get(mfrId) as any;
+        if (!mfr) {
+            console.warn(`[Security] Blocked resource registration for unknown manufacturer ID: ${mfrId}`);
+            return;
+        }
+
         const url = new URL(uri);
-        const allowedDomains = ['www.frymaster.com', 'frymaster.com'];
-        if (!allowedDomains.includes(url.hostname)) {
+        const mfrHost = new URL(mfr.base_url).hostname;
+
+        // SSRF Sentinel: Only allow the manufacturer's own domain
+        if (url.hostname !== mfrHost && !url.hostname.endsWith(`.${mfrHost}`)) {
+            console.warn(`[Security] Blocked unauthorized resource URI (Domain Mismatch): ${uri}`);
             return;
         }
 
