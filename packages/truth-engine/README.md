@@ -16,6 +16,16 @@ The Truth Engine is the core synchronization and discovery layer for Pharos. it 
 
 The engine follows **ADR-0017 (Option 3)**, utilizing a SQLite-backed state machine to ensure "Sync Vitality" across long cycles.
 
+```mermaid
+stateDiagram-v2
+    [*] --> STALE : Discovery
+    STALE --> PENDING_VERIFICATION : Pulse Check (HEAD)
+    PENDING_VERIFICATION --> HEALTHY : ETag Match (200)
+    PENDING_VERIFICATION --> DIVE_REQUIRED : ETag Mismatch
+    PENDING_VERIFICATION --> BROKEN : 404 / 403 / Timeout
+    DIVE_REQUIRED --> HEALTHY : Playwright Crawl Success
+```
+
 ### State Transitions
 - **STALE**: Default state for discovered resources. Requires a Vitality Check.
 - **PENDING_VERIFICATION**: Resource is currently being probed via HEAD request.

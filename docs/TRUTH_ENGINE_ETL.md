@@ -17,6 +17,16 @@ The Pharos Truth Engine is a deterministic synchronization pipeline designed to 
 
 ## 1. The Three-Stage Pipeline
 
+```mermaid
+graph TD
+    A[Manufacturer CDN] -->|Network Intercept| B(Playwright Crawler)
+    B -->|Raw URL/HTML| C{SSRF Sentinel}
+    C -->|Blocked| D[Audit Log]
+    C -->|Allowed| E[(SQLite: resources)]
+    E -->|Pattern Matching| F(Forensic Normalizer)
+    F -->|BRIDGE_SCHEMA| G[(Pharos Production)]
+```
+
 ### Stage 1: Extraction (Discovery Layer)
 The engine utilizes a **Deep Crawler (Playwright)** to simulate human-like research.
 - **Passive Interception**: Rather than scraping brittle DOM elements, the engine listens to the network stream (`page.on('response')`) to identify direct URIs for PDFs, Images, and Revit Families (.RFA).
