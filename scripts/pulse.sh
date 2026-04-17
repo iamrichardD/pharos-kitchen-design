@@ -29,7 +29,26 @@ echo "🔍 Starting Pharos Process Linting: Governance Verification"
 
 # 3. Process Linting (Pharos Standard)
 
-# Check 1: Branch Naming (Task/Bug ID Traceability)
+# Check 1: File Prologue Audit (FSL-1.1 Legal Compliance)
+echo "   [Process] Verifying FSL-1.1 File Prologues..."
+MISSING_PROLOGUES=0
+while IFS= read -r file; do
+    if ! grep -q "Project: Pharos Kitchen Design" "$file"; then
+        echo "      ❌ Missing prologue in: $file"
+        MISSING_PROLOGUES=$((MISSING_PROLOGUES + 1))
+    fi
+done < <(find packages -name "*.ts" -not -path "*/node_modules/*" -not -path "*/pkg/*" -not -path "*/.wrangler/*")
+
+if [ $MISSING_PROLOGUES -gt 0 ]; then
+    echo "   ❌ Error: $MISSING_PROLOGUES files are missing the mandatory Standardized File Prologue."
+    exit 1
+fi
+
+# Check 2: Truth Engine Integrated Validation
+echo "   [Process] Executing Truth Engine Atomic Tests (Phase 1.4)..."
+podman run --rm --security-opt seccomp=unconfined pkd-truth-engine sh -c "cd packages/truth-engine && vitest run"
+
+# Check 3: Branch Naming (Task/Bug ID Traceability)
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 if [[ ! $CURRENT_BRANCH =~ ^(feat|fix|debt)/issue-[0-9]+ ]]; then
     echo "❌ Error: Branch '$CURRENT_BRANCH' violates naming standard (feat|fix|debt)/issue-X."

@@ -1,12 +1,12 @@
-/* ========================================================================
- * Project: Pharos Kitchen Design (Project Prism)
- * Component: Truth Engine / Persistence
- * File: schema.sql
- * Author: Richard D. (https://github.com/iamrichardd)
- * License: FSL-1.1 (See LICENSE file for details)
- * Purpose: State machine schema for tracking manufacturer data vitality.
- * Traceability: Issue #47, ADR-0015, ADR-0017
- * ======================================================================== */
+-- ========================================================================
+-- Project: Pharos Kitchen Design (Project Prism)
+-- Component: Truth Engine / Persistence
+-- File: schema.sql
+-- Author: Richard D. (https://github.com/iamrichardd)
+-- License: FSL-1.1 (See LICENSE file for details)
+-- Purpose: State machine schema for tracking manufacturer data vitality.
+-- Traceability: Issue #47, ADR-0015, ADR-0017
+-- ========================================================================
 
 -- Manufacturers Table
 CREATE TABLE IF NOT EXISTS manufacturers (
@@ -39,9 +39,9 @@ CREATE TABLE IF NOT EXISTS resources (
 -- Sync Logs (Audit Trail)
 CREATE TABLE IF NOT EXISTS sync_logs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    resource_id INTEGER NOT NULL,
+    resource_id INTEGER, -- NULL indicates a global system event
     status_code INTEGER,
-    action_taken TEXT, -- 'HEAD_CHECK', 'FULL_DOWNLOAD', 'ABORTED'
+    action_taken TEXT, -- 'HEAD_CHECK', 'FULL_DOWNLOAD', 'ABORTED', 'BLOCKED'
     message TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (resource_id) REFERENCES resources(id)

@@ -5,7 +5,7 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Event-driven state machine for manufacturer data synchronization.
- * Traceability: Issue #46, ADR-0017 (Option 3)
+ * Traceability: Issue #46, Issue #47, ADR-0017
  * ======================================================================== */
 
 import Database from 'better-sqlite3';
@@ -59,7 +59,7 @@ export class TruthEngine {
             );
             CREATE TABLE IF NOT EXISTS sync_logs (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                resource_id INTEGER NOT NULL,
+                resource_id INTEGER,
                 status_code INTEGER,
                 action_taken TEXT,
                 message TEXT,
@@ -153,16 +153,17 @@ export class TruthEngine {
         if (url.hostname !== mfrHost && url.hostname !== baseDomain && !url.hostname.endsWith(`.${baseDomain}`)) {
             const msg = `Blocked unauthorized resource URI (Domain Mismatch): ${uri}`;
             console.warn(`[Security] ${msg}`);
-            
-            // Persistent Security Logging (Issue #47 Audit)
-            // Note: We attempt to link this to the manufacturer's root HTML resource if it exists
+
+            // Persistent Security Logging (High Rigor Refactor)
+            // We use a NULL resource_id to indicate a "Global System Event"
             this.db.prepare(`
                 INSERT INTO sync_logs (resource_id, status_code, action_taken, message)
-                SELECT id, 403, 'BLOCKED', ? FROM resources WHERE mfr_id = ? AND resource_type = 'HTML' LIMIT 1
-            `).run(msg, mfrId);
-            
+                VALUES (NULL, 403, 'BLOCKED', ?)
+            `).run(`${mfrHost}: ${msg}`);
+
             return;
         }
+
 
         const stmt = this.db.prepare(`
             INSERT OR IGNORE INTO resources (mfr_id, resource_type, uri, sync_state)

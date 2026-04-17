@@ -100,10 +100,6 @@ describe('TruthEngine', () => {
     it('test_should_log_security_violation_to_sync_logs', () => {
         const maliciousUri = 'https://malicious-site.com/malware.pdf';
         
-        // Seed a dummy root HTML resource for the log linkage
-        // @ts-ignore
-        engine.db.prepare("INSERT INTO resources (mfr_id, resource_type, uri, sync_state) VALUES (1, 'HTML', 'https://www.frymaster.com/products', 'STALE')").run();
-        
         engine.registerResource(1, maliciousUri, 'PDF');
         
         // @ts-ignore
