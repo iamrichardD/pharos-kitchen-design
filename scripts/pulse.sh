@@ -50,7 +50,7 @@ podman run --rm --security-opt seccomp=unconfined pkd-truth-engine sh -c "cd pac
 
 # Check 3: Branch Naming (Task/Bug ID Traceability)
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-if [[ ! $CURRENT_BRANCH =~ ^(feat|fix|debt)/issue-[0-9]+ ]]; then
+if [[ "$CURRENT_BRANCH" != "main" && ! $CURRENT_BRANCH =~ ^(feat|fix|debt)/issue-[0-9]+ ]]; then
     echo "❌ Error: Branch '$CURRENT_BRANCH' violates naming standard (feat|fix|debt)/issue-X."
     exit 1
 fi
