@@ -1,0 +1,28 @@
+# ========================================================================
+# Project: Pharos Kitchen Design (Project Prism)
+# Component: Truth Engine / Crawler Environment
+# File: Containerfile.truth-engine
+# Author: Richard D. (https://github.com/iamrichardd)
+# License: FSL-1.1
+# Purpose: Execution environment for the Playwright-based Truth Engine.
+# Traceability: Issue #46, ADR-0014
+# ========================================================================
+
+FROM mcr.microsoft.com/playwright:v1.59.1-noble
+
+# Force Node 24 installation (Playwright image might have v22 or v20)
+RUN apt-get update && apt-get install -y curl && \
+    curl -fsSL https://deb.nodesource.com/setup_24.x | bash - && \
+    apt-get install -y nodejs python3 make g++ && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /work
+
+# Copy ALL source code first to ensure npm rebuild sees everything
+COPY . .
+
+# Clean and Install/Rebuild INSIDE the container to match Node 24
+RUN rm -rf node_modules && npm install && npm rebuild better-sqlite3
+
+# Run the Truth Engine Pulse using the local tsx binary
+CMD ["./node_modules/.bin/tsx", "scripts/truth-engine/pulse.ts"]

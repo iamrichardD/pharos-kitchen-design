@@ -82,11 +82,42 @@ Every non-trivial task completion MUST follow this workflow:
     - **Integrated Mentorship:** Weave the technical rationale, safety implications, and alternative patterns directly into the critique (e.g., "We should avoid [X] here because [Y] results in [Z]. A more resilient approach is [A]...").
 
 ## DevSecOps & Workflow
+
+### 1. The Pharos Development Lifecycle
+Every task MUST progress through the following four phases. Failure to complete a phase's requirements is a violation of the Pharos Standard.
+
+1.  **Phase 1: Research & Issue Authority:**
+    *   **Gate:** Create a GitHub Issue (The Logical Authority).
+    *   **Security:** Perform "Shift-Left" security analysis to identify attack vectors.
+    *   **TDD:** Define atomic test cases *before* any implementation begins.
+2.  **Phase 2: Strategy & The Three-Option Crucible:**
+    *   **Gate:** For non-trivial tasks (ADR-0017), develop exactly three implementation options.
+    *   **Evaluation:** Provide a "Brutally Honest" assessment of the options before promotion.
+3.  **Phase 3: Execution (Surgical Implementation):**
+    *   **Gate:** Implement logic and tests in isolated `git worktree` environments.
+    *   **Validation:** Verify behavioral correctness in a Podman container via `scripts/pulse.sh`.
+4.  **Phase 4: The Crucible Audit (The Hard Gate):**
+    *   **Gate:** Transition from "Builder" to "Auditor" persona.
+    *   **Review:** Perform a "Brutally Honest" gap analysis using **[.github/CRUCIBLE_HEURISTICS.md](.github/CRUCIBLE_HEURISTICS.md)**.
+    *   **Mentorship:** Provide instructive peer review comments in the GitHub PR.
+    *   **Finality:** Merge only after HitL approval and "Pharos Green" verification.
+
+### 2. Sub-Agent Delegation Matrix (The Context Reset)
+To prevent "Persona Schizophrenia" and ensure objective verification, the **Builder** and the **Auditor** MUST be separate, isolated sub-agent instances.
+
+| Role | Responsibility | Tool / Mandate |
+| :--- | :--- | :--- |
+| **Orchestrator** | **Me (The PMA)** | Mental Map, HitL Liaison, Delegation Logic. |
+| **Builder** | Implementation | `generalist` (fresh context) |
+| **Auditor** | Crucible Review | `generalist` (fresh context) + HEURISTICS. |
+
+- **Context Reset:** Every transition from Phase 3 (Execution) to Phase 4 (Crucible) REQUIRE a context reset. I MUST NOT review my own implementation logic. I MUST delegate the audit to a sub-agent with no prior memory of the Builder's work.
+
+### 3. Git Flow & CI/CD
 - **Git Flow:** Utilize feature branches tied directly to GitHub Issues (e.g., `feat/issue-4-tcp-listener`). Merge to `main` only after validation in Podman.
 - **AI-Handover:** Every task closure requires a `gh` issue update with a **Fix Summary**, **Security Review**, and **DORA Metric** check.
-- **Issue-First Mandate:** EVERY feature request or bug fix MUST begin with the creation of a GitHub Issue. This issue serves as the **Logical Authority** for the change.
-    - **Branching**: All branches MUST follow the `feat/issue-X-description` or `fix/issue-X-description` naming convention.
-    - **Traceability**: All Pull Requests MUST reference the corresponding issue (e.g., `Closes #X`) to ensure complete architectural and requirement traceability.
+- **Issue-First Mandate:** EVERY feature request or bug fix MUST begin with the creation of a GitHub Issue. 
+    - **Traceability**: All Pull Requests MUST reference the corresponding issue (e.g., `Closes #X`).
 - **CI/CD:** Utilize GitHub Actions for cross-compiling the Tauri binary and deploying the Astro site.
 
 ---

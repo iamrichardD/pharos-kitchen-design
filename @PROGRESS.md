@@ -84,6 +84,7 @@
 - [x] **Issue #29 (UI)**: Scaffolded Revit Ribbon UI with "Pharos Design" tab and "Truth Engine" panel.
 - [x] **Issue #29 (Commands)**: Implemented `ValidateSelectionCommand` with Revit-to-Rust bridge integration.
 - [x] **Issue #33 (CI)**: Implemented unified "Pulse" validation system (`scripts/pulse.sh`).
+- [x] **Issue #43 (Process)**: Implement Pharos Synchronization Protocol (Task 4.1).
 - [x] **Verification**: Cross-language handshake verified green in a single multi-stage Podman transaction.
 
 ---
@@ -91,5 +92,10 @@
 ## 🏗️ Active Development
 
 ### Phase 4: Revit & Web Interop (Project Prism Bridge)
-- [ ] **Issue #30**: Implement "Ghost Link" metadata sync between Revit and Demo site.
-- [ ] **Issue #28**: Shared Design System Extraction (UI/UX Bridge).
+- [ ] **Issue #31**: Verify End-to-End Revit -> Bridge -> Web Flow (Task 4.2).
+- [ ] **Issue #30**: Implement Ghost Link Prototype (Task 4.3).
+- [ ] **Issue #28**: Shared Design System Extraction (Task 4.4).
+- [ ] **Issue #42**: Audit Remediation: SRI, SEO, and WASM Bridge (Task 4.5).
+- [ ] **Issue #41**: Marketing Site CI/CD Build Failure (Bug #41).
+- [x] **Issue #44**: Implement Pharos Crucible Process (Task 4.6).
+- [x] **Issue #45**: Implement Pharos Crucible Enforcement Layer (Task 4.7).
