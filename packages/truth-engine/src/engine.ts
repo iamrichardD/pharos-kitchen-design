@@ -9,13 +9,12 @@
  * ======================================================================== */
 
 import Database from 'better-sqlite3';
-import { join } from 'node:path';
-import { chromium, Browser, Page } from '@playwright/test';
+import { chromium } from '@playwright/test';
 
 // State Types
-type SyncState = 'STALE' | 'PENDING_VERIFICATION' | 'DIVE_REQUIRED' | 'HEALTHY' | 'BROKEN';
+export type SyncState = 'STALE' | 'PENDING_VERIFICATION' | 'DIVE_REQUIRED' | 'HEALTHY' | 'BROKEN';
 
-interface Resource {
+export interface Resource {
     id: number;
     mfr_id: number;
     resource_type: string;
@@ -55,19 +54,12 @@ export class TruthEngine {
         this.db.exec(schema);
     }
 
-    /**
-     * Simulates human delay to avoid bot detection.
-     */
     async sleep(min = 2000, max = 5000) {
         const ms = Math.floor(Math.random() * (max - min + 1) + min);
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    /**
-     * Performs a lightweight HEAD check on a resource.
-     */
     async checkVitality(resource: Resource): Promise<SyncState> {
-        console.log(`[Pulse] Checking Vitality: ${resource.uri}`);
         try {
             const response = await fetch(resource.uri, { method: 'HEAD' });
             
@@ -84,14 +76,10 @@ export class TruthEngine {
 
             return 'DIVE_REQUIRED';
         } catch (error) {
-            console.error(`[Error] Vitality check failed for ${resource.uri}:`, error);
             return 'BROKEN';
         }
     }
 
-    /**
-     * Transitions a resource to a new state and updates persistence.
-     */
     updateState(id: number, state: SyncState, metadata?: { etag?: string, last_modified?: string }) {
         const stmt = this.db.prepare(`
             UPDATE resources 
@@ -99,24 +87,18 @@ export class TruthEngine {
             WHERE id = ?
         `);
         stmt.run(state, metadata?.etag || null, metadata?.last_modified || null, id);
-        console.log(`[State] Resource ${id} transitioned to ${state}`);
     }
 
-    /**
-     * Discovers new resources for a manufacturer using Playwright.
-     */
     async discover(mfrName: string) {
         const mfr = this.db.prepare('SELECT * FROM manufacturers WHERE name = ?').get(mfrName) as any;
         if (!mfr) throw new Error(`Manufacturer ${mfrName} not found in Truth Engine.`);
 
-        console.log(`[Discovery] Starting deep crawl for ${mfrName}...`);
         const browser = await chromium.launch({ headless: true });
         const context = await browser.newContext({
             userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
         });
         const page = await context.newPage();
 
-        // 1. Intercept network for PDF/Image discovery
         page.on('response', response => {
             const url = response.url();
             if (url.endsWith('.pdf') || url.match(/\.(jpg|jpeg|png|webp)$/i)) {
@@ -127,9 +109,8 @@ export class TruthEngine {
         await page.goto(mfr.base_url);
         await this.sleep(3000, 6000);
         
-        // Human-like scrolling to trigger lazy loads
         await page.evaluate(async () => {
-            for (let i = 0; i < 5; i++) {
+            for (let i = 0; i < 3; i++) {
                 window.scrollBy(0, window.innerHeight);
                 await new Promise(r => setTimeout(r, 1000));
             }
@@ -139,6 +120,13 @@ export class TruthEngine {
     }
 
     private registerResource(mfrId: number, uri: string, type: string) {
+        // SSRF Sentinel: Only allow known manufacturer domains
+        const url = new URL(uri);
+        const allowedDomains = ['www.frymaster.com', 'frymaster.com'];
+        if (!allowedDomains.includes(url.hostname)) {
+            return;
+        }
+
         const stmt = this.db.prepare(`
             INSERT OR IGNORE INTO resources (mfr_id, resource_type, uri, sync_state)
             VALUES (?, ?, ?, 'STALE')

@@ -8,7 +8,7 @@
  * Traceability: Issue #46, ADR-0015
  * ======================================================================== */
 
-import { TruthEngine } from './engine.js';
+import { TruthEngine } from '../../packages/truth-engine/src/engine.js';
 import Database from 'better-sqlite3';
 
 async function main() {
