@@ -10,7 +10,8 @@
 
 # ⚔️ Pharos Truth Engine: ETL & Forensic Mapping Blueprint
 
-The Pharos Truth Engine is a deterministic synchronization pipeline designed to displace legacy, static AEC data providers (KCL, AQ) with a living source of truth. It operates on the principle of **"Metadata-First Truth"** and ensures **"Data Sovereignty"** for Independent Kitchen Designers (IKD).
+The Pharos Truth Engine is a deterministic synchronization pipeline designed to evolve commercial kitchen data from static, third-party repositories into a living, verified source of truth directly from the manufacturer.
+ It operates on the principle of **"Metadata-First Truth"** and ensures **"Data Sovereignty"** for Independent Kitchen Designers (IKD).
 
 ---
 
