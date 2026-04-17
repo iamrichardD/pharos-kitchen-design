@@ -99,3 +99,9 @@
 - [ ] **Issue #41**: Marketing Site CI/CD Build Failure (Bug #41).
 - [x] **Issue #44**: Implement Pharos Crucible Process (Task 4.6).
 - [x] **Issue #45**: Implement Pharos Crucible Enforcement Layer (Task 4.7).
+
+### Sprint 4.0: Truth Engine & Crawler Logic (2026-04-16) - ✅ COMPLETED
+- [x] **Issue #46 (Core)**: Implemented Playwright-based crawler and state machine.
+- [x] **Issue #46 (Security)**: SSRF Sentinel and Zero-Host isolation verified.
+- [x] **Issue #46 (Governance)**: Clean Architecture (Public APIs) and TDD Traceability (3 tests passed).
+- [x] **Verification**: Pharos Green status confirmed in Podman Node 24.
