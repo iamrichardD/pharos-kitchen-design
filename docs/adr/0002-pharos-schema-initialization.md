@@ -1,9 +1,13 @@
-/* ========================================================================
+<!-- ========================================================================
  * Project: Pharos Kitchen Design (Project Prism)
  * Component: Documentation
  * File: 0002-pharos-schema-initialization.md
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * License: FSL-1.1 (See LICENSE file for details)
+ * Purpose: [Purpose]
+ * Traceability: [Traceability]
  * Status: Active
- * ======================================================================== */
+ * ======================================================================== -->
 
 # ADR 0002: Pharos Schema Initialization & LOD Standards
 

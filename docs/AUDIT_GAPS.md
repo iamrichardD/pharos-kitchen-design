@@ -1,4 +1,4 @@
-/* ========================================================================
+<!-- ========================================================================
  * Project: Pharos Kitchen Design (Project Prism)
  * Component: Governance / Audit
  * File: docs/AUDIT_GAPS.md
@@ -7,7 +7,7 @@
  * Purpose: Formal tracking of architectural and security gaps identified 
  *          during the Phase 3 Architecture Audit (2026-04-08).
  * Traceability: GEMINI.md, ADR-0017, ADR-0016
- * ======================================================================== */
+ * ======================================================================== -->
 
 # 🕵️ Architectural & Security Gap Report (2026-04-08)
 

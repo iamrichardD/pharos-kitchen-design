@@ -1,9 +1,13 @@
-/* ========================================================================
+<!-- ========================================================================
  * Project: Pharos Kitchen Design (Project Prism)
  * Component: Documentation / Legal
  * File: 0009-interoperability-and-ip-strategy.md
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * License: FSL-1.1 (See LICENSE file for details)
+ * Purpose: [Purpose]
+ * Traceability: [Traceability]
  * Status: Approved
- * ======================================================================== */
+ * ======================================================================== -->
 
 # ADR 0009: Interoperability & IP Strategy (The "Lawfare" Defense)
 

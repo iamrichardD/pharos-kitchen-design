@@ -1,9 +1,13 @@
-/* ========================================================================
+<!-- ========================================================================
  * Project: Pharos Kitchen Design (Project Prism)
  * Component: Documentation
  * File: 0005-hybrid-fsl-and-high-rigor-standards.md
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * License: FSL-1.1 (See LICENSE file for details)
+ * Purpose: [Purpose]
+ * Traceability: [Traceability]
  * Status: Approved
- * ======================================================================== */
+ * ======================================================================== -->
 
 # ADR 0005: Hybrid FSL & High-Rigor Engineering Standards
 

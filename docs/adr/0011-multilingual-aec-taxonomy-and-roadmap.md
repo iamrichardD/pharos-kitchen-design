@@ -1,9 +1,13 @@
-/* ========================================================================
+<!-- ========================================================================
  * Project: Pharos Kitchen Design (Project Prism)
  * Component: Documentation / Strategy
  * File: 0011-multilingual-aec-taxonomy-and-roadmap.md
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * License: FSL-1.1 (See LICENSE file for details)
+ * Purpose: [Purpose]
+ * Traceability: [Traceability]
  * Status: Approved
- * ======================================================================== */
+ * ======================================================================== -->
 
 # ADR 0011: Multilingual AEC Taxonomy & Global Roadmap
 

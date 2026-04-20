@@ -1,13 +1,13 @@
-/* ========================================================================
+<!-- ========================================================================
  * Project: Pharos Kitchen Design (Project Prism)
  * Component: Documentation / Strategy
  * File: 0015-ikd-centric-marketing-and-truth-engine.md
- * Status: Approved
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Strategic pivot for IKD marketing and metadata governance.
  * Traceability: ADR 0012, RFC-2378
- * ======================================================================== */
+ * Status: Approved
+ * ======================================================================== -->
 
 # ADR 0015: IKD-Centric Marketing & Live-Sync Truth Engine
 

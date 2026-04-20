@@ -1,9 +1,13 @@
-/* ========================================================================
+<!-- ========================================================================
  * Project: Pharos Kitchen Design (Project Prism)
  * Component: Documentation / Strategy
  * File: 0013-personal-brand-integration-proof-of-capability.md
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * License: FSL-1.1 (See LICENSE file for details)
+ * Purpose: [Purpose]
+ * Traceability: [Traceability]
  * Status: Approved
- * ======================================================================== */
+ * ======================================================================== -->
 
 # ADR 0013: Personal Brand Integration & Proof of Capability
 

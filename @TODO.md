@@ -1,9 +1,12 @@
-/* ========================================================================
+<!-- ========================================================================
  * Project: Pharos Kitchen Design (Project Prism)
  * Component: Project Management / Backlog
  * File: @TODO.md
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Central tracking for Phase-specific tasks and issues.
- * ======================================================================== */
+ * Traceability: [Traceability]
+ * ======================================================================== -->
 
 <!-- 
   AI_AGENT_PROTOCOL: @TODO.md
@@ -31,6 +34,8 @@
 - [x] Issue #10: RFC 8628 Auth: Implement local `auth login` flow with secure token storage (`keyring-rs`).
 - [x] Deep Validation: Semantic type-checking for shared parameters.
 - [x] CI Remediation: Resolved IAM Trust Policy case-sensitivity/Wildcard warnings.
+- [x] **Issue #46**: Implement Pharos Truth Engine Crawler Logic (Frymaster) (Task 4.8).
+- [x] **Issue #50**: Truth Engine: Authoritative SQL Schema Extraction (Task 4.9).
 
 ---
 
@@ -60,7 +65,6 @@
 - [x] Jargon removal & functional utility mapping.
 
 ### Phase 4: Revit & Web Interop (Project Prism Bridge)
-- [x] **Issue #46**: Implement Pharos Truth Engine Crawler Logic (Frymaster) (Task 4.8).
 - [x] **Issue #20 (Log Sync)**: Synchronized Decision Log with ADR-0023/24/25.
 - [x] **Issue #18 (SRI)**: Rectified Umami SRI and implemented Fail-Fast build check.
 - [x] **Issue #17 (Scaffold)**: Revit Bridge (.NET 8) and Demo Site (Astro) initialized.

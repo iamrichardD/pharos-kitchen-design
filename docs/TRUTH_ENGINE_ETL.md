@@ -1,4 +1,4 @@
-/* ========================================================================
+<!-- ========================================================================
  * Project: Pharos Kitchen Design (Project Prism)
  * Component: Documentation / ETL Strategy
  * File: TRUTH_ENGINE_ETL.md
@@ -6,7 +6,7 @@
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Master blueprint for the Pharos Truth Engine ETL pipeline.
  * Traceability: Issue #46, Issue #47, ADR-0015
- * ======================================================================== */
+ * ======================================================================== -->
 
 # ⚔️ Pharos Truth Engine: ETL & Forensic Mapping Blueprint
 

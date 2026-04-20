@@ -1,9 +1,12 @@
-/* ========================================================================
+<!-- ========================================================================
  * Project: Pharos Kitchen Design (Project Prism)
  * Component: Project Management / Progress
  * File: @PROGRESS.md
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Iterative log of project milestones and sprint outcomes.
- * ======================================================================== */
+ * Traceability: [Traceability]
+ * ======================================================================== -->
 
 <!-- 
   AI_AGENT_PROTOCOL: @PROGRESS.md
@@ -106,9 +109,16 @@
 - [x] **Issue #46 (Governance)**: Clean Architecture (Public APIs) and TDD Traceability (3 tests passed).
 - [x] **Verification**: Pharos Green status confirmed in Podman Node 24.
 
-### Sprint 4.1: Transformation & Forensic Mapping (2026-04-17) - ✅ COMPLETED
+### Sprint 4.1: Transformation & Forensic Mapping (#48) - ✅ COMPLETED
 - [x] **Issue #48 (Forensics)**: Implemented `ForensicNormalizer` and JSON-based pattern sovereignty.
 - [x] **Issue #48 (Hardening)**: Implemented "Forensic Isolation Ward" with transaction-hardened schema and UNIQUE hash constraints.
 - [x] **Issue #48 (Security)**: Implemented "Regex Warden" with pre-compiled patterns and ReDoS length/timeout gates.
 - [x] **Issue #48 (Traceability)**: Linked forensic investigations to parent resources for automated promotion.
 - [x] **Verification**: Zero-Host verification successful (12 tests passed) in Node 24/Playwright container.
+
+### Sprint 4.2: Truth Engine Hardening (#50) - ✅ COMPLETED
+- [x] **Issue #50 (Architecture)**: Extracted authoritative SQL schema and implemented Async DI initialization.
+- [x] **Issue #50 (Governance)**: Implemented Zero-Tolerance documentation sync for ERD verification.
+- [x] **Issue #50 (Security)**: Hardened temporal types and forensic logging traceability.
+- [x] **Verification**: Pharos Green status confirmed via `scripts/truth-engine/sync-docs.ts` and Node 22 Vitest.
+

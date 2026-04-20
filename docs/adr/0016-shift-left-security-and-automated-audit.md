@@ -1,13 +1,13 @@
-/* ========================================================================
+<!-- ========================================================================
  * Project: Pharos Kitchen Design (Project Prism)
  * Component: Documentation / Strategy
  * File: 0016-shift-left-security-and-automated-audit.md
- * Status: Approved
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Codifying automated vulnerability auditing in the test cycle.
  * Traceability: GEMINI.md, ADR 0005
- * ======================================================================== */
+ * Status: Approved
+ * ======================================================================== -->
 
 # ADR 0016: Shift-Left Security & Automated Audit
 

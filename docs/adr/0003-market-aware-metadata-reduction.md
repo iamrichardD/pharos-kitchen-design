@@ -1,9 +1,13 @@
-/* ========================================================================
+<!-- ========================================================================
  * Project: Pharos Kitchen Design (Project Prism)
  * Component: Documentation
  * File: 0003-market-aware-metadata-reduction.md
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * License: FSL-1.1 (See LICENSE file for details)
+ * Purpose: [Purpose]
+ * Traceability: [Traceability]
  * Status: Approved
- * ======================================================================== */
+ * ======================================================================== -->
 
 # ADR 0003: Market-Aware Metadata Reduction
 

@@ -1,11 +1,12 @@
-/* ========================================================================
+<!-- ========================================================================
  * Project: Pharos Kitchen Design (Project Prism)
  * Component: Documentation
  * File: ARCHITECTURE.md
  * Author: Richard D. (https://github.com/iamrichardd)
+ * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Mermaid visualizations for Human-AI contextual alignment.
  * Traceability: UX/VSA Strategy Approved 2026-03-31
- * ======================================================================== */
+ * ======================================================================== -->
 
 # Pharos Architectural & UX Visualizations
 

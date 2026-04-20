@@ -1,13 +1,13 @@
-/* ========================================================================
+<!-- ========================================================================
  * Project: Pharos Kitchen Design (Project Prism)
  * Component: Documentation / AWS Architecture
  * File: 0019-aws-serverless-auth-bridge.md
- * Status: Superseded by ADR 0021
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Detailed implementation plan for the RFC 8628 AWS Bridge.
  * Traceability: ADR 0018, RFC 8628, ADR 0021
- * ======================================================================== */
+ * Status: Superseded by ADR 0021
+ * ======================================================================== -->
 
 # ADR 0019: AWS Serverless Auth Bridge Implementation (Superseded)
 

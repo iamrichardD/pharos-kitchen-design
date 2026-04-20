@@ -1,13 +1,13 @@
-/* ========================================================================
+<!-- ========================================================================
  * Project: Pharos Kitchen Design (Project Prism)
  * Component: Documentation / Strategy
  * File: docs/adr/0025-modern-only-interop-mandate.md
- * Status: Active
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Mandating .NET 8.0+ for all C# Interop components.
  * Traceability: Issue #32, Revit 2025 SDK
- * ======================================================================== */
+ * Status: Active
+ * ======================================================================== -->
 
 # ADR 0025: Modern-Only Interop Mandate (.NET 8.0+)
 

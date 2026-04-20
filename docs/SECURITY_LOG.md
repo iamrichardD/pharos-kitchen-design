@@ -1,11 +1,12 @@
-/* ========================================================================
+<!-- ========================================================================
  * Project: Pharos Kitchen Design (Project Prism)
  * Component: Security / Governance
  * File: SECURITY_LOG.md
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Tracking security debt, audit bypasses, and remediation targets.
- * ======================================================================== */
+ * Traceability: [Traceability]
+ * ======================================================================== -->
 
 # 🛡️ Pharos Security Log
 

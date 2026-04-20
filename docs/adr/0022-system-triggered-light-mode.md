@@ -1,13 +1,13 @@
-/* ========================================================================
+<!-- ========================================================================
  * Project: Pharos Kitchen Design (Project Prism)
  * Component: Documentation / UX
  * File: 0022-system-triggered-light-mode.md
- * Status: Proposed
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Defining the strategy for system-triggered light mode and adaptive assets.
  * Traceability: ADR 0012, ADR 0015, ADR 0017
- * ======================================================================== */
+ * Status: Proposed
+ * ======================================================================== -->
 
 # ADR 0022: System-Triggered Light Mode & Adaptive Assets
 

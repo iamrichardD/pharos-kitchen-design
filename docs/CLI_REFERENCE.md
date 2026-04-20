@@ -1,4 +1,4 @@
-/* ========================================================================
+<!-- ========================================================================
  * Project: Pharos Kitchen Design (Project Prism)
  * Component: Documentation / Tooling
  * File: docs/CLI_REFERENCE.md
@@ -6,7 +6,7 @@
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Formal command reference for the Pharos CLI (pkd).
  * Traceability: Issue #10, Issue #12, ADR-0006
- * ======================================================================== */
+ * ======================================================================== -->
 
 # Pharos CLI (pkd) Reference Guide
 

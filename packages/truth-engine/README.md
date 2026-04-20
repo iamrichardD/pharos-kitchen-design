@@ -1,4 +1,4 @@
-/* ========================================================================
+<!-- ========================================================================
  * Project: Pharos Kitchen Design (Project Prism)
  * Component: Truth Engine / Documentation
  * File: README.md
@@ -6,7 +6,7 @@
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Technical documentation for the Truth Engine vertical slice.
  * Traceability: Issue #46, Issue #47, ADR-0017
- * ======================================================================== */
+ * ======================================================================== -->
 
 # @pkd/truth-engine
 

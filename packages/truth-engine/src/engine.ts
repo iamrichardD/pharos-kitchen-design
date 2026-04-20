@@ -5,14 +5,16 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Event-driven state machine for manufacturer data synchronization.
- * Traceability: Issue #46, Issue #47, ADR-0017
+ * Traceability: Issue #46, Issue #47, Issue #50, ADR-0017
  * ======================================================================== */
 
 import Database from 'better-sqlite3';
 import { chromium } from '@playwright/test';
 import { ForensicNormalizer, NormalizationResult } from './normalizer.js';
-import { join } from 'node:path';
+import { join, dirname } from 'node:path';
 import { createHash } from 'node:crypto';
+import { readFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
 
 // State Types
 export type SyncState = 'STALE' | 'PENDING_VERIFICATION' | 'DIVE_REQUIRED' | 'HEALTHY' | 'BROKEN';
@@ -28,68 +30,49 @@ export interface Resource {
 }
 
 export class TruthEngine {
-    private db: Database.Database;
+    private _db: Database.Database;
     private normalizer: ForensicNormalizer;
+    private _initialized = false;
 
-    constructor(dbPath: string = 'data/truth_engine.db') {
-        this.db = new Database(dbPath);
-        this.initializeSchema();
+    constructor(dbOrPath?: Database.Database | string) {
+        if (dbOrPath instanceof Database) {
+            this._db = dbOrPath;
+        } else {
+            this._db = new Database(dbOrPath || 'data/truth_engine.db');
+        }
         
         // Pattern registry location relative to this file
         const patternDir = join(process.cwd(), 'patterns');
         this.normalizer = new ForensicNormalizer(patternDir);
     }
 
-    private initializeSchema() {
-        const schema = `
-            CREATE TABLE IF NOT EXISTS manufacturers (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL UNIQUE,
-                scheme TEXT NOT NULL DEFAULT 'https',
-                host TEXT NOT NULL,
-                catalog_path TEXT NOT NULL DEFAULT '/',
-                base_url TEXT GENERATED ALWAYS AS (scheme || '://' || host || catalog_path) VIRTUAL,
-                last_crawl_at DATETIME,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-            );
-            CREATE TABLE IF NOT EXISTS resources (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                mfr_id INTEGER NOT NULL,
-                resource_type TEXT NOT NULL,
-                uri TEXT NOT NULL UNIQUE,
-                etag TEXT,
-                last_modified TEXT,
-                content_hash TEXT,
-                sync_state TEXT DEFAULT 'STALE',
-                last_checked_at DATETIME,
-                failure_count INTEGER DEFAULT 0,
-                FOREIGN KEY (mfr_id) REFERENCES manufacturers(id)
-            );
-            CREATE TABLE IF NOT EXISTS forensic_investigations (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                mfr_id INTEGER NOT NULL,
-                resource_id INTEGER NOT NULL,
-                raw_input TEXT NOT NULL,
-                raw_input_hash TEXT NOT NULL,
-                source_uri TEXT NOT NULL,
-                rejection_reason TEXT NOT NULL,
-                investigation_status TEXT DEFAULT 'PENDING',
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (mfr_id) REFERENCES manufacturers(id),
-                FOREIGN KEY (resource_id) REFERENCES resources(id),
-                UNIQUE(mfr_id, raw_input_hash)
-            );
-            CREATE TABLE IF NOT EXISTS sync_logs (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                resource_id INTEGER,
-                status_code INTEGER,
-                action_taken TEXT,
-                message TEXT,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (resource_id) REFERENCES resources(id)
-            );
-        `;
-        this.db.exec(schema);
+    /**
+     * Initializes the engine, ensuring the schema is applied.
+     * This must be called before using the engine.
+     */
+    public async init() {
+        await this.initializeSchema();
+        this._initialized = true;
+    }
+
+    private ensureInitialized() {
+        if (!this._initialized) {
+            throw new Error('[Critical] TruthEngine is not initialized. Call await engine.init() before use.');
+        }
+    }
+
+    /**
+     * Closes the database connection.
+     */
+    public close() {
+        this._db.close();
+    }
+
+    private async initializeSchema() {
+        const __dirname = dirname(fileURLToPath(import.meta.url));
+        const schemaPath = join(__dirname, 'schema.sql');
+        const schema = await readFile(schemaPath, 'utf8');
+        this._db.exec(schema);
     }
 
     async sleep(min = 2000, max = 5000) {
@@ -119,7 +102,8 @@ export class TruthEngine {
     }
 
     updateState(id: number, state: SyncState, metadata?: { etag?: string, last_modified?: string }) {
-        const stmt = this.db.prepare(`
+        this.ensureInitialized();
+        const stmt = this._db.prepare(`
             UPDATE resources 
             SET sync_state = ?, etag = ?, last_modified = ?, last_checked_at = CURRENT_TIMESTAMP 
             WHERE id = ?
@@ -132,29 +116,30 @@ export class TruthEngine {
      * Implements the "Forensic Isolation Ward" for unmatched data.
      */
     public handleTransformation(resourceId: number, rawInput: string): NormalizationResult {
-        const resource = this.db.prepare('SELECT * FROM resources WHERE id = ?').get(resourceId) as Resource;
+        this.ensureInitialized();
+        const resource = this._db.prepare('SELECT * FROM resources WHERE id = ?').get(resourceId) as Resource;
         if (!resource) throw new Error(`Resource ${resourceId} not found.`);
 
-        const mfr = this.db.prepare('SELECT name FROM manufacturers WHERE id = ?').get(resource.mfr_id) as any;
+        const mfr = this._db.prepare('SELECT name FROM manufacturers WHERE id = ?').get(resource.mfr_id) as any;
         const result = this.normalizer.normalize(resource.mfr_id, mfr.name, rawInput, resource.uri);
 
         if (result.status === 'UNVERIFIED_RAW_DATA') {
             const hash = createHash('sha256').update(rawInput).digest('hex');
             
             // Atomic Transaction: Forensic Deferral
-            const transaction = this.db.transaction(() => {
+            const transaction = this._db.transaction(() => {
                 // Log the investigation
-                this.db.prepare(`
+                this._db.prepare(`
                     INSERT OR IGNORE INTO forensic_investigations (
                         mfr_id, resource_id, raw_input, raw_input_hash, source_uri, rejection_reason
                     ) VALUES (?, ?, ?, ?, ?, ?)
                 `).run(resource.mfr_id, resourceId, rawInput, hash, resource.uri, result.rejection_reason || 'Unknown');
 
                 // Update sync log
-                this.db.prepare(`
-                    INSERT INTO sync_logs (resource_id, status_code, action_taken, message)
-                    VALUES (?, 202, 'FORENSIC_DEFERRAL', ?)
-                `).run(resourceId, `Transformation failed: ${result.rejection_reason}`);
+                this._db.prepare(`
+                    INSERT INTO sync_logs (mfr_id, resource_id, status_code, action_taken, message)
+                    VALUES (?, ?, 202, 'FORENSIC_DEFERRAL', ?)
+                `).run(resource.mfr_id, resourceId, `Transformation failed: ${result.rejection_reason}`);
 
                 // Move state machine to DIVE_REQUIRED
                 this.updateState(resourceId, 'DIVE_REQUIRED');
@@ -167,7 +152,8 @@ export class TruthEngine {
     }
 
     async discover(mfrName: string) {
-        const mfr = this.db.prepare('SELECT * FROM manufacturers WHERE name = ?').get(mfrName) as any;
+        this.ensureInitialized();
+        const mfr = this._db.prepare('SELECT * FROM manufacturers WHERE name = ?').get(mfrName) as any;
         if (!mfr) throw new Error(`Manufacturer ${mfrName} not found in Truth Engine.`);
 
         const browser = await chromium.launch({ headless: true });
@@ -200,7 +186,8 @@ export class TruthEngine {
      * Registers a discovered resource if it passes the SSRF Domain Sentinel.
      */
     public registerResource(mfrId: number, uri: string, type: string) {
-        const mfr = this.db.prepare('SELECT host FROM manufacturers WHERE id = ?').get(mfrId) as any;
+        this.ensureInitialized();
+        const mfr = this._db.prepare('SELECT host FROM manufacturers WHERE id = ?').get(mfrId) as any;
         if (!mfr) {
             console.warn(`[Security] Blocked resource registration for unknown manufacturer ID: ${mfrId}`);
             return;
@@ -217,16 +204,16 @@ export class TruthEngine {
 
             // Persistent Security Logging (High Rigor Refactor)
             // We use a NULL resource_id to indicate a "Global System Event"
-            this.db.prepare(`
-                INSERT INTO sync_logs (resource_id, status_code, action_taken, message)
-                VALUES (NULL, 403, 'BLOCKED', ?)
-            `).run(`${mfrHost}: ${msg}`);
+            this._db.prepare(`
+                INSERT INTO sync_logs (mfr_id, resource_id, status_code, action_taken, message)
+                VALUES (?, NULL, 403, 'BLOCKED', ?)
+            `).run(mfrId, `${mfrHost}: ${msg}`);
 
             return;
         }
 
 
-        const stmt = this.db.prepare(`
+        const stmt = this._db.prepare(`
             INSERT OR IGNORE INTO resources (mfr_id, resource_type, uri, sync_state)
             VALUES (?, ?, ?, 'STALE')
         `);

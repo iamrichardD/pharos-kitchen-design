@@ -1,10 +1,13 @@
-/* ========================================================================
+<!-- ========================================================================
  * Project: Pharos Kitchen Design (Project Prism)
  * Component: Documentation
  * File: 0006-command-first-ux.md
- * Status: Approved (Refined for Phase 3)
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * License: FSL-1.1 (See LICENSE file for details)
+ * Purpose: [Purpose]
  * Traceability: Issue #10, ADR 0009, ADR 0015
- * ======================================================================== */
+ * Status: Approved (Refined for Phase 3)
+ * ======================================================================== -->
 
 # ADR 0006: Command-First UX (The Three Pillars)
 

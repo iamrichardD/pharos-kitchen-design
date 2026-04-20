@@ -1,13 +1,13 @@
-/* ========================================================================
+<!-- ========================================================================
  * Project: Pharos Kitchen Design (Project Prism)
  * Component: Documentation / Infrastructure
  * File: 0021-cloudflare-edge-auth-bridge.md
- * Status: Approved
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Pivoting the Auth Bridge to Cloudflare Workers and D1 for performance.
  * Traceability: ADR 0018, ADR 0019, ADR 0020
- * ======================================================================== */
+ * Status: Approved
+ * ======================================================================== -->
 
 # ADR 0021: Cloudflare Edge Auth Bridge
 

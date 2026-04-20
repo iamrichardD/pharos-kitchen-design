@@ -1,13 +1,13 @@
-/* ========================================================================
+<!-- ========================================================================
  * Project: Pharos Kitchen Design (Project Prism)
  * Component: Documentation / Strategy
  * File: 0017-crucible-slice-three-option-workflow.md
- * Status: Approved
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Codifying the Three-Option Crucible-Slice workflow for AI agents.
  * Traceability: GEMINI.md, ADR 0005, git worktree --help
- * ======================================================================== */
+ * Status: Approved
+ * ======================================================================== -->
 
 # ADR 0017: Crucible-Slice & Three-Option Workflow
 

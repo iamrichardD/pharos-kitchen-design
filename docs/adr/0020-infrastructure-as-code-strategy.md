@@ -1,13 +1,13 @@
-/* ========================================================================
+<!-- ========================================================================
  * Project: Pharos Kitchen Design (Project Prism)
  * Component: Documentation / Infrastructure
  * File: 0020-infrastructure-as-code-strategy.md
- * Status: Proposed
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Defining the IaC and Deployment strategy for Project Prism.
  * Traceability: ADR 0018, ADR 0019
- * ======================================================================== */
+ * Status: Proposed
+ * ======================================================================== -->
 
 # ADR 0020: Infrastructure as Code (IaC) & Deployment
 
