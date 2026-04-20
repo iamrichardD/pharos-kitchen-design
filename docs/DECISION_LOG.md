@@ -29,6 +29,7 @@ This log provides an index of the technical and architectural decisions made for
 | **[ADR-0023]** | 2026-04-13 | Active   | [RFC 2378 Search Metadata & Fail Fast Engineering](docs/adr/0023-rfc2378-and-fail-fast-integration.md) |
 | **[ADR-0024]** | 2026-04-13 | Active   | [Shared RFC 2378 Protocol Library Extraction](docs/adr/0024-rfc2378-library-extraction.md) |
 | **[ADR-0025]** | 2026-04-13 | Active   | [Modern-Only Interop Mandate (.NET 8.0+)](docs/adr/0025-modern-only-interop-mandate.md) |
+| **[ADR-0026]** | 2026-04-20 | Active   | [Four-Realm Registry & Pulse Protocol](docs/adr/0026-four-realm-registry-pulse-protocol.md) |
 
 ---
 *To add a new decision, create a new file in `docs/adr/` following the established template and append it to this index.*

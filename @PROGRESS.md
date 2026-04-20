@@ -122,3 +122,9 @@
 - [x] **Issue #50 (Security)**: Hardened temporal types and forensic logging traceability.
 - [x] **Verification**: Pharos Green status confirmed via `scripts/truth-engine/sync-docs.ts` and Node 22 Vitest.
 
+### Sprint 4.3: Registry Distribution & Pulse Protocol (#51-54) - 🔄 In Progress
+- [ ] **Issue #53 (ETL)**: [PRIMARY TARGET] Implement \`pkd core bake\` engine to generate sharded JSON and binary indexes.
+- [ ] **Issue #51 (CLI)**: Implement \`--env [local|dev|stage|prod]\` global flag and path isolation.
+- [ ] **Issue #52 (Protocol)**: Upgrade \`pharos-protocol\` to support logical \`OR\` for complex queries.
+- [ ] **Issue #54 (Network)**: Implement "Pulse" startup event with SHA-256 verification and XDG cache persistence.
+

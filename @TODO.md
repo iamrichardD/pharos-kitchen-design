@@ -87,6 +87,12 @@
 - [x] **Issue #44**: Implement Pharos Crucible Process (Task 4.6).
 - [x] **Issue #45**: Implement Pharos Crucible Enforcement Layer (Task 4.7).
 
+### Sprint 4.3: Registry Distribution & Pulse Protocol (#51-54)
+- [ ] **Issue #51**: Implement `--env [local|dev|stage|prod]` and environment isolation logic in `pkd-cli`.
+- [ ] **Issue #52**: Upgrade `pharos-protocol` to support logical `OR` grouping for registry queries.
+- [ ] **Issue #53**: Implement `pkd core bake` to generate sharded JSON and Tantivy indexes.
+- [ ] **Issue #54**: Implement "Pulse" startup event with SHA-256 verification and XDG cache.
+
 ---
 
 ## 🗑️ Purge/Stale Logic
