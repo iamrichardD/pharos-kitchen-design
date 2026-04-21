@@ -7,13 +7,13 @@
  * Purpose: Event-driven state machine for manufacturer data synchronization.
  * Traceability: Issue #46, Issue #47, Issue #50, ADR-0017
  * ======================================================================== */
-
 import Database from 'better-sqlite3';
 import { chromium } from '@playwright/test';
 import { ForensicNormalizer, NormalizationResult } from './normalizer.js';
 import { join, dirname } from 'node:path';
 import { createHash } from 'node:crypto';
-import { readFile } from 'node:fs/promises';
+import { readFile, writeFile, mkdir, rm } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 // State Types
@@ -123,7 +123,31 @@ export class TruthEngine {
         const mfr = this._db.prepare('SELECT name FROM manufacturers WHERE id = ?').get(resource.mfr_id) as any;
         const result = this.normalizer.normalize(resource.mfr_id, mfr.name, rawInput, resource.uri);
 
-        if (result.status === 'UNVERIFIED_RAW_DATA') {
+        if (result.status === 'HEALTHY' && result.data) {
+            const data = result.data;
+            const sku = data.PKD_ProductNumber || data.PKD_ModelNumber || `SKU-${resourceId}`;
+            
+            // Atomic Transaction: Registry Promotion (The "Bake" Preparation)
+            const transaction = this._db.transaction(() => {
+                this._db.prepare(`
+                    INSERT OR REPLACE INTO equipment_registry (
+                        mfr_id, resource_id, sku, name, category, voltage, btu, metadata
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                `).run(
+                    resource.mfr_id, 
+                    resourceId, 
+                    sku,
+                    data.name || 'Unknown Equipment',
+                    data.PKD_MainCategory || null,
+                    data.PKD_Voltage || null,
+                    data.PKD_BTU || null,
+                    JSON.stringify(data)
+                );
+
+                this.updateState(resourceId, 'HEALTHY');
+            });
+            transaction();
+        } else if (result.status === 'UNVERIFIED_RAW_DATA') {
             const hash = createHash('sha256').update(rawInput).digest('hex');
             
             // Atomic Transaction: Forensic Deferral
@@ -149,6 +173,74 @@ export class TruthEngine {
         }
 
         return result;
+    }
+
+    /**
+     * Bakes the truth_engine.db registry into a sharded JSON file system.
+     * Organization: [stagingDir]/[manufacturer]/[category]/[sku].json
+     */
+    public async bake(stagingDir: string) {
+        this.ensureInitialized();
+
+        // 1. Path Integrity Sentinel: Prevent arbitrary deletion (Shift-Left Security)
+        const absoluteStaging = join(process.cwd(), stagingDir);
+        const allowedBase = join(process.cwd(), '.artifacts');
+        const allowedData = join(process.cwd(), 'data');
+
+        if (!absoluteStaging.startsWith(allowedBase) && !absoluteStaging.startsWith(allowedData)) {
+            throw new Error(`[Security] Bake aborted: stagingDir '${stagingDir}' is outside of allowed paths (.artifacts/ or data/).`);
+        }
+
+        // 2. Atomic Wipe: Prevent "Zombie Data" from previous runs
+        if (existsSync(absoluteStaging)) {
+            await rm(absoluteStaging, { recursive: true, force: true });
+        }
+        await mkdir(absoluteStaging, { recursive: true });
+
+        // 3. Manufacturer Enrichment & Metadata Generation
+        const stmt = this._db.prepare(`
+            SELECT 
+                r.sku, r.name, r.category, r.voltage, r.btu, r.metadata,
+                m.name as manufacturer_name
+            FROM equipment_registry r
+            JOIN manufacturers m ON r.mfr_id = m.id
+        `);
+
+        const records = stmt.all() as any[];
+
+        for (const row of records) {
+            const rawMetadata = JSON.parse(row.metadata);
+
+            // 4. Inject Standardized File Prologue (The Agentic Traceability)
+            const bakedRecord = {
+                pkd_prologue: {
+                    project: "Pharos Kitchen Design (Project Prism)",
+                    component: "Registry / Sharded Content",
+                    file: `${row.sku}.json`,
+                    author: "Pharos Bake Engine (https://github.com/iamrichardd)",
+                    license: "FSL-1.1 (See LICENSE file for details)",
+                    purpose: `Authoritative Truth for ${row.manufacturer_name} ${row.name}.`,
+                    traceability: `Issue #53 - ETL Bake`
+                },
+                sku: row.sku,
+                name: row.name,
+                manufacturer: row.manufacturer_name,
+                category: row.category || 'Uncategorized',
+                voltage: row.voltage,
+                btu: row.btu,
+                parameters: rawMetadata
+            };
+
+            const manufacturerDir = join(stagingDir, row.manufacturer_name.replace(/[^a-z0-9]/gi, '_').toLowerCase());
+            const categoryDir = join(manufacturerDir, (row.category || 'uncategorized').replace(/[^a-z0-9]/gi, '_').toLowerCase());
+
+            await mkdir(categoryDir, { recursive: true });
+
+            const filePath = join(categoryDir, `${row.sku}.json`);
+            await writeFile(filePath, JSON.stringify(bakedRecord, null, 2));
+        }
+
+        return records.length;
     }
 
     async discover(mfrName: string) {

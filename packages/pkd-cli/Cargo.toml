@@ -45,6 +45,13 @@ pkd-core = { path = "../pkd-core" }
 dirs = "6.0.0"
 pharos-protocol = { version = "0.1.0", path = "../pharos-protocol" }
 
+# Binary Indexing & Distribution
+tantivy = "0.22.0"
+tar = "0.4.40"
+zstd = "0.13.0"
+walkdir = "2.5.0"
+serde_yaml = "0.9.34"
+
 [dev-dependencies]
 mockall = "0.12.1"
 tempfile = "3.27.0"

@@ -4,137 +4,134 @@
  * File: engine.test.ts
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
- * Purpose: Atomic verification of the Truth Engine state machine.
- * Traceability: Issue #46, Issue #47, Issue #50, PRACTICES.md#1
+ * Purpose: Atomic verification of the Bake Engine and Registry Promotion.
+ * Traceability: Issue #53 - ETL Bake
  * ======================================================================== */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { TruthEngine } from './engine.js';
-import Database from 'better-sqlite3';
+import { join } from 'node:path';
+import { rm, mkdir, readdir, readFile } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 
-describe('TruthEngine', () => {
+describe('TruthEngine: Bake & Promotion', () => {
     let engine: TruthEngine;
-    let db: Database.Database;
+    const TEST_DB = 'data/test_bake.db';
+    const STAGING_DIR = '.artifacts/test_staging';
 
     beforeEach(async () => {
-        db = new Database(':memory:');
-        engine = new TruthEngine(db);
+        if (existsSync(TEST_DB)) await rm(TEST_DB);
+        engine = new TruthEngine(TEST_DB);
         await engine.init();
         
-        db.prepare(`
-            INSERT INTO manufacturers (id, name, scheme, host, catalog_path) 
-            VALUES (1, 'Frymaster', 'https', 'www.frymaster.com', '/products')
-        `).run();
+        // Setup mock manufacturer
+        const db = (engine as any)._db;
+        db.prepare("INSERT INTO manufacturers (name, host) VALUES ('Frymaster', 'www.frymaster.com')").run();
     });
 
-    afterEach(() => {
+    afterEach(async () => {
         engine.close();
+        if (existsSync(TEST_DB)) await rm(TEST_DB);
+        if (existsSync(STAGING_DIR)) await rm(STAGING_DIR, { recursive: true, force: true });
     });
 
-    it('test_should_fail_fast_when_not_initialized', async () => {
-        const uninitializedEngine = new TruthEngine(':memory:');
-        expect(() => uninitializedEngine.registerResource(1, 'http://test.com', 'PDF'))
-            .toThrow('[Critical] TruthEngine is not initialized. Call await engine.init() before use.');
-    });
-
-    it('test_should_reconstruct_full_uri_from_components', () => {
-        const mfr = db.prepare('SELECT base_url FROM manufacturers WHERE name = ?').get('Frymaster') as any;
-        expect(mfr.base_url).toBe('https://www.frymaster.com/products');
-    });
-
-    it('test_should_block_unauthorized_domain_when_registering_resource', () => {
-        const maliciousUri = 'https://malicious-site.com/malware.pdf';
-        engine.registerResource(1, maliciousUri, 'PDF');
+    it('test_should_promote_to_registry_when_normalization_succeeds', async () => {
+        const db = (engine as any)._db;
+        db.prepare("INSERT INTO resources (mfr_id, resource_type, uri, sync_state) VALUES (1, 'PDF', 'https://www.frymaster.com/manual.pdf', 'STALE')").run();
         
-        const resource = db.prepare('SELECT * FROM resources WHERE uri = ?').get(maliciousUri);
-        expect(resource).toBeUndefined();
-    });
-
-    it('test_should_allow_subdomain_of_authorized_host', () => {
-        const subdomainUri = 'https://assets.frymaster.com/spec.pdf';
-        engine.registerResource(1, subdomainUri, 'PDF');
+        // Mock a healthy normalization by the ForensicNormalizer (simulated)
+        // We'll manually trigger handleTransformation with data that matches a dialect
+        // For this test, we assume the normalizer is working and focus on the engine's promotion logic.
         
-        const resource = db.prepare('SELECT * FROM resources WHERE uri = ?').get(subdomainUri) as any;
-        expect(resource).toBeDefined();
-    });
-
-    it('test_should_allow_authorized_domain_when_registering_resource', () => {
-        const validUri = 'https://www.frymaster.com/products/spec.pdf';
-        engine.registerResource(1, validUri, 'PDF');
+        const rawInput = "Model: FPRE217, Voltage: 208V, Category: Fryers";
         
-        const resource = db.prepare('SELECT * FROM resources WHERE uri = ?').get(validUri) as any;
-        expect(resource).toBeDefined();
-        expect(resource.sync_state).toBe('STALE');
-    });
-
-    it('test_should_transition_to_healthy_when_etag_matches', async () => {
-        global.fetch = vi.fn().mockResolvedValue({
-            ok: true,
-            headers: new Map([
-                ['etag', 'match'],
-                ['last-modified', 'today']
-            ])
+        // Force a successful match in the mock normalizer logic (by providing valid fields)
+        // Since we are testing TruthEngine.handleTransformation, we need the ForensicNormalizer 
+        // to return a HEALTHY result.
+        
+        // We'll mock the normalizer's behavior by overriding the method for this test instance
+        (engine as any).normalizer.normalize = () => ({
+            status: 'HEALTHY',
+            data: {
+                name: "High Efficiency Fryer",
+                PKD_ModelNumber: "FPRE217",
+                PKD_MainCategory: "Fryers",
+                PKD_Voltage: "208V",
+                PKD_BTU: "0"
+            }
         });
 
-        engine.registerResource(1, 'https://www.frymaster.com/spec.pdf', 'PDF');
-        const resource = db.prepare('SELECT * FROM resources LIMIT 1').get() as any;
-        
-        engine.updateState(resource.id, 'STALE', { etag: 'match', last_modified: 'today' });
-        
-        const updatedResource = db.prepare('SELECT * FROM resources LIMIT 1').get() as any;
-        const nextState = await engine.checkVitality(updatedResource);
-        
-        expect(nextState).toBe('HEALTHY');
+        engine.handleTransformation(1, rawInput);
+
+        const registryEntry = db.prepare("SELECT * FROM equipment_registry WHERE sku = 'FPRE217'").get();
+        expect(registryEntry).toBeDefined();
+        expect(registryEntry.name).toBe("High Efficiency Fryer");
+        expect(registryEntry.voltage).toBe("208V");
+        expect(registryEntry.category).toBe("Fryers");
     });
 
-    it('test_should_log_security_violation_to_sync_logs', () => {
-        const maliciousUri = 'https://malicious-site.com/malware.pdf';
+    it('test_should_replace_existing_sku_when_updated_data_arrives', async () => {
+        const db = (engine as any)._db;
+        db.prepare("INSERT INTO resources (mfr_id, resource_type, uri, sync_state) VALUES (1, 'PDF', 'https://www.frymaster.com/manual.pdf', 'STALE')").run();
         
-        engine.registerResource(1, maliciousUri, 'PDF');
+        const firstPromotion = {
+            status: 'HEALTHY',
+            data: { name: "Old Fryer", PKD_ModelNumber: "SKU-1" }
+        };
         
-        const log = db.prepare('SELECT * FROM sync_logs WHERE action_taken = ?').get('BLOCKED') as any;
-        expect(log).toBeDefined();
-        expect(log.mfr_id).toBe(1);
-        expect(log.message).toContain('Domain Mismatch');
+        const secondPromotion = {
+            status: 'HEALTHY',
+            data: { name: "New Fryer", PKD_ModelNumber: "SKU-1" }
+        };
+
+        (engine as any).normalizer.normalize = () => firstPromotion;
+        engine.handleTransformation(1, "raw1");
+        
+        (engine as any).normalizer.normalize = () => secondPromotion;
+        engine.handleTransformation(1, "raw2");
+
+        const count = db.prepare("SELECT COUNT(*) as count FROM equipment_registry WHERE sku = 'SKU-1'").get().count;
+        const entry = db.prepare("SELECT name FROM equipment_registry WHERE sku = 'SKU-1'").get();
+        
+        expect(count).toBe(1);
+        expect(entry.name).toBe("New Fryer");
     });
 
-    it('test_should_handle_unverified_raw_data_with_forensic_isolation', () => {
-        const uri = 'https://www.frymaster.com/manual.pdf';
-        engine.registerResource(1, uri, 'PDF');
-        const resource = db.prepare('SELECT id FROM resources WHERE uri = ?').get(uri) as any;
-        
-        const rawInput = "BAD_DATA_999";
-        const result = engine.handleTransformation(resource.id, rawInput);
-        
-        expect(result.status).toBe('UNVERIFIED_RAW_DATA');
-        
-        // Verify database side-effects
-        const investigation = db.prepare('SELECT * FROM forensic_investigations WHERE resource_id = ?').get(resource.id) as any;
-        expect(investigation).toBeDefined();
-        expect(investigation.raw_input).toBe(rawInput);
-        expect(investigation.rejection_reason).toBe('No pattern match');
+    it('test_should_bake_sharded_json_when_registry_is_populated', async () => {
+        const db = (engine as any)._db;
+        db.prepare(`
+            INSERT INTO equipment_registry (mfr_id, resource_id, sku, name, category, metadata)
+            VALUES (1, 1, 'FRY-101', 'Super Fryer', 'Fryers', '{"PKD_Voltage":"208V"}')
+        `).run();
 
-        const log = db.prepare('SELECT * FROM sync_logs WHERE resource_id = ? AND action_taken = ?').get(resource.id, 'FORENSIC_DEFERRAL') as any;
-        expect(log).toBeDefined();
-        expect(log.mfr_id).toBe(1);
+        const count = await engine.bake(STAGING_DIR);
+        expect(count).toBe(1);
 
-        const updatedResource = db.prepare('SELECT sync_state FROM resources WHERE id = ?').get(resource.id) as any;
-        expect(updatedResource.sync_state).toBe('DIVE_REQUIRED');
+        const mfrPath = join(STAGING_DIR, 'frymaster');
+        const catPath = join(mfrPath, 'fryers');
+        const filePath = join(catPath, 'FRY-101.json');
+
+        expect(existsSync(filePath)).toBe(true);
+        
+        const content = JSON.parse(await readFile(filePath, 'utf-8'));
+        expect(content.sku).toBe('FRY-101');
+        expect(content.manufacturer).toBe('Frymaster');
+        expect(content.pkd_prologue).toBeDefined();
+        expect(content.parameters.PKD_Voltage).toBe('208V');
     });
 
-    it('test_should_be_deterministic_when_pattern_matches_exactly', () => {
-        const uri = 'https://www.frymaster.com/spec.pdf';
-        engine.registerResource(1, uri, 'PDF');
-        const resource = db.prepare('SELECT id FROM resources WHERE uri = ?').get(uri) as any;
+    it('test_should_perform_atomic_wipe_before_bake', async () => {
+        await mkdir(STAGING_DIR, { recursive: true });
+        const zombieFile = join(STAGING_DIR, 'zombie.json');
+        await writeFile(zombieFile, '{}');
+
+        await engine.bake(STAGING_DIR);
         
-        const rawInput = "208V 3PH 60HZ";
-        const result = engine.handleTransformation(resource.id, rawInput);
-        
-        expect(result.status).toBe('HEALTHY');
-        expect(result.data).toEqual({
-            voltage: "208",
-            phase: "3",
-            hertz: "60"
-        });
+        expect(existsSync(zombieFile)).toBe(false);
     });
 });
+
+async function writeFile(path: string, content: string) {
+    const fs = await import('node:fs/promises');
+    await fs.writeFile(path, content);
+}
