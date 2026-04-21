@@ -99,6 +99,8 @@ describe('TruthEngine: Bake & Promotion', () => {
 
     it('test_should_bake_sharded_json_when_registry_is_populated', async () => {
         const db = (engine as any)._db;
+        db.prepare("INSERT INTO resources (mfr_id, resource_type, uri, sync_state) VALUES (1, 'PDF', 'https://www.frymaster.com/manual.pdf', 'STALE')").run();
+        
         db.prepare(`
             INSERT INTO equipment_registry (mfr_id, resource_id, sku, name, category, metadata)
             VALUES (1, 1, 'FRY-101', 'Super Fryer', 'Fryers', '{"PKD_Voltage":"208V"}')

@@ -28,7 +28,10 @@ WORKDIR /work
 COPY . .
 # Perform dependency audit and TS unit tests.
 # We allow audit failures for known language-server issues (See docs/SECURITY_LOG.md)
-RUN npm install && (npm audit --workspaces || echo "⚠️ Warning: Audit found known issues, proceeding per SECURITY_LOG.md") && npm test
+RUN npm install && \
+    npm rebuild better-sqlite3 && \
+    (npm audit --workspaces || echo "⚠️ Warning: Audit found known issues, proceeding per SECURITY_LOG.md") && \
+    npm test
 
 # Stage 3: .NET SDK (Integrated "Pulse" Handshake)
 # We use the official .NET 8 SDK and chain the Rust artifact for the FFI validation.
