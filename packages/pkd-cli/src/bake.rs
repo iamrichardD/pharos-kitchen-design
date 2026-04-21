@@ -18,6 +18,8 @@ use tar::Builder;
 use zstd::stream::write::Encoder;
 use pkd_core::{PharosMetadata, PharosSchema};
 use colored::*;
+use sha2::{Sha256, Digest};
+use std::io::Read;
 
 pub struct BakeEngine {
     schema: Schema,
