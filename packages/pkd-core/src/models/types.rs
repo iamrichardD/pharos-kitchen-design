@@ -10,6 +10,7 @@
 
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
+use std::fmt;
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 #[serde(untagged)]
@@ -20,6 +21,25 @@ pub enum ParameterValue {
     Url(String),
     Array(Vec<ParameterValue>),
     Object(BTreeMap<String, String>),
+}
+
+impl fmt::Display for ParameterValue {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            ParameterValue::Text(s) => write!(f, "{}", s),
+            ParameterValue::Number(n) => write!(f, "{}", n),
+            ParameterValue::Boolean(b) => write!(f, "{}", b),
+            ParameterValue::Url(s) => write!(f, "{}", s),
+            ParameterValue::Array(v) => {
+                let parts: Vec<String> = v.iter().map(|v| v.to_string()).collect();
+                write!(f, "{}", parts.join(", "))
+            }
+            ParameterValue::Object(m) => {
+                let parts: Vec<String> = m.iter().map(|(k, v)| format!("{}={}", k, v)).collect();
+                write!(f, "{{{}}}", parts.join(", "))
+            }
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]

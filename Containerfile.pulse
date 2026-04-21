@@ -8,14 +8,18 @@
 # Why: ADR-0017 (Multi-Stage chaining) ensures cross-language FFI stability.
 # ========================================================================
 
-# Stage 1: Rust Builder (Metadata Core)
+# Stage 1: Rust Builder (Metadata Core & CLI)
 FROM public.ecr.aws/docker/library/rust@sha256:72724f1a416c449b405a2b7ed6bac56058163e6dfb1b5ccb40839882141dd237 AS rust-builder
 WORKDIR /work
 COPY . .
+# Install system dependencies for pkd-cli (OpenSSL, etc.)
+RUN apt-get update && apt-get install -y pkg-config libssl-dev && rm -rf /var/lib/apt/lists/*
 # Install cargo-audit for security scanning
 RUN cargo install cargo-audit
 # Run Rust unit tests, compile core, and perform security audit.
 RUN cd packages/pkd-core && cargo test && cargo build && cargo audit
+# AUTHORITATIVE GATE: Verify pkd-cli build integrity
+RUN cd packages/pkd-cli && cargo check && cargo test
 
 # Stage 2: Node.js (TypeScript & Security Audit)
 FROM mcr.microsoft.com/playwright:v1.59.1-noble AS ts-auditor
@@ -28,7 +32,10 @@ WORKDIR /work
 COPY . .
 # Perform dependency audit and TS unit tests.
 # We allow audit failures for known language-server issues (See docs/SECURITY_LOG.md)
-RUN npm install && (npm audit --workspaces || echo "⚠️ Warning: Audit found known issues, proceeding per SECURITY_LOG.md") && npm test
+RUN npm install && \
+    npm rebuild better-sqlite3 && \
+    (npm audit --workspaces || echo "⚠️ Warning: Audit found known issues, proceeding per SECURITY_LOG.md") && \
+    npm test
 
 # Stage 3: .NET SDK (Integrated "Pulse" Handshake)
 # We use the official .NET 8 SDK and chain the Rust artifact for the FFI validation.

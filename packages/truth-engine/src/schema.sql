@@ -59,3 +59,18 @@ CREATE TABLE IF NOT EXISTS sync_logs (
     FOREIGN KEY (mfr_id) REFERENCES manufacturers(id),
     FOREIGN KEY (resource_id) REFERENCES resources(id)
 );
+
+CREATE TABLE IF NOT EXISTS equipment_registry (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    mfr_id INTEGER NOT NULL,
+    resource_id INTEGER NOT NULL,
+    sku TEXT NOT NULL UNIQUE,
+    name TEXT NOT NULL,
+    category TEXT,
+    voltage TEXT,
+    btu TEXT,
+    metadata TEXT NOT NULL, -- JSON blob for unstructured leftovers
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (mfr_id) REFERENCES manufacturers(id),
+    FOREIGN KEY (resource_id) REFERENCES resources(id)
+);

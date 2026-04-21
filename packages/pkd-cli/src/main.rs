@@ -13,6 +13,7 @@ mod auth;
 mod admin;
 mod models;
 mod guard;
+mod bake;
 
 use anyhow::{Result, anyhow};
 use clap::{Parser, Subcommand};
@@ -22,6 +23,7 @@ use crate::auth::AuthManager;
 use crate::admin::AdminManager;
 use crate::models::PharosRole;
 use crate::guard::{Guard, Authorizable};
+use std::path::PathBuf;
 
 /// Pharos CLI (pkd) - The Admin-First Control Plane for Project Prism.
 #[derive(Parser)]
@@ -110,15 +112,27 @@ enum CoreCommands {
     /// Validate a Pharos metadata JSON file
     Validate {
         #[arg(short, long)]
-        path: std::path::PathBuf,
+        path: PathBuf,
     },
     /// Search the equipment registry using RFC 2378 query syntax
-    /// Examples: 
-    ///   pkd core search "manufacturer=3m return name"
-    ///   pkd core search manufacturer=3m voltage=208
     Search {
         /// The query string (e.g., 'manufacturer=3m return name')
         query: Vec<String>,
+    },
+    /// Bake the raw registry into a searchable binary archive
+    Bake {
+        /// Source directory containing sharded JSON files
+        #[arg(short, long)]
+        source: PathBuf,
+        /// Output directory for the Tantivy index and archive
+        #[arg(short, long)]
+        output: PathBuf,
+    },
+    /// Promote local artifacts to the production CDN (Cloudflare R2)
+    Promote {
+        /// The environment to promote to
+        #[arg(short, long, default_value = "prod")]
+        env: String,
     },
 }
 
@@ -168,6 +182,12 @@ async fn main() -> Result<()> {
                 CoreCommands::Search { query } => {
                     handle_core_search(query).await?;
                 }
+                CoreCommands::Bake { source, output } => {
+                    handle_core_bake(source, output).await?;
+                }
+                CoreCommands::Promote { env } => {
+                    handle_core_promote(env).await?;
+                }
             },
             Commands::SelfUpdate => {
                 handle_self_update().await?;
@@ -189,7 +209,7 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn handle_core_validate(path: std::path::PathBuf) -> Result<()> {
+async fn handle_core_validate(path: PathBuf) -> Result<()> {
     println!("{} Validating metadata at {:?}...", "ℹ".blue(), path);
     let content = std::fs::read_to_string(&path)?;
     let metadata: PharosMetadata = serde_json::from_str(&content)?;
@@ -251,6 +271,17 @@ async fn handle_core_search(query_parts: Vec<String>) -> Result<()> {
         println!("\n{} Search syntax is valid and compliant with RFC 2378.", "✔".green());
     }
 
+    Ok(())
+}
+
+async fn handle_core_bake(source: PathBuf, output: PathBuf) -> Result<()> {
+    let engine = bake::BakeEngine::new();
+    engine.run(&source, &output).await
+}
+
+async fn handle_core_promote(env: String) -> Result<()> {
+    println!("{} Scaffolding promotion to {}...", "ℹ".blue(), env.cyan());
+    println!("{} Note: Actual Cloudflare R2 upload logic will be implemented in Issue #55.", "⚠".yellow());
     Ok(())
 }
 
