@@ -20,24 +20,25 @@ We will implement a 4-tier Realm system for data isolation and a "Pulse" startup
 1.  **Define Four Realms**:
     - **`local`**: Raw Extraction. Data source: SQLite (`truth_engine.db`). Used for forensic discovery and initial verification.
     - **`dev`**: Local Sandbox. Data source: Local Filesystem (`.artifacts/registry/`). Used for verifying the "Bake" (JSON/Index) on the Human Engineer's machine.
-    - **`stage`**: Pre-release UAT. Data source: GitHub Pages (`/staging/`). Used for testing remote synchronization before production release.
-    - **`prod`**: Authoritative Truth. Data source: GitHub Pages (`/root/`). The authoritative CDN for IKD users.
+    - **stage**: Pre-release UAT. Data source: Cloudflare R2 Staging Bucket (\`staging-registry.pharos.internal\`). Used for testing remote synchronization before production release.
+    - **prod**: Authoritative Truth. Data source: Cloudflare R2 Production Bucket (\`registry.iamrichardd.com\`). The authoritative S3-compatible CDN for all IKD pillars (CLI, Plugin, Web).
 
-2.  **Sharded Storage & Binary Indexing**:
-    - Metadata is stored as individual `[SKU].json` files with a `_prologue` key for agentic traceability.
-    - Search is powered by a binary **Tantivy index** (`search-index.bin`) generated during the ETL "Bake" process.
+    2.  **Sharded Storage & Unified Binary Indexing**:
+    - Metadata is stored as individual \`[SKU].json\` files with a \`_prologue\` key for agentic traceability.
+    - Search is powered by a binary **Tantivy index** (\`search-index.bin\`) generated during the ETL "Bake" process.
+    - **WASM Tantivy Mandate**: To ensure search parity across all pillars, the Web experience (\`apps/demo\`) MUST utilize the \`tantivy\` Rust crate compiled to WASM. A loading sequence is acceptable to manage the initial index download and engine initialization.
 
-3.  **The "Pulse" Protocol**:
-    - On CLI startup (throttled by a 1-hour TTL), the `pkd` binary checks the remote CDN for a new `search-index.bin` via ETag/Last-Modified headers.
-    - Updates are downloaded to realm-specific cache paths (XDG standard for `prod`, project-relative for `dev/stage`).
+    3.  **The "Pulse" Protocol**:
+    - On CLI/Plugin startup (throttled by a 1-hour TTL), the client checks the Cloudflare R2 manifest for a new \`search-index.bin\` via ETag/MD5 headers.
+    - Updates are downloaded to realm-specific cache paths (XDG standard for \`prod\`, project-relative for \`dev/stage\`).
     - **SHA-256 Verification**: Mandatory checksum validation is performed after every download to ensure data integrity and security.
-    - **Fail-Soft**: If the network is unavailable, the CLI will default to the local cache and print: `[Info] Network unavailable, using local cache.`
+    - **Fail-Soft**: If the network is unavailable, the client will default to the local cache and notify the user.
 
-## Rationale
-- **Cost Sovereignty**: Maintains $0 OpEx by utilizing GitHub Pages as a CDN and the Human Engineer's physical compute for extraction.
-- **Performance**: In-memory binary search (Tantivy) eliminates the need for expensive server-side compute or slow file-by-file crawling.
-- **Isolation**: Prevents development experimentation (e.g., malformed JSON) from leaking into the IKD's professional workspace.
-- **Data Sovereignty**: IKDs retain local copies of the registry, ensuring the Pharos toolset remains functional even in disconnected or subterranean environments (Subway Mode).
+    ## Rationale
+    - **Cost Sovereignty**: Utilizes Cloudflare R2's zero-egress fee model to serve large binary indexes at $0 OpEx.
+    - **Architectural Parity**: Mandating WASM Tantivy ensures that the "Truth" (fuzzy search results, ranking, and filtering) is identical in the Revit Plugin, the CLI, and the Browser.
+    - **Git Hygiene**: Prevents repository bloat by moving binary artifacts out of the GitHub history and into an object store.
+
 
 ## Impact
 - **CLI Command**: Introduction of the `--env [local|dev|stage|prod]` global flag.
