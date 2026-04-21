@@ -10,11 +10,12 @@
 import Database from 'better-sqlite3';
 import { chromium } from '@playwright/test';
 import { ForensicNormalizer, NormalizationResult } from './normalizer.js';
-import { join, dirname } from 'node:path';
+import { join, dirname, resolve, sep } from 'node:path';
 import { createHash } from 'node:crypto';
 import { readFile, writeFile, mkdir, rm } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { PharosValidator } from './validator.js';
 
 // State Types
 export type SyncState = 'STALE' | 'PENDING_VERIFICATION' | 'DIVE_REQUIRED' | 'HEALTHY' | 'BROKEN';
@@ -32,6 +33,7 @@ export interface Resource {
 export class TruthEngine {
     private _db: Database.Database;
     private normalizer: ForensicNormalizer;
+    private validator = new PharosValidator();
     private _initialized = false;
 
     constructor(dbOrPath?: Database.Database | string) {
@@ -52,6 +54,7 @@ export class TruthEngine {
      */
     public async init() {
         await this.initializeSchema();
+        await this.validator.init();
         this._initialized = true;
     }
 
@@ -125,7 +128,15 @@ export class TruthEngine {
 
         if (result.status === 'HEALTHY' && result.data) {
             const data = result.data;
-            const sku = data.PKD_ProductNumber || data.PKD_ModelNumber || `SKU-${resourceId}`;
+            const sku = data.PKD_ProductNumber || data.PKD_ModelNumber;
+            
+            // No-Masking Principle: If SKU is missing, fail fast to forensic queue
+            if (!sku) {
+                return {
+                    status: 'UNVERIFIED_RAW_DATA',
+                    rejection_reason: 'MISSING_SKU'
+                };
+            }
             
             // Atomic Transaction: Registry Promotion (The "Bake" Preparation)
             const transaction = this._db.transaction(() => {
@@ -183,9 +194,10 @@ export class TruthEngine {
         this.ensureInitialized();
 
         // 1. Path Integrity Sentinel: Prevent arbitrary deletion (Shift-Left Security)
-        const absoluteStaging = join(process.cwd(), stagingDir);
-        const allowedBase = join(process.cwd(), '.artifacts');
-        const allowedData = join(process.cwd(), 'data');
+        // Harden: resolve and ensure trailing separator (ADR-0017)
+        const absoluteStaging = resolve(stagingDir) + sep;
+        const allowedBase = resolve('.artifacts') + sep;
+        const allowedData = resolve('data') + sep;
 
         if (!absoluteStaging.startsWith(allowedBase) && !absoluteStaging.startsWith(allowedData)) {
             throw new Error(`[Security] Bake aborted: stagingDir '${stagingDir}' is outside of allowed paths (.artifacts/ or data/).`);
@@ -207,11 +219,19 @@ export class TruthEngine {
         `);
 
         const records = stmt.all() as any[];
+        const writeTasks: Promise<void>[] = [];
 
         for (const row of records) {
             const rawMetadata = JSON.parse(row.metadata);
 
-            // 4. Inject Standardized File Prologue (The Agentic Traceability)
+            // 4. Split-Brain Validation Remediation: Validate before write
+            const validation = this.validator.validate(rawMetadata);
+            if (!validation.isValid) {
+                console.warn(`[Bake] Skipping invalid record ${row.sku}: ${validation.errors.join(', ')}`);
+                continue;
+            }
+
+            // 5. Inject Standardized File Prologue (The Agentic Traceability)
             const bakedRecord = {
                 pkd_prologue: {
                     project: "Pharos Kitchen Design (Project Prism)",
@@ -228,18 +248,21 @@ export class TruthEngine {
                 category: row.category || 'Uncategorized',
                 voltage: row.voltage,
                 btu: row.btu,
-                parameters: rawMetadata
+                parameters: rawMetadata.parameters || {}
             };
 
             const manufacturerDir = join(stagingDir, row.manufacturer_name.replace(/[^a-z0-9]/gi, '_').toLowerCase());
             const categoryDir = join(manufacturerDir, (row.category || 'uncategorized').replace(/[^a-z0-9]/gi, '_').toLowerCase());
 
-            await mkdir(categoryDir, { recursive: true });
-
-            const filePath = join(categoryDir, `${row.sku}.json`);
-            await writeFile(filePath, JSON.stringify(bakedRecord, null, 2));
+            // Concurrent I/O Optimization
+            writeTasks.push((async () => {
+                await mkdir(categoryDir, { recursive: true });
+                const filePath = join(categoryDir, `${row.sku}.json`);
+                await writeFile(filePath, JSON.stringify(bakedRecord, null, 2));
+            })());
         }
 
+        await Promise.all(writeTasks);
         return records.length;
     }
 
@@ -285,12 +308,30 @@ export class TruthEngine {
             return;
         }
 
-        const url = new URL(uri);
+        let url: URL;
+        try {
+            url = new URL(uri);
+        } catch (e) {
+            console.warn(`[Security] Blocked invalid URI: ${uri}`);
+            return;
+        }
+
+        // Scheme Validation (ADR-0023)
+        if (url.protocol !== 'https:' && url.protocol !== 'http:') {
+            console.warn(`[Security] Blocked unauthorized protocol: ${url.protocol}`);
+            return;
+        }
+
         const mfrHost = mfr.host;
         const baseDomain = mfrHost.startsWith('www.') ? mfrHost.substring(4) : mfrHost;
 
         // SSRF Sentinel: Only allow the manufacturer's own domain or subdomains
-        if (url.hostname !== mfrHost && url.hostname !== baseDomain && !url.hostname.endsWith(`.${baseDomain}`)) {
+        // Harden: ensure exact match or explicit subdomain to prevent 'myfrymaster.com' bypass
+        const isAllowedDomain = url.hostname === mfrHost || 
+                               url.hostname === baseDomain || 
+                               url.hostname.endsWith(`.${baseDomain}`);
+
+        if (!isAllowedDomain) {
             const msg = `Blocked unauthorized resource URI (Domain Mismatch): ${uri}`;
             console.warn(`[Security] ${msg}`);
 

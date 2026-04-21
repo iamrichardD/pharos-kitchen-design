@@ -138,6 +138,19 @@ impl BakeEngine {
 
         encoder.finish()?;
 
+        // 4. Binary Integrity: Generate SHA-256 Manifest (Issue #54 Requirement)
+        println!("{} Generating integrity manifest...", "ℹ".blue());
+        let mut hasher = Sha256::new();
+        let mut archive_file = File::open(&archive_path)?;
+        let mut buffer = Vec::new();
+        archive_file.read_to_end(&mut buffer)?;
+        hasher.update(&buffer);
+        let hash = format!("{:x}", hasher.finalize());
+
+        let manifest_path = output.join("search-index.tar.zst.sha256");
+        fs::write(&manifest_path, &hash)?;
+        println!("{} SHA-256: {}", "✔".green(), hash.cyan());
+
         println!("{} Bake complete. Artifacts ready for promotion.", "✔".green());
         Ok(())
     }

@@ -101,10 +101,30 @@ describe('TruthEngine: Bake & Promotion', () => {
         const db = (engine as any)._db;
         db.prepare("INSERT INTO resources (mfr_id, resource_type, uri, sync_state) VALUES (1, 'PDF', 'https://www.frymaster.com/manual.pdf', 'STALE')").run();
         
+        const metadata = {
+            name: 'Super Fryer',
+            metadata_id: 'FRY-101',
+            parameters: {
+                PKD_Manufacturer: 'Frymaster',
+                PKD_ModelNumber: 'FRY-101',
+                PKD_MainCategory: 'Fryers',
+                PKD_TargetMarket: 'Commercial',
+                PKD_Voltage: '208V',
+                PKD_Phase: 3,
+                PKD_Wattage: '4500W',
+                PKD_BTU: '0',
+                PKD_DrainConnection: '2"',
+                PKD_DocLinks: [],
+                PKD_Industry: ['Foodservice'],
+                PKD_TargetRegions: ['US'],
+                PKD_AssetViews: {}
+            }
+        };
+
         db.prepare(`
             INSERT INTO equipment_registry (mfr_id, resource_id, sku, name, category, metadata)
-            VALUES (1, 1, 'FRY-101', 'Super Fryer', 'Fryers', '{"PKD_Voltage":"208V"}')
-        `).run();
+            VALUES (1, 1, 'FRY-101', 'Super Fryer', 'Fryers', ?)
+        `).run(JSON.stringify(metadata));
 
         const count = await engine.bake(STAGING_DIR);
         expect(count).toBe(1);
