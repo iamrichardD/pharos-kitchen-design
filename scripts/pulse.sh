@@ -48,7 +48,18 @@ fi
 echo "   [Process] Executing Truth Engine Atomic Tests (Phase 1.4)..."
 podman run --rm --security-opt seccomp=unconfined pkd-truth-engine sh -c "cd packages/truth-engine && vitest run"
 
-# Check 3: Branch Naming (Task/Bug ID Traceability)
+# Check 3: Supply Chain Verification (Issue #54)
+echo "   [Process] Verifying Supply Chain Security Logic..."
+# Build the CLI to run the verification
+podman run --rm --security-opt seccomp=unconfined -v $(pwd):/work:z -w /work/packages/pkd-cli \
+    public.ecr.aws/docker/library/rust@sha256:72724f1a416c449b405a2b7ed6bac56058163e6dfb1b5ccb40839882141dd237 \
+    sh -c "cargo build && \
+    echo 'Integrity-Test' > /tmp/good.txt && \
+    GOOD_HASH=\$(sha256sum /tmp/good.txt | cut -d' ' -f1) && \
+    cargo run -- core verify-manifest /tmp/good.txt \$GOOD_HASH && \
+    if cargo run -- core verify-manifest /tmp/good.txt 'wrong-hash' 2>/dev/null; then exit 1; fi"
+
+# Check 4: Branch Naming (Task/Bug ID Traceability)
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 if [[ "$CURRENT_BRANCH" != "main" && ! $CURRENT_BRANCH =~ ^(feat|fix|debt)/issue-[0-9]+ ]]; then
     echo "❌ Error: Branch '$CURRENT_BRANCH' violates naming standard (feat|fix|debt)/issue-X."

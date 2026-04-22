@@ -57,6 +57,7 @@ pub fn verify_lod_wasm(metadata_js: JsValue, target_lod: String) -> Result<bool,
 
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
+use std::path::Path;
 use serde::Serialize;
 use crate::validator::ValidationError;
 
@@ -216,6 +217,72 @@ pub extern "C" fn pkd_validate_metadata_json(schema_json: *const c_char, metadat
     let result = pkd_validate_with_handle(handle, metadata_json);
     pkd_free_schema(handle);
     result
+}
+
+/// Verifies the integrity of a file against an expected SHA-256 hash.
+/// Why: High-rigor supply chain security for all Pharos artifact ingestion.
+/// Safety: Returns serialized JSON error if path is invalid, hash mismatches, or file is missing.
+#[no_mangle]
+pub extern "C" fn pkd_verify_manifest(file_path: *const c_char, expected_hash: *const c_char) -> *mut c_char {
+    let result = catch_unwind(|| {
+        if file_path.is_null() || expected_hash.is_null() {
+            let resp = InteropResponse {
+                status: "ERROR".to_string(),
+                errors: vec![ValidationError::SliceError("Null pointer provided for path or hash".to_string())],
+            };
+            return serialize_interop_response(&resp);
+        }
+
+        let path_cstr = unsafe { CStr::from_ptr(file_path) };
+        let hash_cstr = unsafe { CStr::from_ptr(expected_hash) };
+
+        let path_str = match path_cstr.to_str() {
+            Ok(s) => s,
+            Err(_) => {
+                let resp = InteropResponse {
+                    status: "ERROR".to_string(),
+                    errors: vec![ValidationError::SliceError("INVALID_PATH_ENCODING: Path contains invalid UTF-8".to_string())],
+                };
+                return serialize_interop_response(&resp);
+            }
+        };
+
+        let hash_str = match hash_cstr.to_str() {
+            Ok(s) => s,
+            Err(_) => {
+                let resp = InteropResponse {
+                    status: "ERROR".to_string(),
+                    errors: vec![ValidationError::SliceError("INVALID_HASH_ENCODING: Hash contains invalid UTF-8".to_string())],
+                };
+                return serialize_interop_response(&resp);
+            }
+        };
+
+        match crate::security::verify_manifest(Path::new(path_str), hash_str) {
+            Ok(_) => {
+                let resp = InteropResponse {
+                    status: "OK".to_string(),
+                    errors: Vec::new(),
+                };
+                serialize_interop_response(&resp)
+            },
+            Err(e) => {
+                let resp = InteropResponse {
+                    status: "ERROR".to_string(),
+                    errors: vec![ValidationError::SliceError(e.to_string())],
+                };
+                serialize_interop_response(&resp)
+            }
+        }
+    });
+
+    match result {
+        Ok(ptr) => ptr,
+        Err(_) => serialize_interop_response(&InteropResponse {
+            status: "PANIC".to_string(),
+            errors: vec![ValidationError::SliceError("Rust core panicked during manifest verification".to_string())],
+        }),
+    }
 }
 
 /// Safely serializes the response for C-ABI consumption.

@@ -1,0 +1,148 @@
+/* ========================================================================
+ * Project: Pharos Kitchen Design (Project Prism)
+ * Component: Core / Security
+ * File: security.rs
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * License: FSL-1.1 (See LICENSE file for details)
+ * Purpose: High-rigor supply chain verification for Pharos artifacts.
+ * Traceability: Issue #54 - Supply Chain Blind Spot
+ * ======================================================================== */
+
+use std::fs::File;
+use std::io::{Read, BufReader};
+use std::path::Path;
+use sha2::{Sha256, Digest};
+use hex;
+use thiserror::Error;
+
+#[derive(Error, Debug)]
+pub enum SecurityError {
+    #[error("FILE_NOT_FOUND: {0}")]
+    FileNotFound(String),
+    #[error("IO_ERROR: {0}")]
+    IoError(String),
+    #[error("HASH_MISMATCH: Expected {expected}, but got {actual}")]
+    HashMismatch { expected: String, actual: String },
+}
+
+/// Verifies the integrity of a file against an expected SHA-256 hash.
+///
+/// # Arguments
+/// * `file_path` - The path to the file to verify.
+/// * `expected_hash` - The hexadecimal string representing the expected SHA-256 hash.
+///
+/// # Returns
+/// * `Ok(())` if verification is successful.
+/// * `Err(SecurityError)` if verification fails or an I/O error occurs.
+///
+/// # Why:
+/// To prevent 'BIM Bloat' memory spikes and Revit UI freezes during large registry ingestion,
+/// we use chunked I/O via BufReader instead of loading the entire file into memory.
+pub fn verify_manifest(file_path: &Path, expected_hash: &str) -> Result<(), SecurityError> {
+    if !file_path.exists() {
+        return Err(SecurityError::FileNotFound(file_path.to_string_lossy().into_owned()));
+    }
+
+    let file = File::open(file_path)
+        .map_err(|e| SecurityError::IoError(format!("Failed to open file: {}", e)))?;
+    
+    let mut reader = BufReader::new(file);
+    let mut hasher = Sha256::new();
+    let mut buffer = [0u8; 8192]; // 8KB chunks
+
+    loop {
+        let n = reader.read(&mut buffer)
+            .map_err(|e| SecurityError::IoError(format!("Failed to read file: {}", e)))?;
+        if n == 0 {
+            break;
+        }
+        hasher.update(&buffer[..n]);
+    }
+
+    let result = hasher.finalize();
+    let actual_hash = hex::encode(result);
+
+    if actual_hash == expected_hash {
+        Ok(())
+    } else {
+        Err(SecurityError::HashMismatch {
+            expected: expected_hash.to_string(),
+            actual: actual_hash,
+        })
+    }
+}
+
+/// Computes the SHA-256 hash of a file using chunked I/O.
+/// Why: Centralized hashing logic to prevent dependency bloat and ensure parity.
+pub fn compute_hash(file_path: &Path) -> Result<String, SecurityError> {
+    if !file_path.exists() {
+        return Err(SecurityError::FileNotFound(file_path.to_string_lossy().into_owned()));
+    }
+
+    let file = File::open(file_path)
+        .map_err(|e| SecurityError::IoError(format!("Failed to open file: {}", e)))?;
+    
+    let mut reader = BufReader::new(file);
+    let mut hasher = Sha256::new();
+    let mut buffer = [0u8; 8192];
+
+    loop {
+        let n = reader.read(&mut buffer)
+            .map_err(|e| SecurityError::IoError(format!("Failed to read file: {}", e)))?;
+        if n == 0 {
+            break;
+        }
+        hasher.update(&buffer[..n]);
+    }
+
+    Ok(hex::encode(hasher.finalize()))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::io::Write;
+    use tempfile::NamedTempFile;
+
+    #[test]
+    fn test_should_verify_successfully_when_hash_matches() {
+        let mut file = NamedTempFile::new().unwrap();
+        let content = "Pharos Kitchen Design - Integrity Test";
+        write!(file, "{}", content).unwrap();
+        let path = file.path();
+
+        let mut hasher = Sha256::new();
+        hasher.update(content.as_bytes());
+        let expected = hex::encode(hasher.finalize());
+        
+        assert!(verify_manifest(path, &expected).is_ok());
+    }
+
+    #[test]
+    fn test_should_fail_verification_when_hash_mismatch() {
+        let mut file = NamedTempFile::new().unwrap();
+        write!(file, "Tampered Data").unwrap();
+        let path = file.path();
+
+        let wrong_hash = "deadbeef12345678";
+        
+        let result = verify_manifest(path, wrong_hash);
+        assert!(result.is_err());
+        match result.unwrap_err() {
+            SecurityError::HashMismatch { .. } => (),
+            _ => panic!("Expected HashMismatch error"),
+        }
+    }
+
+    #[test]
+    fn test_should_fail_verification_when_file_not_found() {
+        let path = Path::new("non_existent_file.tar.zst");
+        let result = verify_manifest(path, "anyhash");
+        
+        assert!(result.is_err());
+        match result.unwrap_err() {
+            SecurityError::FileNotFound(_) => (),
+            _ => panic!("Expected FileNotFound error"),
+        }
+    }
+}

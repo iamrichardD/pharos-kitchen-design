@@ -102,6 +102,9 @@ namespace Pkd.RevitBridge
         private static extern SafeStringHandle pkd_validate_metadata_json(string schemaJson, string metadataJson);
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
+        private static extern SafeStringHandle pkd_verify_manifest(string filePath, string expectedHash);
+
+        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern SafeStringHandle pkd_trigger_panic();
 
         public ValidationResponse TriggerPanic()
@@ -145,6 +148,18 @@ namespace Pkd.RevitBridge
         public ValidationResponse ValidateMetadata(string schemaJson, string metadataJson)
         {
             using (var result = pkd_validate_metadata_json(schemaJson, metadataJson))
+            {
+                return ProcessRawResponse(result);
+            }
+        }
+
+        /// <summary>
+        /// Verifies the integrity of an artifact on disk against a SHA-256 hash.
+        /// Why: Ensures the Supply Chain is sealed before ingesting BIM metadata.
+        /// </summary>
+        public ValidationResponse VerifyManifest(string filePath, string expectedHash)
+        {
+            using (var result = pkd_verify_manifest(filePath, expectedHash))
             {
                 return ProcessRawResponse(result);
             }

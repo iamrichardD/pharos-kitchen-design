@@ -128,6 +128,13 @@ enum CoreCommands {
         #[arg(short, long)]
         output: PathBuf,
     },
+    /// Verify the integrity of a baked manifest
+    VerifyManifest {
+        /// The path to the file to verify
+        path: PathBuf,
+        /// The expected SHA-256 hash
+        hash: String,
+    },
     /// Promote local artifacts to the production CDN (Cloudflare R2)
     Promote {
         /// The environment to promote to
@@ -184,6 +191,9 @@ async fn main() -> Result<()> {
                 }
                 CoreCommands::Bake { source, output } => {
                     handle_core_bake(source, output).await?;
+                }
+                CoreCommands::VerifyManifest { path, hash } => {
+                    handle_core_verify_manifest(path, hash).await?;
                 }
                 CoreCommands::Promote { env } => {
                     handle_core_promote(env).await?;
@@ -277,6 +287,23 @@ async fn handle_core_search(query_parts: Vec<String>) -> Result<()> {
 async fn handle_core_bake(source: PathBuf, output: PathBuf) -> Result<()> {
     let engine = bake::BakeEngine::new();
     engine.run(&source, &output).await
+}
+
+async fn handle_core_verify_manifest(path: PathBuf, hash: String) -> Result<()> {
+    println!("{} Verifying manifest integrity...", "ℹ".blue());
+    println!("{} Path: {}", "  -".blue(), path.display().to_string().cyan());
+    println!("{} Hash: {}", "  -".blue(), hash.yellow());
+
+    match pkd_core::security::verify_manifest(&path, &hash) {
+        Ok(_) => {
+            println!("\n{} Verification successful. Artifact is structurally sound.", "✔".green());
+            Ok(())
+        }
+        Err(e) => {
+            println!("\n{} Verification failed: {}", "✘".red(), e.to_string().yellow());
+            Err(anyhow!("Integrity violation detected."))
+        }
+    }
 }
 
 async fn handle_core_promote(env: String) -> Result<()> {
