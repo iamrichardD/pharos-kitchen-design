@@ -1,4 +1,4 @@
-<!-- ========================================================================
+/* ========================================================================
  * Project: Pharos Kitchen Design (Project Prism)
  * Component: Project Management / Backlog
  * File: @TODO.md
@@ -6,16 +6,16 @@
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Central tracking for Phase-specific tasks and issues.
  * Traceability: [Traceability]
- * ======================================================================== -->
+ * ======================================================================== */
 
-<!-- 
-  AI_AGENT_PROTOCOL: @TODO.md
-  1. SOURCE OF TRUTH: This document is the logical authority for the backlog.
-  2. PRE-FLIGHT CHECK: Tasks must be defined here and approved by the user BEFORE implementation begins.
-  3. TRACEABILITY: Ensure every active task has an associated #IssueID once the branch is created.
-  4. PURGE TRACKING: Explicitly log deleted files/logic in the 'Purge/Stale' section to prevent "Ghost References" in future research.
-  5. ATOMICITY: Focus on one Phase/Task at a time. Do not "scatter" progress across unrelated silos.
--->
+/* 
+ * AI_AGENT_PROTOCOL: @TODO.md
+ * 1. SOURCE OF TRUTH: This document is the logical authority for the backlog.
+ * 2. PRE-FLIGHT CHECK: Tasks must be defined here and approved by the user BEFORE implementation begins.
+ * 3. TRACEABILITY: Ensure every active task has an associated #IssueID once the branch is created.
+ * 4. PURGE TRACKING: Explicitly log deleted files/logic in the 'Purge/Stale' section to prevent "Ghost References" in future research.
+ * 5. ATOMICITY: Focus on one Phase/Task at a time. Do not "scatter" progress across unrelated silos.
+ */
 
 # @TODO: Pharos Kitchen Design (Project Prism)
 
@@ -36,6 +36,7 @@
 - [x] CI Remediation: Resolved IAM Trust Policy case-sensitivity/Wildcard warnings.
 - [x] **Issue #46**: Implement Pharos Truth Engine Crawler Logic (Frymaster) (Task 4.8).
 - [x] **Issue #50**: Truth Engine: Authoritative SQL Schema Extraction (Task 4.9).
+- [x] **Issue #53**: Implement `pkd core bake` engine for sharded JSON and binary indexes (Task 4.10).
 
 ---
 
@@ -90,8 +91,7 @@
 ### Sprint 4.3: Registry Distribution & Pulse Protocol (#51-54)
 - [ ] **Issue #51**: Implement `--env [local|dev|stage|prod]` and environment isolation logic in `pkd-cli`.
 - [ ] **Issue #52**: Upgrade `pharos-protocol` to support logical `OR` grouping for registry queries.
-- [ ] **Issue #53**: Implement `pkd core bake` to generate sharded JSON and Tantivy indexes.
-- [ ] **Issue #54**: Implement "Pulse" startup event with SHA-256 verification and XDG cache.
+- [x] **Issue #54**: Implement "Pulse" startup event with SHA-256 verification and XDG cache.
 
 ---
 

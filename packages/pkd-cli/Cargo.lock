@@ -2734,6 +2734,7 @@ dependencies = [
  "serde",
  "serde_json",
  "serde_yaml",
+ "sha2",
  "tantivy",
  "tar",
  "tempfile",
@@ -2751,9 +2752,11 @@ dependencies = [
 name = "pkd-core"
 version = "0.1.0"
 dependencies = [
+ "hex",
  "serde",
  "serde-wasm-bindgen",
  "serde_json",
+ "sha2",
  "thiserror 1.0.69",
  "wasm-bindgen",
 ]

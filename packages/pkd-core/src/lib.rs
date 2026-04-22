@@ -12,6 +12,7 @@ pub mod models;
 pub mod validator;
 pub mod bindings;
 pub mod slices;
+pub mod security;
 
 pub use models::schema::PharosSchema;
 pub use models::metadata::PharosMetadata;
