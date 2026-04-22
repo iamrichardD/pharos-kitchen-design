@@ -18,8 +18,6 @@ use tar::Builder;
 use zstd::stream::write::Encoder;
 use pkd_core::{PharosMetadata, PharosSchema};
 use colored::*;
-use sha2::{Sha256, Digest};
-use std::io::Read;
 
 pub struct BakeEngine {
     schema: Schema,
@@ -142,12 +140,8 @@ impl BakeEngine {
 
         // 4. Binary Integrity: Generate SHA-256 Manifest (Issue #54 Requirement)
         println!("{} Generating integrity manifest...", "ℹ".blue());
-        let mut hasher = Sha256::new();
-        let mut archive_file = File::open(&archive_path)?;
-        let mut buffer = Vec::new();
-        archive_file.read_to_end(&mut buffer)?;
-        hasher.update(&buffer);
-        let hash = format!("{:x}", hasher.finalize());
+        let hash = pkd_core::security::compute_hash(&archive_path)
+            .map_err(|e| anyhow!("Hashing Failure: {}", e))?;
 
         let manifest_path = output.join("search-index.tar.zst.sha256");
         fs::write(&manifest_path, &hash)?;

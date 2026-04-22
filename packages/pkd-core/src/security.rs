@@ -13,6 +13,17 @@ use std::io::{Read, BufReader};
 use std::path::Path;
 use sha2::{Sha256, Digest};
 use hex;
+use thiserror::Error;
+
+#[derive(Error, Debug)]
+pub enum SecurityError {
+    #[error("FILE_NOT_FOUND: {0}")]
+    FileNotFound(String),
+    #[error("IO_ERROR: {0}")]
+    IoError(String),
+    #[error("HASH_MISMATCH: Expected {expected}, but got {actual}")]
+    HashMismatch { expected: String, actual: String },
+}
 
 /// Verifies the integrity of a file against an expected SHA-256 hash.
 ///
@@ -22,18 +33,18 @@ use hex;
 ///
 /// # Returns
 /// * `Ok(())` if verification is successful.
-/// * `Err(String)` containing a descriptive error if verification fails or an I/O error occurs.
+/// * `Err(SecurityError)` if verification fails or an I/O error occurs.
 ///
 /// # Why:
 /// To prevent 'BIM Bloat' memory spikes and Revit UI freezes during large registry ingestion,
 /// we use chunked I/O via BufReader instead of loading the entire file into memory.
-pub fn verify_manifest(file_path: &Path, expected_hash: &str) -> Result<(), String> {
+pub fn verify_manifest(file_path: &Path, expected_hash: &str) -> Result<(), SecurityError> {
     if !file_path.exists() {
-        return Err(format!("FILE_NOT_FOUND: {:?}", file_path));
+        return Err(SecurityError::FileNotFound(file_path.to_string_lossy().into_owned()));
     }
 
     let file = File::open(file_path)
-        .map_err(|e| format!("IO_ERROR: Failed to open file: {}", e))?;
+        .map_err(|e| SecurityError::IoError(format!("Failed to open file: {}", e)))?;
     
     let mut reader = BufReader::new(file);
     let mut hasher = Sha256::new();
@@ -41,7 +52,7 @@ pub fn verify_manifest(file_path: &Path, expected_hash: &str) -> Result<(), Stri
 
     loop {
         let n = reader.read(&mut buffer)
-            .map_err(|e| format!("IO_ERROR: Failed to read file: {}", e))?;
+            .map_err(|e| SecurityError::IoError(format!("Failed to read file: {}", e)))?;
         if n == 0 {
             break;
         }
@@ -54,8 +65,37 @@ pub fn verify_manifest(file_path: &Path, expected_hash: &str) -> Result<(), Stri
     if actual_hash == expected_hash {
         Ok(())
     } else {
-        Err(format!("HASH_MISMATCH: Expected {}, but got {}", expected_hash, actual_hash))
+        Err(SecurityError::HashMismatch {
+            expected: expected_hash.to_string(),
+            actual: actual_hash,
+        })
     }
+}
+
+/// Computes the SHA-256 hash of a file using chunked I/O.
+/// Why: Centralized hashing logic to prevent dependency bloat and ensure parity.
+pub fn compute_hash(file_path: &Path) -> Result<String, SecurityError> {
+    if !file_path.exists() {
+        return Err(SecurityError::FileNotFound(file_path.to_string_lossy().into_owned()));
+    }
+
+    let file = File::open(file_path)
+        .map_err(|e| SecurityError::IoError(format!("Failed to open file: {}", e)))?;
+    
+    let mut reader = BufReader::new(file);
+    let mut hasher = Sha256::new();
+    let mut buffer = [0u8; 8192];
+
+    loop {
+        let n = reader.read(&mut buffer)
+            .map_err(|e| SecurityError::IoError(format!("Failed to read file: {}", e)))?;
+        if n == 0 {
+            break;
+        }
+        hasher.update(&buffer[..n]);
+    }
+
+    Ok(hex::encode(hasher.finalize()))
 }
 
 #[cfg(test)]
@@ -81,14 +121,17 @@ mod tests {
     #[test]
     fn test_should_fail_verification_when_hash_mismatch() {
         let mut file = NamedTempFile::new().unwrap();
-        writeln!(file, "Tampered Data").unwrap();
+        write!(file, "Tampered Data").unwrap();
         let path = file.path();
 
         let wrong_hash = "deadbeef12345678";
         
         let result = verify_manifest(path, wrong_hash);
         assert!(result.is_err());
-        assert!(result.unwrap_err().contains("HASH_MISMATCH"));
+        match result.unwrap_err() {
+            SecurityError::HashMismatch { .. } => (),
+            _ => panic!("Expected HashMismatch error"),
+        }
     }
 
     #[test]
@@ -97,6 +140,9 @@ mod tests {
         let result = verify_manifest(path, "anyhash");
         
         assert!(result.is_err());
-        assert!(result.unwrap_err().contains("FILE_NOT_FOUND"));
+        match result.unwrap_err() {
+            SecurityError::FileNotFound(_) => (),
+            _ => panic!("Expected FileNotFound error"),
+        }
     }
 }

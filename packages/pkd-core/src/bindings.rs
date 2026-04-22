@@ -214,7 +214,7 @@ pub extern "C" fn pkd_validate_metadata_json(schema_json: *const c_char, metadat
         return serialize_interop_response(&resp);
     }
 
-        let result = pkd_validate_with_handle(handle, metadata_json);
+    let result = pkd_validate_with_handle(handle, metadata_json);
     pkd_free_schema(handle);
     result
 }
@@ -269,7 +269,7 @@ pub extern "C" fn pkd_verify_manifest(file_path: *const c_char, expected_hash: *
             Err(e) => {
                 let resp = InteropResponse {
                     status: "ERROR".to_string(),
-                    errors: vec![ValidationError::SliceError(e)],
+                    errors: vec![ValidationError::SliceError(e.to_string())],
                 };
                 serialize_interop_response(&resp)
             }

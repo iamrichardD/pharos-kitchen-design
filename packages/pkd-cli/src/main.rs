@@ -300,7 +300,7 @@ async fn handle_core_verify_manifest(path: PathBuf, hash: String) -> Result<()> 
             Ok(())
         }
         Err(e) => {
-            println!("\n{} Verification failed: {}", "✘".red(), e.yellow());
+            println!("\n{} Verification failed: {}", "✘".red(), e.to_string().yellow());
             Err(anyhow!("Integrity violation detected."))
         }
     }
