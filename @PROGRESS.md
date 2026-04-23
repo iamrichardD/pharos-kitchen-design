@@ -125,10 +125,9 @@
 ### Sprint 4.3: Registry Distribution & Pulse Protocol (#51-54) - 🔄 In Progress
 - [x] **Issue #53 (ETL)**: Implemented `pkd core bake` engine with Tantivy indexing and sharded JSON distribution.
 - [x] **Issue #54 (Security)**: Implemented high-rigor SHA-256 verification in `pkd-core` with C-FFI bindings and InteropResponse for diagnostic observability in `pkd-cli` and `revit-bridge`.
+- [x] **Issue #54 (Network)**: Implemented "Pulse" startup event with SHA-256 verification and XDG cache persistence. (Verified)
 
 - [x] **Issue #53 (Security)**: Hardened path integrity sentinels and SHA-256 manifest generation.
 - [x] **Issue #53 (Verification)**: 100% Zero-Host build verification achieved for CLI and Core.
-- [ ] **Issue #51 (CLI)**: Implement \`--env [local|dev|stage|prod]\` global flag and path isolation.
-- [ ] **Issue #52 (Protocol)**: Upgrade \`pharos-protocol\` to support logical \`OR\` for complex queries.
-- [ ] **Issue #54 (Network)**: Implement "Pulse" startup event with SHA-256 verification and XDG cache persistence.
-
+- [ ] **Issue #51 (CLI)**: Implement `--env [local|dev|stage|prod]` global flag and path isolation.
+- [ ] **Issue #52 (Protocol)**: Upgrade `pharos-protocol` to support logical `OR` for complex queries.
