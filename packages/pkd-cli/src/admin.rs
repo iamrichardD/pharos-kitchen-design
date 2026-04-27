@@ -16,6 +16,7 @@ use std::fs;
 use std::path::PathBuf;
 use crate::models::{PharosRole, PharosEnv};
 use crate::auth::AuthManager;
+use crate::config::PathResolver;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct User {
@@ -68,14 +69,9 @@ impl AdminManager {
         if let Some(ref p) = self.context_path {
             return Ok(p.clone());
         }
-        let home = dirs::home_dir().ok_or_else(|| anyhow!("Could not find home directory"))?;
         
-        let filename = match self.env {
-            PharosEnv::Prod => ".pkd_context".to_string(),
-            _ => format!(".pkd_context_{}", self.env),
-        };
-        
-        Ok(home.join(filename))
+        let config_dir = PathResolver::resolve_config_dir(self.env)?;
+        Ok(config_dir.join(".pkd_context"))
     }
 
     fn load_context(&self) -> LocalContext {

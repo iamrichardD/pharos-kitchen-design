@@ -142,11 +142,7 @@ enum CoreCommands {
         hash: String,
     },
     /// Promote local artifacts to the production CDN (Cloudflare R2)
-    Promote {
-        /// The environment to promote to
-        #[arg(short, long, default_value = "prod")]
-        env: PharosEnv,
-    },
+    Promote,
 }
 
 #[tokio::main]
@@ -203,8 +199,8 @@ async fn main() -> Result<()> {
                 CoreCommands::VerifyManifest { path, hash } => {
                     handle_core_verify_manifest(path, hash).await?;
                 }
-                CoreCommands::Promote { env } => {
-                    handle_core_promote(env).await?;
+                CoreCommands::Promote => {
+                    handle_core_promote(cli.env).await?;
                 }
             },
             Commands::SelfUpdate => {

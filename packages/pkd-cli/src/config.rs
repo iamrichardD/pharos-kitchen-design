@@ -48,6 +48,27 @@ impl PathResolver {
         }
     }
 
+    /// Resolves the configuration directory for the given environment.
+    ///
+    /// Why: Adheres to XDG standards by using config_dir() instead of cluttering 
+    /// the user's HOME. Isolates administrative context per environment to 
+    /// prevent session leakage.
+    pub fn resolve_config_dir(env: PharosEnv) -> Result<PathBuf> {
+        let base_dir = dirs::config_dir()
+            .ok_or_else(|| anyhow!("Could not find system config directory"))?;
+        
+        let path = match env {
+            PharosEnv::Prod => base_dir.join("pharos"),
+            _ => base_dir.join("pharos").join(env.to_string()),
+        };
+        
+        if !path.exists() {
+            std::fs::create_dir_all(&path)?;
+        }
+        
+        Ok(path)
+    }
+
     /// Resolves the Auth Bridge URL based on the environment.
     pub fn resolve_auth_url(env: PharosEnv, override_url: Option<String>) -> String {
         if let Some(url) = override_url {
@@ -66,6 +87,8 @@ impl PathResolver {
 mod tests {
     use super::*;
 
+    /// Why: Verifies that production data is correctly routed to authoritative 
+    /// system paths, maintaining host-system governance.
     #[test]
     fn test_should_resolve_xdg_cache_path_when_env_is_prod() {
         let result = PathResolver::resolve_cache_dir(PharosEnv::Prod);
@@ -75,11 +98,22 @@ mod tests {
         assert!(path.to_string_lossy().contains("prod"));
     }
 
+    /// Why: Ensures that development artifacts remain sandboxed in the project 
+    /// root, enabling "Zero-Host" iteration without impacting the local user.
     #[test]
     fn test_should_resolve_local_artifacts_path_when_env_is_dev() {
         let result = PathResolver::resolve_cache_dir(PharosEnv::Dev);
         assert!(result.is_ok());
         let path = result.unwrap();
         assert!(path.to_string_lossy().contains(".artifacts"));
+    }
+
+    /// Why: Verifies XDG compliance for administrative configuration storage.
+    #[test]
+    fn test_should_resolve_config_dir_when_env_is_prod() {
+        let result = PathResolver::resolve_config_dir(PharosEnv::Prod);
+        assert!(result.is_ok());
+        let path = result.unwrap();
+        assert!(path.to_string_lossy().contains("pharos"));
     }
 }
