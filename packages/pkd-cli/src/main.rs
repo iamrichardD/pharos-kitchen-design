@@ -14,6 +14,7 @@ mod admin;
 mod models;
 mod guard;
 mod bake;
+mod config;
 
 use anyhow::{Result, anyhow};
 use clap::{Parser, Subcommand};
@@ -21,8 +22,9 @@ use colored::*;
 use pkd_core::{PharosSchema, PharosMetadata};
 use crate::auth::AuthManager;
 use crate::admin::AdminManager;
-use crate::models::PharosRole;
+use crate::models::{PharosRole, PharosEnv};
 use crate::guard::{Guard, Authorizable};
+use crate::config::PathResolver;
 use std::path::PathBuf;
 
 /// Pharos CLI (pkd) - The Admin-First Control Plane for Project Prism.
@@ -32,9 +34,13 @@ struct Cli {
     #[command(subcommand)]
     command: Option<Commands>,
 
+    /// Target environment (local, dev, stage, prod)
+    #[arg(short, long, env = "PHAROS_ENV", default_value = "prod")]
+    env: PharosEnv,
+
     /// Override the default Auth Bridge URL
-    #[arg(long, env = "PHAROS_AUTH_URL", default_value = "https://auth.iamrichardd.com")]
-    auth_url: String,
+    #[arg(long, env = "PHAROS_AUTH_URL")]
+    auth_url: Option<String>,
 
     /// Positional fallback for RFC 2378 search (e.g., 'pkd manufacturer=3m')
     #[arg(trailing_var_arg = true)]
@@ -136,19 +142,17 @@ enum CoreCommands {
         hash: String,
     },
     /// Promote local artifacts to the production CDN (Cloudflare R2)
-    Promote {
-        /// The environment to promote to
-        #[arg(short, long, default_value = "prod")]
-        env: String,
-    },
+    Promote,
 }
 
 #[tokio::main]
 async fn main() -> Result<()> {
     tracing_subscriber::fmt::init();
     let cli = Cli::parse();
-    let auth_mgr = AuthManager::new(&cli.auth_url);
-    let admin_mgr = AdminManager::new(&cli.auth_url, auth_mgr.clone());
+    
+    let auth_url = PathResolver::resolve_auth_url(cli.env, cli.auth_url);
+    let auth_mgr = AuthManager::new(&auth_url, cli.env);
+    let admin_mgr = AdminManager::new(&auth_url, auth_mgr.clone(), cli.env);
 
     match cli.command {
         Some(command) => match command {
@@ -187,7 +191,7 @@ async fn main() -> Result<()> {
                     handle_core_validate(path).await?;
                 }
                 CoreCommands::Search { query } => {
-                    handle_core_search(query).await?;
+                    handle_core_search(query, cli.env).await?;
                 }
                 CoreCommands::Bake { source, output } => {
                     handle_core_bake(source, output).await?;
@@ -195,8 +199,8 @@ async fn main() -> Result<()> {
                 CoreCommands::VerifyManifest { path, hash } => {
                     handle_core_verify_manifest(path, hash).await?;
                 }
-                CoreCommands::Promote { env } => {
-                    handle_core_promote(env).await?;
+                CoreCommands::Promote => {
+                    handle_core_promote(cli.env).await?;
                 }
             },
             Commands::SelfUpdate => {
@@ -207,7 +211,7 @@ async fn main() -> Result<()> {
             // Task 2: Positional Fallback (ADR 0006)
             // If no subcommand is provided but query parts exist, default to 'core search'
             if !cli.query.is_empty() {
-                handle_core_search(cli.query).await?;
+                handle_core_search(cli.query, cli.env).await?;
             } else {
                 // No command and no query: show help
                 use clap::CommandFactory;
@@ -231,7 +235,7 @@ async fn handle_core_validate(path: PathBuf) -> Result<()> {
     match pkd_core::validator::SchemaValidator::validate_metadata(&schema, &metadata) {
         Ok(_) => println!("{} Metadata is valid and compliant.", "✔".green()),
         Err(errors) => {
-            println!("{} Validation failed with {} errors:", "✘".red(), errors.len());
+            println!("{} Validation failed with {} errors:", "✘".red(), errors.len() as u32);
             for err in errors {
                 println!("  - {}", err.to_string().yellow());
             }
@@ -241,12 +245,13 @@ async fn handle_core_validate(path: PathBuf) -> Result<()> {
     Ok(())
 }
 
-async fn handle_core_search(query_parts: Vec<String>) -> Result<()> {
+async fn handle_core_search(query_parts: Vec<String>, env: PharosEnv) -> Result<()> {
     if query_parts.is_empty() {
         return Err(anyhow!("Search query is empty. Example: pkd core search manufacturer=3m"));
     }
 
     let raw_query = query_parts.join(" ");
+    let cache_dir = PathResolver::resolve_cache_dir(env)?;
     
     // 1. Fail Fast: Parse the query using the shared pharos-protocol library
     let command = pharos_protocol::parse_command(&format!("query {}", raw_query))
@@ -272,7 +277,9 @@ async fn handle_core_search(query_parts: Vec<String>) -> Result<()> {
         }
 
         println!("{} Executing registry search...", "ℹ".blue());
-        println!("{} Query:   {}", "  -".blue(), raw_query.cyan());
+        println!("{} Environment: {}", "  -".blue(), env.to_string().cyan());
+        println!("{} Cache Path:  {}", "  -".blue(), cache_dir.display().to_string().yellow());
+        println!("{} Query:       {}", "  -".blue(), raw_query.cyan());
         if !returns.is_empty() {
             println!("{} Returns: {}", "  -".blue(), returns.join(", ").yellow());
         }
@@ -300,14 +307,15 @@ async fn handle_core_verify_manifest(path: PathBuf, hash: String) -> Result<()> 
             Ok(())
         }
         Err(e) => {
-            println!("\n{} Verification failed: {}", "✘".red(), e.to_string().yellow());
+            let err_msg: String = e.to_string();
+            println!("\n{} Verification failed: {}", "✘".red(), err_msg.yellow());
             Err(anyhow!("Integrity violation detected."))
         }
     }
 }
 
-async fn handle_core_promote(env: String) -> Result<()> {
-    println!("{} Scaffolding promotion to {}...", "ℹ".blue(), env.cyan());
+async fn handle_core_promote(env: PharosEnv) -> Result<()> {
+    println!("{} Scaffolding promotion to {}...", "ℹ".blue(), env.to_string().cyan());
     println!("{} Note: Actual Cloudflare R2 upload logic will be implemented in Issue #55.", "⚠".yellow());
     Ok(())
 }
