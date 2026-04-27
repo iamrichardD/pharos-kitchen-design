@@ -53,7 +53,7 @@ echo "   [Process] Verifying Supply Chain Security Logic..."
 # Build the CLI to run the verification
 podman run --rm --security-opt seccomp=unconfined -v $(pwd):/work:z -w /work/packages/pkd-cli \
     public.ecr.aws/docker/library/rust@sha256:72724f1a416c449b405a2b7ed6bac56058163e6dfb1b5ccb40839882141dd237 \
-    sh -c "cargo build && \
+    sh -c "cargo clean && cargo build && \
     echo 'Integrity-Test' > /tmp/good.txt && \
     GOOD_HASH=\$(sha256sum /tmp/good.txt | cut -d' ' -f1) && \
     cargo run -- core verify-manifest /tmp/good.txt \$GOOD_HASH && \

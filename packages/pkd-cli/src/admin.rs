@@ -14,7 +14,7 @@ use serde::{Deserialize, Serialize};
 use colored::*;
 use std::fs;
 use std::path::PathBuf;
-use crate::models::PharosRole;
+use crate::models::{PharosRole, PharosEnv};
 use crate::auth::AuthManager;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -43,15 +43,17 @@ pub struct AdminManager {
     client: Client,
     base_url: String,
     auth_mgr: AuthManager,
+    env: PharosEnv,
     context_path: Option<PathBuf>,
 }
 
 impl AdminManager {
-    pub fn new(base_url: &str, auth_mgr: AuthManager) -> Self {
+    pub fn new(base_url: &str, auth_mgr: AuthManager, env: PharosEnv) -> Self {
         Self {
             client: Client::new(),
             base_url: base_url.to_string(),
             auth_mgr,
+            env,
             context_path: None,
         }
     }
@@ -67,7 +69,13 @@ impl AdminManager {
             return Ok(p.clone());
         }
         let home = dirs::home_dir().ok_or_else(|| anyhow!("Could not find home directory"))?;
-        Ok(home.join(".pkd_context"))
+        
+        let filename = match self.env {
+            PharosEnv::Prod => ".pkd_context".to_string(),
+            _ => format!(".pkd_context_{}", self.env),
+        };
+        
+        Ok(home.join(filename))
     }
 
     fn load_context(&self) -> LocalContext {
@@ -185,7 +193,7 @@ mod tests {
     #[tokio::test]
     async fn test_should_list_users_when_admin_authenticated() {
         let mock_server = MockServer::start().await;
-        let auth_mgr = AuthManager::new(&mock_server.uri());
+        let auth_mgr = AuthManager::new(&mock_server.uri(), PharosEnv::Dev);
         let temp_context = NamedTempFile::new().unwrap();
         
         // Mock token retrieval
@@ -210,7 +218,7 @@ mod tests {
             .mount(&mock_server)
             .await;
 
-        let admin_mgr = AdminManager::new(&mock_server.uri(), auth_mgr)
+        let admin_mgr = AdminManager::new(&mock_server.uri(), auth_mgr, PharosEnv::Dev)
             .with_context_path(temp_context.path().to_path_buf());
         
         let result = admin_mgr.list_users().await;
@@ -220,7 +228,7 @@ mod tests {
     #[tokio::test]
     async fn test_should_update_user_when_admin_authenticated() {
         let mock_server = MockServer::start().await;
-        let auth_mgr = AuthManager::new(&mock_server.uri());
+        let auth_mgr = AuthManager::new(&mock_server.uri(), PharosEnv::Dev);
         let temp_context = NamedTempFile::new().unwrap();
         
         std::env::set_var("CI", "true");
@@ -239,7 +247,7 @@ mod tests {
             .mount(&mock_server)
             .await;
 
-        let admin_mgr = AdminManager::new(&mock_server.uri(), auth_mgr)
+        let admin_mgr = AdminManager::new(&mock_server.uri(), auth_mgr, PharosEnv::Dev)
             .with_context_path(temp_context.path().to_path_buf());
         
         let result = admin_mgr.update_user("test@example.com", PharosRole::Admin).await;
@@ -249,7 +257,7 @@ mod tests {
     #[tokio::test]
     async fn test_should_include_impersonation_header_when_context_is_set() {
         let mock_server = MockServer::start().await;
-        let auth_mgr = AuthManager::new(&mock_server.uri());
+        let auth_mgr = AuthManager::new(&mock_server.uri(), PharosEnv::Dev);
         let temp_context = NamedTempFile::new().unwrap();
         
         std::env::set_var("CI", "true");
@@ -265,7 +273,7 @@ mod tests {
             .mount(&mock_server)
             .await;
 
-        let admin_mgr = AdminManager::new(&mock_server.uri(), auth_mgr)
+        let admin_mgr = AdminManager::new(&mock_server.uri(), auth_mgr, PharosEnv::Dev)
             .with_context_path(temp_context.path().to_path_buf());
         
         let _ = admin_mgr.impersonate("target@example.com");

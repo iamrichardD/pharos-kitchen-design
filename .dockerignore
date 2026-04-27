@@ -1,0 +1,9 @@
+**/target/
+**/node_modules/
+**/dist/
+**/.astro/
+**/.wrangler/
+**/.artifacts/
+**/*.db
+**/*.log
+.git/

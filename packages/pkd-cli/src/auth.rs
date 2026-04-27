@@ -8,7 +8,7 @@
  * Traceability: Issue #10 - Auth Handshake
  * ======================================================================== */
 
-use crate::models::PharosRole;
+use crate::models::{PharosRole, PharosEnv};
 use anyhow::{Result, anyhow};
 use keyring::Entry;
 use reqwest::Client;
@@ -18,7 +18,7 @@ use tokio::time::sleep;
 use colored::*;
 use jsonwebtoken::{decode_header, decode, DecodingKey, Validation};
 
-const AUTH_SERVICE: &str = "pharos-kitchen-design";
+const AUTH_SERVICE_BASE: &str = "pharos-kitchen-design";
 const TOKEN_KEY: &str = "access_token";
 const ID_TOKEN_KEY: &str = "id_token";
 const REFRESH_TOKEN_KEY: &str = "refresh_token";
@@ -66,13 +66,22 @@ pub(crate) struct Claims {
 pub struct AuthManager {
     client: Client,
     base_url: String,
+    env: PharosEnv,
 }
 
 impl AuthManager {
-    pub fn new(base_url: &str) -> Self {
+    pub fn new(base_url: &str, env: PharosEnv) -> Self {
         Self {
             client: Client::new(),
             base_url: base_url.to_string(),
+            env,
+        }
+    }
+
+    fn get_service_name(&self) -> String {
+        match self.env {
+            PharosEnv::Prod => AUTH_SERVICE_BASE.to_string(),
+            _ => format!("{}-{}", AUTH_SERVICE_BASE, self.env),
         }
     }
 
@@ -138,15 +147,16 @@ impl AuthManager {
     /// attack vectors. Clearing the keyring is the primary security gate 
     /// for Pharos local-host integrity.
     pub fn logout(&self) -> Result<()> {
-        let entry_access = Entry::new(AUTH_SERVICE, TOKEN_KEY)?;
-        let entry_id = Entry::new(AUTH_SERVICE, ID_TOKEN_KEY)?;
-        let entry_refresh = Entry::new(AUTH_SERVICE, REFRESH_TOKEN_KEY)?;
+        let service = self.get_service_name();
+        let entry_access = Entry::new(&service, TOKEN_KEY)?;
+        let entry_id = Entry::new(&service, ID_TOKEN_KEY)?;
+        let entry_refresh = Entry::new(&service, REFRESH_TOKEN_KEY)?;
 
         let _ = entry_access.delete_password();
         let _ = entry_id.delete_password();
         let _ = entry_refresh.delete_password();
 
-        println!("{} Logged out successfully.", "✔".green());
+        println!("{} Logged out successfully from '{}' environment.", "✔".green(), self.env);
         Ok(())
     }
 
@@ -156,10 +166,12 @@ impl AuthManager {
     /// state (e.g., verifying their role as IKD or ADMIN) without performing 
     /// a full server-side signature check, reducing latency.
     pub fn whoami(&self) -> Result<()> {
-        let entry = Entry::new(AUTH_SERVICE, ID_TOKEN_KEY)?;
+        let service = self.get_service_name();
+        let entry = Entry::new(&service, ID_TOKEN_KEY)?;
         match entry.get_password() {
             Ok(token) => {
                 let claims = self.decode_id_token_insecure(&token)?;
+                println!("{} Environment: {}", "ℹ".blue(), self.env.to_string().cyan());
                 println!("{} Authenticated as: {}", "✔".green(), claims.email.unwrap_or_else(|| claims.sub.clone()).bold());
                 if let Some(role) = claims.role {
                     println!("{} Role: {}", "ℹ".blue(), role.yellow());
@@ -167,7 +179,7 @@ impl AuthManager {
                 Ok(())
             }
             Err(_) => {
-                println!("{} Not authenticated. Run `pkd auth login` to begin.", "ℹ".red());
+                println!("{} Not authenticated in '{}' environment. Run `pkd --env {} auth login` to begin.", "ℹ".red(), self.env, self.env);
                 Ok(())
             }
         }
@@ -178,7 +190,8 @@ impl AuthManager {
     /// Why: Enables local "Fail Fast" authorization checks before making 
     /// expensive network calls to the Auth Bridge.
     pub fn get_current_role(&self) -> Result<Option<PharosRole>> {
-        let entry = Entry::new(AUTH_SERVICE, ID_TOKEN_KEY)?;
+        let service = self.get_service_name();
+        let entry = Entry::new(&service, ID_TOKEN_KEY)?;
         match entry.get_password() {
             Ok(token) => {
                 let claims = self.decode_id_token_insecure(&token)?;
@@ -217,8 +230,9 @@ impl AuthManager {
                 return Ok(token);
             }
         }
-        let entry = Entry::new(AUTH_SERVICE, TOKEN_KEY)?;
-        entry.get_password().map_err(|_| anyhow!("Not authenticated. Please run `pkd auth login`"))
+        let service = self.get_service_name();
+        let entry = Entry::new(&service, TOKEN_KEY)?;
+        entry.get_password().map_err(|_| anyhow!("Not authenticated in '{}' environment. Please run `pkd --env {} auth login`", self.env, self.env))
     }
 
     fn store_tokens(&self, access: &str, id: &str, refresh: &str) -> Result<()> {
@@ -228,9 +242,10 @@ impl AuthManager {
             return Ok(());
         }
 
-        let entry_access = Entry::new(AUTH_SERVICE, TOKEN_KEY)?;
-        let entry_id = Entry::new(AUTH_SERVICE, ID_TOKEN_KEY)?;
-        let entry_refresh = Entry::new(AUTH_SERVICE, REFRESH_TOKEN_KEY)?;
+        let service = self.get_service_name();
+        let entry_access = Entry::new(&service, TOKEN_KEY)?;
+        let entry_id = Entry::new(&service, ID_TOKEN_KEY)?;
+        let entry_refresh = Entry::new(&service, REFRESH_TOKEN_KEY)?;
 
         entry_access.set_password(access).map_err(|e| anyhow!("Failed to store access token: {}", e))?;
         entry_id.set_password(id).map_err(|e| anyhow!("Failed to store ID token: {}", e))?;
@@ -249,7 +264,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_should_return_role_when_id_token_contains_it() {
-        let auth_mgr = AuthManager::new("http://localhost");
+        let auth_mgr = AuthManager::new("http://localhost", PharosEnv::Dev);
         
         // For this unit test, we'll verify the parsing logic in get_current_role
         let claims_decoded = auth_mgr.decode_id_token_insecure(&format_mock_token("ADMIN")).unwrap();
@@ -300,7 +315,7 @@ mod tests {
             .mount(&mock_server)
             .await;
 
-        let auth_mgr = AuthManager::new(&mock_server.uri());
+        let auth_mgr = AuthManager::new(&mock_server.uri(), PharosEnv::Dev);
         std::env::set_var("CI", "true"); // Prevent keyring usage in tests
         let result = auth_mgr.login().await;
 

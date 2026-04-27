@@ -97,14 +97,14 @@ impl BakeEngine {
         for (_, metadata) in files_to_index {
             let sku = metadata.parameters.get("PKD_ProductNumber")
                 .or_else(|| metadata.parameters.get("PKD_ModelNumber"))
-                .map(|v| v.to_string())
+                .map(|v: &pkd_core::ParameterValue| v.to_string())
                 .unwrap_or_else(|| metadata.metadata_id.clone());
 
             let name = metadata.name.clone();
-            let mfr = metadata.parameters.get("PKD_Manufacturer").map(|v| v.to_string()).unwrap_or_default();
-            let cat = metadata.parameters.get("PKD_MainCategory").map(|v| v.to_string()).unwrap_or_default();
-            let volt = metadata.parameters.get("PKD_Voltage").map(|v| v.to_string()).unwrap_or_default();
-            let btu = metadata.parameters.get("PKD_BTU").map(|v| v.to_string()).unwrap_or_default();
+            let mfr = metadata.parameters.get("PKD_Manufacturer").map(|v: &pkd_core::ParameterValue| v.to_string()).unwrap_or_default();
+            let cat = metadata.parameters.get("PKD_MainCategory").map(|v: &pkd_core::ParameterValue| v.to_string()).unwrap_or_default();
+            let volt = metadata.parameters.get("PKD_Voltage").map(|v: &pkd_core::ParameterValue| v.to_string()).unwrap_or_default();
+            let btu = metadata.parameters.get("PKD_BTU").map(|v: &pkd_core::ParameterValue| v.to_string()).unwrap_or_default();
             
             // Full body search index
             let body = serde_json::to_string(&metadata.parameters)?;

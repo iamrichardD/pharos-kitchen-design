@@ -35,8 +35,9 @@
 - [x] Deep Validation: Semantic type-checking for shared parameters.
 - [x] CI Remediation: Resolved IAM Trust Policy case-sensitivity/Wildcard warnings.
 - [x] **Issue #46**: Implement Pharos Truth Engine Crawler Logic (Frymaster) (Task 4.8).
-- [x] **Issue #50**: Truth Engine: Authoritative SQL Schema Extraction (Task 4.9).
-- [x] **Issue #53**: Implement `pkd core bake` engine for sharded JSON and binary indexes (Task 4.10).
+- [x] **Issue #47**: Harden Manufacturer URI Infrastructure (Componentization) (Task 4.9).
+- [x] **Issue #48**: Implement ForensicNormalizer & Pattern Mapping (Task 4.10).
+- [x] **Issue #50**: Truth Engine: Authoritative SQL Schema Extraction (Task 4.11).
 
 ---
 
@@ -89,9 +90,10 @@
 - [x] **Issue #45**: Implement Pharos Crucible Enforcement Layer (Task 4.7).
 
 ### Sprint 4.3: Registry Distribution & Pulse Protocol (#51-54)
-- [ ] **Issue #51**: Implement `--env [local|dev|stage|prod]` and environment isolation logic in `pkd-cli`.
-- [ ] **Issue #52**: Upgrade `pharos-protocol` to support logical `OR` grouping for registry queries.
-- [x] **Issue #54**: Implement "Pulse" startup event with SHA-256 verification and XDG cache. (Verified)
+- [x] **Issue #53**: Implement `pkd core bake` engine for sharded JSON and binary indexes (Task 4.12).
+- [x] **Issue #54**: Implement "Pulse" startup event with SHA-256 verification and XDG cache (Task 4.13).
+- [x] **Issue #51**: Implement `--env [local|dev|stage|prod]` and environment isolation logic in `pkd-cli` (Task 4.14).
+- [ ] **Issue #52**: Upgrade `pharos-protocol` to support logical `OR` grouping for registry queries (Task 4.15).
 
 ---
 

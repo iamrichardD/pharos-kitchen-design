@@ -105,6 +105,7 @@
 
 ### Sprint 4.0: Truth Engine & Crawler Logic (2026-04-16) - ✅ COMPLETED
 - [x] **Issue #46 (Core)**: Implemented Playwright-based crawler and state machine.
+- [x] **Issue #47 (Core)**: Hardened Manufacturer URI Infrastructure and SSRF Sentinel.
 - [x] **Issue #46 (Security)**: SSRF Sentinel and Zero-Host isolation verified.
 - [x] **Issue #46 (Governance)**: Clean Architecture (Public APIs) and TDD Traceability (3 tests passed).
 - [x] **Verification**: Pharos Green status confirmed in Podman Node 24.
@@ -126,8 +127,7 @@
 - [x] **Issue #53 (ETL)**: Implemented `pkd core bake` engine with Tantivy indexing and sharded JSON distribution.
 - [x] **Issue #54 (Security)**: Implemented high-rigor SHA-256 verification in `pkd-core` with C-FFI bindings and InteropResponse for diagnostic observability in `pkd-cli` and `revit-bridge`.
 - [x] **Issue #54 (Network)**: Implemented "Pulse" startup event with SHA-256 verification and XDG cache persistence. (Verified)
-
 - [x] **Issue #53 (Security)**: Hardened path integrity sentinels and SHA-256 manifest generation.
 - [x] **Issue #53 (Verification)**: 100% Zero-Host build verification achieved for CLI and Core.
-- [ ] **Issue #51 (CLI)**: Implement `--env [local|dev|stage|prod]` global flag and path isolation.
-- [ ] **Issue #52 (Protocol)**: Upgrade `pharos-protocol` to support logical `OR` for complex queries.
+- [ ] **Issue #51 (CLI)**: Implement `--env [local|dev|stage|prod]` global flag and path isolation (Task 4.14).
+- [ ] **Issue #52 (Protocol)**: Upgrade `pharos-protocol` to support logical `OR` for complex queries (Task 4.15).

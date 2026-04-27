@@ -1,0 +1,12 @@
+[[rule]]
+toolName = "run_shell_command"
+# Using regex to catch git status, git branch, and the combined command
+commandRegex = "^git\\s+(status|branch)(\\s*&&\\s*git\\s+(status|branch))*\\s*$"
+decision = "allow"
+priority = 100
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = ["gh issue", "gh issue", "gh pr", "gh pr"]
+decision = "allow"
+priority = 100

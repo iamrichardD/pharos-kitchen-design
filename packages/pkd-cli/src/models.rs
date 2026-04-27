@@ -29,6 +29,31 @@ pub enum PharosRole {
     Bot,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, ValueEnum, Serialize, Deserialize, Default)]
+#[serde(rename_all = "lowercase")]
+pub enum PharosEnv {
+    /// Raw Extraction (SQLite)
+    Local,
+    /// Local Sandbox (.artifacts/)
+    Dev,
+    /// Pre-release UAT (Staging R2)
+    Stage,
+    /// Authoritative Truth (Production R2)
+    #[default]
+    Prod,
+}
+
+impl fmt::Display for PharosEnv {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            PharosEnv::Local => write!(f, "local"),
+            PharosEnv::Dev => write!(f, "dev"),
+            PharosEnv::Stage => write!(f, "stage"),
+            PharosEnv::Prod => write!(f, "prod"),
+        }
+    }
+}
+
 impl fmt::Display for PharosRole {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
