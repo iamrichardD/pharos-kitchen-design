@@ -12,10 +12,12 @@ pub mod ast;
 pub mod codes;
 pub mod format;
 pub mod lexer;
+pub mod metadata;
 pub mod parser;
 pub mod wildcard;
 
 pub use ast::Command;
 pub use lexer::tokenize;
+pub use metadata::{ParameterValue, PharosMetadataBuffer};
 pub use parser::{parse_command, ProtocolError};
 pub use wildcard::wildcard_match;

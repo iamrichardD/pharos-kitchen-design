@@ -93,6 +93,7 @@
 - [x] **Issue #53**: Implement `pkd core bake` engine for sharded JSON and binary indexes (Task 4.12).
 - [x] **Issue #54**: Implement "Pulse" startup event with SHA-256 verification and XDG cache (Task 4.13).
 - [x] **Issue #51**: Implement `--env [local|dev|stage|prod]` and environment isolation logic in `pkd-cli` (Task 4.14).
+- [x] **Issue #60**: [SPIKE] Option C: WASM-Based Manufacturer Dialects (Task 4.16).
 - [ ] **Issue #52**: Upgrade `pharos-protocol` to support logical `OR` grouping for registry queries (Task 4.15).
 
 ---
