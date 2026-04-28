@@ -1,25 +1,27 @@
 # ========================================================================
 # Project: Pharos Kitchen Design (Project Prism)
-# Component: Protocol / Shared Library
-# File: packages/pharos-protocol/Cargo.toml
+# Component: Dialect / Frymaster
+# File: Cargo.toml
 # Author: Richard D. (https://github.com/iamrichardd)
 # License: FSL-1.1 (See LICENSE file for details)
-# Purpose: Manifest for the shared Pharos (RFC 2378) protocol library.
-# Traceability: ADR 0024
+# Purpose: Frymaster-specific WASM dialect for forensic extraction.
+# Traceability: Issue #60
 # ========================================================================
 
 [package]
-name = "pharos-protocol"
+name = "pkd-dialect-frymaster"
 version = "0.1.0"
 edition = "2021"
-authors = ["Richard D. <https://github.com/iamrichardd>"]
+authors = ["Richard D. (https://github.com/iamrichardd)"]
 license = "FSL-1.1"
 
-[dependencies]
-serde = { version = "1.0", features = ["derive"] }
-thiserror = "1.0"
-chrono = { version = "0.4", default-features = false, features = ["serde", "alloc"] }
-anyhow = "1.0"
+[lib]
+crate-type = ["cdylib"]
 
-[dev-dependencies]
+[dependencies]
+extism-pdk = "1.0"
+serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+pharos-protocol = { path = "../../pharos-protocol" }
+thiserror = "1.0"
+regex = "1.10"

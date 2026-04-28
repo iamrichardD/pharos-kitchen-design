@@ -7,8 +7,9 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "better-sqlite3": "^11.5.0",
-    "@playwright/test": "^1.59.1"
+    "@extism/extism": "^2.0.0-rc13",
+    "@playwright/test": "^1.59.1",
+    "better-sqlite3": "^11.5.0"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",
