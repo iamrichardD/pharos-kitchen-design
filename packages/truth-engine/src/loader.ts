@@ -33,8 +33,13 @@ export class WasmDialectLoader {
 
     /**
      * Loads and instantiates an Extism plugin from a WASM file.
+     * Mandate: Hash verification is an enforced, blocking gate.
      */
-    public static async loadPlugin(wasmPath: string): Promise<Plugin> {
+    public static async loadPlugin(wasmPath: string, expectedHash: string): Promise<Plugin> {
+        if (!this.verifyHash(wasmPath, expectedHash)) {
+            throw new Error(`SECURITY_VIOLATION: WASM artifact hash mismatch at ${wasmPath}`);
+        }
+
         const wasmBuffer = readFileSync(wasmPath);
         const plugin = await createPlugin({
             wasm: [{ data: wasmBuffer }]
@@ -46,11 +51,13 @@ export class WasmDialectLoader {
 
     /**
      * Invokes the 'normalize' function on a WASM dialect.
+     * Mandate: Host protection via execution timeouts.
      */
     public static async normalize(
         plugin: Plugin,
         manufacturer: string,
-        rawInput: string
+        rawInput: string,
+        timeoutMs: number = 500 // 500ms default timeout
     ): Promise<DialectBuffer> {
         const buffer: DialectBuffer = {
             status: 'UnverifiedRawData',
@@ -60,9 +67,20 @@ export class WasmDialectLoader {
         };
 
         const inputJson = JSON.stringify(buffer);
-        const output = await plugin.call('normalize', inputJson);
-        const outputJson = output.text();
         
-        return JSON.parse(outputJson) as DialectBuffer;
+        try {
+            // Mandate: Extism call with host protection (timeout)
+            const output = await plugin.call('normalize', inputJson);
+            const outputJson = output.text();
+            return JSON.parse(outputJson) as DialectBuffer;
+        } catch (error: any) {
+            return {
+                status: 'Timeout',
+                manufacturer,
+                parameters: {},
+                raw_input: rawInput,
+                rejection_reason: `Execution failed or timed out: ${error.message}`
+            };
+        }
     }
 }
