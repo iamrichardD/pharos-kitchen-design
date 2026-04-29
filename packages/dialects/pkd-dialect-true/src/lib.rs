@@ -12,6 +12,11 @@ use extism_pdk::*;
 use pharos_protocol::metadata::{PharosMetadataBuffer, NormalizationStatus, ParameterValue};
 use regex::Regex;
 use base64::{Engine as _, engine::general_purpose};
+use once_cell::sync::Lazy;
+
+static RE_VOLTAGE: Lazy<Regex> = Lazy::new(|| Regex::new(r"(\d{3}/\d{2}/\d{1})").unwrap());
+static RE_AMPS: Lazy<Regex> = Lazy::new(|| Regex::new(r"Amps:\s*([\d\.]+)").unwrap());
+static RE_SKU: Lazy<Regex> = Lazy::new(|| Regex::new(r"PKD_(Product|Model)Number:\s*([A-Z0-9-]+)").unwrap());
 
 #[plugin_fn]
 pub fn normalize(Json(mut buffer): Json<PharosMetadataBuffer>) -> FnResult<Json<PharosMetadataBuffer>> {
@@ -54,15 +59,13 @@ fn extract_specs(buffer: &mut PharosMetadataBuffer) -> bool {
     let mut matched = false;
 
     // Voltage: 115/60/1
-    let re_voltage = Regex::new(r"(\d{3}/\d{2}/\d{1})").unwrap();
-    if let Some(caps) = re_voltage.captures(&buffer.raw_input) {
+    if let Some(caps) = RE_VOLTAGE.captures(&buffer.raw_input) {
         buffer.parameters.insert("PKD_Voltage".to_string(), ParameterValue::Text(caps[1].to_string()));
         matched = true;
     }
 
     // Amps: 1.4
-    let re_amps = Regex::new(r"Amps:\s*([\d\.]+)").unwrap();
-    if let Some(caps) = re_amps.captures(&buffer.raw_input) {
+    if let Some(caps) = RE_AMPS.captures(&buffer.raw_input) {
         if let Ok(val) = caps[1].parse::<f64>() {
             buffer.parameters.insert("PKD_Amps".to_string(), ParameterValue::Number(val));
             matched = true;
@@ -70,8 +73,7 @@ fn extract_specs(buffer: &mut PharosMetadataBuffer) -> bool {
     }
 
     // Product/Model Numbers
-    let re_sku = Regex::new(r"PKD_(Product|Model)Number:\s*([A-Z0-9-]+)").unwrap();
-    if let Some(caps) = re_sku.captures(&buffer.raw_input) {
+    if let Some(caps) = RE_SKU.captures(&buffer.raw_input) {
         let key = format!("PKD_{}Number", &caps[1]);
         buffer.parameters.insert(key, ParameterValue::Text(caps[2].to_string()));
         matched = true;

@@ -307,10 +307,32 @@ export class TruthEngine {
         });
         const page = await context.newPage();
 
-        page.on('response', response => {
+        // High Rigor: Global Response Listener (Passive & Active)
+        page.on('response', async response => {
             const url = response.url();
-            if (url.endsWith('.pdf') || url.match(/\.(jpg|jpeg|png|webp)$/i)) {
-                this.registerResource(mfr.id, url, url.endsWith('.pdf') ? 'PDF' : 'IMAGE');
+            
+            // 1. Passive Discovery: Static Assets
+            if (url.endsWith('.pdf') || url.match(/\.(jpg|jpeg|png|webp|rfa)$/i)) {
+                let type = 'IMAGE';
+                if (url.endsWith('.pdf')) type = 'PDF';
+                if (url.endsWith('.rfa')) type = 'RFA';
+                this.registerResource(mfr.id, url, type);
+            }
+
+            // 2. Active Discovery: KCL API Interception (Issue #62)
+            if (mfr.kcl_enabled && url.includes('kclcad.com/www/GetModelData/')) {
+                try {
+                    const text = await response.text();
+                    const hash = createHash('sha256').update(text).digest('hex');
+                    
+                    // Register the API payload as a resource for transformation
+                    this._db.prepare(`
+                        INSERT OR IGNORE INTO resources (mfr_id, resource_type, uri, content_hash, sync_state)
+                        VALUES (?, 'KCL_API_PAYLOAD', ?, ?, 'DIVE_REQUIRED')
+                    `).run(mfr.id, url, hash);
+                } catch (e) {
+                    console.warn(`[Active Discovery] Failed to capture KCL payload: ${url}`);
+                }
             }
         });
 
