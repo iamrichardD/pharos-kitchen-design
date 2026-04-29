@@ -1,0 +1,5 @@
+FROM public.ecr.aws/docker/library/rust@sha256:72724f1a416c449b405a2b7ed6bac56058163e6dfb1b5ccb40839882141dd237
+RUN rustup target add wasm32-unknown-unknown
+WORKDIR /work
+COPY . .
+RUN cd packages/dialects/pkd-dialect-true && cargo build --target wasm32-unknown-unknown --release

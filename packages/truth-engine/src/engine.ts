@@ -10,6 +10,8 @@
 import Database from 'better-sqlite3';
 import { chromium } from '@playwright/test';
 import { ForensicNormalizer, NormalizationResult } from './normalizer.js';
+import { WasmDialectLoader } from './loader.js';
+import { Plugin } from '@extism/extism';
 import { join, dirname, resolve, sep } from 'node:path';
 import { createHash } from 'node:crypto';
 import { readFile, writeFile, mkdir, rm } from 'node:fs/promises';
@@ -33,6 +35,7 @@ export interface Resource {
 export class TruthEngine {
     private _db: Database.Database;
     private normalizer: ForensicNormalizer;
+    private wasmPlugins: Map<number, Plugin> = new Map();
     private validator = new PharosValidator();
     private _initialized = false;
 
@@ -118,47 +121,74 @@ export class TruthEngine {
      * Transforms raw strings into structured metadata.
      * Implements the "Forensic Isolation Ward" for unmatched data.
      */
-    public handleTransformation(resourceId: number, rawInput: string): NormalizationResult {
+    public async handleTransformation(resourceId: number, rawInput: string): Promise<NormalizationResult> {
         this.ensureInitialized();
         const resource = this._db.prepare('SELECT * FROM resources WHERE id = ?').get(resourceId) as Resource;
         if (!resource) throw new Error(`Resource ${resourceId} not found.`);
 
-        const mfr = this._db.prepare('SELECT name FROM manufacturers WHERE id = ?').get(resource.mfr_id) as any;
-        const result = this.normalizer.normalize(resource.mfr_id, mfr.name, rawInput, resource.uri);
+        const mfr = this._db.prepare('SELECT name, wasm_path, wasm_hash FROM manufacturers WHERE id = ?').get(resource.mfr_id) as any;
+        if (!mfr) throw new Error(`Manufacturer for resource ${resourceId} not found.`);
+
+        let result: NormalizationResult;
+
+        // Try WASM dialect first if configured
+        if (mfr.wasm_path && mfr.wasm_hash) {
+            try {
+                let plugin = this.wasmPlugins.get(resource.mfr_id);
+                if (!plugin) {
+                    const fullPath = resolve(mfr.wasm_path);
+                    plugin = await WasmDialectLoader.loadPlugin(fullPath, mfr.wasm_hash);
+                    this.wasmPlugins.set(resource.mfr_id, plugin);
+                }
+
+                const dialectBuffer = await WasmDialectLoader.normalize(plugin, mfr.name, rawInput);
+                result = {
+                    status: dialectBuffer.status.toUpperCase() as any,
+                    data: dialectBuffer.parameters as any,
+                    rejection_reason: dialectBuffer.rejection_reason
+                };
+            } catch (error: any) {
+                console.error(`[TruthEngine] WASM Transformation failed for ${mfr.name}:`, error);
+                result = this.normalizer.normalize(resource.mfr_id, mfr.name, rawInput, resource.uri);
+            }
+        } else {
+            result = this.normalizer.normalize(resource.mfr_id, mfr.name, rawInput, resource.uri);
+        }
 
         if (result.status === 'HEALTHY' && result.data) {
             const data = result.data;
             const sku = data.PKD_ProductNumber || data.PKD_ModelNumber;
             
             // No-Masking Principle: If SKU is missing, fail fast to forensic queue
-            if (!sku) {
-                return {
-                    status: 'UNVERIFIED_RAW_DATA',
-                    rejection_reason: 'MISSING_SKU'
-                };
-            }
-            
-            // Atomic Transaction: Registry Promotion (The "Bake" Preparation)
-            const transaction = this._db.transaction(() => {
-                this._db.prepare(`
-                    INSERT OR REPLACE INTO equipment_registry (
-                        mfr_id, resource_id, sku, name, category, voltage, btu, metadata
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                `).run(
-                    resource.mfr_id, 
-                    resourceId, 
-                    sku,
-                    data.name || 'Unknown Equipment',
-                    data.PKD_MainCategory || null,
-                    data.PKD_Voltage || null,
-                    data.PKD_BTU || null,
-                    JSON.stringify(data)
-                );
+            if (sku) {
+                // Atomic Transaction: Registry Promotion (The "Bake" Preparation)
+                const transaction = this._db.transaction(() => {
+                    this._db.prepare(`
+                        INSERT OR REPLACE INTO equipment_registry (
+                            mfr_id, resource_id, sku, name, category, voltage, btu, metadata
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    `).run(
+                        resource.mfr_id, 
+                        resourceId, 
+                        sku,
+                        data.name || 'Unknown Equipment',
+                        data.PKD_MainCategory || null,
+                        data.PKD_Voltage || null,
+                        data.PKD_BTU || null,
+                        JSON.stringify(data)
+                    );
 
-                this.updateState(resourceId, 'HEALTHY');
-            });
-            transaction();
-        } else if (result.status === 'UNVERIFIED_RAW_DATA') {
+                    this.updateState(resourceId, 'HEALTHY');
+                });
+                transaction();
+                return result;
+            } else {
+                result.status = 'UNVERIFIED_RAW_DATA';
+                result.rejection_reason = 'MISSING_SKU';
+            }
+        } 
+        
+        if (result.status === 'UNVERIFIED_RAW_DATA') {
             const hash = createHash('sha256').update(rawInput).digest('hex');
             
             // Atomic Transaction: Forensic Deferral
@@ -302,7 +332,7 @@ export class TruthEngine {
      */
     public registerResource(mfrId: number, uri: string, type: string) {
         this.ensureInitialized();
-        const mfr = this._db.prepare('SELECT host FROM manufacturers WHERE id = ?').get(mfrId) as any;
+        const mfr = this._db.prepare('SELECT host, kcl_enabled FROM manufacturers WHERE id = ?').get(mfrId) as any;
         if (!mfr) {
             console.warn(`[Security] Blocked resource registration for unknown manufacturer ID: ${mfrId}`);
             return;
@@ -325,11 +355,11 @@ export class TruthEngine {
         const mfrHost = mfr.host;
         const baseDomain = mfrHost.startsWith('www.') ? mfrHost.substring(4) : mfrHost;
 
-        // SSRF Sentinel: Only allow the manufacturer's own domain or subdomains
-        // Harden: ensure exact match or explicit subdomain to prevent 'myfrymaster.com' bypass
+        // SSRF Sentinel: Only allow the manufacturer's own domain, subdomains, or authorized proxies
         const isAllowedDomain = url.hostname === mfrHost || 
                                url.hostname === baseDomain || 
-                               url.hostname.endsWith(`.${baseDomain}`);
+                               url.hostname.endsWith(`.${baseDomain}`) ||
+                               (mfr.kcl_enabled && url.hostname.endsWith('kclcad.com'));
 
         if (!isAllowedDomain) {
             const msg = `Blocked unauthorized resource URI (Domain Mismatch): ${uri}`;

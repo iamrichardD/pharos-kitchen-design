@@ -61,7 +61,7 @@ describe('TruthEngine: Bake & Promotion', () => {
             }
         });
 
-        engine.handleTransformation(1, rawInput);
+        await engine.handleTransformation(1, rawInput);
 
         const registryEntry = db.prepare("SELECT * FROM equipment_registry WHERE sku = 'FPRE217'").get();
         expect(registryEntry).toBeDefined();
@@ -85,10 +85,10 @@ describe('TruthEngine: Bake & Promotion', () => {
         };
 
         (engine as any).normalizer.normalize = () => firstPromotion;
-        engine.handleTransformation(1, "raw1");
+        await engine.handleTransformation(1, "raw1");
         
         (engine as any).normalizer.normalize = () => secondPromotion;
-        engine.handleTransformation(1, "raw2");
+        await engine.handleTransformation(1, "raw2");
 
         const count = db.prepare("SELECT COUNT(*) as count FROM equipment_registry WHERE sku = 'SKU-1'").get().count;
         const entry = db.prepare("SELECT name FROM equipment_registry WHERE sku = 'SKU-1'").get();
