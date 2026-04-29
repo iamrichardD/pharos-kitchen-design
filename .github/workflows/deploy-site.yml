@@ -51,8 +51,8 @@ jobs:
         run: |
           curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
-      - name: "🏗️ Build WASM Core"
-        run: wasm-pack build packages/pkd-core --target nodejs
+      - name: "🏗️ Build All WASM Artifacts"
+        run: bash scripts/build-wasm.sh
 
       - name: "📦 Install Dependencies"
         run: npm ci
