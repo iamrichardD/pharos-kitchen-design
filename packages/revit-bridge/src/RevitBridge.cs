@@ -35,6 +35,9 @@ namespace Pkd.RevitBridge
         [JsonPropertyName("errors")]
         public List<ValidationError> Errors { get; set; } = new List<ValidationError>();
 
+        [JsonPropertyName("data")]
+        public JsonElement? Data { get; set; }
+
         public bool IsValid => Status == "OK";
     }
 
@@ -106,6 +109,22 @@ namespace Pkd.RevitBridge
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern SafeStringHandle pkd_trigger_panic();
+
+        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
+        private static extern SafeStringHandle pkd_get_ghost_metadata(string metadataId);
+
+        /// <summary>
+        /// Retrieves verified metadata for a "Ghost Link" prototype.
+        /// Why: Enables metadata-first hydration of procedural geometry.
+        /// Traceability: Issue #30
+        /// </summary>
+        public ValidationResponse GetGhostMetadata(string metadataId)
+        {
+            using (var result = pkd_get_ghost_metadata(metadataId))
+            {
+                return ProcessRawResponse(result);
+            }
+        }
 
         public ValidationResponse TriggerPanic()
         {
