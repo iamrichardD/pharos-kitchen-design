@@ -15,6 +15,9 @@ CREATE TABLE IF NOT EXISTS manufacturers (
     host TEXT NOT NULL,
     catalog_path TEXT NOT NULL DEFAULT '/',
     base_url TEXT GENERATED ALWAYS AS (scheme || '://' || host || catalog_path) VIRTUAL,
+    kcl_enabled BOOLEAN NOT NULL DEFAULT 0,
+    wasm_path TEXT,
+    wasm_hash TEXT,
     last_crawl_at DATETIME,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
