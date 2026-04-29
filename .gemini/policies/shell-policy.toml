@@ -1,0 +1,32 @@
+[[rule]]
+toolName = "run_shell_command"
+# Expanded to include safe/standard git operations used for status, logs, diffs, and branch management.
+commandRegex = "^git\\s+(status|branch|log|diff|checkout|add|commit|pull)(\\s+.*)?$"
+decision = "allow"
+priority = 100
+
+[[rule]]
+toolName = "run_shell_command"
+# Consolidated GH CLI prefixes to cover issues, PRs, and high-rigor API/GraphQL interactions.
+commandPrefix = ["gh issue", "gh pr", "gh api"]
+decision = "allow"
+priority = 100
+
+[[rule]]
+toolName = "run_shell_command"
+# MANDATORY: Allows podman commands which are required by the Pharos Zero-Host constraint (ADR-0014).
+commandPrefix = ["podman build", "podman run"]
+decision = "allow"
+priority = 100
+
+[[rule]]
+toolName = "run_shell_command"
+# Security: Allows hash verification as required by the Supply Chain Security logic (Issue #54).
+commandPrefix = ["sha256sum"]
+decision = "allow"
+priority = 100
+ll_command"
+# Authorize the project's primary validation and pulse-check scripts.
+commandPrefix = ["scripts/pulse.sh", "scripts/truth-engine/pulse.ts"]
+decision = "allow"
+priority = 100
