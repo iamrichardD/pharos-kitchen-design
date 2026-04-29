@@ -137,5 +137,20 @@ namespace Pkd.RevitBridge.Tests
             ValidationResponse result = _bridge.ValidateMetadata(LoadSchema(), metadata);
             Assert.True(result.IsValid);
         }
+
+        [Fact]
+        public void TestShould_ReturnGhostMetadata_When_ValidIdProvided()
+        {
+            ValidationResponse result = _bridge.GetGhostMetadata("PHX-DW-001");
+            Assert.Equal("OK", result.Status);
+            Assert.True(result.Data.HasValue);
+            
+            var data = result.Data.Value;
+            Assert.True(data.TryGetProperty("parameters", out JsonElement parameters));
+            Assert.True(parameters.TryGetProperty("manufacturer", out JsonElement manufacturer));
+            Assert.True(parameters.TryGetProperty("model", out JsonElement model));
+            Assert.Equal("Hobart", manufacturer.GetString());
+            Assert.Equal("LXeR", model.GetString());
+        }
     }
 }

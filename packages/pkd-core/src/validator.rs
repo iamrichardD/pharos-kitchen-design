@@ -12,9 +12,9 @@ use crate::models::schema::PharosSchema;
 use crate::models::metadata::PharosMetadata;
 use crate::models::types::ParameterValue;
 use thiserror::Error;
-use serde::Serialize;
+use serde::{Serialize, Deserialize};
 
-#[derive(Error, Debug, PartialEq, Serialize)]
+#[derive(Error, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "code", content = "details")]
 pub enum ValidationError {
     #[error("Missing required PKD parameter: {0}")]

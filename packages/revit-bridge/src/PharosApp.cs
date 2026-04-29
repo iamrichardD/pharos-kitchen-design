@@ -50,6 +50,19 @@ namespace Pkd.RevitBridge
 
                 panel.AddItem(validateBtnData);
 
+                // 4. Add the "Place Draft" Button
+                PushButtonData placeDraftBtnData = new PushButtonData(
+                    "PlaceDraft",
+                    "Place\nDraft",
+                    assemblyPath,
+                    "Pkd.RevitBridge.InstantiateDraftComponentCommand"
+                );
+
+                placeDraftBtnData.ToolTip = "Places a lightweight, metadata-rich placeholder for equipment coordination.";
+                placeDraftBtnData.LongDescription = "Instantiates a procedural 'Ghost Link' component with verified metadata from the Pharos core.";
+
+                panel.AddItem(placeDraftBtnData);
+
                 return Result.Succeeded;
             }
             catch (Exception ex)

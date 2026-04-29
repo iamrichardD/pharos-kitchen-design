@@ -58,18 +58,129 @@ pub fn verify_lod_wasm(metadata_js: JsValue, target_lod: String) -> Result<bool,
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
 use std::path::Path;
-use serde::Serialize;
+use std::collections::BTreeMap;
+use serde::{Serialize, Deserialize};
 use crate::validator::ValidationError;
+use pharos_protocol::metadata::ParameterValue;
 
 const MAX_JSON_SIZE: usize = 1024 * 1024; // 1MB Limit for Shift-Left Security (ADR-0016)
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 pub struct InteropResponse {
     pub status: String,
     pub errors: Vec<ValidationError>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub data: Option<serde_json::Value>,
 }
 
 use std::panic::catch_unwind;
+
+/// Hydrates a "Ghost Link" with verified Pharos metadata.
+/// Why: Provides immediate BIM hydration for unmodeled placeholders.
+/// Traceability: Issue #30
+#[no_mangle]
+pub extern "C" fn pkd_get_ghost_metadata(metadata_id: *const c_char) -> *mut c_char {
+    let result = catch_unwind(|| {
+        if metadata_id.is_null() {
+            let resp = InteropResponse {
+                status: "ERROR".to_string(),
+                errors: vec![ValidationError::SliceError("Null metadata_id provided".to_string())],
+                data: None,
+            };
+            return serialize_interop_response(&resp);
+        }
+
+        let id_cstr = unsafe { CStr::from_ptr(metadata_id) };
+        let id_str = match id_cstr.to_str() {
+            Ok(s) => s,
+            Err(_) => {
+                let resp = InteropResponse {
+                    status: "ERROR".to_string(),
+                    errors: vec![ValidationError::SliceError("Invalid UTF-8 in metadata_id".to_string())],
+                    data: None,
+                };
+                return serialize_interop_response(&resp);
+            }
+        };
+
+        // Basic Whitelist (Issue #30)
+        // TODO: In the next slice, integrate this with the BakeEngine sharded index (ADR-0015)
+        // to move beyond this hardcoded scaffold and support dynamic registry lookups.
+        if id_str == "PHX-DW-001" {
+            let mut parameters = BTreeMap::new();
+            parameters.insert("manufacturer".to_string(), ParameterValue::Text("Hobart".to_string()));
+            parameters.insert("model".to_string(), ParameterValue::Text("LXeR".to_string()));
+            parameters.insert("voltage".to_string(), ParameterValue::Text("208V".to_string()));
+            parameters.insert("phase".to_string(), ParameterValue::Number(1.0));
+
+            let mut dimensions = BTreeMap::new();
+            dimensions.insert("width".to_string(), "2.5".to_string());
+            dimensions.insert("depth".to_string(), "2.5".to_string());
+            dimensions.insert("height".to_string(), "3.5".to_string());
+
+            let mut lod_geometry_specs = BTreeMap::new();
+            lod_geometry_specs.insert("100".to_string(), crate::models::metadata::LodGeometrySpec {
+                spec_type: "PROCEDURAL_BOX".to_string(),
+                dimensions: Some(dimensions),
+                components: None,
+                features: None,
+                description: "LOD 100 Volumetric Placeholder".to_string(),
+            });
+
+            let metadata = PharosMetadata {
+                metadata_id: "PHX-DW-001".to_string(),
+                name: "Hobart LXeR Dishwasher".to_string(),
+                schema_version: "1.0.0".to_string(),
+                classification: crate::models::metadata::Classification {
+                    omniclass_table_23: "23-75 50 11 11".to_string(),
+                    category: "Warewashing".to_string(),
+                },
+                parameters,
+                lod_geometry_specs,
+                performance_metadata: crate::models::metadata::PerformanceMetadata {
+                    estimated_rfa_size_kb: 450,
+                    procedural_lod_enabled: true,
+                    ghost_link_active: true,
+                },
+            };
+
+            let data = match serde_json::to_value(&metadata) {
+                Ok(v) => Some(v),
+                Err(e) => {
+                    let resp = InteropResponse {
+                        status: "ERROR".to_string(),
+                        errors: vec![ValidationError::SliceError(format!("Metadata serialization failed: {}", e))],
+                        data: None,
+                    };
+                    return serialize_interop_response(&resp);
+                }
+            };
+
+            let resp = InteropResponse {
+                status: "OK".to_string(),
+                errors: Vec::new(),
+                data,
+            };
+            return serialize_interop_response(&resp);
+        }
+
+        let resp = InteropResponse {
+            status: "ERROR".to_string(),
+            errors: vec![ValidationError::SliceError(format!("Metadata ID '{}' not found in verified whitelist", id_str))],
+            data: None,
+        };
+        serialize_interop_response(&resp)
+    });
+
+    match result {
+        Ok(ptr) => ptr,
+        Err(_) => serialize_interop_response(&InteropResponse {
+            status: "PANIC".to_string(),
+            errors: vec![ValidationError::SliceError("Rust core panicked during ghost metadata retrieval".to_string())],
+            data: None,
+        }),
+    }
+}
 
 /// Loads a PharosSchema from JSON and returns an opaque handle.
 /// Why: Eliminates redundant schema parsing overhead for high-frequency validation.
@@ -118,6 +229,7 @@ pub extern "C" fn pkd_validate_with_handle(handle: *mut PharosSchema, metadata_j
             let resp = InteropResponse {
                 status: "ERROR".to_string(),
                 errors: vec![ValidationError::SliceError("Null pointer provided".to_string())],
+                data: None,
             };
             return serialize_interop_response(&resp);
         }
@@ -130,6 +242,7 @@ pub extern "C" fn pkd_validate_with_handle(handle: *mut PharosSchema, metadata_j
             let resp = InteropResponse {
                 status: "ERROR".to_string(),
                 errors: vec![ValidationError::SliceError("Metadata exceeds 1MB limit".to_string())],
+                data: None,
             };
             return serialize_interop_response(&resp);
         }
@@ -140,6 +253,7 @@ pub extern "C" fn pkd_validate_with_handle(handle: *mut PharosSchema, metadata_j
                 let resp = InteropResponse {
                     status: "ERROR".to_string(),
                     errors: vec![ValidationError::SliceError("Invalid UTF-8 in metadata".to_string())],
+                    data: None,
                 };
                 return serialize_interop_response(&resp);
             }
@@ -151,6 +265,7 @@ pub extern "C" fn pkd_validate_with_handle(handle: *mut PharosSchema, metadata_j
                 let resp = InteropResponse {
                     status: "ERROR".to_string(),
                     errors: vec![ValidationError::SliceError(format!("Invalid metadata JSON: {}", e))],
+                    data: None,
                 };
                 return serialize_interop_response(&resp);
             }
@@ -172,11 +287,13 @@ pub extern "C" fn pkd_validate_with_handle(handle: *mut PharosSchema, metadata_j
             InteropResponse {
                 status: "OK".to_string(),
                 errors: Vec::new(),
+                data: None,
             }
         } else {
             InteropResponse {
                 status: "ERROR".to_string(),
                 errors: all_errors,
+                data: None,
             }
         };
 
@@ -188,6 +305,7 @@ pub extern "C" fn pkd_validate_with_handle(handle: *mut PharosSchema, metadata_j
         Err(_) => serialize_interop_response(&InteropResponse {
             status: "PANIC".to_string(),
             errors: vec![ValidationError::SliceError("Rust core panicked during validation".to_string())],
+            data: None,
         }),
     }
 }
@@ -210,6 +328,7 @@ pub extern "C" fn pkd_validate_metadata_json(schema_json: *const c_char, metadat
          let resp = InteropResponse {
             status: "ERROR".to_string(),
             errors: vec![ValidationError::SliceError("Failed to load schema (Null or Invalid)".to_string())],
+            data: None,
         };
         return serialize_interop_response(&resp);
     }
@@ -229,6 +348,7 @@ pub extern "C" fn pkd_verify_manifest(file_path: *const c_char, expected_hash: *
             let resp = InteropResponse {
                 status: "ERROR".to_string(),
                 errors: vec![ValidationError::SliceError("Null pointer provided for path or hash".to_string())],
+                data: None,
             };
             return serialize_interop_response(&resp);
         }
@@ -242,6 +362,7 @@ pub extern "C" fn pkd_verify_manifest(file_path: *const c_char, expected_hash: *
                 let resp = InteropResponse {
                     status: "ERROR".to_string(),
                     errors: vec![ValidationError::SliceError("INVALID_PATH_ENCODING: Path contains invalid UTF-8".to_string())],
+                    data: None,
                 };
                 return serialize_interop_response(&resp);
             }
@@ -253,6 +374,7 @@ pub extern "C" fn pkd_verify_manifest(file_path: *const c_char, expected_hash: *
                 let resp = InteropResponse {
                     status: "ERROR".to_string(),
                     errors: vec![ValidationError::SliceError("INVALID_HASH_ENCODING: Hash contains invalid UTF-8".to_string())],
+                    data: None,
                 };
                 return serialize_interop_response(&resp);
             }
@@ -263,6 +385,7 @@ pub extern "C" fn pkd_verify_manifest(file_path: *const c_char, expected_hash: *
                 let resp = InteropResponse {
                     status: "OK".to_string(),
                     errors: Vec::new(),
+                    data: None,
                 };
                 serialize_interop_response(&resp)
             },
@@ -270,6 +393,7 @@ pub extern "C" fn pkd_verify_manifest(file_path: *const c_char, expected_hash: *
                 let resp = InteropResponse {
                     status: "ERROR".to_string(),
                     errors: vec![ValidationError::SliceError(e.to_string())],
+                    data: None,
                 };
                 serialize_interop_response(&resp)
             }
@@ -281,6 +405,7 @@ pub extern "C" fn pkd_verify_manifest(file_path: *const c_char, expected_hash: *
         Err(_) => serialize_interop_response(&InteropResponse {
             status: "PANIC".to_string(),
             errors: vec![ValidationError::SliceError("Rust core panicked during manifest verification".to_string())],
+            data: None,
         }),
     }
 }
@@ -315,10 +440,55 @@ pub extern "C" fn pkd_trigger_panic() -> *mut c_char {
         Ok(_) => serialize_interop_response(&InteropResponse {
             status: "OK".to_string(),
             errors: Vec::new(),
+            data: None,
         }),
         Err(_) => serialize_interop_response(&InteropResponse {
             status: "PANIC".to_string(),
             errors: vec![ValidationError::SliceError("Rust core panicked (Verified)".to_string())],
+            data: None,
         }),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_should_return_ghost_metadata_when_id_is_phx_dw_001() {
+        let id = CString::new("PHX-DW-001").unwrap();
+        let ptr = pkd_get_ghost_metadata(id.as_ptr());
+        
+        let result_cstr = unsafe { CStr::from_ptr(ptr) };
+        let result_json = result_cstr.to_str().unwrap();
+        
+        let resp: InteropResponse = serde_json::from_str(result_json).unwrap();
+        assert_eq!(resp.status, "OK");
+        assert!(resp.data.is_some());
+        
+        let data = resp.data.unwrap();
+        assert_eq!(data["metadata_id"], "PHX-DW-001");
+        assert_eq!(data["name"], "Hobart LXeR Dishwasher");
+        
+        let dimensions = &data["lod_geometry_specs"]["100"]["dimensions"];
+        assert_eq!(dimensions["width"], "2.5");
+        assert_eq!(dimensions["height"], "3.5");
+
+        pkd_free_string(ptr);
+    }
+
+    #[test]
+    fn test_should_return_error_when_id_not_found() {
+        let id = CString::new("INVALID-ID").unwrap();
+        let ptr = pkd_get_ghost_metadata(id.as_ptr());
+        
+        let result_cstr = unsafe { CStr::from_ptr(ptr) };
+        let result_json = result_cstr.to_str().unwrap();
+        
+        let resp: InteropResponse = serde_json::from_str(result_json).unwrap();
+        assert_eq!(resp.status, "ERROR");
+        assert!(resp.errors.len() > 0);
+
+        pkd_free_string(ptr);
     }
 }
