@@ -48,15 +48,30 @@ namespace Pkd.RevitBridge
                 // 2. Define Location (Prototype: Origin)
                 XYZ origin = new XYZ(0, 0, 0);
 
-                // 3. Create Procedural Geometry (2'x2'x3' Box)
+                // 3. Extract Metadata-Driven Geometry (LOD 100)
+                double width = 2.0;
+                double depth = 2.0;
+                double height = 3.0;
+
+                if (response.Data.HasValue)
+                {
+                    var data = response.Data.Value;
+                    if (data.TryGetProperty("lod_geometry_specs", out JsonElement lodSpecs) && 
+                        lodSpecs.TryGetProperty("100", out JsonElement lod100) &&
+                        lod100.TryGetProperty("dimensions", out JsonElement dimensions))
+                    {
+                        // Mentorship: Metadata is the Source of Truth. 
+                        // We extract dimensions from the schema to eliminate "Hallucination Gaps."
+                        if (dimensions.TryGetProperty("width", out JsonElement w)) width = double.Parse(w.GetString() ?? "2.0");
+                        if (dimensions.TryGetProperty("depth", out JsonElement d)) depth = double.Parse(d.GetString() ?? "2.0");
+                        if (dimensions.TryGetProperty("height", out JsonElement h)) height = double.Parse(h.GetString() ?? "3.0");
+                    }
+                }
+
+                // 4. Create Procedural Geometry
                 using (Transaction trans = new Transaction(doc, "Place Pharos Draft"))
                 {
                     trans.Start();
-
-                    // Create Profile
-                    double width = 2.0;
-                    double depth = 2.0;
-                    double height = 3.0;
 
                     List<Curve> profile = new List<Curve>();
                     profile.Add(Line.CreateBound(origin, origin + new XYZ(width, 0, 0)));
@@ -78,14 +93,16 @@ namespace Pkd.RevitBridge
                     ds.SetShape(new List<GeometryObject> { box });
                     ds.Name = "Pharos Ghost: PHX-DW-001";
 
-                    // 4. Apply Metadata
+                    // 5. Apply Standardized Parameters (PKD_*)
                     if (response.Data.HasValue)
                     {
                         var data = response.Data.Value;
                         if (data.TryGetProperty("parameters", out JsonElement parameters))
                         {
-                            ApplyParameter(ds, "Manufacturer", "manufacturer", parameters);
-                            ApplyParameter(ds, "Model", "model", parameters);
+                            // Mentorship: Standardized parameter binding ensures metadata persistence 
+                            // across different Revit templates and locales.
+                            ApplyParameter(ds, "PKD_Manufacturer", "manufacturer", parameters);
+                            ApplyParameter(ds, "PKD_ModelNumber", "model", parameters);
                         }
                     }
 

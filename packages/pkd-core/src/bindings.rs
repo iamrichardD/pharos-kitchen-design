@@ -104,12 +104,28 @@ pub extern "C" fn pkd_get_ghost_metadata(metadata_id: *const c_char) -> *mut c_c
         };
 
         // Basic Whitelist (Issue #30)
+        // TODO: In the next slice, integrate this with the BakeEngine sharded index (ADR-0015)
+        // to move beyond this hardcoded scaffold and support dynamic registry lookups.
         if id_str == "PHX-DW-001" {
             let mut parameters = BTreeMap::new();
             parameters.insert("manufacturer".to_string(), ParameterValue::Text("Hobart".to_string()));
             parameters.insert("model".to_string(), ParameterValue::Text("LXeR".to_string()));
             parameters.insert("voltage".to_string(), ParameterValue::Text("208V".to_string()));
             parameters.insert("phase".to_string(), ParameterValue::Number(1.0));
+
+            let mut dimensions = BTreeMap::new();
+            dimensions.insert("width".to_string(), "2.5".to_string());
+            dimensions.insert("depth".to_string(), "2.5".to_string());
+            dimensions.insert("height".to_string(), "3.5".to_string());
+
+            let mut lod_geometry_specs = BTreeMap::new();
+            lod_geometry_specs.insert("100".to_string(), crate::models::metadata::LodGeometrySpec {
+                spec_type: "PROCEDURAL_BOX".to_string(),
+                dimensions: Some(dimensions),
+                components: None,
+                features: None,
+                description: "LOD 100 Volumetric Placeholder".to_string(),
+            });
 
             let metadata = PharosMetadata {
                 metadata_id: "PHX-DW-001".to_string(),
@@ -120,7 +136,7 @@ pub extern "C" fn pkd_get_ghost_metadata(metadata_id: *const c_char) -> *mut c_c
                     category: "Warewashing".to_string(),
                 },
                 parameters,
-                lod_geometry_specs: BTreeMap::new(),
+                lod_geometry_specs,
                 performance_metadata: crate::models::metadata::PerformanceMetadata {
                     estimated_rfa_size_kb: 450,
                     procedural_lod_enabled: true,
@@ -128,10 +144,22 @@ pub extern "C" fn pkd_get_ghost_metadata(metadata_id: *const c_char) -> *mut c_c
                 },
             };
 
+            let data = match serde_json::to_value(&metadata) {
+                Ok(v) => Some(v),
+                Err(e) => {
+                    let resp = InteropResponse {
+                        status: "ERROR".to_string(),
+                        errors: vec![ValidationError::SliceError(format!("Metadata serialization failed: {}", e))],
+                        data: None,
+                    };
+                    return serialize_interop_response(&resp);
+                }
+            };
+
             let resp = InteropResponse {
                 status: "OK".to_string(),
                 errors: Vec::new(),
-                data: Some(serde_json::to_value(&metadata).unwrap()),
+                data,
             };
             return serialize_interop_response(&resp);
         }
@@ -441,6 +469,10 @@ mod tests {
         let data = resp.data.unwrap();
         assert_eq!(data["metadata_id"], "PHX-DW-001");
         assert_eq!(data["name"], "Hobart LXeR Dishwasher");
+        
+        let dimensions = &data["lod_geometry_specs"]["100"]["dimensions"];
+        assert_eq!(dimensions["width"], "2.5");
+        assert_eq!(dimensions["height"], "3.5");
 
         pkd_free_string(ptr);
     }
