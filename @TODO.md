@@ -89,12 +89,13 @@
 - [x] **Issue #44**: Implement Pharos Crucible Process (Task 4.6).
 - [x] **Issue #45**: Implement Pharos Crucible Enforcement Layer (Task 4.7).
 
-### Sprint 4.3: Registry Distribution & Pulse Protocol (#51-54)
+### Sprint 4.3: Registry Distribution & Pulse Protocol (#51-54, #65) - 🔄 In Progress
 - [x] **Issue #53**: Implement `pkd core bake` engine for sharded JSON and binary indexes (Task 4.12).
 - [x] **Issue #54**: Implement "Pulse" startup event with SHA-256 verification and XDG cache (Task 4.13).
 - [x] **Issue #51**: Implement `--env [local|dev|stage|prod]` and environment isolation logic in `pkd-cli` (Task 4.14).
 - [x] **Issue #60**: [SPIKE] Option C: WASM-Based Manufacturer Dialects (Task 4.16).
 - [x] **Issue #62**: True Manufacturing Onboarding (Forensic KCL Spike) (Task 4.17).
+- [x] **Issue #65**: CI/CD: WASM Build Hardening & Zero-Host Remediation. (Verified Pharos Green)
 - [ ] **Issue #52**: Upgrade `pharos-protocol` to support logical `OR` grouping for registry queries (Task 4.15).
 
 ---

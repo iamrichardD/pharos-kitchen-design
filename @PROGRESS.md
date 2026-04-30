@@ -20,7 +20,7 @@
 # @PROGRESS: Pharos Kitchen Design (Project Prism)
 
 ## 🎯 Current Milestone: Phase 4 - Revit & Web Interop
-**Status**: 🔄 In Progress (Logic Bridge & Interop Stability)
+**Status**: 🔄 In Progress (End-to-End Interop Verification)
 
 ---
 
@@ -124,7 +124,7 @@
 - [x] **Issue #50 (Security)**: Hardened temporal types and forensic logging traceability.
 - [x] **Verification**: Pharos Green status confirmed via `scripts/truth-engine/sync-docs.ts` and Node 22 Vitest.
 
-### Sprint 4.3: Registry Distribution & Pulse Protocol (#51-54) - 🔄 In Progress
+### Sprint 4.3: Registry Distribution & Pulse Protocol (#51-54, #65) - ✅ COMPLETED
 - [x] **Issue #53 (ETL)**: Implemented `pkd core bake` engine with Tantivy indexing and sharded JSON distribution.
 - [x] **Issue #54 (Security)**: Implemented high-rigor SHA-256 verification in `pkd-core` with C-FFI bindings and InteropResponse for diagnostic observability in `pkd-cli` and `revit-bridge`.
 - [x] **Issue #54 (Network)**: Implemented "Pulse" startup event with SHA-256 verification and XDG cache persistence. (Verified)
@@ -132,4 +132,5 @@
 - [x] **Issue #53 (Verification)**: 100% Zero-Host build verification achieved for CLI and Core.
 - [x] **Issue #51 (CLI)**: Implemented `--env [local|dev|stage|prod]` global flag and environment isolation logic (Task 4.14). (Verified Pharos Green)
 - [x] **Issue #60 (Spike)**: Option C: WASM-Based Manufacturer Dialects (Task 4.16). (Verified Universal Interop)
+- [x] **Issue #65 (CI/CD)**: Remediated WASM build failure via centralized `scripts/build-wasm.sh` and multi-stage Zero-Host promotion. (Verified Pharos Green)
 - [ ] **Issue #52 (Protocol)**: Upgrade `pharos-protocol` to support logical `OR` for complex queries (Task 4.15).
