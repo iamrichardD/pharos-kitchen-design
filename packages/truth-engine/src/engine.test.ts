@@ -50,7 +50,7 @@ describe('TruthEngine: Bake & Promotion', () => {
         // to return a HEALTHY result.
         
         // We'll mock the normalizer's behavior by overriding the method for this test instance
-        (engine as any).normalizer.normalize = () => ({
+        (engine as any).normalizer.normalize = async () => ({
             status: 'HEALTHY',
             data: {
                 name: "High Efficiency Fryer",
@@ -84,10 +84,10 @@ describe('TruthEngine: Bake & Promotion', () => {
             data: { name: "New Fryer", PKD_ModelNumber: "SKU-1" }
         };
 
-        (engine as any).normalizer.normalize = () => firstPromotion;
+        (engine as any).normalizer.normalize = async () => firstPromotion;
         await engine.handleTransformation(1, "raw1");
         
-        (engine as any).normalizer.normalize = () => secondPromotion;
+        (engine as any).normalizer.normalize = async () => secondPromotion;
         await engine.handleTransformation(1, "raw2");
 
         const count = db.prepare("SELECT COUNT(*) as count FROM equipment_registry WHERE sku = 'SKU-1'").get().count;
@@ -150,6 +150,35 @@ describe('TruthEngine: Bake & Promotion', () => {
         await engine.bake(STAGING_DIR);
         
         expect(existsSync(zombieFile)).toBe(false);
+    });
+
+    it('test_should_load_dialects_from_custom_env_path', async () => {
+        const customDir = join(process.cwd(), '.artifacts', 'custom_patterns');
+        const { mkdirSync, writeFileSync, existsSync, rmSync } = await import('node:fs');
+        if (!existsSync(customDir)) mkdirSync(customDir, { recursive: true });
+        
+        const dialect = {
+            manufacturer: "CustomMfr",
+            rules: [{
+                id: "custom-rule",
+                weight: 100,
+                mappings: { "test": "SUCCESS" }
+            }]
+        };
+        writeFileSync(join(customDir, 'custom.json'), JSON.stringify(dialect));
+
+        const originalEnv = process.env.PKD_PATTERN_DIR;
+        process.env.PKD_PATTERN_DIR = customDir;
+        
+        const customEngine = new TruthEngine(':memory:');
+        await customEngine.init();
+        
+        const result = await (customEngine as any).normalizer.normalize(1, 'CustomMfr', 'SUCCESS', 'https://test.com');
+        expect(result.status).toBe('HEALTHY');
+        
+        // Cleanup
+        process.env.PKD_PATTERN_DIR = originalEnv;
+        rmSync(customDir, { recursive: true, force: true });
     });
 });
 

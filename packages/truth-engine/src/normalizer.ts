@@ -9,7 +9,9 @@
  * ======================================================================== */
 
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, dirname } from 'node:path';
+import { Worker } from 'node:worker_threads';
+import { fileURLToPath } from 'node:url';
 
 export type NormalizationStatus = 'HEALTHY' | 'UNVERIFIED_RAW_DATA';
 
@@ -23,7 +25,6 @@ interface PatternRule {
     id: string;
     weight: number;
     mappings: Record<string, string>;
-    compiled?: Record<string, RegExp>;
 }
 
 interface ManufacturerDialect {
@@ -49,14 +50,6 @@ export class ForensicNormalizer {
                 const content = readFileSync(join(this.patternDir, file), 'utf-8');
                 const dialect: ManufacturerDialect = JSON.parse(content);
                 
-                // Pre-compile regex patterns (The Regex Warden: Memoization)
-                for (const rule of dialect.rules) {
-                    rule.compiled = {};
-                    for (const [key, pattern] of Object.entries(rule.mappings)) {
-                        rule.compiled[key] = new RegExp(pattern, 'i');
-                    }
-                }
-
                 // Sort rules by weight descending
                 dialect.rules.sort((a, b) => b.weight - a.weight);
                 this.registry.set(dialect.manufacturer, dialect);
@@ -68,14 +61,14 @@ export class ForensicNormalizer {
 
     /**
      * Normalizes a raw string using manufacturer-specific dialects.
-     * Implements Regex Warden timeout protection.
+     * Implements Regex Warden temporal timeout protection via Worker Threads.
      */
-    public normalize(
+    public async normalize(
         mfrId: number,
         mfrName: string,
         rawInput: string,
         sourceUri: string
-    ): NormalizationResult {
+    ): Promise<NormalizationResult> {
         const dialect = this.registry.get(mfrName);
         if (!dialect) {
             return {
@@ -89,17 +82,21 @@ export class ForensicNormalizer {
             let matchCount = 0;
             let isTimeout = false;
 
-            for (const [key, regex] of Object.entries(rule.compiled || {})) {
-                // The Regex Warden: match_with_timeout simulation
+            for (const [key, pattern] of Object.entries(rule.mappings)) {
                 try {
-                    const match = this.matchWithTimeout(rawInput, regex, 100); // 100ms timeout
+                    // The Regex Warden: true temporal isolation
+                    const match = await this.matchWithWorker(rawInput, pattern, 100); // 100ms timeout
                     if (match) {
                         extracted[key] = match[1] || match[0];
                         matchCount++;
                     }
                 } catch (e: any) {
-                    isTimeout = true;
-                    break;
+                    if (e.message === 'REGEX_TIMEOUT') {
+                        isTimeout = true;
+                        break;
+                    }
+                    // Log other errors but continue if possible
+                    console.warn(`[Regex Warden] Match error for ${key}:`, e.message);
                 }
             }
 
@@ -126,15 +123,47 @@ export class ForensicNormalizer {
     }
 
     /**
-     * Safety wrapper to prevent ReDoS.
-     * Note: A production implementation would use a worker thread or vm.runInContext
-     * to strictly enforce the timeout.
+     * Offloads regex execution to a worker thread with a hard timeout.
      */
-    private matchWithTimeout(input: string, regex: RegExp, timeoutMs: number): RegExpMatchArray | null {
-        // High Rigor: To truly prevent ReDoS in JS, we need to run in a separate context or thread.
-        // For this surgical slice, we'll use a simple length gate + the fact that we pre-compile.
-        if (input.length > 1000) throw new Error('REGEX_TIMEOUT'); // Fail-Fast on suspicious input
-        
-        return input.match(regex);
+    private async matchWithWorker(input: string, pattern: string, timeoutMs: number): Promise<RegExpMatchArray | null> {
+        return new Promise((resolve, reject) => {
+            const __dirname = dirname(fileURLToPath(import.meta.url));
+            // In development (vitest), we point to the .ts file. In production, it would be .js.
+            // Node 22+ with experimental flags or TS loaders will handle this.
+            const workerFile = join(__dirname, 'regex_worker.ts');
+            
+            const worker = new Worker(workerFile, {
+                workerData: { input, pattern, flags: 'i' }
+            });
+
+            const timeout = setTimeout(() => {
+                worker.terminate();
+                reject(new Error('REGEX_TIMEOUT'));
+            }, timeoutMs);
+
+            worker.on('message', (result) => {
+                clearTimeout(timeout);
+                if (result.error) {
+                    reject(new Error(result.error));
+                } else {
+                    resolve(result.match);
+                }
+                worker.terminate();
+            });
+
+            worker.on('error', (err) => {
+                clearTimeout(timeout);
+                reject(err);
+                worker.terminate();
+            });
+
+            worker.on('exit', (code) => {
+                if (code !== 0 && code !== 1) { // 1 is often termination
+                    clearTimeout(timeout);
+                    reject(new Error(`Worker stopped with exit code ${code}`));
+                }
+            });
+        });
     }
 }
+

@@ -114,7 +114,7 @@
 ### Sprint 4.1: Transformation & Forensic Mapping (#48) - ✅ COMPLETED
 - [x] **Issue #48 (Forensics)**: Implemented `ForensicNormalizer` and JSON-based pattern sovereignty.
 - [x] **Issue #48 (Hardening)**: Implemented "Forensic Isolation Ward" with transaction-hardened schema and UNIQUE hash constraints.
-- [x] **Issue #48 (Security)**: Implemented "Regex Warden" with pre-compiled patterns and ReDoS length/timeout gates.
+- [x] **Issue #48 (Security)**: Implemented "Regex Warden" with asynchronous temporal hardening (worker_threads) for true ReDoS immunity and configurable pattern directories (PKD_PATTERN_DIR).
 - [x] **Issue #48 (Traceability)**: Linked forensic investigations to parent resources for automated promotion.
 - [x] **Verification**: Zero-Host verification successful (12 tests passed) in Node 24/Playwright container.
 
