@@ -1,0 +1,35 @@
+#!/bin/bash
+# ========================================================================
+# Project: Pharos Kitchen Design (Project Prism)
+# Component: DevSecOps / Build
+# File: build-wasm.sh
+# Author: Richard D. (https://github.com/iamrichardd)
+# License: FSL-1.1 (See LICENSE file for details)
+# Purpose: Centralized build script for all WASM targets.
+# Traceability: Issue #65, ADR-0017
+# ========================================================================
+
+set -e
+
+# Ensure wasm-pack is installed (Safe for CI and Local)
+if ! command -v wasm-pack &> /dev/null; then
+    echo "⚠️ wasm-pack not found. Installing..."
+    curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+fi
+
+echo "🦀 Building Pharos WASM Core..."
+wasm-pack build packages/pkd-core --target nodejs
+
+echo "🍳 Building Manufacturer Dialects..."
+for dialect in packages/dialects/*; do
+    if [ -d "$dialect" ]; then
+        dialect_name=$(basename "$dialect")
+        echo "   -> Building Dialect: $dialect_name"
+        
+        # We use cargo build --target wasm32-unknown-unknown --release
+        # as these are Extism plugins, not standard wasm-pack packages.
+        (cd "$dialect" && cargo build --target wasm32-unknown-unknown --release)
+    fi
+done
+
+echo "✅ WASM Build Complete."
