@@ -89,6 +89,7 @@
 - [ ] **Issue #41**: Marketing Site CI/CD Build Failure (Bug #41).
 - [x] **Issue #44**: Implement Pharos Crucible Process (Task 4.6).
 - [x] **Issue #45**: Implement Pharos Crucible Enforcement Layer (Task 4.7).
+- [x] **Issue #74**: Remediate CI Test Paths (Deterministic Pathing) (Task 4.20).
 
 ### Sprint 4.3: Registry Distribution & Pulse Protocol (#51-54, #65) - 🔄 In Progress
 - [x] **Issue #53**: Implement `pkd core bake` engine for sharded JSON and binary indexes (Task 4.12).

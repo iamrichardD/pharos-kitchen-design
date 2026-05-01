@@ -137,4 +137,5 @@
 - [x] **Issue #51 (CLI)**: Implemented `--env [local|dev|stage|prod]` global flag and environment isolation logic (Task 4.14). (Verified Pharos Green)
 - [x] **Issue #60 (Spike)**: Option C: WASM-Based Manufacturer Dialects (Task 4.16). (Verified Universal Interop)
 - [x] **Issue #65 (CI/CD)**: Remediated WASM build failure via centralized `scripts/build-wasm.sh` and multi-stage Zero-Host promotion. (Verified Pharos Green)
+- [x] **Issue #74 (CI/CD)**: Remediated CI path failures via deterministic import.meta.url resolution and artifact isolation. (Verified Pharos Green)
 - [ ] **Issue #52 (Protocol)**: Upgrade `pharos-protocol` to support logical `OR` for complex queries (Task 4.15).
