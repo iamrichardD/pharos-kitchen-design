@@ -21,6 +21,9 @@ on:
       - 'package.json'
       - 'package-lock.json'
       - '.github/workflows/deploy-site.yml'
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
