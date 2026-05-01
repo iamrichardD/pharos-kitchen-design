@@ -12,6 +12,8 @@ import { describe, it, expect } from 'vitest';
 // High-Rigor: Import via workspace package name, not relative path
 import * as pkdCore from '@pkd/core';
 import schema from '@pkd/core/schema/pharos-schema.json';
+import { roadmapItems } from './data/roadmap';
+import { categories } from './data/categories';
 
 describe('Marketing Site Monorepo Integrity', () => {
   it('should resolve @pkd/core package via npm workspaces', () => {
@@ -26,5 +28,26 @@ describe('Marketing Site Monorepo Integrity', () => {
   it('should expose the WASM validation entry point', () => {
     // We verify the export exists, confirming the TS/WASM bridge is linked
     expect(pkdCore.validate_metadata_wasm).toBeDefined();
+  });
+});
+
+describe('Marketing Data Integrity (Issue #71)', () => {
+  it('should have Warewashing as a Verified category (Option A)', () => {
+    const warewashing = categories.find(c => c.name === 'Warewashing');
+    expect(warewashing).toBeDefined();
+    expect(warewashing?.fidelity).toBe('verified');
+  });
+
+  it('should have Sprint 4 items marked as In Construction (Option A)', () => {
+    const sprint4Items = roadmapItems.filter(i => i.phase === 'Sprint 4');
+    expect(sprint4Items.length).toBeGreaterThan(0);
+    sprint4Items.forEach(item => {
+      expect(item.status).toBe('In Construction');
+    });
+  });
+
+  it('should have Manufacturer-Verified Specs marked as Deployed', () => {
+    const specs = roadmapItems.find(i => i.name === 'Manufacturer-Verified Specs');
+    expect(specs?.status).toBe('Deployed');
   });
 });
