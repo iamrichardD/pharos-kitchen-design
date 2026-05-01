@@ -16,29 +16,36 @@ import { roadmapItems } from './data/roadmap';
 import { categories } from './data/categories';
 
 describe('Marketing Site Monorepo Integrity', () => {
-  it('should resolve @pkd/core package via npm workspaces', () => {
+  /**
+   * Why: Ensures the marketing site is correctly linked to the shared logic core.
+   */
+  it('test_should_resolve_pkd_core_when_imported_via_workspaces', () => {
     expect(pkdCore).toBeDefined();
   });
 
-  it('should resolve and import the core pharos-schema from @pkd/core', () => {
+  it('test_should_resolve_pharos_schema_when_imported_from_core', () => {
     expect(schema).toBeDefined();
     expect(schema.pkd_prologue.project).toBe('Pharos Kitchen Design (Project Prism)');
   });
 
-  it('should expose the WASM validation entry point', () => {
+  it('test_should_expose_wasm_validation_when_core_is_linked', () => {
     // We verify the export exists, confirming the TS/WASM bridge is linked
     expect(pkdCore.validate_metadata_wasm).toBeDefined();
   });
 });
 
+/**
+ * Why: Verifies that the marketing site data manifests are synchronized with the 
+ * high-fidelity technical core (Phase 4). Prevents narrative drift from engineering reality.
+ */
 describe('Marketing Data Integrity (Issue #71)', () => {
-  it('should have Warewashing as a Verified category (Option A)', () => {
+  it('test_should_mark_warewashing_as_verified_when_category_exists', () => {
     const warewashing = categories.find(c => c.name === 'Warewashing');
     expect(warewashing).toBeDefined();
     expect(warewashing?.fidelity).toBe('verified');
   });
 
-  it('should have Sprint 4 items marked as In Construction (Option A)', () => {
+  it('test_should_mark_sprint_4_items_as_in_construction_when_state_is_active', () => {
     const sprint4Items = roadmapItems.filter(i => i.phase === 'Sprint 4');
     expect(sprint4Items.length).toBeGreaterThan(0);
     sprint4Items.forEach(item => {
@@ -46,7 +53,7 @@ describe('Marketing Data Integrity (Issue #71)', () => {
     });
   });
 
-  it('should have Manufacturer-Verified Specs marked as Deployed', () => {
+  it('test_should_mark_manufacturer_specs_as_deployed_when_sprint_3_is_complete', () => {
     const specs = roadmapItems.find(i => i.name === 'Manufacturer-Verified Specs');
     expect(specs?.status).toBe('Deployed');
   });

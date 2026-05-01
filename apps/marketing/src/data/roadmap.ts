@@ -95,3 +95,8 @@ export const roadmapItems: RoadmapItem[] = [
     description: "Intelligent assistance for choosing equipment based on energy and project criteria." 
   }
 ];
+
+// High-Rigor: Runtime invariant check (Fail Fast)
+if (roadmapItems.length === 0) {
+  throw new Error("[PHAROS_FATAL]: Roadmap manifest must not be empty.");
+}

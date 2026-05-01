@@ -23,3 +23,8 @@ export const categories: Category[] = [
 	{ name: 'Serving Systems', coverage: 60, fidelity: 'normalized', lastSync: '5d ago' },
 	{ name: 'Ventilation', coverage: 10, fidelity: 'raw', lastSync: '30d ago' }
 ];
+
+// High-Rigor: Runtime invariant check (Fail Fast)
+if (categories.length === 0) {
+	throw new Error("[PHAROS_FATAL]: Categories manifest must not be empty.");
+}
