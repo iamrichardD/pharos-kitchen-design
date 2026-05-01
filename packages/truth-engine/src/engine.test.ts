@@ -10,14 +10,19 @@
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { TruthEngine } from './engine.js';
-import { join } from 'node:path';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { rm, mkdir, readdir, readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 
 describe('TruthEngine: Bake & Promotion', () => {
+    // High-Rigor: Use package-relative paths for test artifacts
+    const __dirname = dirname(fileURLToPath(import.meta.url));
+    const pkgRoot = join(__dirname, '..');
+    const TEST_DB = join(pkgRoot, 'data', 'test_bake.db');
+    const STAGING_DIR = join(pkgRoot, '.artifacts', 'test_staging');
+
     let engine: TruthEngine;
-    const TEST_DB = 'data/test_bake.db';
-    const STAGING_DIR = '.artifacts/test_staging';
 
     beforeEach(async () => {
         if (existsSync(TEST_DB)) await rm(TEST_DB);
@@ -153,7 +158,7 @@ describe('TruthEngine: Bake & Promotion', () => {
     });
 
     it('test_should_load_dialects_from_custom_env_path', async () => {
-        const customDir = join(process.cwd(), '.artifacts', 'custom_patterns');
+        const customDir = join(pkgRoot, '.artifacts', 'custom_patterns');
         const { mkdirSync, writeFileSync, existsSync, rmSync } = await import('node:fs');
         if (!existsSync(customDir)) mkdirSync(customDir, { recursive: true });
         
@@ -170,7 +175,8 @@ describe('TruthEngine: Bake & Promotion', () => {
         const originalEnv = process.env.PKD_PATTERN_DIR;
         process.env.PKD_PATTERN_DIR = customDir;
         
-        const customEngine = new TruthEngine('data/custom_test.db');
+        const customEnvDb = join(pkgRoot, 'data', 'custom_test.db');
+        const customEngine = new TruthEngine(customEnvDb);
         await customEngine.init();
         
         const result = await (customEngine as any).normalizer.normalize(1, 'CustomMfr', 'SUCCESS', 'https://test.com');
@@ -180,7 +186,7 @@ describe('TruthEngine: Bake & Promotion', () => {
         customEngine.close();
         process.env.PKD_PATTERN_DIR = originalEnv;
         rmSync(customDir, { recursive: true, force: true });
-        if (existsSync('data/custom_test.db')) rmSync('data/custom_test.db');
+        if (existsSync(customEnvDb)) rmSync(customEnvDb);
     });
 });
 

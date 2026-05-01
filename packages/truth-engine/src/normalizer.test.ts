@@ -10,13 +10,14 @@
 
 import { describe, it, expect, beforeEach } from 'vitest';
 import { ForensicNormalizer } from './normalizer.js';
-import { join } from 'node:path';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { writeFileSync, mkdirSync, existsSync, rmSync } from 'node:fs';
 
 describe('ForensicNormalizer', () => {
-    // The test is running from packages/truth-engine
-    // Patterns are in packages/truth-engine/patterns
-    const patternDir = join(process.cwd(), 'patterns');
+    // High-Rigor: Use relative path from test file to find patterns, avoiding process.cwd() drift
+    const __dirname = dirname(fileURLToPath(import.meta.url));
+    const patternDir = join(__dirname, '..', 'patterns');
     let normalizer: ForensicNormalizer;
 
     beforeEach(() => {
@@ -54,7 +55,7 @@ describe('ForensicNormalizer', () => {
 
     it('test_should_abort_via_temporal_warden_when_redos_pattern_encountered', async () => {
         // Create a malicious dialect in a temporary location
-        const redosDir = join(process.cwd(), '.artifacts', 'test_redos');
+        const redosDir = join(__dirname, '..', '.artifacts', 'test_redos');
         if (!existsSync(redosDir)) mkdirSync(redosDir, { recursive: true });
         
         const maliciousDialect = {
