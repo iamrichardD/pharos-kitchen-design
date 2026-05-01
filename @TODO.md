@@ -36,8 +36,9 @@
 - [x] CI Remediation: Resolved IAM Trust Policy case-sensitivity/Wildcard warnings.
 - [x] **Issue #46**: Implement Pharos Truth Engine Crawler Logic (Frymaster) (Task 4.8).
 - [x] **Issue #47**: Harden Manufacturer URI Infrastructure (Componentization) (Task 4.9).
-- [x] **Issue #48**: Implement ForensicNormalizer & Pattern Mapping (Task 4.10).
+- [x] **Issue #48**: Implement ForensicNormalizer & Pattern Mapping (Task 4.10). [AUDITED PR #67]
 - [x] **Issue #50**: Truth Engine: Authoritative SQL Schema Extraction (Task 4.11).
+- [ ] **Issue #68**: Remediate Pulse WASM Artifact Environmental Gap (Task 4.18).
 
 ---
 
