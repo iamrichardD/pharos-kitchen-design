@@ -5,7 +5,7 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Atomic verification of the ForensicNormalizer and Regex Warden.
- * Traceability: Issue #48, ADR-0017
+ * Traceability: Issue #48, ADR-0017, Issue #74
  * ======================================================================== */
 
 import { describe, it, expect, beforeEach } from 'vitest';
@@ -24,6 +24,10 @@ describe('ForensicNormalizer', () => {
         normalizer = new ForensicNormalizer(patternDir);
     });
 
+    /**
+     * Why: Verifies that the normalizer can correctly extract fields from a standard
+     * manufacturer string using weighted pattern matching.
+     */
     it('test_should_extract_metadata_when_pattern_matches_standard_dialect', async () => {
         const input = "208V 3PH 60HZ";
         const result = await normalizer.normalize(1, 'Frymaster', input, 'https://test.com');
@@ -36,6 +40,10 @@ describe('ForensicNormalizer', () => {
         });
     });
 
+    /**
+     * Why: Confirms that lower-weight "verbose" patterns are still correctly identified
+     * when standard patterns fail to match.
+     */
     it('test_should_extract_metadata_when_pattern_matches_verbose_dialect', async () => {
         const input = "240 Volts 1 Phase";
         const result = await normalizer.normalize(1, 'Frymaster', input, 'https://test.com');
@@ -45,6 +53,10 @@ describe('ForensicNormalizer', () => {
         expect(result.data?.phase).toBe("1");
     });
 
+    /**
+     * Why: Ensures the system fails gracefully (returning UNVERIFIED_RAW_DATA)
+     * when no known dialect patterns match the input string.
+     */
     it('test_should_return_unverified_raw_data_when_no_pattern_matches', async () => {
         const input = "UNKNOWN_POWER_FORMAT_999";
         const result = await normalizer.normalize(1, 'Frymaster', input, 'https://test.com');
@@ -53,6 +65,10 @@ describe('ForensicNormalizer', () => {
         expect(result.rejection_reason).toBe('No pattern match');
     });
 
+    /**
+     * Why: Critical security check for ReDoS immunity. Verifies that the Regex Warden
+     * kills worker threads that exceed the 100ms temporal sentinel.
+     */
     it('test_should_abort_via_temporal_warden_when_redos_pattern_encountered', async () => {
         // Create a malicious dialect in a temporary location
         const redosDir = join(__dirname, '..', '.artifacts', 'test_redos');

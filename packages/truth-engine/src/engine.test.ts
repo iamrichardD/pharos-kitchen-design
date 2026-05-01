@@ -5,7 +5,7 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Atomic verification of the Bake Engine and Registry Promotion.
- * Traceability: Issue #53 - ETL Bake
+ * Traceability: Issue #53 - ETL Bake, Issue #74
  * ======================================================================== */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
@@ -40,6 +40,10 @@ describe('TruthEngine: Bake & Promotion', () => {
         if (existsSync(STAGING_DIR)) await rm(STAGING_DIR, { recursive: true, force: true });
     });
 
+    /**
+     * Why: Verifies the "Promotion" logic where a successful forensic normalization
+     * results in a new entry in the SQLite equipment registry.
+     */
     it('test_should_promote_to_registry_when_normalization_succeeds', async () => {
         const db = (engine as any)._db;
         db.prepare("INSERT INTO resources (mfr_id, resource_type, uri, sync_state) VALUES (1, 'PDF', 'https://www.frymaster.com/manual.pdf', 'STALE')").run();
@@ -75,6 +79,10 @@ describe('TruthEngine: Bake & Promotion', () => {
         expect(registryEntry.category).toBe("Fryers");
     });
 
+    /**
+     * Why: Ensures that incoming manufacturer data updates existing registry entries
+     * (matching by SKU) instead of creating duplicate records.
+     */
     it('test_should_replace_existing_sku_when_updated_data_arrives', async () => {
         const db = (engine as any)._db;
         db.prepare("INSERT INTO resources (mfr_id, resource_type, uri, sync_state) VALUES (1, 'PDF', 'https://www.frymaster.com/manual.pdf', 'STALE')").run();
@@ -102,6 +110,10 @@ describe('TruthEngine: Bake & Promotion', () => {
         expect(entry.name).toBe("New Fryer");
     });
 
+    /**
+     * Why: Core ETL verification. Confirms that the SQLite registry is correctly 
+     * transformed ("baked") into sharded JSON files for distribution to the CDN.
+     */
     it('test_should_bake_sharded_json_when_registry_is_populated', async () => {
         const db = (engine as any)._db;
         db.prepare("INSERT INTO resources (mfr_id, resource_type, uri, sync_state) VALUES (1, 'PDF', 'https://www.frymaster.com/manual.pdf', 'STALE')").run();
@@ -147,6 +159,10 @@ describe('TruthEngine: Bake & Promotion', () => {
         expect(content.parameters.PKD_Voltage).toBe('208V');
     });
 
+    /**
+     * Why: Confirms that the bake process is idempotent and clean, removing any
+     * stale artifacts from previous runs before generating new ones.
+     */
     it('test_should_perform_atomic_wipe_before_bake', async () => {
         await mkdir(STAGING_DIR, { recursive: true });
         const zombieFile = join(STAGING_DIR, 'zombie.json');
@@ -157,6 +173,10 @@ describe('TruthEngine: Bake & Promotion', () => {
         expect(existsSync(zombieFile)).toBe(false);
     });
 
+    /**
+     * Why: Verifies that the Truth Engine respects environmental overrides for pattern
+     * discovery. This is critical for regional deployments (e.g., es-MX) and local dev.
+     */
     it('test_should_load_dialects_from_custom_env_path', async () => {
         const customDir = join(pkgRoot, '.artifacts', 'custom_patterns');
         const { mkdirSync, writeFileSync, existsSync, rmSync } = await import('node:fs');
@@ -173,20 +193,23 @@ describe('TruthEngine: Bake & Promotion', () => {
         writeFileSync(join(customDir, 'custom.json'), JSON.stringify(dialect));
 
         const originalEnv = process.env.PKD_PATTERN_DIR;
-        process.env.PKD_PATTERN_DIR = customDir;
-        
         const customEnvDb = join(pkgRoot, 'data', 'custom_test.db');
-        const customEngine = new TruthEngine(customEnvDb);
-        await customEngine.init();
-        
-        const result = await (customEngine as any).normalizer.normalize(1, 'CustomMfr', 'SUCCESS', 'https://test.com');
-        expect(result.status).toBe('HEALTHY');
-        
-        // Cleanup
-        customEngine.close();
-        process.env.PKD_PATTERN_DIR = originalEnv;
-        rmSync(customDir, { recursive: true, force: true });
-        if (existsSync(customEnvDb)) rmSync(customEnvDb);
+
+        try {
+            process.env.PKD_PATTERN_DIR = customDir;
+            
+            const customEngine = new TruthEngine(customEnvDb);
+            await customEngine.init();
+            
+            const result = await (customEngine as any).normalizer.normalize(1, 'CustomMfr', 'SUCCESS', 'https://test.com');
+            expect(result.status).toBe('HEALTHY');
+            customEngine.close();
+        } finally {
+            // High-Rigor: Ensure environment is restored even if test fails
+            process.env.PKD_PATTERN_DIR = originalEnv;
+            rmSync(customDir, { recursive: true, force: true });
+            if (existsSync(customEnvDb)) rmSync(customEnvDb);
+        }
     });
 });
 
