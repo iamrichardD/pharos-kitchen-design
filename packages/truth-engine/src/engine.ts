@@ -46,8 +46,8 @@ export class TruthEngine {
             this._db = new Database(dbOrPath || 'data/truth_engine.db');
         }
         
-        // Pattern registry location relative to this file
-        const patternDir = join(process.cwd(), 'patterns');
+        // Pattern registry location preference: PKD_PATTERN_DIR > default 'patterns'
+        const patternDir = process.env.PKD_PATTERN_DIR || join(process.cwd(), 'patterns');
         this.normalizer = new ForensicNormalizer(patternDir);
     }
 
@@ -149,10 +149,10 @@ export class TruthEngine {
                 };
             } catch (error: any) {
                 console.error(`[TruthEngine] WASM Transformation failed for ${mfr.name}:`, error);
-                result = this.normalizer.normalize(resource.mfr_id, mfr.name, rawInput, resource.uri);
+                result = await this.normalizer.normalize(resource.mfr_id, mfr.name, rawInput, resource.uri);
             }
         } else {
-            result = this.normalizer.normalize(resource.mfr_id, mfr.name, rawInput, resource.uri);
+            result = await this.normalizer.normalize(resource.mfr_id, mfr.name, rawInput, resource.uri);
         }
 
         if (result.status === 'HEALTHY' && result.data) {
