@@ -59,7 +59,11 @@ export class TruthEngine {
         // 1. Environment Resilience: Ensure data directory exists
         if (this._dbPath !== ':memory:') {
             const dbDir = dirname(resolve(this._dbPath));
-            await mkdir(dbDir, { recursive: true });
+            try {
+                await mkdir(dbDir, { recursive: true });
+            } catch (error: any) {
+                throw new Error(`[Critical] Failed to create data directory at ${dbDir}: ${error.message}. Check filesystem permissions.`);
+            }
             
             if (!this._db) {
                 this._db = new Database(this._dbPath);
