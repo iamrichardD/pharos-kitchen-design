@@ -12,8 +12,8 @@ import { describe, it, expect } from 'vitest';
 import { join } from 'node:path';
 import { WasmDialectLoader } from './loader.js';
 
-const WASM_PATH = join(process.cwd(), '../dialects/pkd-dialect-frymaster/target/wasm32-unknown-unknown/release/pkd_dialect_frymaster.wasm');
-const EXPECTED_HASH = 'df09509839ea762a3cb9aeca66f1b96df7054f37ce81620c15a947a50770aa3a';
+const WASM_PATH = '/work/dist/dialects/pkd_dialect_frymaster.wasm';
+const EXPECTED_HASH = '68949beded5dd86796b52b2d7abef00a0208bf77988b49f169e3754f70986fb3';
 
 describe('WasmDialectLoader', () => {
     it('test_should_verify_hash_successfully_when_artifact_is_authentic', () => {

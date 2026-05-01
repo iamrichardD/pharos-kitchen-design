@@ -170,15 +170,17 @@ describe('TruthEngine: Bake & Promotion', () => {
         const originalEnv = process.env.PKD_PATTERN_DIR;
         process.env.PKD_PATTERN_DIR = customDir;
         
-        const customEngine = new TruthEngine(':memory:');
+        const customEngine = new TruthEngine('data/custom_test.db');
         await customEngine.init();
         
         const result = await (customEngine as any).normalizer.normalize(1, 'CustomMfr', 'SUCCESS', 'https://test.com');
         expect(result.status).toBe('HEALTHY');
         
         // Cleanup
+        customEngine.close();
         process.env.PKD_PATTERN_DIR = originalEnv;
         rmSync(customDir, { recursive: true, force: true });
+        if (existsSync('data/custom_test.db')) rmSync('data/custom_test.db');
     });
 });
 

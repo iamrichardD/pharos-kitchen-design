@@ -12,8 +12,8 @@ import { describe, it, expect } from 'vitest';
 import { join } from 'node:path';
 import { WasmDialectLoader } from './loader.js';
 
-const WASM_PATH = join(process.cwd(), '../../.artifacts/dialects/pkd_dialect_true.wasm');
-const EXPECTED_HASH = '9c352bc1a102c904e14c16be9dcef2839a9685a2688ba584482129977f9477a4';
+const WASM_PATH = '/work/dist/dialects/pkd_dialect_true.wasm';
+const EXPECTED_HASH = '6cbbb765c73174eca2bee201c64061c52e0d0cd26c217e1f7d91dbdba0074269';
 
 describe('True Manufacturing WASM Dialect', () => {
     it('test_should_extract_voltage_and_amps_from_true_mfg_specs', async () => {
