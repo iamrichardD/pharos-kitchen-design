@@ -13,8 +13,8 @@ import { TruthEngine } from './engine.js';
 import Database from 'better-sqlite3';
 import { join } from 'node:path';
 
-const WASM_PATH = join(process.cwd(), '../../.artifacts/dialects/pkd_dialect_true.wasm');
-const WASM_HASH = '9c352bc1a102c904e14c16be9dcef2839a9685a2688ba584482129977f9477a4';
+const WASM_PATH = '/work/dist/dialects/pkd_dialect_true.wasm';
+const WASM_HASH = '6cbbb765c73174eca2bee201c64061c52e0d0cd26c217e1f7d91dbdba0074269';
 
 describe('TruthEngine WASM Integration (True Mfg)', () => {
     let engine: TruthEngine;

@@ -1,13 +1,33 @@
 # ========================================================================
 # Project: Pharos Kitchen Design (Project Prism)
-# Component: Truth Engine / Crawler Environment
+# Component: Truth Engine / Deterministic Validation
 # File: Containerfile.truth-engine
 # Author: Richard D. (https://github.com/iamrichardd)
 # License: FSL-1.1 (See LICENSE file for details)
-# Purpose: Execution environment for the Playwright-based Truth Engine.
-# Traceability: Issue #46, ADR-0014
+# Purpose: Multi-stage build for container-native WASM compilation and testing.
+# Traceability: Issue #68, ADR-0014, ADR-0017
 # ========================================================================
 
+# --- Stage 1: Rust/WASM Builder ---
+FROM public.ecr.aws/docker/library/rust:1.85-slim-bookworm AS builder
+
+RUN apt-get update && apt-get install -y \
+    pkg-config \
+    libssl-dev \
+    curl \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install wasm-pack
+RUN curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+WORKDIR /build
+COPY . .
+
+# Build all WASM dialects
+RUN bash scripts/build-wasm.sh
+
+# --- Stage 2: Truth Engine Runner ---
 FROM mcr.microsoft.com/playwright:v1.59.1-noble
 
 # Force Node 24 installation
@@ -18,10 +38,15 @@ RUN apt-get update && apt-get install -y curl && \
 
 WORKDIR /work
 
-# Copy source code including all package.json files
+# Copy project files
 COPY . .
 
-# CRITICAL: Clean host node_modules and perform a fresh install inside the container
+# Copy built WASM artifacts from builder stage to a centralized 'dist/dialects'
+RUN mkdir -p dist/dialects
+COPY --from=builder /build/packages/dialects/pkd-dialect-frymaster/target/wasm32-unknown-unknown/release/pkd_dialect_frymaster.wasm dist/dialects/
+COPY --from=builder /build/packages/dialects/pkd-dialect-true/target/wasm32-unknown-unknown/release/pkd_dialect_true.wasm dist/dialects/
+
+# CRITICAL: Clean host node_modules and perform a fresh install
 RUN rm -rf node_modules apps/marketing/node_modules apps/demo/node_modules packages/*/node_modules && \
     npm install && \
     npm rebuild better-sqlite3
@@ -29,5 +54,5 @@ RUN rm -rf node_modules apps/marketing/node_modules apps/demo/node_modules packa
 # Ensure local binaries are in the path
 ENV PATH="/work/node_modules/.bin:$PATH"
 
-# Run the Truth Engine Pulse
-CMD ["tsx", "scripts/truth-engine/pulse.ts"]
+# Default to running tests to ensure validation passes
+CMD ["npm", "test", "--workspace=packages/truth-engine"]

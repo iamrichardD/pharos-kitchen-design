@@ -33,8 +33,9 @@ export interface Resource {
 }
 
 export class TruthEngine {
-    private _db: Database.Database;
-    private normalizer: ForensicNormalizer;
+    private _dbPath: string;
+    private _db!: Database.Database;
+    private normalizer!: ForensicNormalizer;
     private wasmPlugins: Map<number, Plugin> = new Map();
     private validator = new PharosValidator();
     private _initialized = false;
@@ -42,20 +43,33 @@ export class TruthEngine {
     constructor(dbOrPath?: Database.Database | string) {
         if (dbOrPath instanceof Database) {
             this._db = dbOrPath;
+            this._dbPath = ':memory:'; // Placeholder for instance-based DB
         } else {
-            this._db = new Database(dbOrPath || 'data/truth_engine.db');
+            this._dbPath = dbOrPath || 'data/truth_engine.db';
         }
-        
-        // Pattern registry location preference: PKD_PATTERN_DIR > default 'patterns'
-        const patternDir = process.env.PKD_PATTERN_DIR || join(process.cwd(), 'patterns');
-        this.normalizer = new ForensicNormalizer(patternDir);
     }
 
     /**
-     * Initializes the engine, ensuring the schema is applied.
+     * Initializes the engine, ensuring the directory exists and the schema is applied.
      * This must be called before using the engine.
      */
     public async init() {
+        if (this._initialized) return;
+
+        // 1. Environment Resilience: Ensure data directory exists
+        if (this._dbPath !== ':memory:') {
+            const dbDir = dirname(resolve(this._dbPath));
+            await mkdir(dbDir, { recursive: true });
+            
+            if (!this._db) {
+                this._db = new Database(this._dbPath);
+            }
+        }
+
+        // 2. Component Initialization
+        const patternDir = process.env.PKD_PATTERN_DIR || join(process.cwd(), 'patterns');
+        this.normalizer = new ForensicNormalizer(patternDir);
+
         await this.initializeSchema();
         await this.validator.init();
         this._initialized = true;
