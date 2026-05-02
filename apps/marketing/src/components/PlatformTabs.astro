@@ -1,0 +1,109 @@
+---
+/* ========================================================================
+ * Project: Pharos Kitchen Design (Project Prism)
+ * Component: Marketing Site / UI / Tabs
+ * File: PlatformTabs.astro
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * License: FSL-1.1 (See LICENSE file for details)
+ * Purpose: Deterministic tab controller for platform-specific installation.
+ * Traceability: Issue #76, ADR-0006
+ * ======================================================================== */
+---
+
+<div class="platform-tabs-container">
+  <div class="flex border-b border-border-blueprint mb-6 overflow-x-auto scrollbar-hide">
+    <button 
+      data-tab-trigger="linux" 
+      class="px-6 py-3 font-condensed uppercase tracking-widest text-sm border-b-2 border-transparent hover:text-ph-orange transition-all outline-none"
+    >
+      Linux
+    </button>
+    <button 
+      data-tab-trigger="windows" 
+      class="px-6 py-3 font-condensed uppercase tracking-widest text-sm border-b-2 border-transparent hover:text-ph-orange transition-all outline-none"
+    >
+      Windows
+    </button>
+    <button 
+      data-tab-trigger="macos" 
+      class="px-6 py-3 font-condensed uppercase tracking-widest text-sm border-b-2 border-transparent hover:text-ph-orange transition-all outline-none"
+    >
+      macOS
+    </button>
+  </div>
+
+  <div data-tab-content="linux" class="hidden">
+    <slot name="linux" />
+  </div>
+  <div data-tab-content="windows" class="hidden">
+    <slot name="windows" />
+  </div>
+  <div data-tab-content="macos" class="hidden">
+    <slot name="macos" />
+  </div>
+</div>
+
+<script>
+  import { detectPlatform } from '../utils/platform';
+
+  const STORAGE_KEY = 'pkd-platform-pref';
+
+  function initTabs() {
+    const triggers = document.querySelectorAll('[data-tab-trigger]');
+    const contents = document.querySelectorAll('[data-tab-content]');
+
+    function switchTab(platform: string) {
+      contents.forEach(content => {
+        if (content instanceof HTMLElement) {
+          content.classList.toggle('hidden', content.dataset.tabContent !== platform);
+        }
+      });
+
+      triggers.forEach(trigger => {
+        if (trigger instanceof HTMLElement) {
+          const isActive = trigger.dataset.tabTrigger === platform;
+          trigger.classList.toggle('border-ph-orange', isActive);
+          trigger.classList.toggle('text-ph-orange', isActive);
+          trigger.classList.toggle('text-text-muted', !isActive);
+        }
+      });
+
+      localStorage.setItem(STORAGE_KEY, platform);
+    }
+
+    triggers.forEach(trigger => {
+      trigger.addEventListener('click', () => {
+        if (trigger instanceof HTMLElement && trigger.dataset.tabTrigger) {
+          switchTab(trigger.dataset.tabTrigger);
+        }
+      });
+    });
+
+    // Initialization: Sniff and Shift
+    const saved = localStorage.getItem(STORAGE_KEY);
+    const detected = detectPlatform(navigator.userAgent);
+    
+    // Sentinel: Validate saved state against known platforms to prevent UI "Silent Death"
+    const validPlatforms = ['linux', 'windows', 'macos'];
+    const platform = (saved && validPlatforms.includes(saved)) ? saved : detected;
+
+    switchTab(platform);
+  }
+
+  // Run on load and after swaps
+  initTabs();
+  document.addEventListener('astro:after-swap', initTabs);
+</script>
+
+<style>
+  [data-tab-trigger] {
+    white-space: nowrap;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+</style>

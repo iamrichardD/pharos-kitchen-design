@@ -140,3 +140,16 @@
 - [x] **Issue #65 (CI/CD)**: Remediated WASM build failure via centralized `scripts/build-wasm.sh` and multi-stage Zero-Host promotion. (Verified Pharos Green)
 - [x] **Issue #74 (CI/CD)**: Remediate CI path failures via deterministic import.meta.url resolution and hardened Regex Warden (.js). (Verified Pharos Green)
 - [ ] **Issue #52 (Protocol)**: Upgrade `pharos-protocol` to support logical `OR` for complex queries (Task 4.15).
+
+### Sprint 4.4: CLI Distribution & Installation Documentation (#76-78) - 🔄 In Progress
+- [x] **Issue #76**: Implement `/install` route and platform-specific landing page (Task 3.10).
+- [ ] **Issue #77**: Develop universal `install.sh` for Linux (Priority 1) and macOS (Task 3.11).
+- [ ] **Issue #78**: Update CLI Reference with Platform Prerequisites (Task 3.12).
+
+#### [2026-05-02] - /install Route & Platform Detection
+- **Implemented** high-fidelity `/install` landing page with deterministic platform detection.
+- **Created** `PlatformTabs.astro` component with `localStorage` state persistence and Fail-Fast sentinel validation.
+- **Added** Vitest suite for platform detection logic (`platform.test.ts`).
+- **Verified** Zero-Host build in Podman (`pharos-ts` container).
+- **Audited** via Pharos Crucible (Result: Pharos Green).
+

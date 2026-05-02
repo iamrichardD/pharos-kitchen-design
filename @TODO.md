@@ -101,6 +101,11 @@
 - [x] **Issue #65**: CI/CD: WASM Build Hardening & Zero-Host Remediation. (Verified Pharos Green)
 - [ ] **Issue #52**: Upgrade `pharos-protocol` to support logical `OR` grouping for registry queries (Task 4.15).
 
+### Sprint 4.4: CLI Distribution & Installation Documentation (#76-78) - 📋 Backlog
+- [x] **Issue #76**: Implement `/install` route and platform-specific landing page (Task 3.10).
+- [ ] **Issue #77**: Develop universal `install.sh` for Linux (Priority 1) and macOS (Task 3.11).
+- [ ] **Issue #78**: Update CLI Reference with Platform Prerequisites (Task 3.12).
+
 ---
 
 ## 🗑️ Purge/Stale Logic
