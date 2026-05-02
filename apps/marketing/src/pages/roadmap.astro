@@ -13,7 +13,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import { roadmapItems } from "../data/roadmap";
 
 // Deterministic Sort by Phase (Sprint 1 -> 2 -> 3...)
-const sortedRoadmap = roadmapItems.sort((a, b) => a.phase.localeCompare(b.phase));
+const sortedRoadmap = roadmapItems.toSorted((a, b) => a.phase.localeCompare(b.phase));
 ---
 
 <BaseLayout title="Technical Maturity Matrix | Pharos Kitchen Design">

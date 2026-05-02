@@ -17,6 +17,8 @@ RUN apt-get update && apt-get install -y \
     python3 \
     make \
     g++ \
+    curl \
+    openssl \
     && rm -rf /var/lib/apt/lists/*
 
 # Pre-install wrangler globally for edge-worker development
