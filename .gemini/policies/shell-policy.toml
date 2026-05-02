@@ -1,7 +1,7 @@
 [[rule]]
 toolName = "run_shell_command"
 # Expanded to include safe/standard git operations used for status, logs, diffs, and branch management.
-commandRegex = "^git\\s+(status|branch|log|diff|checkout|add|commit|pull)(\\s+.*)?$"
+commandRegex = "^git\\s+(status|branch|log|diff|checkout|add|commit|pull|fetch|rev-parse|describe)(\\s+.*)?$"
 decision = "allow"
 priority = 100
 
@@ -25,7 +25,16 @@ toolName = "run_shell_command"
 commandPrefix = ["sha256sum"]
 decision = "allow"
 priority = 100
-ll_command"
+
+[[rule]]
+toolName = "run_shell_command"
+# Allow safe, read-only discovery tools to reduce "Research" turn count.
+commandPrefix = ["ls", "cat", "grep", "find"]
+decision = "allow"
+priority = 100
+
+[[rule]]
+toolName = "run_shell_command"
 # Authorize the project's primary validation and pulse-check scripts.
 commandPrefix = ["scripts/pulse.sh", "scripts/truth-engine/pulse.ts"]
 decision = "allow"
