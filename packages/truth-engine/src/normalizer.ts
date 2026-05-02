@@ -5,7 +5,7 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Deterministic transformation of raw strings with ReDoS protection.
- * Traceability: Issue #48, ADR-0017
+ * Traceability: Issue #48, ADR-0017, Issue #74
  * ======================================================================== */
 
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
@@ -128,9 +128,8 @@ export class ForensicNormalizer {
     private async matchWithWorker(input: string, pattern: string, timeoutMs: number): Promise<RegExpMatchArray | null> {
         return new Promise((resolve, reject) => {
             const __dirname = dirname(fileURLToPath(import.meta.url));
-            // In development (vitest), we point to the .ts file. In production, it would be .js.
-            // Node 22+ with experimental flags or TS loaders will handle this.
-            const workerFile = join(__dirname, 'regex_worker.ts');
+            // In development (vitest) and production, we point to the .js file to avoid TS loader issues.
+            const workerFile = join(__dirname, 'regex_worker.js');
             
             const worker = new Worker(workerFile, {
                 workerData: { input, pattern, flags: 'i' }

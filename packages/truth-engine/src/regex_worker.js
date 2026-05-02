@@ -1,11 +1,11 @@
 /* ========================================================================
  * Project: Pharos Kitchen Design (Project Prism)
  * Component: Truth Engine / Regex Warden
- * File: regex_worker.ts
+ * File: regex_worker.js
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Isolated worker thread for safe regex execution (ReDoS Prevention).
- * Traceability: Issue #48, ADR-0017
+ * Traceability: Issue #48, ADR-0017, Issue #74
  * ======================================================================== */
 
 import { parentPort, workerData } from 'node:worker_threads';
@@ -21,7 +21,7 @@ if (parentPort) {
         const match = input.match(regex);
         
         parentPort.postMessage({ match });
-    } catch (error: any) {
+    } catch (error) {
         parentPort.postMessage({ error: error.message });
     }
 }
