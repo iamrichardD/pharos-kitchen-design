@@ -1,0 +1,131 @@
+---
+/* ========================================================================
+ * Project: Pharos Kitchen Design (Project Prism)
+ * Component: Marketing Site / Pages / Install
+ * File: install.astro
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * License: FSL-1.1 (See LICENSE file for details)
+ * Purpose: High-fidelity CLI installation landing page.
+ * Traceability: Issue #76, ADR-0006
+ * ======================================================================== */
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import BlueprintCard from '../components/BlueprintCard.astro';
+import PlatformTabs from '../components/PlatformTabs.astro';
+---
+
+<BaseLayout title="Install pkd CLI" description="Download and install the Pharos Kitchen Design command-line interface.">
+  <div class="container mx-auto px-4 py-12">
+    <div class="max-w-4xl mx-auto">
+      <header class="mb-12">
+        <h1 class="text-4xl md:text-5xl mb-4">Command-First Infrastructure</h1>
+        <p class="text-xl text-text-muted max-w-2xl font-mono uppercase tracking-tighter">
+          Acquire the `pkd` CLI: The deterministic control plane for the modern Independent Kitchen Designer.
+        </p>
+      </header>
+
+      <PlatformTabs>
+        <div slot="linux">
+          <BlueprintCard title="Linux (x86_64 / AArch64)">
+            <div class="space-y-6 font-mono text-sm">
+              <p class="text-text-muted italic border-l-2 border-ph-blue pl-4">Primary Development Target</p>
+              
+              <div>
+                <h3 class="text-ph-orange mb-2">1. System Dependencies</h3>
+                <p class="mb-2">Pharos utilizes the system keyring for secure session management. Ensure the following packages are installed:</p>
+                <div class="bg-black/20 p-4 border border-ph-blue/30">
+                  <code class="text-ph-blue"># Ubuntu / Debian</code><br/>
+                  <code>sudo apt-get install libsecret-1-dev gnome-keyring</code><br/><br/>
+                  <code class="text-ph-blue"># Fedora</code><br/>
+                  <code>sudo dnf install libsecret-devel</code>
+                </div>
+              </div>
+
+              <div>
+                <h3 class="text-ph-orange mb-2">2. Installation</h3>
+                <div class="bg-black/20 p-4 border border-ph-blue/30">
+                  <code class="text-ph-blue"># Download and install via shell script</code><br/>
+                  <code>curl -sSf https://iamrichardd.com/pharos/install.sh | sh</code>
+                </div>
+              </div>
+
+              <div>
+                <h3 class="text-ph-orange mb-2">3. Verification</h3>
+                <div class="bg-black/20 p-4 border border-ph-blue/30">
+                  <code>pkd --version</code>
+                </div>
+              </div>
+            </div>
+          </BlueprintCard>
+        </div>
+
+        <div slot="windows">
+          <BlueprintCard title="Windows (x64)">
+            <div class="space-y-6 font-mono text-sm">
+              <p class="text-text-muted italic border-l-2 border-ph-blue pl-4">Native Credential Management</p>
+
+              <div>
+                <h3 class="text-ph-orange mb-2">Security Note</h3>
+                <p class="mb-4">
+                  The `pkd` CLI integrates with **Windows Credential Manager** to store authentication tokens. No additional drivers are required.
+                </p>
+              </div>
+
+              <div>
+                <h3 class="text-ph-orange mb-2">1. Installation</h3>
+                <p class="mb-2">Download the installer or use PowerShell:</p>
+                <div class="bg-black/20 p-4 border border-ph-blue/30 overflow-x-auto">
+                  <code>irm https://iamrichardd.com/pharos/install.ps1 | iex</code>
+                </div>
+              </div>
+
+              <div>
+                <h3 class="text-ph-orange mb-2">2. Verification</h3>
+                <div class="bg-black/20 p-4 border border-ph-blue/30">
+                  <code>pkd --version</code>
+                </div>
+              </div>
+            </div>
+          </BlueprintCard>
+        </div>
+
+        <div slot="macos">
+          <BlueprintCard title="macOS (Apple Silicon / Intel)">
+            <div class="space-y-6 font-mono text-sm">
+              <p class="text-text-muted italic border-l-2 border-ph-blue pl-4">Gatekeeper Verification</p>
+
+              <div>
+                <h3 class="text-ph-orange mb-2">1. Gatekeeper Bypass</h3>
+                <p class="mb-2">As an independent FSL-1.1 project, the binary may require manual quarantine removal:</p>
+                <div class="bg-black/20 p-4 border border-ph-blue/30">
+                  <code>xattr -d com.apple.quarantine pkd</code>
+                </div>
+              </div>
+
+              <div>
+                <h3 class="text-ph-orange mb-2">2. Installation</h3>
+                <p class="mb-2">Install via Homebrew tap:</p>
+                <div class="bg-black/20 p-4 border border-ph-blue/30">
+                  <code>brew install iamrichardd/pharos/pkd</code>
+                </div>
+              </div>
+
+              <div>
+                <h3 class="text-ph-orange mb-2">3. Verification</h3>
+                <div class="bg-black/20 p-4 border border-ph-blue/30">
+                  <code>pkd --version</code>
+                </div>
+              </div>
+            </div>
+          </BlueprintCard>
+        </div>
+      </PlatformTabs>
+
+      <footer class="mt-12 pt-12 border-t border-border-blueprint/30">
+        <p class="text-xs text-text-muted uppercase tracking-widest font-mono">
+          Security: All binaries are signed. Verify checksums in the <a href="https://github.com/iamrichardD/pharos/releases" class="text-ph-blue hover:text-ph-orange">GitHub Releases</a>.
+        </p>
+      </footer>
+    </div>
+  </div>
+</BaseLayout>
