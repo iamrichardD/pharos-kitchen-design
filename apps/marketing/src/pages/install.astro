@@ -28,7 +28,10 @@ import PlatformTabs from '../components/PlatformTabs.astro';
         <div slot="linux">
           <BlueprintCard title="Linux (x86_64 / AArch64)">
             <div class="space-y-6 font-mono text-sm">
-              <p class="text-text-muted italic border-l-2 border-ph-blue pl-4">Primary Development Target</p>
+              <div class="flex justify-between items-start">
+                <p class="text-text-muted italic border-l-2 border-ph-blue pl-4">Primary Development Target</p>
+                <span class="px-2 py-0.5 text-[10px] font-bold tracking-widest bg-ph-blue/20 text-ph-blue border border-ph-blue/50 rounded">TECHNICAL PREVIEW</span>
+              </div>
               
               <div>
                 <h3 class="text-ph-orange mb-2">1. System Dependencies</h3>
@@ -55,6 +58,14 @@ import PlatformTabs from '../components/PlatformTabs.astro';
                   <code>pkd --version</code>
                 </div>
               </div>
+
+              <div>
+                <h3 class="text-ph-orange mb-2">4. Lifecycle Management</h3>
+                <p class="mb-2">Keep your CLI deterministic by updating regularly:</p>
+                <div class="bg-black/20 p-4 border border-ph-blue/30">
+                  <code>pkd self-update</code>
+                </div>
+              </div>
             </div>
           </BlueprintCard>
         </div>
@@ -62,7 +73,10 @@ import PlatformTabs from '../components/PlatformTabs.astro';
         <div slot="windows">
           <BlueprintCard title="Windows (x64)">
             <div class="space-y-6 font-mono text-sm">
-              <p class="text-text-muted italic border-l-2 border-ph-blue pl-4">Native Credential Management</p>
+              <div class="flex justify-between items-start">
+                <p class="text-text-muted italic border-l-2 border-ph-blue pl-4">Native Credential Management</p>
+                <span class="px-2 py-0.5 text-[10px] font-bold tracking-widest bg-ph-blue/20 text-ph-blue border border-ph-blue/50 rounded">TECHNICAL PREVIEW</span>
+              </div>
 
               <div>
                 <h3 class="text-ph-orange mb-2">Security Note</h3>
@@ -85,14 +99,32 @@ import PlatformTabs from '../components/PlatformTabs.astro';
                   <code>pkd --version</code>
                 </div>
               </div>
+
+              <div>
+                <h3 class="text-ph-orange mb-2">3. Lifecycle Management</h3>
+                <p class="mb-2">Automated updates via the control plane:</p>
+                <div class="bg-black/20 p-4 border border-ph-blue/30">
+                  <code>pkd self-update</code>
+                </div>
+              </div>
             </div>
           </BlueprintCard>
         </div>
 
         <div slot="macos">
-          <BlueprintCard title="macOS (Apple Silicon / Intel)">
+          <BlueprintCard title="macOS (Universal Binary)">
             <div class="space-y-6 font-mono text-sm">
-              <p class="text-text-muted italic border-l-2 border-ph-blue pl-4">Gatekeeper Verification</p>
+              <div class="flex justify-between items-start">
+                <p class="text-text-muted italic border-l-2 border-ph-blue pl-4">Gatekeeper Verification</p>
+                <span class="px-2 py-0.5 text-[10px] font-bold tracking-widest bg-ph-blue/20 text-ph-blue border border-ph-blue/50 rounded">TECHNICAL PREVIEW</span>
+              </div>
+
+              <div>
+                <h3 class="text-ph-orange mb-2">Architecture Selection</h3>
+                <p class="mb-4">
+                  Pharos provides a **Universal Binary** supporting both **Apple Silicon (M1/M2/M3)** and **Intel** hardware. 
+                </p>
+              </div>
 
               <div>
                 <h3 class="text-ph-orange mb-2">1. Gatekeeper Bypass</h3>
@@ -114,6 +146,14 @@ import PlatformTabs from '../components/PlatformTabs.astro';
                 <h3 class="text-ph-orange mb-2">3. Verification</h3>
                 <div class="bg-black/20 p-4 border border-ph-blue/30">
                   <code>pkd --version</code>
+                </div>
+              </div>
+
+              <div>
+                <h3 class="text-ph-orange mb-2">4. Lifecycle Management</h3>
+                <p class="mb-2">Keep your macOS workstation in sync:</p>
+                <div class="bg-black/20 p-4 border border-ph-blue/30">
+                  <code>pkd self-update</code>
                 </div>
               </div>
             </div>
