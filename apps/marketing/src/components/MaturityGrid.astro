@@ -9,22 +9,7 @@
  */
 
 import FidelityBadge from './FidelityBadge.astro';
-
-interface Category {
-	name: string;
-	coverage: number;
-	fidelity: 'raw' | 'normalized' | 'verified';
-	lastSync: string;
-}
-
-const categories: Category[] = [
-	{ name: 'Refrigeration', coverage: 85, fidelity: 'normalized', lastSync: '12d ago' },
-	{ name: 'Cooking Equipment', coverage: 40, fidelity: 'raw', lastSync: '3d ago' },
-	{ name: 'Warewashing', coverage: 95, fidelity: 'verified', lastSync: '1d ago' },
-	{ name: 'Food Prep', coverage: 20, fidelity: 'raw', lastSync: '15d ago' },
-	{ name: 'Serving Systems', coverage: 60, fidelity: 'normalized', lastSync: '5d ago' },
-	{ name: 'Ventilation', coverage: 10, fidelity: 'raw', lastSync: '30d ago' }
-];
+import { categories } from '../data/categories';
 ---
 
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 transition-colors duration-300">

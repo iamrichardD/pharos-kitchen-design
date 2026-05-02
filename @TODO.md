@@ -68,6 +68,7 @@
 - [x] Jargon removal & functional utility mapping.
 
 ### Phase 4: Revit & Web Interop (Project Prism Bridge)
+- [x] **Issue #71**: Marketing Sync Phase 4 (Options A & B) (Task 4.19).
 - [x] **Issue #20 (Log Sync)**: Synchronized Decision Log with ADR-0023/24/25.
 - [x] **Issue #18 (SRI)**: Rectified Umami SRI and implemented Fail-Fast build check.
 - [x] **Issue #17 (Scaffold)**: Revit Bridge (.NET 8) and Demo Site (Astro) initialized.

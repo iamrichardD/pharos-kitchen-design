@@ -129,6 +129,7 @@
 - [x] **Verification**: Pharos Green status confirmed via `scripts/truth-engine/sync-docs.ts` and Node 22 Vitest.
 
 ### Sprint 4.3: Registry Distribution & Pulse Protocol (#51-54, #65) - ✅ COMPLETED
+- [x] **Issue #71 (Marketing)**: Synchronized Phase 4 maturity (Options A & B) via Data-Driven Manifests.
 - [x] **Issue #53 (ETL)**: Implemented `pkd core bake` engine with Tantivy indexing and sharded JSON distribution.
 - [x] **Issue #54 (Security)**: Implemented high-rigor SHA-256 verification in `pkd-core` with C-FFI bindings and InteropResponse for diagnostic observability in `pkd-cli` and `revit-bridge`.
 - [x] **Issue #54 (Network)**: Implemented "Pulse" startup event with SHA-256 verification and XDG cache persistence. (Verified)
