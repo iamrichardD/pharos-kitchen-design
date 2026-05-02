@@ -1,14 +1,14 @@
 [[rule]]
 toolName = "run_shell_command"
-# Expanded to include safe/standard git operations used for status, logs, diffs, and branch management.
-commandRegex = "^git\\s+(status|branch|log|diff|checkout|add|commit|pull|fetch|rev-parse|describe)(\\s+.*)?$"
+# Expanded to include push, merge, and remote for full PR/Branch lifecycle management.
+commandRegex = "^git\\s+(status|branch|log|diff|checkout|add|commit|pull|fetch|rev-parse|describe|push|merge|remote)(\\s+.*)?$"
 decision = "allow"
 priority = 100
 
 [[rule]]
 toolName = "run_shell_command"
-# Consolidated GH CLI prefixes to cover issues, PRs, and high-rigor API/GraphQL interactions.
-commandPrefix = ["gh issue", "gh pr", "gh api"]
+# Expanded to include 'gh run' for automated deployment/CI monitoring.
+commandPrefix = ["gh issue", "gh pr", "gh api", "gh run"]
 decision = "allow"
 priority = 100
 
@@ -16,6 +16,20 @@ priority = 100
 toolName = "run_shell_command"
 # MANDATORY: Allows podman commands which are required by the Pharos Zero-Host constraint (ADR-0014).
 commandPrefix = ["podman build", "podman run"]
+decision = "allow"
+priority = 100
+
+[[rule]]
+toolName = "run_shell_command"
+# Authorize primary package manager operations for vertical slice verification.
+commandPrefix = ["npm install", "npm test", "npm run", "npx vitest", "npx astro"]
+decision = "allow"
+priority = 100
+
+[[rule]]
+toolName = "run_shell_command"
+# Authorize targeted cleanup of build artifacts to prevent "Ghost Artifact" pollutions.
+commandRegex = "^rm\\s+-rf\\s+(\\.artifacts/|dist/|node_modules/|target/)(.*)?$"
 decision = "allow"
 priority = 100
 
@@ -36,6 +50,6 @@ priority = 100
 [[rule]]
 toolName = "run_shell_command"
 # Authorize the project's primary validation and pulse-check scripts.
-commandPrefix = ["scripts/pulse.sh", "scripts/truth-engine/pulse.ts"]
+commandPrefix = ["scripts/pulse.sh", "scripts/truth-engine/pulse.ts", "scripts/podman-wrapper.sh"]
 decision = "allow"
 priority = 100
