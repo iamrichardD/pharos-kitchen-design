@@ -7,8 +7,8 @@ priority = 100
 
 [[rule]]
 toolName = "run_shell_command"
-# Expanded to include 'gh run' for automated deployment/CI monitoring.
-commandPrefix = ["gh issue", "gh pr", "gh api", "gh run"]
+# Expanded for full project orchestration, CI monitoring, and release management.
+commandPrefix = ["gh issue", "gh pr", "gh api", "gh run", "gh label", "gh release"]
 decision = "allow"
 priority = 100
 
@@ -43,7 +43,7 @@ priority = 100
 [[rule]]
 toolName = "run_shell_command"
 # Allow safe, read-only discovery tools to reduce "Research" turn count.
-commandPrefix = ["ls", "cat", "grep", "find"]
+commandPrefix = ["ls", "cat", "grep", "find", "tail", "head", "sleep", "jq"]
 decision = "allow"
 priority = 100
 
