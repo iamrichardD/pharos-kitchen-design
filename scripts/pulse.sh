@@ -5,12 +5,13 @@
 # File: pulse.sh
 # Author: Richard D. (https://github.com/iamrichardd)
 # License: FSL-1.1 (See LICENSE file for details)
-# Purpose: Single-command validation of the entire Pharos ecosystem.
+# Purpose: Single-command validation of the entire PKD ecosystem.
+# Traceability: Issue #81
 # ========================================================================
 
 set -e
 
-echo "🚀 Starting Pharos Pulse: Integrated Ecosystem Validation"
+echo "🚀 Starting PKD Pulse: Integrated Ecosystem Validation"
 
 # 1. Build the unified pulse container (Stages: Rust -> TS -> .NET Bridge)
 # We use unconfined seccomp to ensure consistent environment parity during the build.
@@ -25,9 +26,9 @@ podman run --rm \
     --security-opt seccomp=unconfined \
     pkd-pulse
 
-echo "🔍 Starting Pharos Process Linting: Governance Verification"
+echo "🔍 Starting PKD Process Linting: Governance Verification"
 
-# 3. Process Linting (Pharos Standard)
+# 3. Process Linting (PKD Standard)
 
 # Check 1: File Prologue Audit (FSL-1.1 Legal Compliance)
 echo "   [Process] Verifying FSL-1.1 File Prologues..."
@@ -69,8 +70,8 @@ fi
 # Check 2: PR Marker Verification (The Crucible Audit)
 if gh pr view --json body > /dev/null 2>&1; then
     PR_BODY=$(gh pr view --json body -q '.body')
-    if [[ ! "$PR_BODY" == *"## ⚔️ The Pharos Crucible (Audit Log)"* ]]; then
-        echo "❌ Error: Pull Request body is missing the mandatory 'Pharos Crucible' audit log."
+    if [[ ! "$PR_BODY" == *"## ⚔️ The PKD Crucible (Audit Log)"* ]]; then
+        echo "❌ Error: Pull Request body is missing the mandatory 'PKD Crucible' audit log."
         exit 1
     fi
 fi
@@ -84,3 +85,4 @@ if [[ "$CHANGED_FILES" == *"src/"* ]] && [[ ! "$CHANGED_FILES" == *"test"* ]]; t
 fi
 
 echo "✅ Pulse Complete: Ecosystem & Process Stability Verified."
+

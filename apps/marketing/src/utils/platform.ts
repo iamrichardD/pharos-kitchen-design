@@ -5,14 +5,14 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Deterministic platform detection logic for the /install route.
- * Traceability: Issue #76, ADR-0006
+ * Traceability: Issue #76, Issue #81, ADR-0006
  * ======================================================================== */
 
 export type Platform = 'linux' | 'windows' | 'macos';
 
 /**
  * Detects the platform based on the user agent string.
- * Defaults to 'linux' as the Pharos primary development platform.
+ * Defaults to 'linux' as the PKD primary development platform.
  */
 export function detectPlatform(userAgent: string): Platform {
   const ua = userAgent.toLowerCase();

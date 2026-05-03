@@ -145,6 +145,7 @@
 - [x] **Issue #76**: Implement `/install` route and platform-specific landing page (Task 3.10).
 - [ ] **Issue #77**: Develop universal `install.sh` for Linux (Priority 1) and macOS (Task 3.11).
 - [x] **Issue #78**: Update CLI Reference with Platform Prerequisites (Task 3.12). (Verified)
+- [ ] **Bug #81**: Remediate Product Naming and URL Inconsistency in Install Documentation. (Backlog)
 
 #### [2026-05-02] - /install Route & Platform Detection
 - **Implemented** high-fidelity `/install` landing page with deterministic platform detection.

@@ -6,7 +6,7 @@
 # Author: Richard D. (https://github.com/iamrichardd)
 # License: FSL-1.1 (See LICENSE file for details)
 # Purpose: Centralized build script for all WASM targets.
-# Traceability: Issue #65, ADR-0017
+# Traceability: Issue #65, Issue #81, ADR-0017
 # ========================================================================
 
 set -e
@@ -17,7 +17,7 @@ if ! command -v wasm-pack &> /dev/null; then
     curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 fi
 
-echo "🦀 Building Pharos WASM Core..."
+echo "🦀 Building PKD WASM Core..."
 wasm-pack build packages/pkd-core --target nodejs
 
 echo "🍳 Building Manufacturer Dialects..."

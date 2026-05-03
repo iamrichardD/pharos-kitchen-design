@@ -5,7 +5,7 @@
  * File: BaseLayout.astro
  * Author: Richard D. (https://github.com/iamrichardd)
  * Purpose: Global shell for the IKD marketing site.
- * Traceability: ADR 0012, ADR 0013, ADR 0015
+ * Traceability: ADR 0012, ADR 0013, ADR 0015, Issue #81
  * Deployment-Trigger: Issue #76 / Issue #78 Recovery Run
  */
 
@@ -16,7 +16,7 @@ interface Props {
 	description?: string;
 }
 
-const { title, description = "Pharos Kitchen Design: Metadata-First Truth for the Independent Kitchen Designer." } = Astro.props;
+const { title, description = "Pharos Kitchen Design (PKD): Metadata-First Truth for the Independent Kitchen Designer." } = Astro.props;
 ---
 
 <!doctype html>
@@ -61,11 +61,11 @@ const { title, description = "Pharos Kitchen Design: Metadata-First Truth for th
 		<footer class="border-t border-border-blueprint py-8 bg-bg-base/50 transition-colors duration-300">
 			<div class="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
 				<div class="text-xs text-text-muted font-mono uppercase tracking-widest">
-					PROJECT: PHAROS // STATUS: DETERMINISTIC // [FSL-1.1]
+					PROJECT: PKD // STATUS: DETERMINISTIC // [FSL-1.1]
 				</div>
 				<div class="flex gap-6 items-center">
 					<a href="https://iamrichardd.com" class="text-xs text-text-muted hover:text-ph-orange transition-colors">A Project by Richard D.</a>
-					<a href="https://github.com/iamrichardD/pharos" class="text-xs text-ph-blue hover:text-ph-orange transition-colors uppercase font-bold tracking-widest">GitHub Repository</a>
+					<a href="https://github.com/iamrichardD/pharos-kitchen-design" class="text-xs text-ph-blue hover:text-ph-orange transition-colors uppercase font-bold tracking-widest">GitHub Repository</a>
 				</div>
 			</div>
 		</footer>

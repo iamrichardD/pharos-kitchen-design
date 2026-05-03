@@ -6,7 +6,7 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: High-fidelity CLI installation landing page.
- * Traceability: Issue #76, ADR-0006
+ * Traceability: Issue #76, Issue #81, ADR-0006
  * ======================================================================== */
 
 import BaseLayout from '../layouts/BaseLayout.astro';
@@ -20,7 +20,7 @@ import PlatformTabs from '../components/PlatformTabs.astro';
       <header class="mb-12">
         <h1 class="text-4xl md:text-5xl mb-4">Command-First Infrastructure</h1>
         <p class="text-xl text-text-muted max-w-2xl font-mono uppercase tracking-tighter">
-          Acquire the `pkd` CLI: The deterministic control plane for the modern Independent Kitchen Designer.
+          Download and Install pkd: The reliable command center for the modern Independent Kitchen Designer.
         </p>
       </header>
 
@@ -35,7 +35,7 @@ import PlatformTabs from '../components/PlatformTabs.astro';
               
               <div>
                 <h3 class="text-ph-orange mb-2">1. System Dependencies</h3>
-                <p class="mb-2">Pharos utilizes the system keyring for secure session management. Ensure the following packages are installed:</p>
+                <p class="mb-2">PKD uses your computer's secure storage to keep your session safe. Ensure the following items are installed:</p>
                 <div class="bg-black/20 p-4 border border-ph-blue/30">
                   <code class="text-ph-blue"># Ubuntu / Debian</code><br/>
                   <code>sudo apt-get install libsecret-1-dev gnome-keyring</code><br/><br/>
@@ -48,7 +48,7 @@ import PlatformTabs from '../components/PlatformTabs.astro';
                 <h3 class="text-ph-orange mb-2">2. Installation</h3>
                 <div class="bg-black/20 p-4 border border-ph-blue/30">
                   <code class="text-ph-blue"># Download and install via shell script</code><br/>
-                  <code>curl -sSf https://iamrichardd.com/pharos/install.sh | sh</code>
+                  <code>curl -sSf https://iamrichardd.com/pharos-kitchen-design/install.sh | sh</code>
                 </div>
               </div>
 
@@ -61,7 +61,7 @@ import PlatformTabs from '../components/PlatformTabs.astro';
 
               <div>
                 <h3 class="text-ph-orange mb-2">4. Lifecycle Management</h3>
-                <p class="mb-2">Keep your CLI deterministic by updating regularly:</p>
+                <p class="mb-2">Keep your pkd tool reliable by updating regularly:</p>
                 <div class="bg-black/20 p-4 border border-ph-blue/30">
                   <code>pkd self-update</code>
                 </div>
@@ -89,7 +89,7 @@ import PlatformTabs from '../components/PlatformTabs.astro';
                 <h3 class="text-ph-orange mb-2">1. Installation</h3>
                 <p class="mb-2">Download the installer or use PowerShell:</p>
                 <div class="bg-black/20 p-4 border border-ph-blue/30 overflow-x-auto">
-                  <code>irm https://iamrichardd.com/pharos/install.ps1 | iex</code>
+                  <code>irm https://iamrichardd.com/pharos-kitchen-design/install.ps1 | iex</code>
                 </div>
               </div>
 
@@ -102,7 +102,7 @@ import PlatformTabs from '../components/PlatformTabs.astro';
 
               <div>
                 <h3 class="text-ph-orange mb-2">3. Lifecycle Management</h3>
-                <p class="mb-2">Automated updates via the control plane:</p>
+                <p class="mb-2">Automated updates via the command center:</p>
                 <div class="bg-black/20 p-4 border border-ph-blue/30">
                   <code>pkd self-update</code>
                 </div>
@@ -115,42 +115,55 @@ import PlatformTabs from '../components/PlatformTabs.astro';
           <BlueprintCard title="macOS (Universal Binary)">
             <div class="space-y-6 font-mono text-sm">
               <div class="flex justify-between items-start">
-                <p class="text-text-muted italic border-l-2 border-ph-blue pl-4">Gatekeeper Verification</p>
+                <p class="text-text-muted italic border-l-2 border-ph-blue pl-4">Manual Audit Trust Path</p>
                 <span class="px-2 py-0.5 text-[10px] font-bold tracking-widest bg-ph-blue/20 text-ph-blue border border-ph-blue/50 rounded">TECHNICAL PREVIEW</span>
               </div>
 
               <div>
-                <h3 class="text-ph-orange mb-2">Architecture Selection</h3>
+                <h3 class="text-ph-orange mb-2">1. Acquire Binary</h3>
                 <p class="mb-4">
-                  Pharos provides a **Universal Binary** supporting both **Apple Silicon (M1/M2/M3)** and **Intel** hardware. 
+                  Download the latest **Universal Binary** from the official GitHub repository. 
                 </p>
-              </div>
-
-              <div>
-                <h3 class="text-ph-orange mb-2">1. Gatekeeper Bypass</h3>
-                <p class="mb-2">As an independent FSL-1.1 project, the binary may require manual quarantine removal:</p>
                 <div class="bg-black/20 p-4 border border-ph-blue/30">
-                  <code>xattr -d com.apple.quarantine pkd</code>
+                  <a href="https://github.com/iamrichardD/pharos-kitchen-design/releases" class="text-ph-blue hover:text-ph-orange underline">GitHub Releases: pkd-macos-universal</a>
                 </div>
               </div>
 
+              <div>
+                <h3 class="text-ph-orange mb-2">2. Global Accessibility</h3>
+                <p class="mb-2">Move the tool to your system path. Note: You may be asked for your computer password to allow the system to securely store the tool:</p>
+                <div class="bg-black/20 p-4 border border-ph-blue/30">
+                  <code>chmod +x pkd && sudo mv pkd /usr/local/bin/</code>
+                </div>
+              </div>
+
+              <div>
+                <h3 class="text-ph-orange mb-2">3. Security Authorization</h3>
+                <p class="mb-2">As an independent FSL-1.1 project, manual authorization is required for the application:</p>
+                <div class="bg-black/20 p-4 border border-ph-blue/30">
+                  <code>xattr -d com.apple.quarantine /usr/local/bin/pkd</code>
+                </div>
+              </div>
+
+              <!-- TODO: Implement Homebrew Tap (Issue #81 / future)
               <div>
                 <h3 class="text-ph-orange mb-2">2. Installation</h3>
                 <p class="mb-2">Install via Homebrew tap:</p>
                 <div class="bg-black/20 p-4 border border-ph-blue/30">
-                  <code>brew install iamrichardd/pharos/pkd</code>
+                  <code>brew install iamrichardd/pkd/pkd</code>
                 </div>
               </div>
+              -->
 
               <div>
-                <h3 class="text-ph-orange mb-2">3. Verification</h3>
+                <h3 class="text-ph-orange mb-2">4. Verification</h3>
                 <div class="bg-black/20 p-4 border border-ph-blue/30">
                   <code>pkd --version</code>
                 </div>
               </div>
 
               <div>
-                <h3 class="text-ph-orange mb-2">4. Lifecycle Management</h3>
+                <h3 class="text-ph-orange mb-2">5. Lifecycle Management</h3>
                 <p class="mb-2">Keep your macOS workstation in sync:</p>
                 <div class="bg-black/20 p-4 border border-ph-blue/30">
                   <code>pkd self-update</code>
@@ -163,7 +176,7 @@ import PlatformTabs from '../components/PlatformTabs.astro';
 
       <footer class="mt-12 pt-12 border-t border-border-blueprint/30">
         <p class="text-xs text-text-muted uppercase tracking-widest font-mono">
-          Security: All binaries are signed. Verify checksums in the <a href="https://github.com/iamrichardD/pharos/releases" class="text-ph-blue hover:text-ph-orange">GitHub Releases</a>.
+          Security: All binaries are signed. Verify checksums in the <a href="https://github.com/iamrichardD/pharos-kitchen-design/releases" class="text-ph-blue hover:text-ph-orange">GitHub Releases</a>.
         </p>
       </footer>
     </div>

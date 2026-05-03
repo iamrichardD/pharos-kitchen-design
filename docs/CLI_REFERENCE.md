@@ -4,13 +4,13 @@
  * File: docs/CLI_REFERENCE.md
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
- * Purpose: Formal command reference for the Pharos CLI (pkd).
- * Traceability: Issue #10, Issue #12, Issue #78, ADR-0006
+ * Purpose: Formal command reference for the Pharos Kitchen Design CLI (pkd).
+ * Traceability: Issue #10, Issue #12, Issue #78, Issue #81, ADR-0006
  * ======================================================================== -->
 
-# Pharos CLI (pkd) Reference Guide
+# Pharos Kitchen Design CLI (pkd) Reference Guide
 
-The `pkd` command-line tool is the primary control plane for the Pharos ecosystem, providing designers and administrators with tools for metadata validation, identity management, and equipment discovery.
+The `pkd` command-line tool is the primary control plane for the Pharos Kitchen Design ecosystem, providing designers and administrators with tools for metadata validation, identity management, and equipment discovery.
 
 ## 📦 Prerequisites
 
@@ -35,7 +35,7 @@ The CLI utilizes the **Windows Credential Manager**. No additional system librar
 
 ## 🚀 Quick Start
 
-Pharos is designed for a low **Time to First Search (TTFS)**. After installing prerequisites, you can be searching the registry in seconds.
+Pharos Kitchen Design is designed for a low **Time to First Search (TTFS)**. After installing prerequisites, you can be searching the registry in seconds.
 
 ```bash
 # 1. Login to the Pharos Identity Bridge
@@ -66,13 +66,13 @@ Administrative tools for user orchestration (Requires `ADMIN` or `AUDITOR` role)
 
 ### `pkd core`
 Metadata and registry operations.
-- **`validate --path <PATH>`**: Validates a local metadata JSON file against the official Pharos Schema.
+- **`validate --path <PATH>`**: Validates a local metadata JSON file against the official PKD Schema.
 - **`search <QUERY>`**: Executes an RFC 2378 compliant search against the equipment registry.
 
 ---
 
 ## 🔍 RFC 2378 Search Syntax
-Pharos implements an ergonomic, attribute-first search syntax designed for high-speed equipment selection.
+PKD implements an ergonomic, attribute-first search syntax designed for high-speed equipment selection.
 
 ### Basic Queries
 - **Single Attribute**: `pkd core search manufacturer=hobart`
