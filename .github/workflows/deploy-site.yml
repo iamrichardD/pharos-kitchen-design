@@ -63,7 +63,7 @@ jobs:
       - name: "🚀 Build with Astro"
         run: npm run build
         working-directory: ./apps/marketing
-...
+
       - name: "📤 Upload Pages Artifact"
         uses: actions/upload-pages-artifact@v3
         with:
