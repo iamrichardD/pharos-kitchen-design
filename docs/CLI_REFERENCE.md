@@ -5,23 +5,47 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Formal command reference for the Pharos CLI (pkd).
- * Traceability: Issue #10, Issue #12, ADR-0006
+ * Traceability: Issue #10, Issue #12, Issue #78, ADR-0006
  * ======================================================================== -->
 
 # Pharos CLI (pkd) Reference Guide
 
 The `pkd` command-line tool is the primary control plane for the Pharos ecosystem, providing designers and administrators with tools for metadata validation, identity management, and equipment discovery.
 
-## 🚀 Quick Start
+## 📦 Prerequisites
+
+The `pkd` CLI utilizes the system's secure keyring to manage authentication tokens safely.
+
+### 🐧 Linux
+Linux systems require `libsecret` to interact with the Secret Service API (e.g., GNOME Keyring or KSecretService).
 ```bash
-# Login to the Pharos Identity Bridge
+sudo apt update && sudo apt install -y libsecret-1-dev
+```
+
+### 🍎 macOS
+If you are running a pre-compiled binary that is not yet notarized, you may need to clear the quarantine flag:
+```bash
+# Run this from the directory containing the pkd binary
+xattr -d com.apple.quarantine pkd
+```
+The CLI utilizes the **macOS Keychain** for secure token storage.
+
+### 🪟 Windows
+The CLI utilizes the **Windows Credential Manager**. No additional system libraries are required.
+
+## 🚀 Quick Start
+
+Pharos is designed for a low **Time to First Search (TTFS)**. After installing prerequisites, you can be searching the registry in seconds.
+
+```bash
+# 1. Login to the Pharos Identity Bridge
 pkd auth login
 
-# Verify your current role
+# 2. Verify your current role
 pkd auth whoami
 
-# Search the equipment registry
-pkd core search manufacturer=3m
+# 3. Search: Discover equipment immediately using attribute-first syntax
+pkd manufacturer=3m
 ```
 
 ---
