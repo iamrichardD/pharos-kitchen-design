@@ -144,7 +144,7 @@
 ### Sprint 4.4: CLI Distribution & Installation Documentation (#76-78) - 🔄 In Progress
 - [x] **Issue #76**: Implement `/install` route and platform-specific landing page (Task 3.10).
 - [ ] **Issue #77**: Develop universal `install.sh` for Linux (Priority 1) and macOS (Task 3.11).
-- [ ] **Issue #78**: Update CLI Reference with Platform Prerequisites (Task 3.12).
+- [x] **Issue #78**: Update CLI Reference with Platform Prerequisites (Task 3.12). (Verified)
 
 #### [2026-05-02] - /install Route & Platform Detection
 - **Implemented** high-fidelity `/install` landing page with deterministic platform detection.

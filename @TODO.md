@@ -104,7 +104,7 @@
 ### Sprint 4.4: CLI Distribution & Installation Documentation (#76-78) - 📋 Backlog
 - [x] **Issue #76**: Implement `/install` route and platform-specific landing page (Task 3.10).
 - [ ] **Issue #77**: Develop universal `install.sh` for Linux (Priority 1) and macOS (Task 3.11).
-- [ ] **Issue #78**: Update CLI Reference with Platform Prerequisites (Task 3.12).
+- [x] **Issue #78**: Update CLI Reference with Platform Prerequisites (Task 3.12). [feat/issue-78-cli-prerequisites]
 
 ---
 
