@@ -218,6 +218,62 @@ install_binary() {
     log_info "Binary installed successfully at ${INSTALL_DIR}/${BINARY_NAME}"
 }
 
+# PATH Audit & Shell Integration
+path_audit() {
+    log_info "Auditing environment PATH..."
+    
+    # Normalize INSTALL_DIR to remove trailing slash
+    NORMALIZED_INSTALL_DIR=$(echo "${INSTALL_DIR}" | sed 's:/*$::')
+
+    case ":${PATH}:" in
+        *:"${NORMALIZED_INSTALL_DIR}":*)
+            log_info "PATH audit passed: ${INSTALL_DIR} is in your PATH."
+            ;;
+        *)
+            log_warn "${INSTALL_DIR} is NOT in your PATH."
+            
+            # Detect shell and profile
+            USER_SHELL=$(basename "${SHELL:-sh}")
+            log_info "Shell detected: ${USER_SHELL}"
+            
+            case "${USER_SHELL}" in
+                bash)
+                    PROFILE_FILE="${HOME}/.bashrc"
+                    [ "${PLATFORM}" = "macos" ] && PROFILE_FILE="${HOME}/.bash_profile"
+                    ;;
+                zsh)
+                    PROFILE_FILE="${HOME}/.zshrc"
+                    ;;
+                fish)
+                    PROFILE_FILE="${HOME}/.config/fish/config.fish"
+                    ;;
+                *)
+                    PROFILE_FILE="${HOME}/.profile"
+                    ;;
+            esac
+
+            echo ""
+            echo "   ${BOLD}Action Required:${NC}"
+            echo "   To use '${BINARY_NAME}' from any terminal, add it to your PATH:"
+            echo ""
+
+            # Check if it's already in the profile but not in the current PATH
+            if [ -f "${PROFILE_FILE}" ] && grep -q "${NORMALIZED_INSTALL_DIR}" "${PROFILE_FILE}"; then
+                log_info "PATH configuration found in ${PROFILE_FILE} but may not be active."
+                echo "   👉 Run: ${BOLD}source ${PROFILE_FILE}${NC}"
+            else
+                if [ "${USER_SHELL}" = "fish" ]; then
+                    echo "   👉 Run: ${BOLD}echo 'set -U fish_user_paths ${NORMALIZED_INSTALL_DIR} \$fish_user_paths' >> ${PROFILE_FILE}${NC}"
+                else
+                    echo "   👉 Run: ${BOLD}echo 'export PATH=\"${NORMALIZED_INSTALL_DIR}:\$PATH\"' >> ${PROFILE_FILE}${NC}"
+                fi
+                echo "   👉 Then: ${BOLD}source ${PROFILE_FILE}${NC}"
+            fi
+            echo ""
+            ;;
+    esac
+}
+
 # macOS Security Flow
 macos_security_authorization() {
     if [ "${PLATFORM}" = "macos" ]; then
@@ -248,6 +304,7 @@ main() {
     fetch_and_verify
     install_binary
     macos_security_authorization
+    path_audit
     
     log_info "Installation complete. Stay remarkable."
     "${INSTALL_DIR}/${BINARY_NAME}" --version || log_warn "Verification command failed. Ensure ${INSTALL_DIR} is in your PATH."

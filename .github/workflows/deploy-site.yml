@@ -17,6 +17,7 @@ on:
     paths:
       - 'apps/marketing/**'
       - 'packages/**'
+      - 'scripts/install.sh'
       - 'Containerfile.*'
       - 'package.json'
       - 'package-lock.json'
@@ -62,6 +63,9 @@ jobs:
 
       - name: "📦 Install Dependencies (Host for Astro)"
         run: npm ci
+
+      - name: "📜 Distribute Universal Installer"
+        run: cp scripts/install.sh apps/marketing/public/install.sh
 
       - name: "🚀 Build with Astro"
         run: npm run build
