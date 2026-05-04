@@ -141,11 +141,23 @@
 - [x] **Issue #74 (CI/CD)**: Remediate CI path failures via deterministic import.meta.url resolution and hardened Regex Warden (.js). (Verified Pharos Green)
 - [ ] **Issue #52 (Protocol)**: Upgrade `pharos-protocol` to support logical `OR` for complex queries (Task 4.15).
 
-### Sprint 4.4: CLI Distribution & Installation Documentation (#76-78) - 🔄 In Progress
+### Sprint 4.4: CLI Distribution & Installation Documentation (#76-78, #82-83) - 🔄 In Progress
 - [x] **Issue #76**: Implement `/install` route and platform-specific landing page (Task 3.10).
 - [ ] **Issue #77**: Develop universal `install.sh` for Linux (Priority 1) and macOS (Task 3.11).
 - [x] **Issue #78**: Update CLI Reference with Platform Prerequisites (Task 3.12). (Verified)
 - [x] **Bug #81**: Remediate Product Naming and URL Inconsistency in Install Documentation. (Verified PKD Green)
+- [ ] **Issue #82**: Automate Install Script Distribution (Task 3.13).
+- [ ] **Issue #83**: Harden Install Script $PATH Audit (Task 3.14).
+
+### Sprint 4.5: Infrastructure & Identity Governance (#84-87) - 📋 Backlog
+- [ ] **Issue #84**: Configure Dual-Stream Release Pipeline (Task 3.15).
+- [ ] **Issue #85**: Initialize Homebrew Tap (Official) (Task 3.16).
+- [ ] **Issue #86**: ADR-0027: Organization-Based Authority Scopes.
+- [ ] **Issue #87**: Implement Domain-to-Org Mapping (Task 4.21).
+
+### Sprint 4.6: The Pulse Evolution (#88-89) - 📋 Backlog
+- [ ] **Issue #88**: Implement `pkd core pulse` Command (Logic Center for JIT).
+- [ ] **Issue #89**: Develop Manufacturer Maintenance Sidecar (Task 4.22).
 
 #### [2026-05-02] - /install Route & Platform Detection
 - **Implemented** high-fidelity `/install` landing page with deterministic platform detection.

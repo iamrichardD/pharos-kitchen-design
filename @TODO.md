@@ -1,4 +1,4 @@
-/* ========================================================================
+<!-- ========================================================================
  * Project: Pharos Kitchen Design (Project Prism)
  * Component: Project Management / Backlog
  * File: @TODO.md
@@ -6,16 +6,16 @@
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Central tracking for Phase-specific tasks and issues.
  * Traceability: [Traceability]
- * ======================================================================== */
+ * ======================================================================== -->
 
-/* 
+<!-- 
  * AI_AGENT_PROTOCOL: @TODO.md
  * 1. SOURCE OF TRUTH: This document is the logical authority for the backlog.
  * 2. PRE-FLIGHT CHECK: Tasks must be defined here and approved by the user BEFORE implementation begins.
  * 3. TRACEABILITY: Ensure every active task has an associated #IssueID once the branch is created.
  * 4. PURGE TRACKING: Explicitly log deleted files/logic in the 'Purge/Stale' section to prevent "Ghost References" in future research.
  * 5. ATOMICITY: Focus on one Phase/Task at a time. Do not "scatter" progress across unrelated silos.
- */
+ -->
 
 # @TODO: Pharos Kitchen Design (Project Prism)
 
@@ -101,11 +101,23 @@
 - [x] **Issue #65**: CI/CD: WASM Build Hardening & Zero-Host Remediation. (Verified Pharos Green)
 - [ ] **Issue #52**: Upgrade `pharos-protocol` to support logical `OR` grouping for registry queries (Task 4.15).
 
-### Sprint 4.4: CLI Distribution & Installation Documentation (#76-78) - 📋 Backlog
+### Sprint 4.4: CLI Distribution & Installation Documentation (#76-78, #82-83) - 📋 Backlog
 - [x] **Issue #76**: Implement `/install` route and platform-specific landing page (Task 3.10).
 - [ ] **Issue #77**: Develop universal `install.sh` for Linux (Priority 1) and macOS (Task 3.11).
 - [x] **Issue #78**: Update CLI Reference with Platform Prerequisites (Task 3.12). [feat/issue-78-cli-prerequisites]
 - [x] **Bug #81**: Remediate Product Naming and URL Inconsistency in Install Documentation.
+- [ ] **Issue #82**: Automate Install Script Distribution (Task 3.13).
+- [ ] **Issue #83**: Harden Install Script $PATH Audit (Task 3.14).
+
+### Sprint 4.5: Infrastructure & Identity Governance (#84-87) - 📋 Backlog
+- [ ] **Issue #84**: Configure Dual-Stream Release Pipeline (Task 3.15).
+- [ ] **Issue #85**: Initialize Homebrew Tap (Official) (Task 3.16).
+- [ ] **Issue #86**: ADR-0027: Organization-Based Authority Scopes.
+- [ ] **Issue #87**: Implement Domain-to-Org Mapping (Task 4.21).
+
+### Sprint 4.6: The Pulse Evolution (#88-89) - 📋 Backlog
+- [ ] **Issue #88**: Implement `pkd core pulse` Command (Logic Center for JIT).
+- [ ] **Issue #89**: Develop Manufacturer Maintenance Sidecar (Task 4.22).
 
 ---
 
