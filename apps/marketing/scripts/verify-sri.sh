@@ -9,7 +9,7 @@
 # Traceability: Priority 2, Issue #29
 # ========================================================================
 
-EXPECTED_HASH="yRsxKUe1uwvKWyAzDiU58FsIbO8orQJUzy1kPcDQAfAuaczzL5MxTlI4K/AABHhq"
+EXPECTED_HASH="KvnqiR9t+UqqcEcCY14nvZZK2JXQQoNNm3sOWblKyR/ALwgvMvE6xNC+xDWa1G8Y"
 URL="https://cloud.umami.is/script.js"
 
 echo "Checking script integrity for $URL..."
