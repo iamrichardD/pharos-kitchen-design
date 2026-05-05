@@ -7,6 +7,7 @@
 # License: FSL-1.1 (See LICENSE file for details)
 # Purpose: Fail Fast verification of third-party script integrity.
 # Traceability: Priority 2, Issue #29
+# Hash Update: 2026-05-05 (Upstream Umami script update)
 # ========================================================================
 
 EXPECTED_HASH="KvnqiR9t+UqqcEcCY14nvZZK2JXQQoNNm3sOWblKyR/ALwgvMvE6xNC+xDWa1G8Y"
