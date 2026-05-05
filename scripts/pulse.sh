@@ -17,6 +17,10 @@ echo "🚀 Starting PKD Pulse: Integrated Ecosystem Validation"
 echo "   [Infra] Verifying Podman-Wrapper Argument Quoting..."
 bash scripts/test-quoting.sh
 
+# 0.1 Artifact Staging Verification: WASM Dialects
+echo "   [Infra] Verifying WASM Staging Integrity..."
+bash scripts/test-staging.sh
+
 # 1. Build the unified pulse container (Stages: Rust -> TS -> .NET Bridge)
 # We use unconfined seccomp to ensure consistent environment parity during the build.
 podman build \
@@ -48,10 +52,6 @@ if [ $MISSING_PROLOGUES -gt 0 ]; then
     echo "   ❌ Error: $MISSING_PROLOGUES files are missing the mandatory Standardized File Prologue."
     exit 1
 fi
-
-# Check 2: Truth Engine Integrated Validation
-echo "   [Process] Executing Truth Engine Atomic Tests (Phase 1.4)..."
-podman run --rm --security-opt seccomp=unconfined pkd-truth-engine sh -c "cd packages/truth-engine && vitest run"
 
 # Check 3: Supply Chain Verification (Issue #54)
 echo "   [Process] Verifying Supply Chain Security Logic..."

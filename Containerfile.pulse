@@ -30,6 +30,12 @@ RUN apt-get update && apt-get install -y curl && \
     rm -rf /var/lib/apt/lists/*
 WORKDIR /work
 COPY . .
+
+# STAGING THE SHUTTLE (Option B):
+# Copy pre-compiled WASM dialects into the validation environment.
+# Why: Decouples Node.js tests from heavy Rust compilation while maintaining Zero-Host rigor.
+COPY dist/dialects /work/dist/dialects
+
 # Perform dependency audit and TS unit tests.
 # We allow audit failures for known language-server issues (See docs/SECURITY_LOG.md)
 RUN npm install && \

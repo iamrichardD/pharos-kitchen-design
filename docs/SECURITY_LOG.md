@@ -19,6 +19,13 @@
 - **Reason for Bypass**: Standard `npm audit fix` requires breaking changes to `@astrojs/check`. Bypassed to allow the Truth Engine CI/CD pipeline to proceed.
 - **Remediation**: Update Astro and language server dependencies once a non-breaking patch is released.
 
+### 2. [2026-05-05] NPM Audit Bypass: `astro` (< 6.1.6)
+- **Component**: `apps/marketing`, `apps/demo`
+- **Vulnerability**: XSS in define:vars via incomplete </script> tag sanitization (GHSA-j687-52p2-xcff)
+- **Impact**: Moderate. While this affects the production site, the risk is mitigated by our use of strict SRI for third-party scripts and the static nature of the build.
+- **Reason for Bypass**: Upgrading to Astro 6.1.6+ currently forces a breaking change to `@astrojs/tailwind` (downgrading it to v2.x), which breaks our PostCSS pipeline. Bypassed to maintain stable CSS rendering while investigating a non-breaking upgrade path.
+- **Remediation**: Re-evaluate upgrade once `@astrojs/tailwind` provides a compatible v6+ release that doesn't conflict with Astro's dependency resolver.
+
 ---
 
 ## 🛡️ Audit History

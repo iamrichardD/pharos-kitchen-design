@@ -37,3 +37,14 @@ We treat every PR as a teaching tool. Code is "AI Slop" if it lacks the **Why**.
 1.  **Issue First**: Every change begins with a GitHub Issue.
 2.  **Crucible-Slice**: For non-trivial tasks, evaluate three implementation options (ADR-0017).
 3.  **Atomic Verification**: Every change requires a new, semantic BDD test (`TestShould_X_When_Y`).
+
+## 🛠️ Local Development Prerequisite
+To ensure the `pulse.sh` validation passes (Option B Artifact Shuttle), you MUST compile the WASM dialects before running the integrated tests.
+
+```bash
+# 1. Compile WASM Dialects (Stages into dist/dialects/)
+bash scripts/build-wasm.sh
+
+# 2. Run Integrated Pulse
+bash scripts/pulse.sh
+```
