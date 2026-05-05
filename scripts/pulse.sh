@@ -13,6 +13,10 @@ set -e
 
 echo "🚀 Starting PKD Pulse: Integrated Ecosystem Validation"
 
+# 0. Infrastructure Verification: Argument Quoting & Container FFI
+echo "   [Infra] Verifying Podman-Wrapper Argument Quoting..."
+bash scripts/test-quoting.sh
+
 # 1. Build the unified pulse container (Stages: Rust -> TS -> .NET Bridge)
 # We use unconfined seccomp to ensure consistent environment parity during the build.
 podman build \
