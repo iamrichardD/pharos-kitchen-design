@@ -22,7 +22,6 @@ fi
 
 IMAGE=$1
 shift
-COMMAND=$@
 
 # Determine the absolute path of the workspace root via git
 # This ensures the mount works correctly regardless of where the script is called from.
@@ -37,4 +36,4 @@ podman run --rm \
     -v "${WORKSPACE_ROOT}:/work:z" \
     -w /work \
     "$IMAGE" \
-    $COMMAND
+    "$@"
