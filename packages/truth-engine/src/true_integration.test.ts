@@ -14,7 +14,7 @@ import Database from 'better-sqlite3';
 import { join } from 'node:path';
 
 const WASM_PATH = '/work/dist/dialects/pkd_dialect_true.wasm';
-const WASM_HASH = '65f253d2e54e12232911094e2a47bbe945d321a555bbc6e0ea49bb0f174ace8c';
+const WASM_HASH = '9c352bc1a102c904e14c16be9dcef2839a9685a2688ba584482129977f9477a4';
 
 describe('TruthEngine WASM Integration (True Mfg)', () => {
     let engine: TruthEngine;

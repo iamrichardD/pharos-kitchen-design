@@ -56,10 +56,8 @@ jobs:
           cache: 'npm'
           cache-dependency-path: 'package-lock.json'
 
-      - name: "🏗️ Build and Run Truth Engine Validation (Container-Native)"
-        run: |
-          podman build --security-opt seccomp=unconfined -t pkd-truth-engine-test -f Containerfile.truth-engine .
-          podman run --rm --security-opt seccomp=unconfined pkd-truth-engine-test
+      - name: \"🔍 Execute Integrated Pulse Validation (Zero-Host)\"
+        run: bash scripts/pulse.sh
 
       - name: "📦 Install Dependencies (Host for Astro)"
         run: npm ci

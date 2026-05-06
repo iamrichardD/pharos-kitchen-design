@@ -11,7 +11,7 @@
 # ========================================================================
 
 # Use public enterprise registry to avoid rate-limiting (ADR-0014)
-FROM public.ecr.aws/docker/library/rust:latest
+FROM public.ecr.aws/docker/library/rust@sha256:72724f1a416c449b405a2b7ed6bac56058163e6dfb1b5ccb40839882141dd237
 
 # Install build dependencies for OpenSSL and PKG-Config (Required by pkd-cli)
 RUN apt-get update && apt-get install -y \

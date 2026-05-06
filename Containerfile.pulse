@@ -8,18 +8,27 @@
 # Why: ADR-0017 (Multi-Stage chaining) ensures cross-language FFI stability.
 # ========================================================================
 
-# Stage 1: Rust Builder (Metadata Core & CLI)
+# Stage 1: Rust Builder (Metadata Core, CLI, and WASM Dialects)
 FROM public.ecr.aws/docker/library/rust@sha256:72724f1a416c449b405a2b7ed6bac56058163e6dfb1b5ccb40839882141dd237 AS rust-builder
 WORKDIR /work
-COPY . .
-# Install system dependencies for pkd-cli (OpenSSL, etc.)
-RUN apt-get update && apt-get install -y pkg-config libssl-dev && rm -rf /var/lib/apt/lists/*
-# Install cargo-audit for security scanning
+# Install wasm-pack and system dependencies (Immutable layer)
+RUN apt-get update && apt-get install -y pkg-config libssl-dev curl && \
+    curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh && \
+    rm -rf /var/lib/apt/lists/*
+# Install cargo-audit (Immutable layer)
 RUN cargo install cargo-audit
+# Copy Rust-specific packages to protect against TS/Marketing noise
+COPY packages/pharos-protocol packages/pharos-protocol
+COPY packages/pkd-core packages/pkd-core
+COPY packages/pkd-cli packages/pkd-cli
+COPY packages/dialects packages/dialects
+COPY scripts/build-wasm.sh scripts/build-wasm.sh
 # Run Rust unit tests, compile core, and perform security audit.
 RUN cd packages/pkd-core && cargo test && cargo build && cargo audit
 # AUTHORITATIVE GATE: Verify pkd-cli build integrity
 RUN cd packages/pkd-cli && cargo check && cargo test
+# Build and stage WASM dialects for the TS auditor
+RUN bash scripts/build-wasm.sh
 
 # Stage 2: Node.js (TypeScript & Security Audit)
 FROM mcr.microsoft.com/playwright:v1.59.1-noble AS ts-auditor
@@ -31,10 +40,10 @@ RUN apt-get update && apt-get install -y curl && \
 WORKDIR /work
 COPY . .
 
-# STAGING THE SHUTTLE (Option B):
-# Copy pre-compiled WASM dialects into the validation environment.
-# Why: Decouples Node.js tests from heavy Rust compilation while maintaining Zero-Host rigor.
-COPY dist/dialects /work/dist/dialects
+# DETERMINISTIC STAGING (Option A):
+# Copy pre-compiled WASM dialects from the Rust builder stage.
+# Why: Ensures absolute environment parity between compilation and validation.
+COPY --from=rust-builder /work/dist/dialects /work/dist/dialects
 
 # Perform dependency audit and TS unit tests.
 # We allow audit failures for known language-server issues (See docs/SECURITY_LOG.md)

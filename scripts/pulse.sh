@@ -17,10 +17,6 @@ echo "🚀 Starting PKD Pulse: Integrated Ecosystem Validation"
 echo "   [Infra] Verifying Podman-Wrapper Argument Quoting..."
 bash scripts/test-quoting.sh
 
-# 0.1 Artifact Staging Verification: WASM Dialects
-echo "   [Infra] Verifying WASM Staging Integrity..."
-bash scripts/test-staging.sh
-
 # 1. Build the unified pulse container (Stages: Rust -> TS -> .NET Bridge)
 # We use unconfined seccomp to ensure consistent environment parity during the build.
 podman build \
