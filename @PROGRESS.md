@@ -29,7 +29,9 @@
 ### Sprint 4.7: CI/CD Reliability & Diagnostic Hardening (2026-05-06) - ✅ COMPLETED
 - [x] **Bug #96**: CI/CD: pulse.sh fails in GHA due to missing diagnostic images (pkd-ts).
     - Resolved "Diagnostic Blind Spot" by replacing local image dependencies with authoritative public SHA-signed images in `scripts/test-quoting.sh`.
-    - Verified Zero-Host parity in clean environment.
+- [x] **Bug #98**: CI/CD: @pkd/core module resolution failure in ts-auditor stage.
+    - Implemented artifact promotion for `@pkd/core` bindings in `Containerfile.pulse`.
+    - Verified integrated "Pulse" validation (TS + Rust + .NET) in clean environment.
 
 ### Sprint 1: Foundation & High-Rigor CI (2026-04-03)
 - [x] Initial ADR scaffolding (0001-0013).

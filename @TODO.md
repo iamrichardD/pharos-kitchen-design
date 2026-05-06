@@ -26,6 +26,7 @@
 - [x] Marketing Site implemented (Astro, Tailwind, Technical Blueprint).
 - [x] CI: OIDC-based deployment workflow established and verified.
 - [x] **Bug #96**: CI/CD: pulse.sh fails in GHA due to missing diagnostic images (pkd-ts) (Task 1.7).
+- [x] **Bug #98**: CI/CD: @pkd/core module resolution failure in ts-auditor stage.
 
 ### Phase 2: Metadata Core & Identity
 - [x] Issue #5: Provision AWS Cognito & Cloudflare D1 (OpenTofu).

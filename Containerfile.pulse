@@ -41,9 +41,10 @@ WORKDIR /work
 COPY . .
 
 # DETERMINISTIC STAGING (Option A):
-# Copy pre-compiled WASM dialects from the Rust builder stage.
+# Copy pre-compiled WASM dialects and core bindings from the Rust builder stage.
 # Why: Ensures absolute environment parity between compilation and validation.
 COPY --from=rust-builder /work/dist/dialects /work/dist/dialects
+COPY --from=rust-builder /work/packages/pkd-core/pkg /work/packages/pkd-core/pkg
 
 # Perform dependency audit and TS unit tests.
 # We allow audit failures for known language-server issues (See docs/SECURITY_LOG.md)
