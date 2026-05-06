@@ -11,6 +11,15 @@
 
 set -e
 
+# Handle containerized build request
+if [[ "$1" == "--container" ]]; then
+    echo "🏗️  Executing Deterministic Container Build (Zero-Host)..."
+    # We use the standard Rust hash defined in the pulse container for absolute parity.
+    IMAGE="public.ecr.aws/docker/library/rust@sha256:70aebe351faa35667ef36508deb19fe234ff03d67cfe102f095d920a53d0622c"
+    bash scripts/podman-wrapper.sh "$IMAGE" bash scripts/build-wasm.sh
+    exit 0
+fi
+
 # Ensure wasm-pack is installed (Safe for CI and Local)
 if ! command -v wasm-pack &> /dev/null; then
     echo "⚠️ wasm-pack not found. Installing..."
