@@ -9,7 +9,7 @@
 # ========================================================================
 
 # --- Stage 1: Rust/WASM Builder ---
-FROM public.ecr.aws/docker/library/rust@sha256:72724f1a416c449b405a2b7ed6bac56058163e6dfb1b5ccb40839882141dd237 AS builder
+FROM public.ecr.aws/docker/library/rust@sha256:70aebe351faa35667ef36508deb19fe234ff03d67cfe102f095d920a53d0622c AS builder
 
 RUN apt-get update && apt-get install -y \
     pkg-config \

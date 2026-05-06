@@ -15,7 +15,7 @@ set -e
 if [[ "$1" == "--container" ]]; then
     echo "🏗️  Executing Deterministic Container Build (Zero-Host)..."
     # We use the standard Rust hash defined in the pulse container for absolute parity.
-    IMAGE="public.ecr.aws/docker/library/rust@sha256:72724f1a416c449b405a2b7ed6bac56058163e6dfb1b5ccb40839882141dd237"
+    IMAGE="public.ecr.aws/docker/library/rust@sha256:70aebe351faa35667ef36508deb19fe234ff03d67cfe102f095d920a53d0622c"
     bash scripts/podman-wrapper.sh "$IMAGE" bash scripts/build-wasm.sh
     exit 0
 fi

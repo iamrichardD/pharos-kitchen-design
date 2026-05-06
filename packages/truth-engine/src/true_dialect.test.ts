@@ -13,7 +13,7 @@ import { join } from 'node:path';
 import { WasmDialectLoader } from './loader.js';
 
 const WASM_PATH = '/work/dist/dialects/pkd_dialect_true.wasm';
-const EXPECTED_HASH = '9c352bc1a102c904e14c16be9dcef2839a9685a2688ba584482129977f9477a4';
+const EXPECTED_HASH = '65f253d2e54e12232911094e2a47bbe945d321a555bbc6e0ea49bb0f174ace8c';
 
 describe('True Manufacturing WASM Dialect', () => {
     it('test_should_extract_voltage_and_amps_from_true_mfg_specs', async () => {
