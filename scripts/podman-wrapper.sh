@@ -16,7 +16,7 @@ set -e
 if [ $# -lt 1 ]; then
     echo "❌ Error: Missing arguments."
     echo "Usage: $0 <image> [command...]"
-    echo "Example: $0 pkd-ts npm test"
+    echo "Example: $0 public.ecr.aws/docker/library/alpine:latest sh"
     exit 1
 fi
 

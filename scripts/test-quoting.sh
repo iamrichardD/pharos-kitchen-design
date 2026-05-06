@@ -14,8 +14,11 @@ set -e
 # Test Case: Verifying that spaces in arguments are preserved across the FFI boundary (Host -> Container)
 EXPECTED="PHAROS_QUOTING_TEST_PASSED"
 
-# Use pkd-ts image as it is already built and contains required shell tools
-ACTUAL=$(bash scripts/podman-wrapper.sh pkd-ts sh -c "echo 'PHAROS_QUOTING_TEST_PASSED'")
+# Use authoritative public image (ADR-0014) to ensure CI parity.
+# We use the same Rust image required by pulse.sh to optimize caching.
+AUTH_IMAGE="public.ecr.aws/docker/library/rust@sha256:70aebe351faa35667ef36508deb19fe234ff03d67cfe102f095d920a53d0622c"
+
+ACTUAL=$(bash scripts/podman-wrapper.sh "$AUTH_IMAGE" sh -c "echo 'PHAROS_QUOTING_TEST_PASSED'")
 
 if [ "$ACTUAL" == "$EXPECTED" ]; then
     echo "🟢 [PASS] Podman-Wrapper Argument Quoting Verified."

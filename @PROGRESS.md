@@ -26,6 +26,11 @@
 
 ## ✅ Completed Sprints
 
+### Sprint 4.7: CI/CD Reliability & Diagnostic Hardening (2026-05-06) - ✅ COMPLETED
+- [x] **Bug #96**: CI/CD: pulse.sh fails in GHA due to missing diagnostic images (pkd-ts).
+    - Resolved "Diagnostic Blind Spot" by replacing local image dependencies with authoritative public SHA-signed images in `scripts/test-quoting.sh`.
+    - Verified Zero-Host parity in clean environment.
+
 ### Sprint 1: Foundation & High-Rigor CI (2026-04-03)
 - [x] Initial ADR scaffolding (0001-0013).
 - [x] Marketing Site implemented (Astro 5.4.1, Tailwind CSS, Technical Blueprint).
@@ -137,7 +142,7 @@
 - [x] **Issue #53 (Verification)**: 100% Zero-Host build verification achieved for CLI and Core.
 - [x] **Issue #51 (CLI)**: Implemented `--env [local|dev|stage|prod]` global flag and environment isolation logic (Task 4.14). (Verified Pharos Green)
 - [x] **Issue #60 (Spike)**: Option C: WASM-Based Manufacturer Dialects (Task 4.16). (Verified Universal Interop)
-- [x] **Issue #65 (CI/CD)**: Remediated WASM build failure via centralized `scripts/build-wasm.sh` and multi-stage Zero-Host promotion. (Verified Pharos Green)
+- [x] **Issue #65 (CI/CD)**: Remediate WASM build failure via centralized `scripts/build-wasm.sh` and multi-stage Zero-Host promotion. (Verified Pharos Green)
 - [x] **Issue #74 (CI/CD)**: Remediate CI path failures via deterministic import.meta.url resolution and hardened Regex Warden (.js). (Verified Pharos Green)
 - [ ] **Issue #52 (Protocol)**: Upgrade `pharos-protocol` to support logical `OR` for complex queries (Task 4.15).
 
@@ -170,4 +175,3 @@
 - **Added** Vitest suite for platform detection logic (`platform.test.ts`).
 - **Verified** Zero-Host build in Podman (`pharos-ts` container).
 - **Audited** via Pharos Crucible (Result: Pharos Green).
-
