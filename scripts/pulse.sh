@@ -57,10 +57,17 @@ podman run --rm --security-opt seccomp=unconfined pkd-pulse \
     sh -c "echo 'Integrity-Test' > /tmp/good.txt && \
     GOOD_HASH=\$(sha256sum /tmp/good.txt | cut -d' ' -f1) && \
     pkd core verify-manifest /tmp/good.txt \$GOOD_HASH && \
-    if pkd core verify-manifest /tmp/good.txt 'wrong-hash' 2>/dev/null; then exit 1; fi"
+    if pkd core verify-manifest /tmp/good.txt 'wrong-hash' > /dev/null 2>&1; then exit 1; fi"
 
 # Check 4: Branch Naming (Task/Bug ID Traceability)
-CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+# In CI (GitHub Actions), HEAD is often detached. We prioritize GITHUB_HEAD_REF.
+CURRENT_BRANCH=${GITHUB_HEAD_REF:-$(git rev-parse --abbrev-ref HEAD)}
+
+# Handle detached HEAD in CI where GITHUB_REF_NAME might be set
+if [ "$CURRENT_BRANCH" == "HEAD" ]; then
+    CURRENT_BRANCH=${GITHUB_REF_NAME:-"HEAD"}
+fi
+
 if [[ "$CURRENT_BRANCH" != "main" && ! $CURRENT_BRANCH =~ ^(feat|fix|debt)/issue-[0-9]+ ]]; then
     echo "❌ Error: Branch '$CURRENT_BRANCH' violates naming standard (feat|fix|debt)/issue-X."
     exit 1
