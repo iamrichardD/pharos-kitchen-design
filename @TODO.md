@@ -118,6 +118,7 @@
 - [ ] **Issue #94**: Scaffold `install.ps1` for Windows Parity (Task 3.21).
 
 ### Sprint 4.5: Infrastructure & Identity Governance (#84-87) - 📋 Backlog
+- [x] **Issue #100**: Formalize SPM Role and Harden SDLC Governance (Verified Pharos Green).
 - [ ] **Issue #84**: Configure Dual-Stream Release Pipeline (Task 3.15).
 - [ ] **Issue #85**: Initialize Homebrew Tap (Official) (Task 3.16).
 - [ ] **Issue #86**: ADR-0027: Organization-Based Authority Scopes.

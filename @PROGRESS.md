@@ -26,6 +26,12 @@
 
 ## ✅ Completed Sprints
 
+### Sprint 4.8: Governance Hardening & SPM Role Formalization (2026-05-07) - ✅ COMPLETED
+- [x] **Issue #100**: Formalized the **Senior Program Manager (SPM)** role (ADR-0028) for strategic oversight.
+- [x] **Governance Linter**: Implemented `scripts/lint-governance.sh` to automate FSL-1.1 and SDLC compliance.
+- [x] **SDLC Hardening**: Integrated governance audit into `pulse.sh` and enforced standardized file prologues.
+- [x] **Verification**: Pharos Green status confirmed via Podman verification loop.
+
 ### Sprint 4.7: CI/CD Reliability & Diagnostic Hardening (2026-05-06) - ✅ COMPLETED
 - [x] **Bug #96**: CI/CD: pulse.sh fails in GHA due to missing diagnostic images (pkd-ts).
     - Resolved "Diagnostic Blind Spot" by replacing local image dependencies with authoritative public SHA-signed images in `scripts/test-quoting.sh`.
