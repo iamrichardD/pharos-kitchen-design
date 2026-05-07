@@ -72,7 +72,7 @@ Metadata and registry operations.
 ---
 
 ## 🔍 RFC 2378 Search Syntax
-PKD implements an ergonomic, attribute-first search syntax designed for high-speed equipment selection.
+PKD implements an ergonomic, attribute-first search syntax designed for high-speed equipment selection. For a deep dive into advanced query options and wildcards, see the [Professional Search Guide](https://iamrichardd.com/pharos-kitchen-design/docs/user-guide).
 
 ### Basic Queries
 - **Single Attribute**: `pkd core search manufacturer=hobart`

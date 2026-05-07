@@ -101,7 +101,8 @@
 - [x] **Issue #60**: [SPIKE] Option C: WASM-Based Manufacturer Dialects (Task 4.16).
 - [x] **Issue #62**: True Manufacturing Onboarding (Forensic KCL Spike) (Task 4.17).
 - [x] **Issue #65**: CI/CD: WASM Build Hardening & Zero-Host Remediation. (Verified Pharos Green)
-- [ ] **Issue #52**: Upgrade `pharos-protocol` to support logical `OR` grouping for registry queries (Task 4.15).
+- [ ] **Issue #99**: Consolidate Search, Wildcard, and Structural Clause Documentation (Task 4.23).
+- [ ] **Issue #52**: [DEFERRED] Upgrade `pharos-protocol` to support logical `OR` grouping (Task 4.15). (Requires #99)
 
 ### Sprint 4.4: CLI Distribution & Installation Documentation (#76-78, #82-83) - 📋 Backlog
 - [x] **Issue #76**: Implement `/install` route and platform-specific landing page (Task 3.10).

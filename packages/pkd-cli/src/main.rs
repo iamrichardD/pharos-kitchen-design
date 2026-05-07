@@ -120,7 +120,8 @@ enum CoreCommands {
         #[arg(short, long)]
         path: PathBuf,
     },
-    /// Search the equipment registry using RFC 2378 query syntax
+    /// Search the equipment registry using RFC 2378 query syntax.
+    /// Guide: https://iamrichardd.com/pharos-kitchen-design/docs/user-guide
     Search {
         /// The query string (e.g., 'manufacturer=3m return name')
         query: Vec<String>,
