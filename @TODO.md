@@ -89,7 +89,7 @@
 - [ ] **Issue #30**: Implement Ghost Link Prototype (Task 4.3).
 - [ ] **Issue #28**: Shared Design System Extraction (Task 4.4).
 - [ ] **Issue #42**: Audit Remediation: SRI, SEO, and WASM Bridge (Task 4.5).
-- [ ] **Issue #41**: Marketing Site CI/CD Build Failure (Bug #41).
+- [x] **Issue #41**: Marketing Site CI/CD Build Failure (Bug #41).
 - [x] **Issue #44**: Implement Pharos Crucible Process (Task 4.6).
 - [x] **Issue #45**: Implement Pharos Crucible Enforcement Layer (Task 4.7).
 - [x] **Issue #74**: Remediate CI Test Paths (Deterministic Pathing) (Task 4.20). [HARDENED REGEX WARDEN]
