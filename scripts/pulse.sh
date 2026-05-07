@@ -84,10 +84,30 @@ fi
 
 # Check 3: TDD Traceability (Basic Check for Test Inclusion)
 # Ensure any change to src/ includes a corresponding change in tests/ or src/*.test.ts
-CHANGED_FILES=$(git diff --name-only main...HEAD)
-if [[ "$CHANGED_FILES" == *"src/"* ]] && [[ ! "$CHANGED_FILES" == *"test"* ]]; then
-    echo "⚠️ Warning: Changes to 'src/' detected without corresponding 'test' updates."
-    echo "   Ensure TDD traceability (Beck Principle) is maintained."
+# In CI, we use GITHUB_BASE_REF. Locally, we default to 'main'.
+BASE_REF=${GITHUB_BASE_REF:-"main"}
+
+# Verify if the BASE_REF exists in the local tree to avoid CI failures on shallow clones.
+# We check both local and origin namespaces.
+if git rev-parse --verify "$BASE_REF" >/dev/null 2>&1 || git rev-parse --verify "origin/$BASE_REF" >/dev/null 2>&1; then
+    # Determine the most authoritative reference available
+    if git rev-parse --verify "$BASE_REF" >/dev/null 2>&1; then
+        COMPARE_REF="$BASE_REF"
+    else
+        COMPARE_REF="origin/$BASE_REF"
+    fi
+
+    # Execute diff with error handling to catch shallow clone depth issues
+    if CHANGED_FILES=$(git diff --name-only "$COMPARE_REF...HEAD" 2>/dev/null); then
+        if [[ "$CHANGED_FILES" == *"src/"* ]] && [[ ! "$CHANGED_FILES" == *"test"* ]]; then
+            echo "⚠️ Warning: Changes to 'src/' detected without corresponding 'test' updates."
+            echo "   Ensure TDD traceability (Beck Principle) is maintained."
+        fi
+    else
+        echo "   [Process] Skipping TDD Traceability check: Common ancestor with '$COMPARE_REF' not found (shallow clone?)."
+    fi
+else
+    echo "   [Process] Skipping TDD Traceability check: Base reference '$BASE_REF' not found."
 fi
 
 echo "✅ Pulse Complete: Ecosystem & Process Stability Verified."
