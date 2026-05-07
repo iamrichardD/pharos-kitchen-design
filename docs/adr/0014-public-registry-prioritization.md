@@ -1,3 +1,14 @@
+<!-- ========================================================================
+ * Project: Pharos Kitchen Design (Project Prism)
+ * Component: Documentation / Strategy
+ * File: docs/adr/0014-public-registry-prioritization.md
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * License: FSL-1.1 (See LICENSE file for details)
+ * Purpose: Prioritizing public enterprise registries for container images.
+ * Traceability: ADR-0014
+ * Status: Approved
+ * ======================================================================== -->
+
 # ADR 0014: Public Container Registry Prioritization
 
 ## Status

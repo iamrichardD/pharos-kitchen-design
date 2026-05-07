@@ -49,6 +49,9 @@ if [ $MISSING_PROLOGUES -gt 0 ]; then
     exit 1
 fi
 
+# Check 2: Governance & SDLC Audit
+bash scripts/lint-governance.sh
+
 # Check 3: Supply Chain Verification (Issue #54)
 echo "   [Process] Verifying Supply Chain Security Logic..."
 # We utilize the pkd-pulse image already built in Step 1 to avoid redundant compilation.
@@ -68,12 +71,12 @@ if [ "$CURRENT_BRANCH" == "HEAD" ]; then
     CURRENT_BRANCH=${GITHUB_REF_NAME:-"HEAD"}
 fi
 
-if [[ "$CURRENT_BRANCH" != "main" && ! $CURRENT_BRANCH =~ ^(feat|fix|debt)/issue-[0-9]+ ]]; then
-    echo "❌ Error: Branch '$CURRENT_BRANCH' violates naming standard (feat|fix|debt)/issue-X."
+if [[ "$CURRENT_BRANCH" != "main" && ! $CURRENT_BRANCH =~ ^(feat|fix|debt|gov)/issue-[0-9]+ ]]; then
+    echo "❌ Error: Branch '$CURRENT_BRANCH' violates naming standard (feat|fix|debt|gov)/issue-X."
     exit 1
 fi
 
-# Check 2: PR Marker Verification (The Crucible Audit)
+# Check 5: PR Marker Verification (The Crucible Audit)
 if gh pr view --json body > /dev/null 2>&1; then
     PR_BODY=$(gh pr view --json body -q '.body')
     if [[ ! "$PR_BODY" == *"## ⚔️ The PKD Crucible (Audit Log)"* ]]; then
@@ -82,7 +85,7 @@ if gh pr view --json body > /dev/null 2>&1; then
     fi
 fi
 
-# Check 3: TDD Traceability (Basic Check for Test Inclusion)
+# Check 6: TDD Traceability (Basic Check for Test Inclusion)
 # Ensure any change to src/ includes a corresponding change in tests/ or src/*.test.ts
 # In CI, we use GITHUB_BASE_REF. Locally, we default to 'main'.
 BASE_REF=${GITHUB_BASE_REF:-"main"}

@@ -5,8 +5,8 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Codifying the "Claim & Delegate" strategy for organization-based security.
- * Traceability: Issue #86, Task 4.21
- * Status: Active
+ * Traceability: Issue #86, Task 4.21 (SPM Verified)
+ * Status: Proposed
  * ======================================================================== -->
 
 # ADR 0027: Organization-Based Authority Scopes
