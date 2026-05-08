@@ -62,8 +62,10 @@ jobs:
       - name: "📦 Install Dependencies (Host for Astro)"
         run: npm ci
 
-      - name: "📜 Distribute Universal Installer"
-        run: cp scripts/install.sh apps/marketing/public/install.sh
+      - name: "📜 Distribute Universal Installers"
+        run: |
+          cp scripts/install.sh apps/marketing/public/install.sh
+          cp scripts/install.ps1 apps/marketing/public/install.ps1
 
       - name: "🚀 Build with Astro"
         run: npm run build
