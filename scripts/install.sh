@@ -20,9 +20,9 @@ RED='\033[0;31m'
 NC='\033[0m' # No Color
 
 # Default Configuration
-BINARY_NAME="pkd"
-INSTALL_DIR="/usr/local/bin"
-FORCE_INSTALL=false
+BINARY_NAME="${BINARY_NAME:-pkd}"
+INSTALL_DIR="${INSTALL_DIR:-/usr/local/bin}"
+FORCE_INSTALL="${FORCE_INSTALL:-false}"
 REPO_URL="https://github.com/iamrichardD/pharos-kitchen-design"
 LATEST_RELEASE_URL="${REPO_URL}/releases/latest/download"
 
@@ -104,6 +104,77 @@ detect_platform() {
     esac
 
     log_info "Platform Detected: ${PLATFORM} (${TARGET_ARCH})"
+}
+
+# Pharos Gold: Local Version Discovery
+check_local_version() {
+    BINARY_PATH="${INSTALL_DIR}/${BINARY_NAME}"
+    if [ -x "${BINARY_PATH}" ]; then
+        # We capture raw output in a variable before piping to awk.
+        # This prevents the 'pipe-masking' anti-pattern where a failure in 
+        # the binary would be hidden by the success of the awk command.
+        RAW_VER=$("${BINARY_PATH}" --version 2>/dev/null) || RAW_VER=""
+        CURRENT_VERSION=$(echo "${RAW_VER}" | awk '{print $2}')
+        echo "${CURRENT_VERSION:-none}"
+    elif command -v "${BINARY_NAME}" >/dev/null 2>&1; then
+        RAW_VER=$("${BINARY_NAME}" --version 2>/dev/null) || RAW_VER=""
+        CURRENT_VERSION=$(echo "${RAW_VER}" | awk '{print $2}')
+        echo "${CURRENT_VERSION:-none}"
+    else
+        echo "none"
+    fi
+}
+
+# Pharos Gold: Remote Version Discovery (Header Redirect)
+fetch_latest_version_tag() {
+    # Using -I to fetch headers only, -L to follow redirects
+    # Added connect-timeout and max-time to ensure we fail fast on network issues (Shore, 2004)
+    LATEST_URL="${REPO_URL}/releases/latest"
+    TAG=$(curl -sSLI --connect-timeout 5 --max-time 10 "${LATEST_URL}" 2>/dev/null | grep -i '^location:' | tail -n 1 | grep '/tag/' | sed 's/.*\/tag\///' | tr -d '\r' | tr -d '[:space:]')
+    
+    if [ -n "${TAG}" ]; then
+        echo "${TAG}"
+    else
+        echo "unknown"
+    fi
+}
+
+# Pharos Gold: Update Check Logic
+check_update() {
+    if [ "${FORCE_INSTALL}" = true ]; then
+        log_info "Bypassing update check (--force)."
+        return 0
+    fi
+
+    log_info "Performing 'Pharos Gold' update check..."
+    
+    LOCAL_VER=$(check_local_version)
+    REMOTE_TAG=$(fetch_latest_version_tag)
+
+    if [ "${REMOTE_TAG}" = "unknown" ]; then
+        log_warn "Could not determine latest remote version. Proceeding with installation."
+        return 0
+    fi
+
+    if [ "${LOCAL_VER}" = "none" ]; then
+        log_info "No local installation found. Proceeding with fresh install."
+        return 0
+    fi
+
+    # Clean versions (remove 'v' prefix if present for comparison)
+    CLEAN_LOCAL=$(echo "${LOCAL_VER}" | sed 's/^v//')
+    CLEAN_REMOTE=$(echo "${REMOTE_TAG}" | sed 's/^v//')
+
+    log_info "Local version: ${LOCAL_VER}"
+    log_info "Remote version: ${REMOTE_TAG}"
+
+    if [ "${CLEAN_LOCAL}" = "${CLEAN_REMOTE}" ]; then
+        printf "${BLUE}[INFO]${NC} ${BOLD}Pharos Gold: Already up-to-date.${NC}\n"
+        log_info "Stay remarkable."
+        exit 0
+    fi
+
+    log_info "Update available: ${LOCAL_VER} -> ${REMOTE_TAG}"
 }
 
 # Environment Audit (Fail-Fast)
@@ -300,6 +371,7 @@ main() {
     log_info "Initializing Pharos Installation Environment..."
     
     detect_platform
+    check_update
     audit_environment
     fetch_and_verify
     install_binary
@@ -310,4 +382,6 @@ main() {
     "${INSTALL_DIR}/${BINARY_NAME}" --version || log_warn "Verification command failed. Ensure ${INSTALL_DIR} is in your PATH."
 }
 
-main "$@"
+if [ "${PHAROS_INSTALL_SKIP_MAIN}" != "true" ]; then
+    main "$@"
+fi
