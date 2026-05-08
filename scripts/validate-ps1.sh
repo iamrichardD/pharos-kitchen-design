@@ -40,6 +40,7 @@ echo "🔍 Validating internal function definitions..."
         (Get-Command Get-LatestVersionTag -ErrorAction SilentlyContinue) -and
         (Get-Command Check-Update -ErrorAction SilentlyContinue) -and
         (Get-Command Test-IsWritable -ErrorAction SilentlyContinue) -and
+        (Get-Command Uninstall-Binary -ErrorAction SilentlyContinue) -and
         (Get-Command Fetch-And-Verify -ErrorAction SilentlyContinue)) {
         Write-Host '✅ All core functions are defined.'
     } else {

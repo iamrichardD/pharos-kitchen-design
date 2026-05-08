@@ -39,6 +39,7 @@
 param(
     [string]$InstallDir = "",
     [string]$Version = "",
+    [switch]$Uninstall,
     [switch]$Force
 )
 
@@ -347,6 +348,50 @@ function Install-Binary ($ExtractedPath) {
     Log-Info "Binary installed successfully."
 }
 
+# Uninstallation
+function Uninstall-Binary {
+    $destPath = Join-Path $DefaultInstallDir "$BinaryName.exe"
+    
+    if (-not (Test-Path $destPath)) {
+        Log-Warn "No installation found at $destPath"
+    } else {
+        Log-Info "Removing binary: $destPath"
+        try {
+            Remove-Item -Path $destPath -Force -ErrorAction Stop
+            Log-Info "Binary removed successfully."
+        } catch {
+            Log-Error "Failed to remove binary. It may be in use by another process."
+            exit 1
+        }
+    }
+
+    # PATH Cleanup
+    Log-Info "Cleaning up environment PATH..."
+    $currentPath = [Environment]::GetEnvironmentVariable("Path", "User")
+    if ($currentPath -split ";" -contains $DefaultInstallDir) {
+        $pathList = $currentPath -split ";" | Where-Object { $_ -ne $DefaultInstallDir }
+        $newPath = $pathList -join ";"
+        try {
+            [Environment]::SetEnvironmentVariable("Path", $newPath, "User")
+            Log-Info "PATH cleaned up. Please restart your terminal."
+        } catch {
+            Log-Warn "Could not update User PATH automatically."
+        }
+    } else {
+        Log-Info "Installation directory not found in User PATH."
+    }
+
+    # Clean up empty directory
+    if (Test-Path $DefaultInstallDir) {
+        if ((Get-ChildItem -Path $DefaultInstallDir).Count -eq 0) {
+            Log-Info "Removing empty installation directory: $DefaultInstallDir"
+            Remove-Item -Path $DefaultInstallDir -Force
+        }
+    }
+
+    Log-Info "Uninstallation complete."
+}
+
 # PATH Management
 function Update-Path {
     Log-Info "Auditing environment PATH..."
@@ -370,9 +415,15 @@ function Update-Path {
 
 # Main
 function Main {
-    param([string]$Version, [switch]$Force)
+    param([string]$Version, [switch]$Uninstall, [switch]$Force)
 
     Write-Logo
+    
+    if ($Uninstall) {
+        Uninstall-Binary
+        exit 0
+    }
+
     Log-Info "Initializing Pharos Installation Environment..."
 
     $platform = Get-Platform
@@ -393,4 +444,4 @@ function Main {
     }
 }
 
-Main -Version:$Version -Force:$Force
+Main -Version:$Version -Uninstall:$Uninstall -Force:$Force

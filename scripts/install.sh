@@ -61,6 +61,7 @@ show_help() {
     echo ""
     echo "Options:"
     echo "  -v, --version  Specify a version to install (e.g., v1.0.0)."
+    echo "  -u, --uninstall Remove the PKD binary and clean up."
     echo "  -f, --force    Bypass environment audit and dependency checks."
     echo "  -h, --help     Show this help message."
     echo ""
@@ -69,6 +70,7 @@ show_help() {
 }
 
 # Parse Arguments
+UNINSTALL_MODE=false
 while [ "$#" -gt 0 ]; do
     case "$1" in
         -v|--version)
@@ -81,6 +83,7 @@ while [ "$#" -gt 0 ]; do
                 exit 1
             fi
             shift 2 ;;
+        -u|--uninstall) UNINSTALL_MODE=true; shift ;;
         -f|--force) FORCE_INSTALL=true; shift ;;
         -h|--help) show_help; exit 0 ;;
         *) log_error "Unknown option: $1"; show_help; exit 1 ;;
@@ -393,6 +396,40 @@ install_binary() {
     log_info "Binary installed successfully at ${INSTALL_DIR}/${BINARY_NAME}"
 }
 
+# Uninstallation Logic
+uninstall_binary() {
+    log_info "Initiating uninstallation..."
+    
+    BINARY_PATH="${INSTALL_DIR}/${BINARY_NAME}"
+    
+    if [ ! -f "${BINARY_PATH}" ]; then
+        log_warn "No installation found at ${BINARY_PATH}"
+        return 0
+    fi
+
+    # Determine if sudo is needed for removal
+    local SUDO_CMD=""
+    if [ ! -w "${BINARY_PATH}" ] || [ ! -w "${INSTALL_DIR}" ]; then
+        if command -v sudo >/dev/null 2>&1; then
+            log_info "Sudo required for removal."
+            SUDO_CMD="sudo"
+        else
+            log_error "Permission denied and 'sudo' not available for removal."
+            exit 1
+        fi
+    fi
+
+    log_info "Removing binary: ${BINARY_PATH}"
+    ${SUDO_CMD} rm -f "${BINARY_PATH}"
+    
+    log_info "Uninstallation complete."
+    echo ""
+    echo "   ${BOLD}Action Required:${NC}"
+    echo "   To completely revert changes, manually remove the PATH entry from your profile."
+    echo "   👉 Profile: ${HOME}/.bashrc, .zshrc, or .profile"
+    echo ""
+}
+
 # PATH Audit & Shell Integration
 path_audit() {
     log_info "Auditing environment PATH..."
@@ -477,6 +514,12 @@ macos_security_authorization() {
 # Main Execution Flow
 main() {
     print_banner
+    
+    if [ "${UNINSTALL_MODE}" = true ]; then
+        uninstall_binary
+        exit 0
+    fi
+
     log_info "Initializing Pharos Installation Environment..."
     
     detect_platform

@@ -164,7 +164,7 @@
 - [x] **Issue #90**: Implement `check_writable` Logic for local installs (Task 3.17). (Verified Fail-Fast)
 - [x] **Issue #91**: Add Versioning Support (`-v`) to `install.sh` (Task 3.18). (Verified Version Pinning)
 - [x] **Issue #92**: Implement 'Pharos Gold' Update Check (Idempotency) (Task 3.19). (Verified Pharos Gold)
-- [ ] **Issue #93**: Implement `--uninstall` Path (Task 3.20).
+- [x] **Issue #93**: Implement `--uninstall` Path (Task 3.20). (Verified Exit Strategy)
 - [x] **Issue #94**: Scaffold `install.ps1` for Windows Parity (Task 3.21). (Verified Windows Parity)
 
 ### Sprint 4.5: Infrastructure & Identity Governance (#84-87) - 📋 Backlog
