@@ -491,4 +491,4 @@ function Main {
     }
 }
 
-Main -Version:$Version -Uninstall:$Uninstall -Force:$Force
+Main -Version:$Version -Uninstall:$Uninstall -Purge:$Purge -Force:$Force

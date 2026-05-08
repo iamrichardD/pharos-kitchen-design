@@ -72,19 +72,21 @@ show_help() {
 
 # Parse Arguments
 UNINSTALL_MODE=false
+PURGE_MODE=false
 while [ "$#" -gt 0 ]; do
     case "$1" in
         -v|--version)
             TARGET_VERSION="$2"
             # Security [SEC-91-001]: Validate version string pattern to prevent 
             # path traversal or injection during URL construction.
-            if ! echo "${TARGET_VERSION}" | grep -Eq '^v?[0-9]+\.[0-9]+\.[0-9]+$'; then
+            if ! echo "${TARGET_VERSION}" | grep -Eq '^v?[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$'; then
                 log_error "Invalid version format: ${TARGET_VERSION}"
-                log_error "Expected format: v1.2.3 or 1.2.3"
+                log_error "Expected format: v1.2.3, 1.2.3, or v1.2.3-beta.1"
                 exit 1
             fi
             shift 2 ;;
         -u|--uninstall) UNINSTALL_MODE=true; shift ;;
+        -p|--purge) PURGE_MODE=true; shift ;;
         -f|--force) FORCE_INSTALL=true; shift ;;
         -h|--help) show_help; exit 0 ;;
         *) log_error "Unknown option: $1"; show_help; exit 1 ;;
@@ -428,7 +430,7 @@ uninstall_binary() {
     echo "   ${BOLD}Action Required:${NC}"
     echo "   To completely revert changes, manually remove the PATH entry from your profile."
     echo "   👉 Profile: ${HOME}/.bashrc, .zshrc, or .profile"
-    echo "   👉 Automated Fix: ${BOLD}sed -i '/pharos\/bin/d' ${PROFILE_FILE:-~/.bashrc}${NC}"
+    echo "   👉 Automated Fix: ${BOLD}sed -i.bak '/pharos\/bin/d' ${PROFILE_FILE:-~/.bashrc} && rm ${PROFILE_FILE:-~/.bashrc}.bak${NC}"
     echo ""
 }
 
@@ -525,9 +527,10 @@ purge_security() {
     fi
 
     # 2. Clear libsecret credentials (Linux)
+    # Why: We use 'pharos-kitchen-design' as the service name in keyring-rs.
     if [ "${PLATFORM}" = "linux" ] && command -v secret-tool >/dev/null 2>&1; then
         log_info "Clearing libsecret credentials..."
-        secret-tool clear project=pharos || log_warn "No pharos credentials found in libsecret."
+        secret-tool clear service pharos-kitchen-design || log_warn "No pharos credentials found in libsecret."
     fi
 
     log_info "Security purge complete."
