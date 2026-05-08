@@ -62,6 +62,7 @@ show_help() {
     echo "Options:"
     echo "  -v, --version  Specify a version to install (e.g., v1.0.0)."
     echo "  -u, --uninstall Remove the PKD binary and clean up."
+    echo "  -p, --purge    Explicitly clear credentials and local config (Linux)."
     echo "  -f, --force    Bypass environment audit and dependency checks."
     echo "  -h, --help     Show this help message."
     echo ""
@@ -427,6 +428,7 @@ uninstall_binary() {
     echo "   ${BOLD}Action Required:${NC}"
     echo "   To completely revert changes, manually remove the PATH entry from your profile."
     echo "   👉 Profile: ${HOME}/.bashrc, .zshrc, or .profile"
+    echo "   👉 Automated Fix: ${BOLD}sed -i '/pharos\/bin/d' ${PROFILE_FILE:-~/.bashrc}${NC}"
     echo ""
 }
 
@@ -511,16 +513,40 @@ macos_security_authorization() {
     fi
 }
 
+# Security Purge (Debt #102)
+purge_security() {
+    log_info "Initiating Security Purge..."
+    
+    # 1. Clear Local Config
+    CONFIG_DIR="${HOME}/.config/pharos"
+    if [ -d "${CONFIG_DIR}" ]; then
+        log_info "Clearing local configuration: ${CONFIG_DIR}"
+        rm -rf "${CONFIG_DIR}"
+    fi
+
+    # 2. Clear libsecret credentials (Linux)
+    if [ "${PLATFORM}" = "linux" ] && command -v secret-tool >/dev/null 2>&1; then
+        log_info "Clearing libsecret credentials..."
+        secret-tool clear project=pharos || log_warn "No pharos credentials found in libsecret."
+    fi
+
+    log_info "Security purge complete."
+}
+
 # Main Execution Flow
 main() {
     print_banner
     
     if [ "${UNINSTALL_MODE}" = true ]; then
         uninstall_binary
+        [ "${PURGE_MODE}" = true ] && purge_security
         exit 0
     fi
 
-    log_info "Initializing Pharos Installation Environment..."
+    if [ "${PURGE_MODE}" = true ]; then
+        purge_security
+        exit 0
+    fi
     
     detect_platform
     check_update

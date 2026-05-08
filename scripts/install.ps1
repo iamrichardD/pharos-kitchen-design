@@ -40,13 +40,14 @@ param(
     [string]$InstallDir = "",
     [string]$Version = "",
     [switch]$Uninstall,
+    [switch]$Purge,
     [switch]$Force
 )
 
 # Security [SEC-91-001]: Validate version string pattern to prevent 
 # path traversal or injection during URL construction.
-if ($Version -and $Version -notmatch '^v?[0-9]+\.[0-9]+\.[0-9]+$') {
-    Write-Error "Invalid version format: $Version. Expected format: v1.2.3 or 1.2.3"
+if ($Version -and $Version -notmatch '^v?[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$') {
+    Write-Error "Invalid version format: $Version. Expected format: v1.2.3, 1.2.3, or v1.2.3-beta.1"
     exit 1
 }
 
@@ -270,6 +271,38 @@ function Audit-Environment {
     Log-Info "Environment audit passed."
 }
 
+# Security Purge (Debt #102)
+function Clear-PharosSecurity {
+    Log-Info "Initiating Security Purge..."
+    
+    # 1. Clear Local Config
+    $configDir = Join-Path $env:APPDATA "pharos"
+    if (Test-Path $configDir) {
+        Log-Info "Clearing local configuration: $configDir"
+        Remove-Item -Path $configDir -Recurse -Force
+    }
+
+    # 2. Clear Windows Credential Manager entries (Parity with libsecret)
+    # Why: We use keyring-rs which stores tokens in the Credential Manager.
+    #      We target 'pharos-kitchen-design' service entries.
+    Log-Info "Clearing Windows Credential Manager entries..."
+    try {
+        $targets = cmdkey /list | Select-String "target=pharos-kitchen-design"
+        foreach ($targetLine in $targets) {
+            # Extract target name: e.g., "Target: LegacyGeneric:target=pharos-kitchen-design"
+            if ($targetLine -match "target=(pharos-kitchen-design\S*)") {
+                $target = $matches[1]
+                Log-Info "Removing credential: $target"
+                cmdkey /delete:$target | Out-Null
+            }
+        }
+    } catch {
+        Log-Warn "Failed to clear some Windows credentials."
+    }
+
+    Log-Info "Security purge complete."
+}
+
 # Acquisition & Verification
 function Fetch-And-Verify {
     param($PlatformInfo, [string]$Version, [switch]$Force)
@@ -291,47 +324,55 @@ function Fetch-And-Verify {
     $zipPath = Join-Path $tmpDir $artifactName
     $checksumPath = "$zipPath.sha256"
 
-    Log-Info "Downloading $artifactName..."
     try {
-        Invoke-WebRequest -Uri $downloadUrl -OutFile $zipPath -UseBasicParsing
-    } catch {
-        Log-Error "Failed to download binary from $downloadUrl"
-        exit 1
-    }
+        Log-Info "Downloading $artifactName..."
+        try {
+            Invoke-WebRequest -Uri $downloadUrl -OutFile $zipPath -UseBasicParsing
+        } catch {
+            Log-Error "Failed to download binary from $downloadUrl"
+            exit 1
+        }
 
-    Log-Info "Downloading checksum..."
-    try {
-        Invoke-WebRequest -Uri $checksumUrl -OutFile $checksumPath -UseBasicParsing
+        Log-Info "Downloading checksum..."
+        try {
+            Invoke-WebRequest -Uri $checksumUrl -OutFile $checksumPath -UseBasicParsing
+            
+            Log-Info "Verifying SHA-256 checksum..."
+            $expectedHash = (Get-Content $checksumPath).Split(" ")[0].Trim()
+            $actualHash = (Get-FileHash -Path $zipPath -Algorithm SHA256).Hash.ToLower()
+
+            if ($expectedHash -ne $actualHash) {
+                Log-Error "SHA-256 verification failed!"
+                Log-Error "Expected: $expectedHash"
+                Log-Error "Actual:   $actualHash"
+                exit 1
+            }
+            Log-Info "Checksum verified."
+        } catch {
+            Log-Warn "Integrity could not be verified automatically."
+            if (-not $Force) {
+                Log-Error "Mandatory checksum verification failed. Aborting."
+                exit 1
+            }
+        }
+
+        Log-Info "Extracting artifact..."
+        Expand-Archive -Path $zipPath -DestinationPath $tmpDir -Force
         
-        Log-Info "Verifying SHA-256 checksum..."
-        $expectedHash = (Get-Content $checksumPath).Split(" ")[0].Trim()
-        $actualHash = (Get-FileHash -Path $zipPath -Algorithm SHA256).Hash.ToLower()
-
-        if ($expectedHash -ne $actualHash) {
-            Log-Error "SHA-256 verification failed!"
-            Log-Error "Expected: $expectedHash"
-            Log-Error "Actual:   $actualHash"
-            exit 1
+        $extractedBinary = Join-Path $tmpDir "$BinaryName.exe"
+        if (-not (Test-Path $extractedBinary)) {
+            # Fallback if the zip doesn't have the .exe suffix inside or is named differently
+            $extractedBinary = Get-ChildItem -Path $tmpDir -Filter "$BinaryName*" | Select-Object -First 1
         }
-        Log-Info "Checksum verified."
-    } catch {
-        Log-Warn "Integrity could not be verified automatically."
-        if (-not $Force) {
-            Log-Error "Mandatory checksum verification failed. Aborting."
-            exit 1
-        }
-    }
 
-    Log-Info "Extracting artifact..."
-    Expand-Archive -Path $zipPath -DestinationPath $tmpDir -Force
-    
-    $extractedBinary = Join-Path $tmpDir "$BinaryName.exe"
-    if (-not (Test-Path $extractedBinary)) {
-        # Fallback if the zip doesn't have the .exe suffix inside or is named differently
-        $extractedBinary = Get-ChildItem -Path $tmpDir -Filter "$BinaryName*" | Select-Object -First 1
+        # We must copy the binary out of the temp dir before it's deleted
+        $localBinary = Join-Path $env:TEMP "$BinaryName-extracted.exe"
+        Copy-Item -Path $extractedBinary -Destination $localBinary -Force
+        return $localBinary
+    } finally {
+        Log-Info "Cleaning up temporary files..."
+        Remove-Item -Path $tmpDir -Recurse -Force -ErrorAction SilentlyContinue
     }
-
-    return $extractedBinary
 }
 
 # Installation
@@ -415,12 +456,18 @@ function Update-Path {
 
 # Main
 function Main {
-    param([string]$Version, [switch]$Uninstall, [switch]$Force)
+    param([string]$Version, [switch]$Uninstall, [switch]$Purge, [switch]$Force)
 
     Write-Logo
     
     if ($Uninstall) {
         Uninstall-Binary
+        if ($Purge) { Clear-PharosSecurity }
+        exit 0
+    }
+
+    if ($Purge) {
+        Clear-PharosSecurity
         exit 0
     }
 

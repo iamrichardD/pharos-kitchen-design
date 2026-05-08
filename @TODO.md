@@ -116,6 +116,7 @@
 - [x] **Issue #92**: Implement 'Pharos Gold' Update Check (Idempotency) (Task 3.19).
 - [x] **Issue #93**: Implement `--uninstall` Path (Task 3.20).
 - [x] **Issue #94**: Scaffold `install.ps1` for Windows Parity (Task 3.21).
+- [x] **Debt #102**: Installation Suite Hardening & Crucible Audit.
 
 ### Sprint 4.5: Infrastructure & Identity Governance (#84-87) - 📋 Backlog
 - [x] **Issue #100**: Formalize SPM Role and Harden SDLC Governance (Verified Pharos Green).

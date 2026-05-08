@@ -166,6 +166,7 @@
 - [x] **Issue #92**: Implement 'Pharos Gold' Update Check (Idempotency) (Task 3.19). (Verified Pharos Gold)
 - [x] **Issue #93**: Implement `--uninstall` Path (Task 3.20). (Verified Exit Strategy)
 - [x] **Issue #94**: Scaffold `install.ps1` for Windows Parity (Task 3.21). (Verified Windows Parity)
+- [x] **Debt #102**: Installation Suite Hardening & Crucible Audit. (Verified Pharos Green)
 
 ### Sprint 4.5: Infrastructure & Identity Governance (#84-87) - 📋 Backlog
 - [ ] **Issue #84**: Configure Dual-Stream Release Pipeline (Task 3.15).
