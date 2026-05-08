@@ -127,10 +127,26 @@ check_local_version() {
 
 # Pharos Gold: Remote Version Discovery (Header Redirect)
 fetch_latest_version_tag() {
-    # Using -I to fetch headers only, -L to follow redirects
-    # Added connect-timeout and max-time to ensure we fail fast on network issues (Shore, 2004)
+    # Why: We use a header-redirect strategy to identify the latest version 
+    #      without incurring GitHub API rate limits for unauthenticated users.
+    #      This ensures sub-second environment verification and idempotency.
+    
     LATEST_URL="${REPO_URL}/releases/latest"
-    TAG=$(curl -sSLI --connect-timeout 5 --max-time 10 "${LATEST_URL}" 2>/dev/null | grep -i '^location:' | tail -n 1 | grep '/tag/' | sed 's/.*\/tag\///' | tr -d '\r' | tr -d '[:space:]')
+    
+    # We fetch headers and extract the 'location' line.
+    HEADERS=$(curl -sSLI --connect-timeout 5 --max-time 10 "${LATEST_URL}" 2>/dev/null)
+    LOCATION=$(echo "${HEADERS}" | grep -i '^location:' | tail -n 1)
+    
+    # Security [SEC-92-001]: Validate that the redirect location is within 
+    # the authoritative GitHub releases domain before parsing the tag.
+    case "${LOCATION}" in
+        *"github.com/"*"/releases/tag/"*)
+            TAG=$(echo "${LOCATION}" | sed 's/.*\/tag\///' | tr -d '\r' | tr -d '[:space:]')
+            ;;
+        *)
+            TAG=""
+            ;;
+    esac
     
     if [ -n "${TAG}" ]; then
         echo "${TAG}"
@@ -347,6 +363,11 @@ path_audit() {
 
 # macOS Security Flow
 macos_security_authorization() {
+    # Why: Independent BIM content often triggers the macOS quarantine flag (Gatekeeper).
+    #      We proactively remove this flag for authorized PKD binaries to ensure a 
+    #      seamless "First-Run" experience for kitchen designers while providing 
+    #      clear manual instructions should the automatic process fail.
+    
     if [ "${PLATFORM}" = "macos" ]; then
         log_info "Performing macOS Security Audit..."
         BINARY_PATH="${INSTALL_DIR}/${BINARY_NAME}"
