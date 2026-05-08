@@ -62,6 +62,7 @@ show_help() {
     echo "Options:"
     echo "  -v, --version  Specify a version to install (e.g., v1.0.0)."
     echo "  -u, --uninstall Remove the PKD binary and clean up."
+    echo "  -p, --purge    Explicitly clear credentials and local config (Linux)."
     echo "  -f, --force    Bypass environment audit and dependency checks."
     echo "  -h, --help     Show this help message."
     echo ""
@@ -71,19 +72,21 @@ show_help() {
 
 # Parse Arguments
 UNINSTALL_MODE=false
+PURGE_MODE=false
 while [ "$#" -gt 0 ]; do
     case "$1" in
         -v|--version)
             TARGET_VERSION="$2"
             # Security [SEC-91-001]: Validate version string pattern to prevent 
             # path traversal or injection during URL construction.
-            if ! echo "${TARGET_VERSION}" | grep -Eq '^v?[0-9]+\.[0-9]+\.[0-9]+$'; then
+            if ! echo "${TARGET_VERSION}" | grep -Eq '^v?[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$'; then
                 log_error "Invalid version format: ${TARGET_VERSION}"
-                log_error "Expected format: v1.2.3 or 1.2.3"
+                log_error "Expected format: v1.2.3, 1.2.3, or v1.2.3-beta.1"
                 exit 1
             fi
             shift 2 ;;
         -u|--uninstall) UNINSTALL_MODE=true; shift ;;
+        -p|--purge) PURGE_MODE=true; shift ;;
         -f|--force) FORCE_INSTALL=true; shift ;;
         -h|--help) show_help; exit 0 ;;
         *) log_error "Unknown option: $1"; show_help; exit 1 ;;
@@ -427,6 +430,7 @@ uninstall_binary() {
     echo "   ${BOLD}Action Required:${NC}"
     echo "   To completely revert changes, manually remove the PATH entry from your profile."
     echo "   👉 Profile: ${HOME}/.bashrc, .zshrc, or .profile"
+    echo "   👉 Automated Fix: ${BOLD}sed -i.bak '/pharos\/bin/d' ${PROFILE_FILE:-~/.bashrc} && rm ${PROFILE_FILE:-~/.bashrc}.bak${NC}"
     echo ""
 }
 
@@ -511,16 +515,41 @@ macos_security_authorization() {
     fi
 }
 
+# Security Purge (Debt #102)
+purge_security() {
+    log_info "Initiating Security Purge..."
+    
+    # 1. Clear Local Config
+    CONFIG_DIR="${HOME}/.config/pharos"
+    if [ -d "${CONFIG_DIR}" ]; then
+        log_info "Clearing local configuration: ${CONFIG_DIR}"
+        rm -rf "${CONFIG_DIR}"
+    fi
+
+    # 2. Clear libsecret credentials (Linux)
+    # Why: We use 'pharos-kitchen-design' as the service name in keyring-rs.
+    if [ "${PLATFORM}" = "linux" ] && command -v secret-tool >/dev/null 2>&1; then
+        log_info "Clearing libsecret credentials..."
+        secret-tool clear service pharos-kitchen-design || log_warn "No pharos credentials found in libsecret."
+    fi
+
+    log_info "Security purge complete."
+}
+
 # Main Execution Flow
 main() {
     print_banner
     
     if [ "${UNINSTALL_MODE}" = true ]; then
         uninstall_binary
+        [ "${PURGE_MODE}" = true ] && purge_security
         exit 0
     fi
 
-    log_info "Initializing Pharos Installation Environment..."
+    if [ "${PURGE_MODE}" = true ]; then
+        purge_security
+        exit 0
+    fi
     
     detect_platform
     check_update

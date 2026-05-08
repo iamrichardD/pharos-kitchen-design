@@ -7,7 +7,7 @@
 # License: FSL-1.1 (See LICENSE file for details)
 # Purpose: Verification script for Issue #93 (uninstall path).
 #          Tests that --uninstall correctly removes the binary.
-# Traceability: Issue #93
+# Traceability: Issue #93, Issue #102
 # ========================================================================
 
 set -e
@@ -19,6 +19,15 @@ NC='\033[0m'
 
 log_info() { echo "[INFO] $1"; }
 log_error() { echo "[ERROR] $1"; }
+
+# Mock secret-tool if missing to ensure test runs in lean environments
+if ! command -v secret-tool >/dev/null 2>&1; then
+    log_info "Mocking secret-tool for test environment..."
+    secret-tool() {
+        log_info "Mock secret-tool called with: $*"
+        return 0
+    }
+fi
 
 # 1. Setup Environment
 export PHAROS_INSTALL_SKIP_MAIN=true
@@ -57,3 +66,24 @@ fi
 log_info "Testing uninstallation when binary is missing..."
 uninstall_binary
 log_info "Test Passed: Gracefully handled missing binary."
+
+# 4. Test Security Purge
+log_info "Testing security purge..."
+MOCK_CONFIG_DIR="${HOME}/.config/pharos"
+mkdir -p "${MOCK_CONFIG_DIR}"
+touch "${MOCK_CONFIG_DIR}/config.json"
+
+if [ ! -d "${MOCK_CONFIG_DIR}" ]; then
+    log_error "Failed to create mock config directory."
+    exit 1
+fi
+
+PURGE_MODE=true
+purge_security
+
+if [ ! -d "${MOCK_CONFIG_DIR}" ]; then
+    log_info "Test Passed: Security purge successfully cleared config directory."
+else
+    log_error "Test Failed: Security purge did not clear config directory."
+    exit 1
+fi

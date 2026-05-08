@@ -79,8 +79,8 @@ fi
 # Check 5: PR Marker Verification (The Crucible Audit)
 if gh pr view --json body > /dev/null 2>&1; then
     PR_BODY=$(gh pr view --json body -q '.body')
-    if [[ ! "$PR_BODY" == *"## ⚔️ The PKD Crucible (Audit Log)"* ]]; then
-        echo "❌ Error: Pull Request body is missing the mandatory 'PKD Crucible' audit log."
+    if [[ ! "$PR_BODY" == *"## ⚔️ The Pharos Crucible (Audit Log)"* ]]; then
+        echo "❌ Error: Pull Request body is missing the mandatory 'Pharos Crucible' audit log."
         exit 1
     fi
 fi
@@ -121,6 +121,11 @@ if git rev-parse --verify "$BASE_REF" >/dev/null 2>&1 || git rev-parse --verify 
 else
     echo "   [Process] Skipping TDD Traceability check: Base reference '$BASE_REF' not found."
 fi
+
+# Check 8: Installation Script Hardening (Issue #102)
+echo "   [Process] Verifying installation script hardening..."
+./scripts/podman-wrapper.sh "public.ecr.aws/docker/library/debian:bookworm-slim" \
+    sh -c "apt-get update && apt-get install -y curl sudo && bash scripts/test-issue-93.sh"
 
 echo "✅ Pulse Complete: Ecosystem & Process Stability Verified."
 
