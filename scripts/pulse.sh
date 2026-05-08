@@ -85,7 +85,16 @@ if gh pr view --json body > /dev/null 2>&1; then
     fi
 fi
 
-# Check 6: TDD Traceability (Basic Check for Test Inclusion)
+# Check 6: PowerShell Installation Parity (Issue #94)
+echo "   [Process] Verifying scripts/install.ps1 integrity..."
+if [ -f "scripts/install.ps1" ]; then
+    bash scripts/validate-ps1.sh
+else
+    echo "   ❌ Error: scripts/install.ps1 is missing."
+    exit 1
+fi
+
+# Check 7: TDD Traceability (Basic Check for Test Inclusion)
 # Ensure any change to src/ includes a corresponding change in tests/ or src/*.test.ts
 # In CI, we use GITHUB_BASE_REF. Locally, we default to 'main'.
 BASE_REF=${GITHUB_BASE_REF:-"main"}
