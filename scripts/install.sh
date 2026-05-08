@@ -23,6 +23,7 @@ NC='\033[0m' # No Color
 BINARY_NAME="${BINARY_NAME:-pkd}"
 INSTALL_DIR="${INSTALL_DIR:-/usr/local/bin}"
 FORCE_INSTALL="${FORCE_INSTALL:-false}"
+TARGET_VERSION=""
 REPO_URL="https://github.com/iamrichardD/pharos-kitchen-design"
 LATEST_RELEASE_URL="${REPO_URL}/releases/latest/download"
 
@@ -59,6 +60,7 @@ show_help() {
     echo "Usage: install.sh [options]"
     echo ""
     echo "Options:"
+    echo "  -v, --version  Specify a version to install (e.g., v1.0.0)."
     echo "  -f, --force    Bypass environment audit and dependency checks."
     echo "  -h, --help     Show this help message."
     echo ""
@@ -69,6 +71,7 @@ show_help() {
 # Parse Arguments
 while [ "$#" -gt 0 ]; do
     case "$1" in
+        -v|--version) TARGET_VERSION="$2"; shift 2 ;;
         -f|--force) FORCE_INSTALL=true; shift ;;
         -h|--help) show_help; exit 0 ;;
         *) log_error "Unknown option: $1"; show_help; exit 1 ;;
@@ -165,6 +168,11 @@ check_update() {
         return 0
     fi
 
+    if [ -n "${TARGET_VERSION}" ]; then
+        log_info "Bypassing 'Pharos Gold' update check (Version pinned to ${TARGET_VERSION})."
+        return 0
+    fi
+
     log_info "Performing 'Pharos Gold' update check..."
     
     LOCAL_VER=$(check_local_version)
@@ -201,11 +209,19 @@ check_writable() {
     local target_dir="$1"
     log_info "Verifying writability of ${target_dir}..."
 
+    # We use a transactional write/remove test to bypass false positives 
+    # from [ -w ] on certain network-mounted filesystems (NFS/SMB).
+    local test_file
+    test_file="${target_dir}/.pharos_write_test_$(date +%s)"
+    
     # 1. Direct Check
-    if [ -d "${target_dir}" ] && [ -w "${target_dir}" ]; then
-        log_info "Directory is writable."
-        USE_SUDO=false
-        return 0
+    if [ -d "${target_dir}" ]; then
+        if touch "${test_file}" 2>/dev/null; then
+            rm -f "${test_file}"
+            log_info "Directory is writable."
+            USE_SUDO=false
+            return 0
+        fi
     fi
 
     # 2. Parent Check (for creation)
@@ -215,7 +231,10 @@ check_writable() {
         while [ ! -d "${parent_dir}" ] && [ "${parent_dir}" != "/" ]; do
             parent_dir=$(dirname "${parent_dir}")
         done
-        if [ -w "${parent_dir}" ]; then
+        
+        test_file="${parent_dir}/.pharos_write_test_$(date +%s)"
+        if touch "${test_file}" 2>/dev/null; then
+            rm -f "${test_file}"
             log_info "Parent directory ${parent_dir} is writable. No sudo needed for creation."
             USE_SUDO=false
             return 0
@@ -292,7 +311,14 @@ fetch_and_verify() {
 
     # Construct artifact name: e.g., pkd-core-linux-x86_64.tar.gz
     ARTIFACT_NAME="pkd-core-${PLATFORM}-${TARGET_ARCH}.tar.gz"
-    DOWNLOAD_URL="${LATEST_RELEASE_URL}/${ARTIFACT_NAME}"
+    
+    if [ -n "${TARGET_VERSION}" ]; then
+        DOWNLOAD_URL="${REPO_URL}/releases/download/${TARGET_VERSION}/${ARTIFACT_NAME}"
+        log_info "Target Version: ${TARGET_VERSION}"
+    else
+        DOWNLOAD_URL="${LATEST_RELEASE_URL}/${ARTIFACT_NAME}"
+    fi
+    
     CHECKSUM_URL="${DOWNLOAD_URL}.sha256"
 
     TMP_DIR="$(mktemp -d)"

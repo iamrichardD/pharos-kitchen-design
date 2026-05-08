@@ -38,6 +38,7 @@
 
 param(
     [string]$InstallDir = "",
+    [string]$Version = "",
     [switch]$Force
 )
 
@@ -180,10 +181,17 @@ function Audit-Environment {
 
 # Acquisition & Verification
 function Fetch-And-Verify {
-    param($PlatformInfo, [switch]$Force)
+    param($PlatformInfo, [string]$Version, [switch]$Force)
     
     $artifactName = "pkd-core-$($PlatformInfo.Platform)-$($PlatformInfo.Arch).zip"
-    $downloadUrl = "$LatestReleaseUrl/$artifactName"
+    
+    if ($Version) {
+        $downloadUrl = "$RepoUrl/releases/download/$Version/$artifactName"
+        Log-Info "Target Version: $Version"
+    } else {
+        $downloadUrl = "$LatestReleaseUrl/$artifactName"
+    }
+    
     $checksumUrl = "$downloadUrl.sha256"
 
     $tmpDir = Join-Path $env:TEMP ([Guid]::NewGuid().ToString())
@@ -272,7 +280,7 @@ function Update-Path {
 
 # Main
 function Main {
-    param([switch]$Force)
+    param([string]$Version, [switch]$Force)
 
     Write-Logo
     Log-Info "Initializing Pharos Installation Environment..."
@@ -280,7 +288,7 @@ function Main {
     $platform = Get-Platform
     Audit-Environment -Force:$Force
     
-    $binaryPath = Fetch-And-Verify -PlatformInfo $platform -Force:$Force
+    $binaryPath = Fetch-And-Verify -PlatformInfo $platform -Version $Version -Force:$Force
     Install-Binary -ExtractedPath $binaryPath
     Update-Path
 
@@ -294,4 +302,4 @@ function Main {
     }
 }
 
-Main -Force:$Force
+Main -Version:$Version -Force:$Force
