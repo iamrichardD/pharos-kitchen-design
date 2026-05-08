@@ -45,3 +45,4 @@ TestResults/
 *.nupkg
 
 data/*.db
+/docs/plans/
