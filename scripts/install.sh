@@ -7,7 +7,7 @@
 # License: FSL-1.1 (See LICENSE file for details)
 # Purpose: Universal installer for the pkd-core CLI. Implements a 
 #          high-rigor environment audit and SHA-256 verification.
-# Traceability: Issue #77, Bug #81, ADR-0006
+# Traceability: Issue #77, Bug #81, ADR-0006, Issue #90
 # ========================================================================
 
 set -e
@@ -25,6 +25,9 @@ INSTALL_DIR="${INSTALL_DIR:-/usr/local/bin}"
 FORCE_INSTALL="${FORCE_INSTALL:-false}"
 REPO_URL="https://github.com/iamrichardD/pharos-kitchen-design"
 LATEST_RELEASE_URL="${REPO_URL}/releases/latest/download"
+
+# Global state for sudo requirement (ADR-0014)
+USE_SUDO=false
 
 # Logging Utilities
 log_info() {
@@ -194,9 +197,52 @@ check_update() {
 }
 
 # Environment Audit (Fail-Fast)
+check_writable() {
+    local target_dir="$1"
+    log_info "Verifying writability of ${target_dir}..."
+
+    # 1. Direct Check
+    if [ -d "${target_dir}" ] && [ -w "${target_dir}" ]; then
+        log_info "Directory is writable."
+        USE_SUDO=false
+        return 0
+    fi
+
+    # 2. Parent Check (for creation)
+    if [ ! -d "${target_dir}" ]; then
+        local parent_dir
+        parent_dir=$(dirname "${target_dir}")
+        while [ ! -d "${parent_dir}" ] && [ "${parent_dir}" != "/" ]; do
+            parent_dir=$(dirname "${parent_dir}")
+        done
+        if [ -w "${parent_dir}" ]; then
+            log_info "Parent directory ${parent_dir} is writable. No sudo needed for creation."
+            USE_SUDO=false
+            return 0
+        fi
+    fi
+
+    # 3. Sudo Awareness
+    if command -v sudo >/dev/null 2>&1; then
+        log_warn "Installation directory is not writable by current user. Sudo will be required."
+        USE_SUDO=true
+        return 0
+    fi
+
+    log_error "Installation directory is not writable and 'sudo' is not available: ${target_dir}"
+    return 1
+}
+
 audit_environment() {
     log_info "Performing environment audit..."
     
+    check_writable "${INSTALL_DIR}" || {
+        if [ "${FORCE_INSTALL}" = false ]; then
+            exit 1
+        fi
+        log_warn "Bypassing writability check due to --force flag."
+    }
+
     MISSING_DEPS=""
 
     # Check for basic utilities
@@ -291,17 +337,22 @@ fetch_and_verify() {
 install_binary() {
     log_info "Installing binary to ${INSTALL_DIR}..."
 
-    if [ ! -d "${INSTALL_DIR}" ]; then
-        log_warn "Installation directory ${INSTALL_DIR} does not exist. Creating..."
-        sudo mkdir -p "${INSTALL_DIR}"
+    local SUDO_CMD=""
+    if [ "${USE_SUDO}" = true ]; then
+        SUDO_CMD="sudo"
     fi
 
-    if ! sudo mv "${EXTRACTED_BINARY}" "${INSTALL_DIR}/${BINARY_NAME}"; then
-        log_error "Failed to move binary to ${INSTALL_DIR}. Do you have sudo privileges?"
+    if [ ! -d "${INSTALL_DIR}" ]; then
+        log_warn "Installation directory ${INSTALL_DIR} does not exist. Creating..."
+        ${SUDO_CMD} mkdir -p "${INSTALL_DIR}"
+    fi
+
+    if ! ${SUDO_CMD} mv "${EXTRACTED_BINARY}" "${INSTALL_DIR}/${BINARY_NAME}"; then
+        log_error "Failed to move binary to ${INSTALL_DIR}. Check permissions."
         exit 1
     fi
 
-    sudo chmod +x "${INSTALL_DIR}/${BINARY_NAME}"
+    ${SUDO_CMD} chmod +x "${INSTALL_DIR}/${BINARY_NAME}"
     log_info "Binary installed successfully at ${INSTALL_DIR}/${BINARY_NAME}"
 }
 

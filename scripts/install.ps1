@@ -108,10 +108,59 @@ function Get-Platform {
 }
 
 # Environment Audit
+function Test-IsWritable ($Path) {
+    Log-Info "Verifying writability of $Path..."
+    
+    $testFile = "pharos_write_test_$([Guid]::NewGuid().ToString()).tmp"
+    
+    # If path exists, check it directly
+    if (Test-Path $Path) {
+        $testPath = Join-Path $Path $testFile
+        try {
+            $null = New-Item -ItemType File -Path $testPath -ErrorAction Stop
+            Remove-Item -Path $testPath -ErrorAction SilentlyContinue
+            Log-Info "Directory is writable."
+            return $true
+        } catch {
+            return $false
+        }
+    } else {
+        # If it doesn't exist, find the first existing parent
+        $parent = Split-Path $Path -Parent
+        if (-not $parent) { $parent = "." }
+        
+        while ($parent -and -not (Test-Path $parent)) {
+            $parent = Split-Path $parent -Parent
+        }
+        
+        if (-not $parent) { $parent = "\" }
+
+        $testPath = Join-Path $parent $testFile
+        try {
+            $null = New-Item -ItemType File -Path $testPath -ErrorAction Stop
+            Remove-Item -Path $testPath -ErrorAction SilentlyContinue
+            Log-Info "Parent directory $parent is writable."
+            return $true
+        } catch {
+            return $false
+        }
+    }
+}
+
 function Audit-Environment {
     param([switch]$Force)
     
     Log-Info "Performing environment audit..."
+
+    # Issue #90: check_writable Logic (Fail-Fast)
+    if (-not (Test-IsWritable -Path $DefaultInstallDir)) {
+        Log-Error "Installation directory is not writable: $DefaultInstallDir"
+        if (-not $Force) {
+            exit 1
+        }
+        Log-Warn "Bypassing writability check due to -Force flag."
+    }
+
     $missing = @()
 
     if (-not (Get-Command "curl" -ErrorAction SilentlyContinue)) {

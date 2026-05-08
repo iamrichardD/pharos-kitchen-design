@@ -111,11 +111,11 @@
 - [x] **Bug #81**: Remediate Product Naming and URL Inconsistency in Install Documentation.
 - [x] **Issue #82**: Automate Install Script Distribution (Task 3.13).
 - [x] **Issue #83**: Harden Install Script $PATH Audit (Task 3.14).
-- [ ] **Issue #90**: Implement `check_writable` Logic for local installs (Task 3.17).
+- [x] **Issue #90**: Implement `check_writable` Logic for local installs (Task 3.17).
 - [ ] **Issue #91**: Add Versioning Support (`-v`) to `install.sh` (Task 3.18).
-- [ ] **Issue #92**: Implement 'Pharos Gold' Update Check (Idempotency) (Task 3.19).
+- [x] **Issue #92**: Implement 'Pharos Gold' Update Check (Idempotency) (Task 3.19).
 - [ ] **Issue #93**: Implement `--uninstall` Path (Task 3.20).
-- [ ] **Issue #94**: Scaffold `install.ps1` for Windows Parity (Task 3.21).
+- [x] **Issue #94**: Scaffold `install.ps1` for Windows Parity (Task 3.21).
 
 ### Sprint 4.5: Infrastructure & Identity Governance (#84-87) - 📋 Backlog
 - [x] **Issue #100**: Formalize SPM Role and Harden SDLC Governance (Verified Pharos Green).
