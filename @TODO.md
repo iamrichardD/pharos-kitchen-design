@@ -113,10 +113,11 @@
 - [x] **Issue #83**: Harden Install Script $PATH Audit (Task 3.14).
 - [x] **Issue #90**: Implement `check_writable` Logic for local installs (Task 3.17).
 - [x] **Issue #91**: Add Versioning Support (`-v`) to `install.sh` (Task 3.18).
-- [x] **Issue #92**: Implement 'Pharos Gold' Update Check (Idempotency) (Task 3.19).
+- [x] **Issue #92**: Implement 'Authoritative Release' Update Check (Idempotency) (Task 3.19).
 - [x] **Issue #93**: Implement `--uninstall` Path (Task 3.20).
 - [x] **Issue #94**: Scaffold `install.ps1` for Windows Parity (Task 3.21).
 - [x] **Debt #102**: Installation Suite Hardening & Crucible Audit.
+- [x] **Task**: Taxonomy Transition - Transition legacy 'Pharos Gold' to 'Authoritative' across all artifacts.
 
 ### Sprint 4.5: Infrastructure & Identity Governance (#84-87) - 📋 Backlog
 - [x] **Issue #100**: Formalize SPM Role and Harden SDLC Governance (Verified Pharos Green).

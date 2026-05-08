@@ -23,7 +23,7 @@ sudo apt update && sudo apt install -y libsecret-1-dev
 ```
 
 ### 🍎 macOS
-If you are running a pre-compiled binary that is not yet notarized, you may need to clear the quarantine flag:
+If you are running a pre-compiled binary that is not yet notarized, the universal installer proactively authorizes the **Authoritative** binary. To manually clear the quarantine flag:
 ```bash
 # Run this from the directory containing the pkd binary
 xattr -d com.apple.quarantine pkd

@@ -117,7 +117,7 @@ function Get-Platform {
     return @{ Platform = "windows"; Arch = $TargetArch }
 }
 
-# Pharos Gold: Local Version Discovery
+# Authoritative: Local Version Discovery
 function Get-LocalVersion {
     $binaryPath = Join-Path $DefaultInstallDir "$BinaryName.exe"
     if (Test-Path $binaryPath) {
@@ -132,7 +132,7 @@ function Get-LocalVersion {
     return "none"
 }
 
-# Pharos Gold: Remote Version Discovery (Header Redirect)
+# Authoritative: Remote Version Discovery (Header Redirect)
 function Get-LatestVersionTag {
     # Why: We use a header-redirect strategy to identify the latest version 
     #      without incurring GitHub API rate limits.
@@ -157,7 +157,7 @@ function Get-LatestVersionTag {
     return "unknown"
 }
 
-# Pharos Gold: Update Check Logic
+# Authoritative: Update Check Logic
 function Check-Update ($Version, [switch]$Force) {
     if ($Force) {
         Log-Info "Bypassing update check (-Force)."
@@ -165,11 +165,11 @@ function Check-Update ($Version, [switch]$Force) {
     }
 
     if ($Version) {
-        Log-Info "Bypassing 'Pharos Gold' update check (Version pinned to $Version)."
+        Log-Info "Bypassing 'Authoritative' update check (Version pinned to $Version)."
         return $true
     }
 
-    Log-Info "Performing 'Pharos Gold' update check..."
+    Log-Info "Performing 'Authoritative' update check..."
     
     $localVer = Get-LocalVersion
     $remoteTag = Get-LatestVersionTag
@@ -191,7 +191,7 @@ function Check-Update ($Version, [switch]$Force) {
     Log-Info "Remote version: $remoteTag"
 
     if ($cleanLocal -eq $cleanRemote) {
-        Log-Info "Pharos Gold: Already up-to-date."
+        Log-Info "Authoritative Release: Already up-to-date."
         Log-Info "Stay remarkable."
         exit 0
     }

@@ -127,7 +127,7 @@ detect_platform() {
     log_info "Platform Detected: ${PLATFORM} (${TARGET_ARCH})"
 }
 
-# Pharos Gold: Local Version Discovery
+# Authoritative: Local Version Discovery
 check_local_version() {
     BINARY_PATH="${INSTALL_DIR}/${BINARY_NAME}"
     if [ -x "${BINARY_PATH}" ]; then
@@ -146,7 +146,7 @@ check_local_version() {
     fi
 }
 
-# Pharos Gold: Remote Version Discovery (Header Redirect)
+# Authoritative: Remote Version Discovery (Header Redirect)
 fetch_latest_version_tag() {
     # Why: We use a header-redirect strategy to identify the latest version 
     #      without incurring GitHub API rate limits for unauthenticated users.
@@ -176,7 +176,7 @@ fetch_latest_version_tag() {
     fi
 }
 
-# Pharos Gold: Update Check Logic
+# Authoritative: Update Check Logic
 check_update() {
     if [ "${FORCE_INSTALL}" = true ]; then
         log_info "Bypassing update check (--force)."
@@ -184,11 +184,11 @@ check_update() {
     fi
 
     if [ -n "${TARGET_VERSION}" ]; then
-        log_info "Bypassing 'Pharos Gold' update check (Version pinned to ${TARGET_VERSION})."
+        log_info "Bypassing 'Authoritative' update check (Version pinned to ${TARGET_VERSION})."
         return 0
     fi
 
-    log_info "Performing 'Pharos Gold' update check..."
+    log_info "Performing 'Authoritative' update check..."
     
     LOCAL_VER=$(check_local_version)
     REMOTE_TAG=$(fetch_latest_version_tag)
@@ -211,7 +211,7 @@ check_update() {
     log_info "Remote version: ${REMOTE_TAG}"
 
     if [ "${CLEAN_LOCAL}" = "${CLEAN_REMOTE}" ]; then
-        printf "${BLUE}[INFO]${NC} ${BOLD}Pharos Gold: Already up-to-date.${NC}\n"
+        printf "${BLUE}[INFO]${NC} ${BOLD}Authoritative Release: Already up-to-date.${NC}\n"
         log_info "Stay remarkable."
         exit 0
     fi

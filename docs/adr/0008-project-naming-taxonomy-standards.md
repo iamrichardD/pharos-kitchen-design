@@ -20,9 +20,10 @@ Adopt a tiered naming strategy:
 2.  **Digital Identity**: **`pharos-kitchen-design`** (Used in URLs, slugs, and repository naming for SEO/AI Agent clarity).
 3.  **Strategic Alias**: **Project Prism** (Used to refer to the meta-architecture and competitive displacement strategy).
 4.  **Internal Shorthand**: **PKD** or **pkd** (Used in internal documentation, package naming, and code prefixes).
+5.  **Quality Standard**: **Authoritative** (Used to describe production-ready, verified, and truth-based artifacts. Replaces the legacy "Pharos Gold" internal designation).
 
 ## Rationale
-Using the full name in marketing and URLs ensures maximum SEO and AI "entity recognition." Using **PKD** internally reduces visual noise and speeds up development while maintaining a high-rigor, professional identity similar to industry standards (e.g., KCL, AQ).
+Using the full name in marketing and URLs ensures maximum SEO and AI "entity recognition." Using **PKD** internally reduces visual noise and speeds up development while maintaining a high-rigor, professional identity similar to industry standards (e.g., KCL, AQ). The **Authoritative** standard signals a shift from "Version-based" to "Truth-based" engineering, providing a professional guarantee for Independent Kitchen Designers.
 
 ## Impact
 - Monorepo packages will be named `pkd-core`, `pkd-bridge`, `pkd-ui`, etc.

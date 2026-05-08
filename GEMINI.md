@@ -60,7 +60,7 @@ EVERY source file (JSON, RS, ASTRO) MUST begin with:
 - **Regression Integrity & Test Remediation**: When developing a feature or remediating a bug, any failure in the existing test suite MUST be resolved as an integral part of the process. You are strictly prohibited from ignoring, bypassing, or suppressing existing test failures to achieve "green" on new work.
 - **Naming Standard:** ALL test functions MUST follow this semantic format:
     - `test_should_[expected_behavior]_when_[state_under_test]`
-- **"Pharos Gold" ReDoS Immunity (Temporal Warden)**: To protect the host event loop from pathological regular expressions (ReDoS), all non-trivial regex execution MUST be offloaded to an isolated environment (e.g., `worker_threads` in Node.js) with a hard temporal sentinel.
+- **"Authoritative" ReDoS Immunity (Temporal Warden)**: To protect the host event loop from pathological regular expressions (ReDoS), all non-trivial regex execution MUST be offloaded to an isolated environment (e.g., `worker_threads` in Node.js) with a hard temporal sentinel.
     - **Sentinel Timeout**: Execution MUST be terminated after a maximum of 100ms.
     - **Fail-Fast Safety**: Upon timeout, the system MUST return a safe sentinel value (e.g., `UNVERIFIED_RAW_DATA`) and log the event for forensic analysis.
 - **Versioning:** Strictly adhere to **Semantic Versioning (SemVer)** (e.g., `v1.0.0`).

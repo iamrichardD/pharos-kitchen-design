@@ -40,5 +40,5 @@ The SPM role provides the "Connective Tissue" between technical implementation a
 
 ## Impact
 - **Improved Traceability**: Clearer links between GitHub Issues, ADRs, and implementation.
-- **Reduced Technical Debt**: Stricter enforcement of "Pharos Gold" standards during the Strategy phase.
+- **Reduced Technical Debt**: Stricter enforcement of **Authoritative** standards during the Strategy phase.
 - **Enhanced Stakeholder Confidence**: Consistent delivery of high-value, verified "Pharos Green" artifacts.

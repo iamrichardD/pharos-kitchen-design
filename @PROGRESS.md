@@ -163,10 +163,11 @@
 - [x] **Issue #83**: Harden Install Script $PATH Audit (Task 3.14). (Verified Shell Integration)
 - [x] **Issue #90**: Implement `check_writable` Logic for local installs (Task 3.17). (Verified Fail-Fast)
 - [x] **Issue #91**: Add Versioning Support (`-v`) to `install.sh` (Task 3.18). (Verified Version Pinning)
-- [x] **Issue #92**: Implement 'Pharos Gold' Update Check (Idempotency) (Task 3.19). (Verified Pharos Gold)
+- [x] **Issue #92**: Implement 'Authoritative Release' Update Check (Idempotency) (Task 3.19). (Verified Authoritative)
 - [x] **Issue #93**: Implement `--uninstall` Path (Task 3.20). (Verified Exit Strategy)
 - [x] **Issue #94**: Scaffold `install.ps1` for Windows Parity (Task 3.21). (Verified Windows Parity)
 - [x] **Debt #102**: Installation Suite Hardening & Crucible Audit. (Verified Pharos Green)
+- [x] **Terminology Transition**: Formally codified "Authoritative Release" in ADR-0008 and synchronized all governance files (GEMINI.md, ADR-0028). (Verified Taxonomy Green)
 
 ### Sprint 4.5: Infrastructure & Identity Governance (#84-87) - 📋 Backlog
 - [ ] **Issue #84**: Configure Dual-Stream Release Pipeline (Task 3.15).
