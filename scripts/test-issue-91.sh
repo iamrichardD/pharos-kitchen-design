@@ -87,3 +87,35 @@ else
     log_error "Test Failed: Update check not bypassed."
     exit 1
 fi
+
+log_info "Testing version string validation (SEC-91-001)..."
+# We'll run a subshell that executes install.sh with a malicious version
+if (sh ./scripts/install.sh --version "../../malicious" 2>&1 | grep -q "Invalid version format"); then
+    log_info "Test Passed: Invalid version format correctly rejected."
+else
+    log_error "Test Failed: Malicious version string was not rejected."
+    exit 1
+fi
+
+# Let's do a more direct test of the logic we added
+test_version_validation() {
+    local v="$1"
+    if ! echo "${v}" | grep -Eq '^v?[0-9]+\.[0-9]+\.[0-9]+$'; then
+        return 1
+    fi
+    return 0
+}
+
+if ! test_version_validation "../../malicious"; then
+    log_info "Test Passed: Regex rejected path traversal."
+else
+    log_error "Test Failed: Regex allowed path traversal."
+    exit 1
+fi
+
+if test_version_validation "v1.2.3" && test_version_validation "1.2.3"; then
+    log_info "Test Passed: Regex allowed valid versions."
+else
+    log_error "Test Failed: Regex rejected valid versions."
+    exit 1
+fi

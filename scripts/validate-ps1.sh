@@ -36,6 +36,9 @@ echo "🔍 Validating internal function definitions..."
     . ./scripts/install.ps1
     if ((Get-Command Write-Logo -ErrorAction SilentlyContinue) -and 
         (Get-Command Get-Platform -ErrorAction SilentlyContinue) -and
+        (Get-Command Get-LocalVersion -ErrorAction SilentlyContinue) -and
+        (Get-Command Get-LatestVersionTag -ErrorAction SilentlyContinue) -and
+        (Get-Command Check-Update -ErrorAction SilentlyContinue) -and
         (Get-Command Test-IsWritable -ErrorAction SilentlyContinue) -and
         (Get-Command Fetch-And-Verify -ErrorAction SilentlyContinue)) {
         Write-Host '✅ All core functions are defined.'

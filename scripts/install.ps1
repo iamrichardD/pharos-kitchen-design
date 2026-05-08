@@ -42,6 +42,13 @@ param(
     [switch]$Force
 )
 
+# Security [SEC-91-001]: Validate version string pattern to prevent 
+# path traversal or injection during URL construction.
+if ($Version -and $Version -notmatch '^v?[0-9]+\.[0-9]+\.[0-9]+$') {
+    Write-Error "Invalid version format: $Version. Expected format: v1.2.3 or 1.2.3"
+    exit 1
+}
+
 # Enforce TLS 1.2/1.3 for secure downloads (Required for legacy PowerShell 5.1 compatibility)
 try {
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls13
@@ -106,6 +113,89 @@ function Get-Platform {
 
     Log-Info "Platform Detected: windows ($TargetArch)"
     return @{ Platform = "windows"; Arch = $TargetArch }
+}
+
+# Pharos Gold: Local Version Discovery
+function Get-LocalVersion {
+    $binaryPath = Join-Path $DefaultInstallDir "$BinaryName.exe"
+    if (Test-Path $binaryPath) {
+        try {
+            # We capture the version string (e.g., pkd 1.2.3) and extract the semver part.
+            $raw = & $binaryPath --version 2>$null
+            if ($raw -match "pkd\s+(\S+)") {
+                return $matches[1]
+            }
+        } catch {}
+    }
+    return "none"
+}
+
+# Pharos Gold: Remote Version Discovery (Header Redirect)
+function Get-LatestVersionTag {
+    # Why: We use a header-redirect strategy to identify the latest version 
+    #      without incurring GitHub API rate limits.
+    $url = "$RepoUrl/releases/latest"
+    
+    try {
+        $request = [System.Net.WebRequest]::Create($url)
+        $request.Method = "HEAD"
+        $request.AllowAutoRedirect = $false
+        $response = $request.GetResponse()
+        $location = $response.Headers["Location"]
+        $response.Close()
+        
+        # Security [SEC-92-001]: Validate redirect location.
+        if ($location -match "github\.com/.+/releases/tag/(.+)") {
+            return $matches[1].Trim().Replace("`r", "")
+        }
+    } catch {
+        # Fallback for older PowerShell versions
+        Log-Warn "Could not determine remote version via HEAD request."
+    }
+    return "unknown"
+}
+
+# Pharos Gold: Update Check Logic
+function Check-Update ($Version, [switch]$Force) {
+    if ($Force) {
+        Log-Info "Bypassing update check (-Force)."
+        return $true
+    }
+
+    if ($Version) {
+        Log-Info "Bypassing 'Pharos Gold' update check (Version pinned to $Version)."
+        return $true
+    }
+
+    Log-Info "Performing 'Pharos Gold' update check..."
+    
+    $localVer = Get-LocalVersion
+    $remoteTag = Get-LatestVersionTag
+
+    if ($remoteTag -eq "unknown") {
+        Log-Warn "Could not determine latest remote version. Proceeding."
+        return $true
+    }
+
+    if ($localVer -eq "none") {
+        Log-Info "No local installation found. Proceeding with fresh install."
+        return $true
+    }
+
+    $cleanLocal = $localVer.TrimStart('v')
+    $cleanRemote = $remoteTag.TrimStart('v')
+
+    Log-Info "Local version: $localVer"
+    Log-Info "Remote version: $remoteTag"
+
+    if ($cleanLocal -eq $cleanRemote) {
+        Log-Info "Pharos Gold: Already up-to-date."
+        Log-Info "Stay remarkable."
+        exit 0
+    }
+
+    Log-Info "Update available: $localVer -> $remoteTag"
+    return $true
 }
 
 # Environment Audit
@@ -286,6 +376,7 @@ function Main {
     Log-Info "Initializing Pharos Installation Environment..."
 
     $platform = Get-Platform
+    Check-Update -Version $Version -Force:$Force
     Audit-Environment -Force:$Force
     
     $binaryPath = Fetch-And-Verify -PlatformInfo $platform -Version $Version -Force:$Force

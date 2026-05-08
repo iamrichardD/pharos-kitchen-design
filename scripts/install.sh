@@ -71,7 +71,16 @@ show_help() {
 # Parse Arguments
 while [ "$#" -gt 0 ]; do
     case "$1" in
-        -v|--version) TARGET_VERSION="$2"; shift 2 ;;
+        -v|--version)
+            TARGET_VERSION="$2"
+            # Security [SEC-91-001]: Validate version string pattern to prevent 
+            # path traversal or injection during URL construction.
+            if ! echo "${TARGET_VERSION}" | grep -Eq '^v?[0-9]+\.[0-9]+\.[0-9]+$'; then
+                log_error "Invalid version format: ${TARGET_VERSION}"
+                log_error "Expected format: v1.2.3 or 1.2.3"
+                exit 1
+            fi
+            shift 2 ;;
         -f|--force) FORCE_INSTALL=true; shift ;;
         -h|--help) show_help; exit 0 ;;
         *) log_error "Unknown option: $1"; show_help; exit 1 ;;
@@ -211,8 +220,10 @@ check_writable() {
 
     # We use a transactional write/remove test to bypass false positives 
     # from [ -w ] on certain network-mounted filesystems (NFS/SMB).
+    # Security [SEC-91-002]: Append random suffix to prevent predictable 
+    # filenames in shared directories.
     local test_file
-    test_file="${target_dir}/.pharos_write_test_$(date +%s)"
+    test_file="${target_dir}/.pharos_write_test_$(date +%s)_${RANDOM:-$$}"
     
     # 1. Direct Check
     if [ -d "${target_dir}" ]; then
@@ -232,7 +243,7 @@ check_writable() {
             parent_dir=$(dirname "${parent_dir}")
         done
         
-        test_file="${parent_dir}/.pharos_write_test_$(date +%s)"
+        test_file="${parent_dir}/.pharos_write_test_$(date +%s)_${RANDOM:-$$}"
         if touch "${test_file}" 2>/dev/null; then
             rm -f "${test_file}"
             log_info "Parent directory ${parent_dir} is writable. No sudo needed for creation."
