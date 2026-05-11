@@ -179,12 +179,19 @@
 - [ ] **Issue #88**: Implement `pkd core pulse` Command (Logic Center for JIT).
 - [ ] **Issue #89**: Develop Manufacturer Maintenance Sidecar (Task 4.22).
 
-### Sprint 4.9: The IKD Empowerment Sprint (2026-05-11) - 🔄 PLANNING
+### Sprint 4.9: The IKD Empowerment Sprint (2026-05-11) - 🚀 ACTIVE
 - **Goal**: Empower Independent Kitchen Designers (IKD) with modern, high-efficiency tools via "Ghost Links" and Unified Interop metadata standards.
-- [ ] **Issue #31**: Unified Interop Schema (Task 4.2).
+- [x] **Issue #31**: Unified Interop Schema (Task 4.2).
 - [ ] **Issue #68**: WASM Engine Performance (Task 4.18).
 - [ ] **Issue #52**: Protocol 'OR' grouping & Temporal Warden (Task 4.15).
 - [ ] **Issue #30**: "Ghost Link" Prototype (Task 4.3).
+
+#### [2026-05-11] - Unified Interop Schema (Memory-Safe FFI)
+- **Refactored** the Pharos FFI boundary from legacy null-terminated strings (`*const c_char`) to modern, length-prefixed byte slices (`*const u8`, `usize`) per ADR-0025.
+- **Implemented** Shift-Left Security sentinels (ADR-0016) in Rust to enforce a 1MB `MAX_JSON_SIZE` gate before memory access.
+- **Enabled** zero-allocation marshalling in the .NET 8.0 Revit Bridge using `ReadOnlySpan<byte>`.
+- **Verified** 25 integrated tests (15 Rust, 10 C#) in Podman containers.
+- **Audited** via Pharos Crucible (Result: Pharos Green).
 
 #### [2026-05-02] - /install Route & Platform Detection
 - **Implemented** high-fidelity `/install` landing page with deterministic platform detection.
