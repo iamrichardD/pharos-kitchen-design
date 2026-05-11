@@ -200,6 +200,8 @@
 - **Enabled** Zero-Host site deployments in `deploy-site.yml` via ephemeral container artifact extraction (`podman cp`), eliminating host-side Node.js dependencies.
 - **Updated** `scripts/build-wasm.sh` and `packages/truth-engine` tests to support workspace-aware artifact locations and new WASM hashes.
 - **Verified** monolithic stability via `pulse.sh` (Result: Pharos Green).
+- **Council Review (PR #106)**: Accepted the 13-minute build as the new **Safe Baseline**. Prioritized supply chain integrity (SHA-256 pinning) and Zero-Host parity over raw speed. Rejected global Podman storage persistence to mitigate 'Poisoned Layer' risks.
+- **Strategic Decision**: Established high-rigor CI/CD foundation; performance betterment will now focus on dependency pruning (Issue #107) and parallel sharding (Issue #108).
 
 #### [2026-05-02] - /install Route & Platform Detection
 - **Implemented** high-fidelity `/install` landing page with deterministic platform detection.

@@ -62,11 +62,15 @@ jobs:
             ${{ runner.os }}-deps-
 
       - name: "🔍 Execute Integrated Pulse Validation (Zero-Host)"
-        run: bash scripts/pulse.sh
+        run: |
+          mkdir -p ~/.cargo/registry ~/.cargo/git ~/.npm
+          bash scripts/pulse.sh
 
       - name: "🏗️ Build Site (Zero-Host)"
         run: |
-          podman build -t pkd-ts -f Containerfile.ts --build-arg BUILD_MODE=$BUILD_MODE .
+          podman build -t pkd-ts -f Containerfile.ts \
+            --build-arg BUILD_MODE=$BUILD_MODE \
+            --volume "$HOME/.npm:/root/.npm:z" .
           # Extract dist folder from the built image (ADR-0016)
           CONTAINER_ID=$(podman create pkd-ts)
           podman cp $CONTAINER_ID:/work/apps/marketing/dist ./apps/marketing/dist
