@@ -15,6 +15,9 @@ edition = "2021"
 authors = ["Richard D. <https://github.com/iamrichardd>"]
 license = "FSL-1.1"
 
+[lib]
+path = "src/lib.rs"
+
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
 thiserror = "1.0"
