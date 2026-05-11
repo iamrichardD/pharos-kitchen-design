@@ -23,10 +23,15 @@ bash scripts/test-quoting.sh
 
 # 1. Build the unified pulse container (Stages: Rust -> TS -> .NET Bridge)
 # We use unconfined seccomp to ensure consistent environment parity during the build.
+# We mount volume caches to persist built dependencies on the host for GHA caching.
+mkdir -p target-cache
 podman build \
     --security-opt seccomp=unconfined \
     -t pkd-pulse \
     --build-arg BUILD_MODE="$BUILD_MODE" \
+    --volume "$(pwd)/target-cache:/work/target:z" \
+    --volume "$HOME/.cargo/registry:/usr/local/cargo/registry:z" \
+    --volume "$HOME/.cargo/git:/usr/local/cargo/git:z" \
     -f Containerfile.pulse .
 
 # 2. Execute the final integrated handshake in the container

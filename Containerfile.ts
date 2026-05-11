@@ -9,6 +9,7 @@
 # ========================================================================
 
 FROM public.ecr.aws/docker/library/node:24-slim AS base
+ARG BUILD_MODE=debug
 RUN apt-get update && apt-get install -y \
     python3 make g++ curl openssl && \
     rm -rf /var/lib/apt/lists/*
