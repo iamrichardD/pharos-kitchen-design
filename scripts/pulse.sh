@@ -11,7 +11,11 @@
 
 set -e
 
-echo "🚀 Starting PKD Pulse: Integrated Ecosystem Validation"
+# Determine Build Mode (Default to debug, override via env)
+# Why: Allows CI to trigger release mode for main branch.
+BUILD_MODE=${BUILD_MODE:-debug}
+
+echo "🚀 Starting PKD Pulse: Integrated Ecosystem Validation [Mode: $BUILD_MODE]"
 
 # 0. Infrastructure Verification: Argument Quoting & Container FFI
 echo "   [Infra] Verifying Podman-Wrapper Argument Quoting..."
@@ -22,6 +26,7 @@ bash scripts/test-quoting.sh
 podman build \
     --security-opt seccomp=unconfined \
     -t pkd-pulse \
+    --build-arg BUILD_MODE="$BUILD_MODE" \
     -f Containerfile.pulse .
 
 # 2. Execute the final integrated handshake in the container

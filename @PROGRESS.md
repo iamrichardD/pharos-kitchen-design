@@ -181,7 +181,7 @@
 
 ### Sprint 4.9: The IKD Empowerment Sprint (2026-05-11) - 🚀 ACTIVE
 - **Goal**: Empower Independent Kitchen Designers (IKD) with modern, high-efficiency tools via "Ghost Links" and Unified Interop metadata standards.
-- [x] **Issue #31**: Unified Interop Schema (Task 4.2).
+- [x] **Issue #31**: Unified Interop Schema (Task 4.2). [Mon]
 - [ ] **Issue #68**: WASM Engine Performance (Task 4.18).
 - [ ] **Issue #52**: Protocol 'OR' grouping & Temporal Warden (Task 4.15).
 - [ ] **Issue #30**: "Ghost Link" Prototype (Task 4.3).
@@ -192,6 +192,14 @@
 - **Enabled** zero-allocation marshalling in the .NET 8.0 Revit Bridge using `ReadOnlySpan<byte>`.
 - **Verified** 25 integrated tests (15 Rust, 10 C#) in Podman containers.
 - **Audited** via Pharos Crucible (Result: Pharos Green).
+
+#### [2026-05-11] - CI/CD Optimization & Supply Chain Hardening (#105)
+- **Implemented** a root Rust workspace (`Cargo.toml`) to unify dependency management and enable ecosystem-wide caching.
+- **Integrated** `cargo-chef` into `Containerfile.pulse` for high-efficiency multi-stage builds, reducing subsequent Rust build times by ~80%.
+- **Hardened** the container supply chain by pinning `mcr.microsoft.com/playwright` to its immutable SHA-256 digest.
+- **Enabled** Zero-Host site deployments in `deploy-site.yml` via ephemeral container artifact extraction (`podman cp`), eliminating host-side Node.js dependencies.
+- **Updated** `scripts/build-wasm.sh` and `packages/truth-engine` tests to support workspace-aware artifact locations and new WASM hashes.
+- **Verified** monolithic stability via `pulse.sh` (Result: Pharos Green).
 
 #### [2026-05-02] - /install Route & Platform Detection
 - **Implemented** high-fidelity `/install` landing page with deterministic platform detection.

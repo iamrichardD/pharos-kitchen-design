@@ -46,7 +46,18 @@ for dialect in packages/dialects/*; do
         (cd "$dialect" && cargo build --target wasm32-unknown-unknown --release)
         
         # Stage the artifact
-        cp "$dialect/target/wasm32-unknown-unknown/release/$wasm_name.wasm" "$STAGING_DIR/"
+        # Handle both workspace (target at root) and independent (target in dialect)
+        TARGET_FILE="$dialect/target/wasm32-unknown-unknown/release/$wasm_name.wasm"
+        WORKSPACE_TARGET="target/wasm32-unknown-unknown/release/$wasm_name.wasm"
+        
+        if [ -f "$TARGET_FILE" ]; then
+            cp "$TARGET_FILE" "$STAGING_DIR/"
+        elif [ -f "$WORKSPACE_TARGET" ]; then
+            cp "$WORKSPACE_TARGET" "$STAGING_DIR/"
+        else
+            echo "❌ Error: Could not find WASM artifact for $dialect_name (Checked: $TARGET_FILE and $WORKSPACE_TARGET)"
+            exit 1
+        fi
         echo "   ✅ Staged: $STAGING_DIR/$wasm_name.wasm"
     fi
 done
