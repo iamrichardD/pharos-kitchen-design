@@ -1,11 +1,11 @@
 /* ========================================================================
  * Project: Pharos Kitchen Design (Project Prism)
- * Component: Core / WASM Bindings
+ * Component: Core / Interop Bindings
  * File: bindings.rs
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
- * Purpose: WASM bindings for consuming pkd-core in web environments.
- * Traceability: Issue #9, ADR 0002
+ * Purpose: Unified WASM and C-ABI bindings for multi-platform interop.
+ * Traceability: Issue #9, #31, ADR-0002, ADR-0025
  * ======================================================================== */
 
 use wasm_bindgen::prelude::*;
@@ -52,10 +52,11 @@ pub fn verify_lod_wasm(metadata_js: JsValue, target_lod: String) -> Result<bool,
     }
 }
 
-// --- C-ABI (Issue #32: Revit Bridge Interop) ---
-// Using JSON strings as the universal "Glue" to maintain Metadata-First Truth.
+// --- C-ABI (Issue #31: Unified Interop Schema) ---
+// Using JSON via Span<byte> (byte slices) to eliminate allocation and null-termination risks.
+// Strictly aligned with ADR-0025 (.NET 8.0+ Mandate).
 
-use std::ffi::{CStr, CString};
+use std::ffi::{CString};
 use std::os::raw::c_char;
 use std::path::Path;
 use std::collections::BTreeMap;
@@ -75,28 +76,39 @@ pub struct InteropResponse {
 
 use std::panic::catch_unwind;
 
+/// Helper to safely obtain a byte slice from raw FFI parameters.
+/// Why: Enforces the MAX_JSON_SIZE sentinel before any memory access.
+fn safe_read_bytes<'a>(ptr: *const u8, len: usize) -> Result<&'a [u8], ValidationError> {
+    if ptr.is_null() {
+        return Err(ValidationError::SliceError("Null pointer provided".to_string()));
+    }
+    // Shift-Left Security: Enforce size sentinel before memory access
+    if len > MAX_JSON_SIZE {
+        return Err(ValidationError::SliceError(format!("Payload exceeds 1MB limit ({} bytes)", len)));
+    }
+    unsafe {
+        Ok(std::slice::from_raw_parts(ptr, len))
+    }
+}
+
+/// Helper to safely obtain a UTF-8 string from raw FFI parameters.
+fn safe_read_str<'a>(ptr: *const u8, len: usize) -> Result<&'a str, ValidationError> {
+    let bytes = safe_read_bytes(ptr, len)?;
+    std::str::from_utf8(bytes).map_err(|e| ValidationError::SliceError(format!("Invalid UTF-8: {}", e)))
+}
+
 /// Hydrates a "Ghost Link" with verified Pharos metadata.
 /// Why: Provides immediate BIM hydration for unmodeled placeholders.
-/// Traceability: Issue #30
+/// Traceability: Issue #30, #31
 #[no_mangle]
-pub extern "C" fn pkd_get_ghost_metadata(metadata_id: *const c_char) -> *mut c_char {
+pub extern "C" fn pkd_get_ghost_metadata(ptr: *const u8, len: usize) -> *mut c_char {
     let result = catch_unwind(|| {
-        if metadata_id.is_null() {
-            let resp = InteropResponse {
-                status: "ERROR".to_string(),
-                errors: vec![ValidationError::SliceError("Null metadata_id provided".to_string())],
-                data: None,
-            };
-            return serialize_interop_response(&resp);
-        }
-
-        let id_cstr = unsafe { CStr::from_ptr(metadata_id) };
-        let id_str = match id_cstr.to_str() {
+        let id_str = match safe_read_str(ptr, len) {
             Ok(s) => s,
-            Err(_) => {
+            Err(e) => {
                 let resp = InteropResponse {
                     status: "ERROR".to_string(),
-                    errors: vec![ValidationError::SliceError("Invalid UTF-8 in metadata_id".to_string())],
+                    errors: vec![e],
                     data: None,
                 };
                 return serialize_interop_response(&resp);
@@ -104,8 +116,6 @@ pub extern "C" fn pkd_get_ghost_metadata(metadata_id: *const c_char) -> *mut c_c
         };
 
         // Basic Whitelist (Issue #30)
-        // TODO: In the next slice, integrate this with the BakeEngine sharded index (ADR-0015)
-        // to move beyond this hardcoded scaffold and support dynamic registry lookups.
         if id_str == "PHX-DW-001" {
             let mut parameters = BTreeMap::new();
             parameters.insert("manufacturer".to_string(), ParameterValue::Text("Hobart".to_string()));
@@ -186,26 +196,14 @@ pub extern "C" fn pkd_get_ghost_metadata(metadata_id: *const c_char) -> *mut c_c
 /// Why: Eliminates redundant schema parsing overhead for high-frequency validation.
 /// Safety: Returns null if JSON is invalid, exceeds MAX_JSON_SIZE, or panics.
 #[no_mangle]
-pub extern "C" fn pkd_load_schema(schema_json: *const c_char) -> *mut PharosSchema {
+pub extern "C" fn pkd_load_schema(ptr: *const u8, len: usize) -> *mut PharosSchema {
     let result = catch_unwind(|| {
-        if schema_json.is_null() {
-            return std::ptr::null_mut();
-        }
-
-        let schema_cstr = unsafe { CStr::from_ptr(schema_json) };
-        let bytes = schema_cstr.to_bytes();
-        
-        // Shift-Left Security: Prevent DoS via massive JSON payloads
-        if bytes.len() > MAX_JSON_SIZE {
-            return std::ptr::null_mut();
-        }
-
-        let schema_str = match schema_cstr.to_str() {
-            Ok(s) => s,
+        let bytes = match safe_read_bytes(ptr, len) {
+            Ok(b) => b,
             Err(_) => return std::ptr::null_mut(),
         };
 
-        let schema: PharosSchema = match serde_json::from_str(schema_str) {
+        let schema: PharosSchema = match serde_json::from_slice(bytes) {
             Ok(s) => s,
             Err(_) => return std::ptr::null_mut(),
         };
@@ -223,43 +221,31 @@ pub extern "C" fn pkd_load_schema(schema_json: *const c_char) -> *mut PharosSche
 /// Why: High-performance validation path for geometry/metadata streams.
 /// Safety: Catches panics to prevent host process (Revit) from crashing.
 #[no_mangle]
-pub extern "C" fn pkd_validate_with_handle(handle: *mut PharosSchema, metadata_json: *const c_char) -> *mut c_char {
+pub extern "C" fn pkd_validate_with_handle(handle: *mut PharosSchema, ptr: *const u8, len: usize) -> *mut c_char {
     let result = catch_unwind(|| {
-        if handle.is_null() || metadata_json.is_null() {
+        if handle.is_null() {
             let resp = InteropResponse {
                 status: "ERROR".to_string(),
-                errors: vec![ValidationError::SliceError("Null pointer provided".to_string())],
+                errors: vec![ValidationError::SliceError("Null schema handle provided".to_string())],
                 data: None,
             };
             return serialize_interop_response(&resp);
         }
 
         let schema = unsafe { &*handle };
-        let metadata_cstr = unsafe { CStr::from_ptr(metadata_json) };
-        
-        // Shift-Left Security: Limit metadata size to prevent memory exhaustion
-        if metadata_cstr.to_bytes().len() > MAX_JSON_SIZE {
-            let resp = InteropResponse {
-                status: "ERROR".to_string(),
-                errors: vec![ValidationError::SliceError("Metadata exceeds 1MB limit".to_string())],
-                data: None,
-            };
-            return serialize_interop_response(&resp);
-        }
-
-        let metadata_str = match metadata_cstr.to_str() {
-            Ok(s) => s,
-            Err(_) => {
-                let resp = InteropResponse {
+        let bytes = match safe_read_bytes(ptr, len) {
+            Ok(b) => b,
+            Err(e) => {
+                 let resp = InteropResponse {
                     status: "ERROR".to_string(),
-                    errors: vec![ValidationError::SliceError("Invalid UTF-8 in metadata".to_string())],
+                    errors: vec![e],
                     data: None,
                 };
                 return serialize_interop_response(&resp);
             }
         };
 
-        let metadata: PharosMetadata = match serde_json::from_str(metadata_str) {
+        let metadata: PharosMetadata = match serde_json::from_slice(bytes) {
             Ok(m) => m,
             Err(e) => {
                 let resp = InteropResponse {
@@ -322,8 +308,11 @@ pub extern "C" fn pkd_free_schema(handle: *mut PharosSchema) {
 }
 
 #[no_mangle]
-pub extern "C" fn pkd_validate_metadata_json(schema_json: *const c_char, metadata_json: *const c_char) -> *mut c_char {
-    let handle = pkd_load_schema(schema_json);
+pub extern "C" fn pkd_validate_metadata_json(
+    schema_ptr: *const u8, schema_len: usize, 
+    metadata_ptr: *const u8, metadata_len: usize
+) -> *mut c_char {
+    let handle = pkd_load_schema(schema_ptr, schema_len);
     if handle.is_null() {
          let resp = InteropResponse {
             status: "ERROR".to_string(),
@@ -333,7 +322,7 @@ pub extern "C" fn pkd_validate_metadata_json(schema_json: *const c_char, metadat
         return serialize_interop_response(&resp);
     }
 
-    let result = pkd_validate_with_handle(handle, metadata_json);
+    let result = pkd_validate_with_handle(handle, metadata_ptr, metadata_len);
     pkd_free_schema(handle);
     result
 }
@@ -342,38 +331,29 @@ pub extern "C" fn pkd_validate_metadata_json(schema_json: *const c_char, metadat
 /// Why: High-rigor supply chain security for all Pharos artifact ingestion.
 /// Safety: Returns serialized JSON error if path is invalid, hash mismatches, or file is missing.
 #[no_mangle]
-pub extern "C" fn pkd_verify_manifest(file_path: *const c_char, expected_hash: *const c_char) -> *mut c_char {
+pub extern "C" fn pkd_verify_manifest(
+    path_ptr: *const u8, path_len: usize, 
+    hash_ptr: *const u8, hash_len: usize
+) -> *mut c_char {
     let result = catch_unwind(|| {
-        if file_path.is_null() || expected_hash.is_null() {
-            let resp = InteropResponse {
-                status: "ERROR".to_string(),
-                errors: vec![ValidationError::SliceError("Null pointer provided for path or hash".to_string())],
-                data: None,
-            };
-            return serialize_interop_response(&resp);
-        }
-
-        let path_cstr = unsafe { CStr::from_ptr(file_path) };
-        let hash_cstr = unsafe { CStr::from_ptr(expected_hash) };
-
-        let path_str = match path_cstr.to_str() {
+        let path_str = match safe_read_str(path_ptr, path_len) {
             Ok(s) => s,
-            Err(_) => {
+            Err(e) => {
                 let resp = InteropResponse {
                     status: "ERROR".to_string(),
-                    errors: vec![ValidationError::SliceError("INVALID_PATH_ENCODING: Path contains invalid UTF-8".to_string())],
+                    errors: vec![e],
                     data: None,
                 };
                 return serialize_interop_response(&resp);
             }
         };
 
-        let hash_str = match hash_cstr.to_str() {
+        let hash_str = match safe_read_str(hash_ptr, hash_len) {
             Ok(s) => s,
-            Err(_) => {
+            Err(e) => {
                 let resp = InteropResponse {
                     status: "ERROR".to_string(),
-                    errors: vec![ValidationError::SliceError("INVALID_HASH_ENCODING: Hash contains invalid UTF-8".to_string())],
+                    errors: vec![e],
                     data: None,
                 };
                 return serialize_interop_response(&resp);
@@ -456,10 +436,10 @@ mod tests {
 
     #[test]
     fn test_should_return_ghost_metadata_when_id_is_phx_dw_001() {
-        let id = CString::new("PHX-DW-001").unwrap();
-        let ptr = pkd_get_ghost_metadata(id.as_ptr());
+        let id = "PHX-DW-001";
+        let ptr = pkd_get_ghost_metadata(id.as_ptr(), id.len());
         
-        let result_cstr = unsafe { CStr::from_ptr(ptr) };
+        let result_cstr = unsafe { std::ffi::CStr::from_ptr(ptr) };
         let result_json = result_cstr.to_str().unwrap();
         
         let resp: InteropResponse = serde_json::from_str(result_json).unwrap();
@@ -479,16 +459,58 @@ mod tests {
 
     #[test]
     fn test_should_return_error_when_id_not_found() {
-        let id = CString::new("INVALID-ID").unwrap();
-        let ptr = pkd_get_ghost_metadata(id.as_ptr());
+        let id = "INVALID-ID";
+        let ptr = pkd_get_ghost_metadata(id.as_ptr(), id.len());
         
-        let result_cstr = unsafe { CStr::from_ptr(ptr) };
+        let result_cstr = unsafe { std::ffi::CStr::from_ptr(ptr) };
         let result_json = result_cstr.to_str().unwrap();
         
         let resp: InteropResponse = serde_json::from_str(result_json).unwrap();
         assert_eq!(resp.status, "ERROR");
         assert!(resp.errors.len() > 0);
 
+        pkd_free_string(ptr);
+    }
+
+    #[test]
+    fn test_should_serialize_complex_metadata_when_bridge_invoked_with_byte_slice() {
+        let schema_json = include_str!("../schema/pharos-schema.json");
+        let metadata_json = include_str!("../samples/commercial-dishwasher.json");
+
+        let ptr = pkd_validate_metadata_json(
+            schema_json.as_ptr(), schema_json.len(),
+            metadata_json.as_ptr(), metadata_json.len()
+        );
+
+        let result_cstr = unsafe { std::ffi::CStr::from_ptr(ptr) };
+        let result_str = result_cstr.to_str().unwrap();
+        let resp: InteropResponse = serde_json::from_str(result_str).unwrap();
+        
+        if resp.status != "OK" {
+            panic!("Validation failed with status: {}, errors: {:?}", resp.status, resp.errors);
+        }
+        
+        pkd_free_string(ptr);
+    }
+
+    #[test]
+    fn test_should_reject_payload_when_len_exceeds_max_size_sentinel() {
+        let oversized_data = vec![0u8; MAX_JSON_SIZE + 1];
+        let ptr = pkd_load_schema(oversized_data.as_ptr(), oversized_data.len());
+        
+        assert!(ptr.is_null());
+    }
+
+    #[test]
+    fn test_should_return_safe_error_when_invalid_utf8_bytes_provided() {
+        let invalid_utf8 = vec![0 as u8, 159, 146, 150]; // Invalid UTF-8 sequence
+        let ptr = pkd_get_ghost_metadata(invalid_utf8.as_ptr(), invalid_utf8.len());
+        
+        let result_cstr = unsafe { std::ffi::CStr::from_ptr(ptr) };
+        let resp: InteropResponse = serde_json::from_str(result_cstr.to_str().unwrap()).unwrap();
+        
+        assert_eq!(resp.status, "ERROR");
+        assert!(resp.errors[0].to_string().contains("Invalid UTF-8"));
         pkd_free_string(ptr);
     }
 }

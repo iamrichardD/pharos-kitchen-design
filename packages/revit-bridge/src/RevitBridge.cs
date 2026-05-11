@@ -96,33 +96,44 @@ namespace Pkd.RevitBridge
         private const string LibName = "pkd_core";
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern PharosSchemaHandle pkd_load_schema(string schemaJson);
+        private static extern unsafe PharosSchemaHandle pkd_load_schema(byte* ptr, nuint length);
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern SafeStringHandle pkd_validate_with_handle(PharosSchemaHandle handle, string metadataJson);
+        private static extern unsafe SafeStringHandle pkd_validate_with_handle(PharosSchemaHandle handle, byte* ptr, nuint length);
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern SafeStringHandle pkd_validate_metadata_json(string schemaJson, string metadataJson);
+        private static extern unsafe SafeStringHandle pkd_validate_metadata_json(
+            byte* schemaPtr, nuint schemaLen, 
+            byte* metadataPtr, nuint metadataLen);
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern SafeStringHandle pkd_verify_manifest(string filePath, string expectedHash);
+        private static extern unsafe SafeStringHandle pkd_verify_manifest(
+            byte* pathPtr, nuint pathLen, 
+            byte* hashPtr, nuint hashLen);
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern SafeStringHandle pkd_trigger_panic();
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern SafeStringHandle pkd_get_ghost_metadata(string metadataId);
+        private static extern unsafe SafeStringHandle pkd_get_ghost_metadata(byte* ptr, nuint length);
 
         /// <summary>
         /// Retrieves verified metadata for a "Ghost Link" prototype.
         /// Why: Enables metadata-first hydration of procedural geometry.
-        /// Traceability: Issue #30
+        /// Traceability: Issue #30, #31
         /// </summary>
         public ValidationResponse GetGhostMetadata(string metadataId)
         {
-            using (var result = pkd_get_ghost_metadata(metadataId))
+            byte[] idBytes = Encoding.UTF8.GetBytes(metadataId);
+            unsafe
             {
-                return ProcessRawResponse(result);
+                fixed (byte* ptr = idBytes)
+                {
+                    using (var result = pkd_get_ghost_metadata(ptr, (nuint)idBytes.Length))
+                    {
+                        return ProcessRawResponse(result);
+                    }
+                }
             }
         }
 
@@ -134,7 +145,7 @@ namespace Pkd.RevitBridge
             }
         }
 
-        public string GetVersion() => "0.2.1";
+        public string GetVersion() => "0.3.0"; // Incremented for Issue #31 FFI Break
 
         /// <summary>
         /// Loads a schema into resident memory.
@@ -142,12 +153,19 @@ namespace Pkd.RevitBridge
         /// </summary>
         public PharosSchemaHandle LoadSchema(string schemaJson)
         {
-            var handle = pkd_load_schema(schemaJson);
-            if (handle.IsInvalid)
+            byte[] bytes = Encoding.UTF8.GetBytes(schemaJson);
+            unsafe
             {
-                throw new InvalidOperationException("Failed to load Pharos Schema. Ensure JSON is valid and under 1MB.");
+                fixed (byte* ptr = bytes)
+                {
+                    var handle = pkd_load_schema(ptr, (nuint)bytes.Length);
+                    if (handle.IsInvalid)
+                    {
+                        throw new InvalidOperationException("Failed to load Pharos Schema. Ensure JSON is valid and under 1MB.");
+                    }
+                    return handle;
+                }
             }
-            return handle;
         }
 
         /// <summary>
@@ -158,17 +176,36 @@ namespace Pkd.RevitBridge
             if (handle == null || handle.IsInvalid)
                 throw new ArgumentException("Invalid schema handle");
 
-            using (var result = pkd_validate_with_handle(handle, metadataJson))
+            byte[] bytes = Encoding.UTF8.GetBytes(metadataJson);
+            unsafe
             {
-                return ProcessRawResponse(result);
+                fixed (byte* ptr = bytes)
+                {
+                    using (var result = pkd_validate_with_handle(handle, ptr, (nuint)bytes.Length))
+                    {
+                        return ProcessRawResponse(result);
+                    }
+                }
             }
         }
 
         public ValidationResponse ValidateMetadata(string schemaJson, string metadataJson)
         {
-            using (var result = pkd_validate_metadata_json(schemaJson, metadataJson))
+            return ValidateMetadata(Encoding.UTF8.GetBytes(schemaJson), Encoding.UTF8.GetBytes(metadataJson));
+        }
+
+        public ValidationResponse ValidateMetadata(ReadOnlySpan<byte> schemaJson, ReadOnlySpan<byte> metadataJson)
+        {
+            unsafe
             {
-                return ProcessRawResponse(result);
+                fixed (byte* sPtr = schemaJson)
+                fixed (byte* mPtr = metadataJson)
+                {
+                    using (var result = pkd_validate_metadata_json(sPtr, (nuint)schemaJson.Length, mPtr, (nuint)metadataJson.Length))
+                    {
+                        return ProcessRawResponse(result);
+                    }
+                }
             }
         }
 
@@ -178,9 +215,21 @@ namespace Pkd.RevitBridge
         /// </summary>
         public ValidationResponse VerifyManifest(string filePath, string expectedHash)
         {
-            using (var result = pkd_verify_manifest(filePath, expectedHash))
+            return VerifyManifest(Encoding.UTF8.GetBytes(filePath), Encoding.UTF8.GetBytes(expectedHash));
+        }
+
+        public ValidationResponse VerifyManifest(ReadOnlySpan<byte> filePath, ReadOnlySpan<byte> expectedHash)
+        {
+            unsafe
             {
-                return ProcessRawResponse(result);
+                fixed (byte* pPtr = filePath)
+                fixed (byte* hPtr = expectedHash)
+                {
+                    using (var result = pkd_verify_manifest(pPtr, (nuint)filePath.Length, hPtr, (nuint)expectedHash.Length))
+                    {
+                        return ProcessRawResponse(result);
+                    }
+                }
             }
         }
 

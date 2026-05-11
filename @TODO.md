@@ -46,6 +46,12 @@
 
 ## 📋 Active Backlog
 
+### Sprint 4.9: The IKD Empowerment Sprint (2026-05-11) - 🔄 PLANNING
+- [ ] **Issue #31**: Unified Interop Schema & FFI Boundary (Task 4.2). [Mon]
+- [ ] **Issue #68**: WASM Engine Performance & Artifact Promotion (Task 4.18). [Tue]
+- [ ] **Issue #52**: pharos-protocol 'OR' grouping & Temporal Warden (Task 4.15). [Wed]
+- [ ] **Issue #30**: "Ghost Link" Prototype & Marketing Demo (Task 4.3). [Thu]
+
 ### Phase 3: The CLI Bridge (Admin Control Plane)
 - [x] **Scaffold pkd-cli:** Rust binary with `clap` and the 5 `pkd_role` variants (IKD, OEM, VDC, ADMIN, AUDITOR, BOT).
 - [x] **Admin Control Plane:** Implement `pkd admin users` for Cognito orchestration and attribute management.
