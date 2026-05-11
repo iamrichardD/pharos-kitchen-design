@@ -12,6 +12,7 @@ using Xunit;
 using Pkd.RevitBridge;
 using System;
 using System.IO;
+using System.Text;
 using System.Text.Json;
 using System.Linq;
 
@@ -46,7 +47,18 @@ namespace Pkd.RevitBridge.Tests
         [Fact]
         public void TestShould_ReturnVersion_When_Requested()
         {
-            Assert.Equal("0.2.1", _bridge.GetVersion());
+            Assert.Equal("0.3.0", _bridge.GetVersion());
+        }
+
+        [Fact]
+        public void Test_ShouldPassReadOnlySpanWithoutAllocation_WhenValidating()
+        {
+            byte[] schemaBytes = Encoding.UTF8.GetBytes(LoadSchema());
+            byte[] metadataBytes = Encoding.UTF8.GetBytes("{\"metadata_id\":\"PHX-DW-001\",\"name\":\"Span Test\",\"parameters\":{}}");
+
+            // Use Span directly to verify the overload works
+            ValidationResponse result = _bridge.ValidateMetadata(schemaBytes.AsSpan(), metadataBytes.AsSpan());
+            Assert.NotNull(result.Status);
         }
 
         [Fact]

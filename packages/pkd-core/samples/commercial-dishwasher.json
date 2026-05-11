@@ -21,6 +21,7 @@
     "PKD_ProductNumber": "PHX-750-HE-001",
     "PKD_IsObsolete": false,
     "PKD_MainCategory": "Dishwashers",
+    "PKD_TargetMarket": "Global",
     "PKD_ParagraphSpec": "High-Efficiency Commercial Dishwasher with advanced heat recovery system and low-water rinse technology. Up to 40 racks per hour.",
     "PKD_Voltage": "208V",
     "PKD_Phase": 3,

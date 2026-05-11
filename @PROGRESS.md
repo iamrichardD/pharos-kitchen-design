@@ -179,6 +179,13 @@
 - [ ] **Issue #88**: Implement `pkd core pulse` Command (Logic Center for JIT).
 - [ ] **Issue #89**: Develop Manufacturer Maintenance Sidecar (Task 4.22).
 
+### Sprint 4.9: The IKD Empowerment Sprint (2026-05-11) - 🔄 PLANNING
+- **Goal**: Empower Independent Kitchen Designers (IKD) with modern, high-efficiency tools via "Ghost Links" and Unified Interop metadata standards.
+- [ ] **Issue #31**: Unified Interop Schema (Task 4.2).
+- [ ] **Issue #68**: WASM Engine Performance (Task 4.18).
+- [ ] **Issue #52**: Protocol 'OR' grouping & Temporal Warden (Task 4.15).
+- [ ] **Issue #30**: "Ghost Link" Prototype (Task 4.3).
+
 #### [2026-05-02] - /install Route & Platform Detection
 - **Implemented** high-fidelity `/install` landing page with deterministic platform detection.
 - **Created** `PlatformTabs.astro` component with `localStorage` state persistence and Fail-Fast sentinel validation.

@@ -1,3 +1,12 @@
+<!-- ========================================================================
+ * Project: Pharos Kitchen Design (Project Prism)
+ * Component: Bridge-Revit
+ * File: PkdRevitBridge.csproj
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * License: FSL-1.1 (See LICENSE file for details)
+ * Purpose: Project definition for the Revit-to-Rust bridge.
+ * Traceability: Issue #31
+ * ======================================================================== -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -8,6 +17,7 @@
     <UseWPF Condition="'$(TargetFramework)' == 'net8.0-windows'">true</UseWPF>
     <RootNamespace>Pkd.RevitBridge</RootNamespace>
     <AssemblyName>Pkd.RevitBridge</AssemblyName>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net8.0-windows'">
