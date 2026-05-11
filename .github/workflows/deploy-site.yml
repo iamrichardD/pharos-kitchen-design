@@ -50,6 +50,14 @@ jobs:
       - name: "🛒 Checkout Code"
         uses: actions/checkout@v4
 
+      - name: "📦 Cache Podman Layers"
+        uses: actions/cache@v4
+        with:
+          path: /home/runner/.local/share/containers/storage
+          key: ${{ runner.os }}-podman-${{ hashFiles('**/Cargo.lock', '**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-podman-
+
       - name: "🔍 Execute Integrated Pulse Validation (Zero-Host)"
         run: bash scripts/pulse.sh
 

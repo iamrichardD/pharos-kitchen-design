@@ -19,7 +19,13 @@ WORKDIR /work
 
 # Stage 2: Planner (Generate dependency recipe)
 FROM chef AS planner
-COPY . .
+COPY Cargo.toml Cargo.lock ./
+COPY packages/pharos-protocol/Cargo.toml packages/pharos-protocol/Cargo.toml
+COPY packages/pkd-core/Cargo.toml packages/pkd-core/Cargo.toml
+COPY packages/pkd-cli/Cargo.toml packages/pkd-cli/Cargo.toml
+COPY packages/dialects/pkd-dialect-frymaster/Cargo.toml packages/dialects/pkd-dialect-frymaster/Cargo.toml
+COPY packages/dialects/pkd-dialect-template/Cargo.toml packages/dialects/pkd-dialect-template/Cargo.toml
+COPY packages/dialects/pkd-dialect-true/Cargo.toml packages/dialects/pkd-dialect-true/Cargo.toml
 RUN cargo chef prepare --recipe-path recipe.json
 
 # Stage 3: Cacher (Build dependency graph)
