@@ -57,23 +57,16 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             ~/.npm
-            ./target-cache
-            ./node_modules-cache
           key: ${{ runner.os }}-deps-${{ hashFiles('**/Cargo.lock', '**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-deps-
 
       - name: "🔍 Execute Integrated Pulse Validation (Zero-Host)"
-        run: |
-          mkdir -p ~/.cargo/registry ~/.cargo/git ~/.npm ./target-cache
-          bash scripts/pulse.sh
+        run: bash scripts/pulse.sh
 
       - name: "🏗️ Build Site (Zero-Host)"
         run: |
-          mkdir -p ./node_modules-cache
-          podman build -t pkd-ts -f Containerfile.ts \
-            --build-arg BUILD_MODE=$BUILD_MODE \
-            --volume "$(pwd)/node_modules-cache:/work/node_modules:z" .
+          podman build -t pkd-ts -f Containerfile.ts --build-arg BUILD_MODE=$BUILD_MODE .
           # Extract dist folder from the built image (ADR-0016)
           CONTAINER_ID=$(podman create pkd-ts)
           podman cp $CONTAINER_ID:/work/apps/marketing/dist ./apps/marketing/dist
