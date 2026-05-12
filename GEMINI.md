@@ -70,9 +70,17 @@ Before moving from **Research** to **Strategy/Execution**, you MUST explicitly c
 - [ ] **Issue Authority:** A GitHub Issue exists and is linked in the prologue of all modified files.
 - [ ] **Branch Integrity:** All changes are occurring on a `feat/issue-X` or `fix/issue-X` branch.
 - [ ] **Triviality Gate:** Explicitly state if the task is **Trivial** (Surgical Strike) or **Non-Trivial** (ADR-0017 Three-Option Rule).
+- [ ] **Complexity Assessment:** Assign a Complexity Tier (1-5) to inform team velocity tracking.
 - [ ] **Shift-Left Security:** Document potential attack vectors identified during research.
 - [ ] **Fix Summary Readiness:** Prepare a "Brutally Honest" summary of the resolution and its impact.
 - [ ] **TDD Strategy:** Define the atomic test cases that will be implemented *before* the code changes.
+
+#### Complexity Tier Definitions:
+- **Tier 1 (Surgical Strike)**: Minor UI fix, documentation update, or internal refactoring with zero external side effects. (< 30m)
+- **Tier 2 (Component Logic)**: modification to a single component or utility function with existing test coverage. (~1h)
+- **Tier 3 (Cross-Cutting Logic)**: Implementation of a new feature or refactor across a single Vertical Slice (e.g., #110). (~2-3h)
+- **Tier 4 (System Integration)**: High-complexity tasks involving cross-language FFI, new dependencies, or multiple vertical slices (e.g., #109). (~4-6h)
+- **Tier 5 (Architectural Shift)**: Paradigm-shifting changes, root schema modifications, or new vertical slice foundations. (> 1 day)
 
 ### 4. Automated Audits & Production Verification
 - **Automated Audits:** Utilize tools like `cargo audit`, `npm audit`, and security-focused linters within the Podman environment to identify vulnerabilities during development.
@@ -85,6 +93,14 @@ Every non-trivial task completion MUST follow this workflow:
 - **Instructive Peer Review:** Provide inline code comments that act as teaching tools.
     - **No Meta-Labels:** Prohibited from using "The Why/How," "Teachable Moment," or other prompt-leaking labels that signal "AI Slop."
     - **Integrated Mentorship:** Weave the technical rationale, safety implications, and alternative patterns directly into the critique (e.g., "We should avoid [X] here because [Y] results in [Z]. A more resilient approach is [A]...").
+
+## 6. Team Topology & Personas
+To ensure context efficiency and architectural consistency across sessions, use the following **Team Keywords** to invoke specialized sub-agent rosters.
+
+| Keyword | Team Designation | Members & Expertise |
+| :--- | :--- | :--- |
+| **`PHAROS_STRATEGY_CORE`** | **Planning & Review** | **PMA** (Meta-Architect), **SPM** (Senior Program Manager), **Senior PRC** (Project Manager), **Senior Engineer**, **Senior DevSecOps Engineer**, **Senior DX Engineer**. *Mandate: Architectural alignment, ADR governance, and milestone tracking.* |
+| **`PHAROS_DEV_CORE`** | **Implementation Team** | **Senior Engineer** (Lead Developer/Rust), **Senior DevSecOps Engineer** (CI/CD/Supply Chain), **Senior DX Engineer** (Loader/UX/Ergonomics). *Mandate: TDD implementation, Crucible evaluation, and Fail-Fast engineering.* |
 
 ## DevSecOps & Workflow
 

@@ -40,9 +40,9 @@
 - [x] **Issue #47**: Harden Manufacturer URI Infrastructure (Componentization) (Task 4.9).
 - [x] **Issue #48**: Implement ForensicNormalizer & Pattern Mapping (Task 4.10). [AUDITED PR #67]
 - [x] **Issue #50**: Truth Engine: Authoritative SQL Schema Extraction (Task 4.11).
-- [ ] **Issue #68**: Remediate Pulse WASM Artifact Environmental Gap (Task 4.18).
+- [x] **Issue #68**: Remediate Pulse WASM Artifact Environmental Gap (Task 4.18).
     - [x] **Issue #109**: Implement SHA-256 Manifest Generation for WASM Artifacts. [Tue]
-    - [ ] **Issue #110**: Enforce WASM Manifest Verification in Containerfile.pulse.
+    - [x] **Issue #110**: Enforce WASM Manifest Verification in Containerfile.pulse. [Tue]
 
 ---
 
@@ -59,6 +59,11 @@
 
 ### Sprint 4.10: Performance & Scale
 - [ ] **Issue #111**: Implement Parallelized JIT WASM Engine.
+- [ ] **Issue #113**: ADR Template Automation with Mandatory Prologue.
+- [ ] **Issue #114**: SDLC Update: Mandatory Regression Surface Mapping.
+- [ ] **Issue #115**: Implement Local Governance Linter (pkd gov lint).
+- [ ] **Issue #117**: Refactor Containerfile.pulse for Dedicated Verification Stage.
+- [ ] **Issue #118**: Implement High-Rigor Manifest Failure Tests in Truth Engine.
 
 ### Phase 3: The CLI Bridge (Admin Control Plane)
 - [x] **Scaffold pkd-cli:** Rust binary with `clap` and the 5 `pkd_role` variants (IKD, OEM, VDC, ADMIN, AUDITOR, BOT).

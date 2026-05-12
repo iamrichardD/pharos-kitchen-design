@@ -32,6 +32,9 @@ This log provides an index of the technical and architectural decisions made for
 | **[ADR-0026]** | 2026-04-20 | Active   | [Four-Realm Registry & Pulse Protocol](docs/adr/0026-four-realm-registry-pulse-protocol.md) |
 | **[ADR-0027]** | 2026-05-07 | Proposed | [Organization-Based Authority Scopes](docs/adr/0027-organization-based-authority-scopes.md) |
 | **[ADR-0028]** | 2026-05-07 | Proposed | [Senior Program Manager (SPM) Role Definition](docs/adr/0028-senior-program-manager-role-definition.md) |
+| **[ADR-0029]** | 2026-05-12 | Approved | [Immutable WASM Promotion](docs/adr/0029-immutable-wasm-promotion.md) |
+| **[ADR-0030]** | 2026-05-12 | Approved | [Performance Engineering & Velocity Tracking](docs/adr/0030-performance-engineering-velocity-tracking.md) |
+| **[ADR-0031]** | 2026-05-12 | Approved | [Project Team Topology & Agentic Orchestration](docs/adr/0031-project-team-topology-agentic-orchestration.md) |
 
 ---
 *To add a new decision, create a new file in `docs/adr/` following the established template and append it to this index.*
