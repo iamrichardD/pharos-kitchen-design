@@ -62,4 +62,16 @@ for dialect in packages/dialects/*; do
     fi
 done
 
-echo "✅ WASM Build and Staging Complete."
+echo "🛡️ Generating SHA-256 Manifest (ADR-0029)..."
+# Build the CLI to use its manifest generation capability
+# We build only the pkd binary to minimize build time.
+cargo build --package pkd --release
+PKD_BIN="target/release/pkd"
+
+# Fail Fast: Ensure the manifest is generated correctly
+if ! $PKD_BIN core generate-manifest "$STAGING_DIR"; then
+    echo "❌ Error: Failed to generate SHA-256 manifest."
+    exit 1
+fi
+
+echo "✅ WASM Build and Manifest Generation Complete."

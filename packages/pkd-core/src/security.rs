@@ -8,12 +8,14 @@
  * Traceability: Issue #54 - Supply Chain Blind Spot
  * ======================================================================== */
 
-use std::fs::File;
+use std::fs::{File, read_dir};
 use std::io::{Read, BufReader};
 use std::path::Path;
+use std::collections::HashMap;
 use sha2::{Sha256, Digest};
 use hex;
 use thiserror::Error;
+use serde_json;
 
 #[derive(Error, Debug)]
 pub enum SecurityError {
@@ -23,57 +25,83 @@ pub enum SecurityError {
     IoError(String),
     #[error("HASH_MISMATCH: Expected {expected}, but got {actual}")]
     HashMismatch { expected: String, actual: String },
+    #[error("MANIFEST_ERROR: {0}")]
+    ManifestError(String),
 }
 
+/// A flat map of artifact filenames to their SHA-256 hashes.
+/// Why: Ergonomic for both Rust and TypeScript consumers (ADR-0029).
+pub type Manifest = HashMap<String, String>;
+
 /// Verifies the integrity of a file against an expected SHA-256 hash.
-///
-/// # Arguments
-/// * `file_path` - The path to the file to verify.
-/// * `expected_hash` - The hexadecimal string representing the expected SHA-256 hash.
-///
-/// # Returns
-/// * `Ok(())` if verification is successful.
-/// * `Err(SecurityError)` if verification fails or an I/O error occurs.
-///
-/// # Why:
-/// To prevent 'BIM Bloat' memory spikes and Revit UI freezes during large registry ingestion,
-/// we use chunked I/O via BufReader instead of loading the entire file into memory.
 pub fn verify_manifest(file_path: &Path, expected_hash: &str) -> Result<(), SecurityError> {
     if !file_path.exists() {
         return Err(SecurityError::FileNotFound(file_path.to_string_lossy().into_owned()));
     }
 
-    let file = File::open(file_path)
-        .map_err(|e| SecurityError::IoError(format!("Failed to open file: {}", e)))?;
-    
-    let mut reader = BufReader::new(file);
-    let mut hasher = Sha256::new();
-    let mut buffer = [0u8; 8192]; // 8KB chunks
+    let actual_hash = compute_hash(file_path)?;
 
-    loop {
-        let n = reader.read(&mut buffer)
-            .map_err(|e| SecurityError::IoError(format!("Failed to read file: {}", e)))?;
-        if n == 0 {
-            break;
-        }
-        hasher.update(&buffer[..n]);
-    }
+    // Handle both raw hex and sha256: prefixed hashes (ADR-0029)
+    let normalized_expected = expected_hash.strip_prefix("sha256:").unwrap_or(expected_hash);
 
-    let result = hasher.finalize();
-    let actual_hash = hex::encode(result);
-
-    if actual_hash == expected_hash {
+    if actual_hash == normalized_expected {
         Ok(())
     } else {
         Err(SecurityError::HashMismatch {
-            expected: expected_hash.to_string(),
+            expected: normalized_expected.to_string(),
             actual: actual_hash,
         })
     }
 }
 
+/// Scans a directory for .wasm files and generates a Manifest.
+/// Why: Provides a single source of truth for the Promotion stage (ADR-0029).
+pub fn generate_manifest_from_dir(dir: &Path) -> Result<Manifest, SecurityError> {
+    let mut manifest = HashMap::new();
+    
+    let entries = read_dir(dir)
+        .map_err(|e| SecurityError::IoError(format!("Failed to read directory {}: {}", dir.display(), e)))?;
+
+    for entry in entries {
+        let entry = entry.map_err(|e| SecurityError::IoError(format!("Failed to read entry: {}", e)))?;
+        let path = entry.path();
+        
+        if path.is_file() && path.extension().and_then(|s| s.to_str()) == Some("wasm") {
+            let filename = path.file_name().unwrap().to_string_lossy().to_string();
+            let hash = compute_hash(&path)?;
+            manifest.insert(filename, format!("sha256:{}", hash));
+        }
+    }
+
+    if manifest.is_empty() {
+        return Err(SecurityError::ManifestError(format!("No .wasm files found in {}", dir.display())));
+    }
+
+    Ok(manifest)
+}
+
+/// Verifies all files listed in a manifest.json file within the same directory.
+pub fn verify_manifest_json(dir: &Path) -> Result<(), SecurityError> {
+    let manifest_path = dir.join("manifest.json");
+    if !manifest_path.exists() {
+        return Err(SecurityError::FileNotFound(manifest_path.to_string_lossy().into_owned()));
+    }
+
+    let file = File::open(&manifest_path)
+        .map_err(|e| SecurityError::IoError(format!("Failed to open manifest: {}", e)))?;
+    
+    let manifest: Manifest = serde_json::from_reader(file)
+        .map_err(|e| SecurityError::ManifestError(format!("Failed to parse manifest: {}", e)))?;
+
+    for (filename, expected_hash) in manifest {
+        let file_path = dir.join(&filename);
+        verify_manifest(&file_path, &expected_hash)?;
+    }
+
+    Ok(())
+}
+
 /// Computes the SHA-256 hash of a file using chunked I/O.
-/// Why: Centralized hashing logic to prevent dependency bloat and ensure parity.
 pub fn compute_hash(file_path: &Path) -> Result<String, SecurityError> {
     if !file_path.exists() {
         return Err(SecurityError::FileNotFound(file_path.to_string_lossy().into_owned()));

@@ -56,10 +56,11 @@ RUN bash scripts/build-wasm.sh
 
 # Stage 5: Node.js (TypeScript & Security Audit)
 FROM mcr.microsoft.com/playwright@sha256:b0ab6f3cb99aa7803adbc14d9027ec1785fc6e433b97e134e0f8fe61683b6b53 AS ts-auditor
+ARG BUILD_MODE=debug
 # Force Node 24 installation on top of Playwright image
 RUN apt-get update && apt-get install -y curl && \
     curl -fsSL https://deb.nodesource.com/setup_24.x | bash - && \
-    apt-get install -y nodejs python3 make g++ && \
+    apt-get install -y nodejs python3 make g++ libssl-dev pkg-config && \
     rm -rf /var/lib/apt/lists/*
 WORKDIR /work
 COPY . .
@@ -68,6 +69,12 @@ COPY . .
 # Copy pre-compiled WASM dialects and core bindings from the Rust builder stage.
 COPY --from=rust-builder /work/dist/dialects /work/dist/dialects
 COPY --from=rust-builder /work/packages/pkd-core/pkg /work/packages/pkd-core/pkg
+# Copy pkd-cli for manifest verification (Issue #110)
+COPY --from=rust-builder /work/target/$BUILD_MODE/pkd /usr/local/bin/pkd
+RUN chmod +x /usr/local/bin/pkd
+
+# MANDATORY CI GATE: Verify WASM manifest integrity before testing (ADR-0029)
+RUN pkd core verify-manifest /work/dist/dialects
 
 # Perform dependency audit and TS unit tests.
 RUN npm install && \
