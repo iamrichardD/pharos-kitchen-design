@@ -135,16 +135,16 @@ enum CoreCommands {
         #[arg(short, long)]
         output: PathBuf,
     },
-    /// Verify the integrity of artifacts in a directory using manifest.json
+    /// Verify the integrity of artifacts (File + Hash OR Directory + manifest.json)
     VerifyManifest {
-        /// The directory containing artifacts and manifest.json
-        #[arg(short, long)]
+        /// The path to the file or directory
         path: PathBuf,
+        /// The expected SHA-256 hash (optional for directory verification)
+        hash: Option<String>,
     },
     /// Generate a manifest.json for all .wasm artifacts in a directory
     GenerateManifest {
         /// The directory containing .wasm artifacts
-        #[arg(short, long)]
         path: PathBuf,
     },
     /// Promote local artifacts to the production CDN (Cloudflare R2)
@@ -202,8 +202,8 @@ async fn main() -> Result<()> {
                 CoreCommands::Bake { source, output } => {
                     handle_core_bake(source, output).await?;
                 }
-                CoreCommands::VerifyManifest { path } => {
-                    handle_core_verify_manifest(path).await?;
+                CoreCommands::VerifyManifest { path, hash } => {
+                    handle_core_verify_manifest(path, hash).await?;
                 }
                 CoreCommands::GenerateManifest { path } => {
                     handle_core_generate_manifest(path).await?;
@@ -305,18 +305,35 @@ async fn handle_core_bake(source: PathBuf, output: PathBuf) -> Result<()> {
     engine.run(&source, &output).await
 }
 
-async fn handle_core_verify_manifest(path: PathBuf) -> Result<()> {
-    println!("{} Verifying manifest integrity in {:?}...", "ℹ".blue(), path);
-
-    match pkd_core::security::verify_manifest_json(&path) {
-        Ok(_) => {
-            println!("\n{} Verification successful. All artifacts are structurally sound.", "✔".green());
-            Ok(())
+async fn handle_core_verify_manifest(path: PathBuf, hash: Option<String>) -> Result<()> {
+    match hash {
+        Some(h) => {
+            println!("{} Verifying artifact integrity: {:?}...", "ℹ".blue(), path);
+            match pkd_core::security::verify_manifest(&path, &h) {
+                Ok(_) => {
+                    println!("\n{} Verification successful. Artifact is structurally sound.", "✔".green());
+                    Ok(())
+                }
+                Err(e) => {
+                    let err_msg: String = e.to_string();
+                    println!("\n{} Verification failed: {}", "✘".red(), err_msg.yellow());
+                    Err(anyhow!("Integrity violation detected."))
+                }
+            }
         }
-        Err(e) => {
-            let err_msg: String = e.to_string();
-            println!("\n{} Verification failed: {}", "✘".red(), err_msg.yellow());
-            Err(anyhow!("Integrity violation detected."))
+        None => {
+            println!("{} Verifying manifest integrity in {:?}...", "ℹ".blue(), path);
+            match pkd_core::security::verify_manifest_json(&path) {
+                Ok(_) => {
+                    println!("\n{} Verification successful. All artifacts are structurally sound.", "✔".green());
+                    Ok(())
+                }
+                Err(e) => {
+                    let err_msg: String = e.to_string();
+                    println!("\n{} Verification failed: {}", "✘".red(), err_msg.yellow());
+                    Err(anyhow!("Integrity violation detected."))
+                }
+            }
         }
     }
 }

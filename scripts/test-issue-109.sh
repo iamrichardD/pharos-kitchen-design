@@ -36,7 +36,7 @@ if [ ! -f "$PKD_BIN" ]; then
     exit 1
 fi
 
-if ! $PKD_BIN core verify-manifest --path "$STAGING_DIR"; then
+if ! $PKD_BIN core verify-manifest "$STAGING_DIR"; then
     echo "❌ Error: Manifest verification failed."
     exit 1
 fi
