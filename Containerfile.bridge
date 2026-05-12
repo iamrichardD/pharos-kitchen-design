@@ -21,12 +21,13 @@ RUN cd packages/pkd-core && \
 # Stage 2: .NET SDK (Revit Bridge Integration Tests)
 FROM mcr.microsoft.com/dotnet/sdk@sha256:3e7b0cefe1b00a350ffb0e06b4e1271a4e791df6b8ac4239be05f1ae2736fcff AS dotnet-tester
 ARG BUILD_MODE=debug
+ENV BUILD_MODE=$BUILD_MODE
 WORKDIR /work
 COPY . .
 
 # Copy the native core binary into the expected location for MSBuild $(RustTargetDir)
 # Why: Allows the .NET test runner to resolve the P/Invoke boundary without a local Rust toolchain.
-COPY --from=rust-builder /work/target/$BUILD_MODE/libpkd_core.so /work/packages/pkd-core/target/$BUILD_MODE/libpkd_core.so
+COPY --from=rust-builder /work/target/$BUILD_MODE/libpkd_core.so /work/target/$BUILD_MODE/libpkd_core.so
 
 # Default command: Run Revit Bridge Integration Tests
 # Why: Pass the configuration to dotnet test to match the Rust build mode.

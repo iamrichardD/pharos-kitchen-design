@@ -30,6 +30,7 @@ RUN cargo chef cook --recipe-path recipe.json
 # Stage 4: Rust Builder (Metadata Core, CLI, and WASM Dialects)
 FROM chef AS rust-builder
 ARG BUILD_MODE=debug
+ENV BUILD_MODE=$BUILD_MODE
 # Enable full backtraces for debug builds to facilitate rapid root-cause analysis.
 ENV RUST_BACKTRACE=full
 WORKDIR /work
@@ -77,6 +78,7 @@ RUN npm install && \
 # Stage 6: .NET SDK (Integrated \"Pulse\" Handshake)
 FROM mcr.microsoft.com/dotnet/sdk@sha256:3e7b0cefe1b00a350ffb0e06b4e1271a4e791df6b8ac4239be05f1ae2736fcff AS pulse-final
 ARG BUILD_MODE=debug
+ENV BUILD_MODE=$BUILD_MODE
 WORKDIR /work
 COPY . .
 
@@ -84,7 +86,7 @@ COPY . .
 RUN apt-get update && apt-get install -y libssl-dev pkg-config && rm -rf /var/lib/apt/lists/*
 
 # COPY THE HANDSHAKE ARTIFACTS:
-COPY --from=rust-builder /work/target/$BUILD_MODE/libpkd_core.so /work/packages/pkd-core/target/$BUILD_MODE/libpkd_core.so
+COPY --from=rust-builder /work/target/$BUILD_MODE/libpkd_core.so /work/target/$BUILD_MODE/libpkd_core.so
 COPY --from=rust-builder /work/target/$BUILD_MODE/pkd /usr/local/bin/pkd
 RUN chmod +x /usr/local/bin/pkd
 
