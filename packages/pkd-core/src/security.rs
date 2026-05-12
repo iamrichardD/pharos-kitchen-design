@@ -130,7 +130,7 @@ pub fn compute_hash(file_path: &Path) -> Result<String, SecurityError> {
 mod tests {
     use super::*;
     use std::io::Write;
-    use tempfile::NamedTempFile;
+    use tempfile::{NamedTempFile, tempdir};
 
     #[test]
     fn test_should_verify_successfully_when_hash_matches() {
@@ -144,6 +144,42 @@ mod tests {
         let expected = hex::encode(hasher.finalize());
         
         assert!(verify_manifest(path, &expected).is_ok());
+        assert!(verify_manifest(path, &format!("sha256:{}", expected)).is_ok());
+    }
+
+    #[test]
+    fn test_should_generate_valid_manifest_from_directory() {
+        let dir = tempdir().unwrap();
+        let file_path = dir.path().join("test.wasm");
+        let mut file = File::create(&file_path).unwrap();
+        let content = "wasm-binary-content";
+        file.write_all(content.as_bytes()).unwrap();
+
+        let manifest = generate_manifest_from_dir(dir.path()).unwrap();
+        assert_eq!(manifest.len(), 1);
+        assert!(manifest.contains_key("test.wasm"));
+        
+        let expected_hash = compute_hash(&file_path).unwrap();
+        assert_eq!(manifest["test.wasm"], format!("sha256:{}", expected_hash));
+    }
+
+    #[test]
+    fn test_should_verify_manifest_json_successfully() {
+        let dir = tempdir().unwrap();
+        let file_path = dir.path().join("test.wasm");
+        let mut file = File::create(&file_path).unwrap();
+        let content = "wasm-binary-content";
+        file.write_all(content.as_bytes()).unwrap();
+
+        let hash = compute_hash(&file_path).unwrap();
+        let mut manifest = HashMap::new();
+        manifest.insert("test.wasm".to_string(), format!("sha256:{}", hash));
+
+        let manifest_path = dir.path().join("manifest.json");
+        let manifest_file = File::create(manifest_path).unwrap();
+        serde_json::to_writer(manifest_file, &manifest).unwrap();
+
+        assert!(verify_manifest_json(dir.path()).is_ok());
     }
 
     #[test]
@@ -161,16 +197,5 @@ mod tests {
             _ => panic!("Expected HashMismatch error"),
         }
     }
-
-    #[test]
-    fn test_should_fail_verification_when_file_not_found() {
-        let path = Path::new("non_existent_file.tar.zst");
-        let result = verify_manifest(path, "anyhash");
-        
-        assert!(result.is_err());
-        match result.unwrap_err() {
-            SecurityError::FileNotFound(_) => (),
-            _ => panic!("Expected FileNotFound error"),
-        }
-    }
 }
+

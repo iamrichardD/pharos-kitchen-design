@@ -182,7 +182,7 @@
 ### Sprint 4.9: The IKD Empowerment Sprint (2026-05-11) - 🚀 ACTIVE
 - **Goal**: Empower Independent Kitchen Designers (IKD) with modern, high-efficiency tools via "Ghost Links" and Unified Interop metadata standards.
 - [x] **Issue #31**: Unified Interop Schema (Task 4.2). [Mon]
-- [x] **Issue #68**: WASM Engine Performance (Task 4.18). [Tue]
+- [x] **Issue #68**: WASM Engine Performance & Artifact Promotion (Task 4.18). [Tue]
 - [x] **Issue #109**: SHA-256 Manifest Generation for WASM (Task 4.19). [Tue]
 - [x] **Issue #110**: Enforce WASM Manifest Verification (Task 4.20). [Tue]
 - [ ] **Issue #52**: Protocol 'OR' grouping & Temporal Warden (Task 4.15).

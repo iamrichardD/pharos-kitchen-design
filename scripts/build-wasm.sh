@@ -20,9 +20,30 @@ if [[ "$1" == "--container" ]]; then
     exit 0
 fi
 
-# Ensure wasm-pack is installed (Safe for CI and Local)
+# Ensure build dependencies are installed (Safe for CI and Local)
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    NEEDED_DEPS=""
+    if ! command -v curl &> /dev/null; then NEEDED_DEPS="$NEEDED_DEPS curl"; fi
+    if ! command -v wasm-pack &> /dev/null; then NEEDED_DEPS="$NEEDED_DEPS wasm-pack"; fi
+    # CLI dependencies for manifest generation
+    if ! command -v pkg-config &> /dev/null; then NEEDED_DEPS="$NEEDED_DEPS pkg-config libssl-dev"; fi
+    
+    if [ -n "$NEEDED_DEPS" ]; then
+        echo "⚠️  Missing build dependencies. Installing: $NEEDED_DEPS..."
+        if command -v apt-get &> /dev/null; then
+            apt-get update && apt-get install -y curl pkg-config libssl-dev
+        fi
+        
+        # Install wasm-pack if it was in NEEDED_DEPS
+        if [[ "$NEEDED_DEPS" == *"wasm-pack"* ]]; then
+            curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+        fi
+    fi
+fi
+
+# Fallback for non-linux or if wasm-pack still missing
 if ! command -v wasm-pack &> /dev/null; then
-    echo "⚠️ wasm-pack not found. Installing..."
+    echo "⚠️ wasm-pack not found. Attempting generic install..."
     curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 fi
 
@@ -63,7 +84,7 @@ for dialect in packages/dialects/*; do
 done
 
 echo "🛡️ Generating SHA-256 Manifest (ADR-0029)..."
-# Build the CLI to use its manifest generation capability
+# Build the CLI to use its manifest generation capability (Surgical implementation)
 # We build only the pkd binary to minimize build time.
 cargo build --package pkd --release
 PKD_BIN="target/release/pkd"
