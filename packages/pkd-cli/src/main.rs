@@ -135,12 +135,17 @@ enum CoreCommands {
         #[arg(short, long)]
         output: PathBuf,
     },
-    /// Verify the integrity of a baked manifest
+    /// Verify the integrity of artifacts (File + Hash OR Directory + manifest.json)
     VerifyManifest {
-        /// The path to the file to verify
+        /// The path to the file or directory
         path: PathBuf,
-        /// The expected SHA-256 hash
-        hash: String,
+        /// The expected SHA-256 hash (optional for directory verification)
+        hash: Option<String>,
+    },
+    /// Generate a manifest.json for all .wasm artifacts in a directory
+    GenerateManifest {
+        /// The directory containing .wasm artifacts
+        path: PathBuf,
     },
     /// Promote local artifacts to the production CDN (Cloudflare R2)
     Promote,
@@ -199,6 +204,9 @@ async fn main() -> Result<()> {
                 }
                 CoreCommands::VerifyManifest { path, hash } => {
                     handle_core_verify_manifest(path, hash).await?;
+                }
+                CoreCommands::GenerateManifest { path } => {
+                    handle_core_generate_manifest(path).await?;
                 }
                 CoreCommands::Promote => {
                     handle_core_promote(cli.env).await?;
@@ -297,23 +305,53 @@ async fn handle_core_bake(source: PathBuf, output: PathBuf) -> Result<()> {
     engine.run(&source, &output).await
 }
 
-async fn handle_core_verify_manifest(path: PathBuf, hash: String) -> Result<()> {
-    println!("{} Verifying manifest integrity...", "ℹ".blue());
-    println!("{} Path: {}", "  -".blue(), path.display().to_string().cyan());
-    println!("{} Hash: {}", "  -".blue(), hash.yellow());
-
-    match pkd_core::security::verify_manifest(&path, &hash) {
-        Ok(_) => {
-            println!("\n{} Verification successful. Artifact is structurally sound.", "✔".green());
-            Ok(())
+async fn handle_core_verify_manifest(path: PathBuf, hash: Option<String>) -> Result<()> {
+    match hash {
+        Some(h) => {
+            println!("{} Verifying artifact integrity: {:?}...", "ℹ".blue(), path);
+            match pkd_core::security::verify_manifest(&path, &h) {
+                Ok(_) => {
+                    println!("\n{} Verification successful. Artifact is structurally sound.", "✔".green());
+                    Ok(())
+                }
+                Err(e) => {
+                    let err_msg: String = e.to_string();
+                    println!("\n{} Verification failed: {}", "✘".red(), err_msg.yellow());
+                    Err(anyhow!("Integrity violation detected."))
+                }
+            }
         }
-        Err(e) => {
-            let err_msg: String = e.to_string();
-            println!("\n{} Verification failed: {}", "✘".red(), err_msg.yellow());
-            Err(anyhow!("Integrity violation detected."))
+        None => {
+            println!("{} Verifying manifest integrity in {:?}...", "ℹ".blue(), path);
+            match pkd_core::security::verify_manifest_json(&path) {
+                Ok(_) => {
+                    println!("\n{} Verification successful. All artifacts are structurally sound.", "✔".green());
+                    Ok(())
+                }
+                Err(e) => {
+                    let err_msg: String = e.to_string();
+                    println!("\n{} Verification failed: {}", "✘".red(), err_msg.yellow());
+                    Err(anyhow!("Integrity violation detected."))
+                }
+            }
         }
     }
 }
+
+async fn handle_core_generate_manifest(path: PathBuf) -> Result<()> {
+    println!("{} Generating manifest for .wasm artifacts in {:?}...", "ℹ".blue(), path);
+
+    let manifest = pkd_core::security::generate_manifest_from_dir(&path)
+        .map_err(|e| anyhow!("Failed to generate manifest: {}", e))?;
+
+    let manifest_path = path.join("manifest.json");
+    let file = std::fs::File::create(&manifest_path)?;
+    serde_json::to_writer_pretty(file, &manifest)?;
+
+    println!("{} Manifest generated: {:?}", "✔".green(), manifest_path);
+    Ok(())
+}
+
 
 async fn handle_core_promote(env: PharosEnv) -> Result<()> {
     println!("{} Scaffolding promotion to {}...", "ℹ".blue(), env.to_string().cyan());
