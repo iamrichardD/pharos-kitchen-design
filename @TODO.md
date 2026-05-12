@@ -48,6 +48,7 @@
 
 ### Sprint 4.9: The IKD Empowerment Sprint (2026-05-11) - 🚀 ACTIVE
 - [x] **Issue #31**: Unified Interop Schema & FFI Boundary (Task 4.2). [Mon]
+- [x] **Issue #105**: CI/CD Optimization & Supply Chain Hardening (Task 4.24). [Mon]
 - [ ] **Issue #68**: WASM Engine Performance & Artifact Promotion (Task 4.18). [Tue]
 - [ ] **Issue #52**: pharos-protocol 'OR' grouping & Temporal Warden (Task 4.15). [Wed]
 - [ ] **Issue #30**: "Ghost Link" Prototype & Marketing Demo (Task 4.3). [Thu]

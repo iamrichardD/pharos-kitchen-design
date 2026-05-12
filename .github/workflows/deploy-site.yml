@@ -29,6 +29,7 @@ on:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  BUILD_MODE: ${{ github.ref == 'refs/heads/main' && 'release' || 'debug' }}
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
@@ -49,27 +50,31 @@ jobs:
       - name: "🛒 Checkout Code"
         uses: actions/checkout@v4
 
-      - name: "🟢 Setup Node.js"
-        uses: actions/setup-node@v4
+      - name: "📦 Cache Build Dependencies"
+        uses: actions/cache@v4
         with:
-          node-version: '24'
-          cache: 'npm'
-          cache-dependency-path: 'package-lock.json'
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            ~/.npm
+          key: ${{ runner.os }}-deps-${{ hashFiles('**/Cargo.lock', '**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-deps-
 
-      - name: \"🔍 Execute Integrated Pulse Validation (Zero-Host)\"
-        run: bash scripts/pulse.sh
-
-      - name: "📦 Install Dependencies (Host for Astro)"
-        run: npm ci
-
-      - name: "📜 Distribute Universal Installers"
+      - name: "🔍 Execute Integrated Pulse Validation (Zero-Host)"
         run: |
-          cp scripts/install.sh apps/marketing/public/install.sh
-          cp scripts/install.ps1 apps/marketing/public/install.ps1
+          mkdir -p ~/.cargo/registry ~/.cargo/git ~/.npm
+          bash scripts/pulse.sh
 
-      - name: "🚀 Build with Astro"
-        run: npm run build
-        working-directory: ./apps/marketing
+      - name: "🏗️ Build Site (Zero-Host)"
+        run: |
+          podman build -t pkd-ts -f Containerfile.ts \
+            --build-arg BUILD_MODE=$BUILD_MODE \
+            --volume "$HOME/.npm:/root/.npm:z" .
+          # Extract dist folder from the built image (ADR-0016)
+          CONTAINER_ID=$(podman create pkd-ts)
+          podman cp $CONTAINER_ID:/work/apps/marketing/dist ./apps/marketing/dist
+          podman rm $CONTAINER_ID
 
       - name: "📤 Upload Pages Artifact"
         uses: actions/upload-pages-artifact@v3

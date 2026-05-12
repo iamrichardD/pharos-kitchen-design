@@ -10,18 +10,24 @@
 
 # Stage 1: Rust Builder (Metadata Core)
 FROM public.ecr.aws/docker/library/rust@sha256:70aebe351faa35667ef36508deb19fe234ff03d67cfe102f095d920a53d0622c AS rust-builder
+ARG BUILD_MODE=debug
+# Enable full backtraces for debug builds to facilitate rapid root-cause analysis.
+ENV RUST_BACKTRACE=full
 WORKDIR /work
 COPY . .
-RUN cd packages/pkd-core && cargo build
+RUN cd packages/pkd-core && \
+    if [ "$BUILD_MODE" = "release" ]; then cargo build --release; else cargo build; fi
 
 # Stage 2: .NET SDK (Revit Bridge Integration Tests)
 FROM mcr.microsoft.com/dotnet/sdk@sha256:3e7b0cefe1b00a350ffb0e06b4e1271a4e791df6b8ac4239be05f1ae2736fcff AS dotnet-tester
+ARG BUILD_MODE=debug
 WORKDIR /work
 COPY . .
 
 # Copy the native core binary into the expected location for MSBuild $(RustTargetDir)
 # Why: Allows the .NET test runner to resolve the P/Invoke boundary without a local Rust toolchain.
-COPY --from=rust-builder /work/packages/pkd-core/target/debug/libpkd_core.so /work/packages/pkd-core/target/debug/libpkd_core.so
+COPY --from=rust-builder /work/target/$BUILD_MODE/libpkd_core.so /work/packages/pkd-core/target/$BUILD_MODE/libpkd_core.so
 
 # Default command: Run Revit Bridge Integration Tests
-CMD ["dotnet", "test", "packages/revit-bridge/tests/Pkd.RevitBridge.Tests/Pkd.RevitBridge.Tests.csproj"]
+# Why: Pass the configuration to dotnet test to match the Rust build mode.
+CMD ["sh", "-c", "if [ \"$BUILD_MODE\" = \"release\" ]; then CONF=\"Release\"; else CONF=\"Debug\"; fi && dotnet test -c $CONF packages/revit-bridge/tests/Pkd.RevitBridge.Tests/Pkd.RevitBridge.Tests.csproj"]

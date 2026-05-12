@@ -11,7 +11,11 @@
 
 set -e
 
-echo "🚀 Starting PKD Pulse: Integrated Ecosystem Validation"
+# Determine Build Mode (Default to debug, override via env)
+# Why: Allows CI to trigger release mode for main branch.
+BUILD_MODE=${BUILD_MODE:-debug}
+
+echo "🚀 Starting PKD Pulse: Integrated Ecosystem Validation [Mode: $BUILD_MODE]"
 
 # 0. Infrastructure Verification: Argument Quoting & Container FFI
 echo "   [Infra] Verifying Podman-Wrapper Argument Quoting..."
@@ -19,9 +23,14 @@ bash scripts/test-quoting.sh
 
 # 1. Build the unified pulse container (Stages: Rust -> TS -> .NET Bridge)
 # We use unconfined seccomp to ensure consistent environment parity during the build.
+# We mount source caches to speed up dependency downloads while keeping target/ in the image layers.
+mkdir -p "$HOME/.cargo/registry" "$HOME/.cargo/git"
 podman build \
     --security-opt seccomp=unconfined \
     -t pkd-pulse \
+    --build-arg BUILD_MODE="$BUILD_MODE" \
+    --volume "$HOME/.cargo/registry:/usr/local/cargo/registry:z" \
+    --volume "$HOME/.cargo/git:/usr/local/cargo/git:z" \
     -f Containerfile.pulse .
 
 # 2. Execute the final integrated handshake in the container

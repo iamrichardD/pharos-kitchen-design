@@ -1,0 +1,20 @@
+# ========================================================================
+# Project: Pharos Kitchen Design (Project Prism)
+# Component: Rust Workspace (Monorepo)
+# File: Cargo.toml
+# Author: Richard D. (https://github.com/iamrichardd)
+# License: FSL-1.1 (See LICENSE file for details)
+# Purpose: Root workspace manifest for the Pharos Rust ecosystem.
+# Traceability: ADR-0007, Issue #105 (Optimization)
+# ========================================================================
+
+[workspace]
+resolver = "2"
+members = [
+    "packages/pharos-protocol",
+    "packages/pkd-core",
+    "packages/pkd-cli",
+    "packages/dialects/pkd-dialect-frymaster",
+    "packages/dialects/pkd-dialect-template",
+    "packages/dialects/pkd-dialect-true",
+]
