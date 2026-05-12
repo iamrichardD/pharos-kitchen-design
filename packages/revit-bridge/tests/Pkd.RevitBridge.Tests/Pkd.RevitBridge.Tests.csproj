@@ -36,8 +36,10 @@
 
   <Target Name="CopyNativeBinary" AfterTargets="AfterBuild">
     <PropertyGroup>
-      <RustTargetDir>$(ProjectDir)../../../pkd-core/target/debug</RustTargetDir>
+      <!-- Resolve the unified workspace target directory (ADR-0007) -->
+      <RustTargetDir>$(ProjectDir)../../../../target/$(Configuration.ToLower())</RustTargetDir>
       <BinaryName Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' == 'true'">pkd_core.dll</BinaryName>
+
       <BinaryName Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' == 'true'">libpkd_core.so</BinaryName>
     </PropertyGroup>
     <Copy SourceFiles="$(RustTargetDir)/$(BinaryName)" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" ContinueOnError="true" />
