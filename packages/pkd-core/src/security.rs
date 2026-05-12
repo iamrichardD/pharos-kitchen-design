@@ -41,7 +41,7 @@ pub fn verify_manifest(file_path: &Path, expected_hash: &str) -> Result<(), Secu
 
     let actual_hash = compute_hash(file_path)?;
 
-    // Handle both raw hex and sha256: prefixed hashes
+    // Handle both raw hex and sha256: prefixed hashes (ADR-0029)
     let normalized_expected = expected_hash.strip_prefix("sha256:").unwrap_or(expected_hash);
 
     if actual_hash == normalized_expected {

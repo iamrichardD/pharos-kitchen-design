@@ -352,7 +352,6 @@ async fn handle_core_generate_manifest(path: PathBuf) -> Result<()> {
     Ok(())
 }
 
-
 async fn handle_core_promote(env: PharosEnv) -> Result<()> {
     println!("{} Scaffolding promotion to {}...", "ℹ".blue(), env.to_string().cyan());
     println!("{} Note: Actual Cloudflare R2 upload logic will be implemented in Issue #55.", "⚠".yellow());

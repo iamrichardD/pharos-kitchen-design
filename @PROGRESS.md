@@ -182,11 +182,19 @@
 ### Sprint 4.9: The IKD Empowerment Sprint (2026-05-11) - 🚀 ACTIVE
 - **Goal**: Empower Independent Kitchen Designers (IKD) with modern, high-efficiency tools via "Ghost Links" and Unified Interop metadata standards.
 - [x] **Issue #31**: Unified Interop Schema (Task 4.2). [Mon]
-- [ ] **Issue #68**: WASM Engine Performance (Task 4.18).
-    - [x] **Issue #109**: Implement SHA-256 Manifest Generation. [Tue]
-    - [ ] **Issue #110**: Enforce WASM Manifest Verification.
+- [x] **Issue #68**: WASM Engine Performance & Artifact Promotion (Task 4.18). [Tue]
+- [x] **Issue #109**: SHA-256 Manifest Generation for WASM (Task 4.19). [Tue]
+- [x] **Issue #110**: Enforce WASM Manifest Verification (Task 4.20). [Tue]
 - [ ] **Issue #52**: Protocol 'OR' grouping & Temporal Warden (Task 4.15).
 - [ ] **Issue #30**: "Ghost Link" Prototype (Task 4.3).
+
+#### [2026-05-12] - WASM Supply Chain Hardening (#109, #110)
+- **Implemented** SHA-256 manifest generation in `pkd-cli` and `pkd-core` for deterministic artifact tracking (ADR-0029).
+- **Integrated** a mandatory CI gate in `Containerfile.pulse` that fails the build if WASM artifacts in `dist/dialects/` mismatch the manifest.
+- **Refactored** the `WasmDialectLoader` in the Truth Engine to enforce three-way verification (DB vs Manifest vs Physical File) with hash normalization.
+- **Remediated** Truth Engine test suites to utilize build-generated manifests safely during parallel execution.
+- **Verified** dual-gate enforcement via empirical failure tests in Podman.
+- **Audited** via Pharos Crucible (Result: Pharos Green).
 
 #### [2026-05-11] - Unified Interop Schema (Memory-Safe FFI)
 - **Refactored** the Pharos FFI boundary from legacy null-terminated strings (`*const c_char`) to modern, length-prefixed byte slices (`*const u8`, `usize`) per ADR-0025.
