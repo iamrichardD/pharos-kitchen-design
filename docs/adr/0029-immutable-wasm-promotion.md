@@ -1,3 +1,13 @@
+<!-- ========================================================================
+ * Project: Pharos Kitchen Design (Project Prism)
+ * Component: Documentation / Governance
+ * File: 0029-immutable-wasm-promotion.md
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * License: FSL-1.1 (See LICENSE file for details)
+ * Purpose: Define the cryptographic manifest mandate for WASM artifact promotion.
+ * Traceability: Issue #68, Issue #109
+ * Status: Accepted
+ ======================================================================== -->
 # ADR-0029: Immutable WASM Promotion
 
 *   **Status**: Accepted
