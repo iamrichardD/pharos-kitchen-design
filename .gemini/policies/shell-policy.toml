@@ -1,7 +1,7 @@
 [[rule]]
 toolName = "run_shell_command"
-# Expanded to include push, merge, and remote for full PR/Branch lifecycle management.
-commandRegex = "^git\\s+(status|branch|log|diff|checkout|add|commit|pull|fetch|rev-parse|describe|push|merge|remote)(\\s+.*)?$"
+# Expanded to allow chained git commands (&&) and advanced workflow tools (stash, show).
+commandPrefix = ["git status", "git branch", "git log", "git diff", "git checkout", "git add", "git commit", "git pull", "git push", "git fetch", "git rev-parse", "git merge", "git remote", "git describe", "git show", "git stash", "git restore"]
 decision = "allow"
 priority = 100
 
@@ -28,8 +28,30 @@ priority = 100
 
 [[rule]]
 toolName = "run_shell_command"
+# Authorize read-only cargo metadata queries for research efficiency.
+commandPrefix = ["cargo check", "cargo metadata", "cargo tree"]
+decision = "allow"
+priority = 100
+
+[[rule]]
+toolName = "run_shell_command"
 # Authorize targeted cleanup of build artifacts to prevent "Ghost Artifact" pollutions.
+# Anchored to specific folders to prevent catastrophic deletions.
 commandRegex = "^rm\\s+-rf\\s+(\\.artifacts/|dist/|node_modules/|target/)(.*)?$"
+decision = "allow"
+priority = 100
+
+[[rule]]
+toolName = "run_shell_command"
+# Authorize surgical deletion of individual files to support cleanup after refactoring.
+commandRegex = "^rm\\s+([\\w\\d\\./_-]+)$"
+decision = "allow"
+priority = 90
+
+[[rule]]
+toolName = "run_shell_command"
+# Infrastructure: Authorize directory creation for staging and diagnostics.
+commandPrefix = ["mkdir -p"]
 decision = "allow"
 priority = 100
 
@@ -43,13 +65,13 @@ priority = 100
 [[rule]]
 toolName = "run_shell_command"
 # Allow safe, read-only discovery tools to reduce "Research" turn count.
-commandPrefix = ["ls", "cat", "grep", "find", "tail", "head", "sleep", "jq"]
+commandPrefix = ["ls", "cat", "grep", "find", "tail", "head", "sleep", "jq", "date", "whoami"]
 decision = "allow"
 priority = 100
 
 [[rule]]
 toolName = "run_shell_command"
-# Authorize the project's primary validation and pulse-check scripts.
-commandPrefix = ["scripts/pulse.sh", "scripts/truth-engine/pulse.ts", "scripts/podman-wrapper.sh"]
+# Authorize the project's orchestration and validation scripts, including bash/sh execution.
+commandRegex = "^(bash\\s+|sh\\s+)?scripts/.*\\.(sh|ts|ps1)$"
 decision = "allow"
 priority = 100
