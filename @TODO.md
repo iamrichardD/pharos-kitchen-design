@@ -41,6 +41,8 @@
 - [x] **Issue #48**: Implement ForensicNormalizer & Pattern Mapping (Task 4.10). [AUDITED PR #67]
 - [x] **Issue #50**: Truth Engine: Authoritative SQL Schema Extraction (Task 4.11).
 - [ ] **Issue #68**: Remediate Pulse WASM Artifact Environmental Gap (Task 4.18).
+    - [x] **Issue #109**: Implement SHA-256 Manifest Generation for WASM Artifacts. [Tue]
+    - [ ] **Issue #110**: Enforce WASM Manifest Verification in Containerfile.pulse.
 
 ---
 
@@ -50,8 +52,13 @@
 - [x] **Issue #31**: Unified Interop Schema & FFI Boundary (Task 4.2). [Mon]
 - [x] **Issue #105**: CI/CD Optimization & Supply Chain Hardening (Task 4.24). [Mon]
 - [ ] **Issue #68**: WASM Engine Performance & Artifact Promotion (Task 4.18). [Tue]
+    - [ ] **Issue #109**: Implement SHA-256 Manifest Generation.
+    - [ ] **Issue #110**: Enforce WASM Manifest Verification.
 - [ ] **Issue #52**: pharos-protocol 'OR' grouping & Temporal Warden (Task 4.15). [Wed]
 - [ ] **Issue #30**: "Ghost Link" Prototype & Marketing Demo (Task 4.3). [Thu]
+
+### Sprint 4.10: Performance & Scale
+- [ ] **Issue #111**: Implement Parallelized JIT WASM Engine.
 
 ### Phase 3: The CLI Bridge (Admin Control Plane)
 - [x] **Scaffold pkd-cli:** Rust binary with `clap` and the 5 `pkd_role` variants (IKD, OEM, VDC, ADMIN, AUDITOR, BOT).

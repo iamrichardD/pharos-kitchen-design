@@ -183,6 +183,8 @@
 - **Goal**: Empower Independent Kitchen Designers (IKD) with modern, high-efficiency tools via "Ghost Links" and Unified Interop metadata standards.
 - [x] **Issue #31**: Unified Interop Schema (Task 4.2). [Mon]
 - [ ] **Issue #68**: WASM Engine Performance (Task 4.18).
+    - [x] **Issue #109**: Implement SHA-256 Manifest Generation. [Tue]
+    - [ ] **Issue #110**: Enforce WASM Manifest Verification.
 - [ ] **Issue #52**: Protocol 'OR' grouping & Temporal Warden (Task 4.15).
 - [ ] **Issue #30**: "Ghost Link" Prototype (Task 4.3).
 
