@@ -49,3 +49,9 @@ To further eliminate the "Hallucination Gap" in planning, we have formalized the
 - **Estimated Complexity Tier (ECT)**: Assigned by `PHAROS_STRATEGY_CORE` during the Research Phase.
 - **Actual Complexity Tier (ACT)**: Assigned by `PHAROS_DEV_CORE` during the Handover Phase.
 - **Velocity Variance**: Calculated as the delta between ACT and ECT to calibrate future resource allocation and identify architectural "friction points."
+
+## Process Evolution (2026-05-13)
+To further eliminate the "Hallucination Gap" in planning, we have formalized the **ECT vs. ACT** tracking loop:
+- **Estimated Complexity Tier (ECT)**: Assigned by `PHAROS_STRATEGY_CORE` during the Research Phase.
+- **Actual Complexity Tier (ACT)**: Assigned by `PHAROS_DEV_CORE` during the Handover Phase.
+- **Velocity Variance**: Calculated as the delta between ACT and ECT to calibrate future resource allocation and identify architectural "friction points."

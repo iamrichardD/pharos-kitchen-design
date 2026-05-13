@@ -22,6 +22,7 @@ To ensure cross-platform parity (Linux Dev -> Multi-OS Revit Targets), all logic
 - **COMMAND PREFIXING:** Every test or build suggestion must be prefixed with `scripts/podman-wrapper.sh <IMAGE> ...` (or the underlying `podman run --rm --security-opt seccomp=unconfined ...`).
 - **Podman Wrapper:** Use `scripts/podman-wrapper.sh` to safely mount the workspace and set the working directory without using shell-injection-prone syntax like `$(pwd)`.
 - **Container Parity:** Ensure the Rust/WASM builder stages match the runtime requirements for the Tauri/Astro output.
+- **Unified OS Base Mandate:** All multi-stage CI/CD containers (e.g., `Containerfile.pulse`) MUST share a unified OS Base (prefer **Debian Bookworm**) to ensure GLIBC and FFI library parity. Copying binaries between inconsistent OS bases (e.g., Debian to Ubuntu) is strictly prohibited.
 - **REGISTRY STRATEGY:** All `Containerfile`s MUST prioritize public enterprise registries (`public.ecr.aws/`, `gcr.io/`, `pkg.dev/`) over `docker.io`. Unqualified image names (e.g., `FROM rust`) are PROHIBITED to avoid rate-limiting and ensure supply-chain predictability. (See ADR-0014)
 
 ## Engineering Standards & Quality Assurance
