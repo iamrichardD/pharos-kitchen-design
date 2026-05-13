@@ -9,7 +9,7 @@
  * ======================================================================== */
 
 use thiserror::Error;
-use crate::ast::Command;
+use crate::ast::{Command, SelectionFilter};
 use crate::lexer::tokenize;
 
 #[derive(Error, Debug, PartialEq, Eq)]
@@ -85,66 +85,43 @@ pub fn parse_command(line: &str) -> Result<Command, ProtocolError> {
             Ok(Command::Add(pairs))
         }
         "query" | "ph" => {
-            let mut selections = Vec::new();
+            let mut pos = 1;
+            let selections = parse_expression(&tokens, &mut pos, &["return"], 0)?;
+
             let mut returns = Vec::new();
-            let mut in_returns = false;
-
-            for token in &tokens[1..] {
-                if token.to_lowercase() == "return" {
-                    in_returns = true;
-                    continue;
-                }
-
-                if in_returns {
-                    returns.push(token.clone());
-                } else {
-                    if let Some((k, v)) = parse_attr_value(token) {
-                        selections.push((Some(k), v));
-                    } else {
-                        selections.push((None, token.clone()));
-                    }
-                }
+            if pos < tokens.len() && tokens[pos].to_lowercase() == "return" {
+                pos += 1;
+                returns.extend(tokens[pos..].iter().cloned());
             }
             Ok(Command::Query { selections, returns })
         }
         "delete" => {
-            let mut selections = Vec::new();
-            for token in &tokens[1..] {
-                if let Some((k, v)) = parse_attr_value(token) {
-                    selections.push((Some(k), v));
-                } else {
-                    selections.push((None, token.clone()));
-                }
-            }
+            let mut pos = 1;
+            let selections = parse_expression(&tokens, &mut pos, &[], 0)?;
             Ok(Command::Delete(selections))
         }
         "change" => {
-            let mut selections = Vec::new();
+            let mut pos = 1;
+            let selections = parse_expression(&tokens, &mut pos, &["make", "force"], 0)?;
+
             let mut modifications = Vec::new();
             let mut force = false;
-            let mut phase = 0; // 0: selection, 1: make/force
 
-            for token in &tokens[1..] {
-                let lower = token.to_lowercase();
+            if pos < tokens.len() {
+                let lower = tokens[pos].to_lowercase();
                 if lower == "make" || lower == "force" {
                     force = lower == "force";
-                    phase = 1;
-                    continue;
+                    pos += 1;
                 }
+            }
 
-                if phase == 0 {
-                    if let Some((k, v)) = parse_attr_value(token) {
-                        selections.push((Some(k), v));
-                    } else {
-                        selections.push((None, token.clone()));
-                    }
+            while pos < tokens.len() {
+                if let Some((k, v)) = parse_attr_value(&tokens[pos]) {
+                    modifications.push((k, v));
                 } else {
-                    if let Some((k, v)) = parse_attr_value(token) {
-                        modifications.push((k, v));
-                    } else {
-                        return Err(ProtocolError::SyntaxError(format!("Change modification expects field=value, found '{}'", token)));
-                    }
+                    return Err(ProtocolError::SyntaxError(format!("Change modification expects field=value, found '{}'", tokens[pos])));
                 }
+                pos += 1;
             }
             Ok(Command::Change { selections, modifications, force })
         }
@@ -186,6 +163,76 @@ pub fn parse_command(line: &str) -> Result<Command, ProtocolError> {
     }
 }
 
+const MAX_PARSE_DEPTH: usize = 10;
+
+fn parse_expression(tokens: &[String], pos: &mut usize, stop_words: &[&str], depth: usize) -> Result<SelectionFilter, ProtocolError> {
+    if depth > MAX_PARSE_DEPTH {
+        return Err(ProtocolError::SyntaxError("Maximum query nesting depth exceeded".to_string()));
+    }
+
+    let mut and_filters = Vec::new();
+    while *pos < tokens.len() {
+        let token = &tokens[*pos];
+        let lower = token.to_lowercase();
+        if stop_words.contains(&lower.as_str()) {
+            break;
+        }
+        if token == ")" {
+            break;
+        }
+
+        and_filters.push(parse_or_expression(tokens, pos, stop_words, depth)?);
+    }
+
+    if and_filters.is_empty() {
+        Ok(SelectionFilter::And(vec![]))
+    } else if and_filters.len() == 1 {
+        Ok(and_filters.remove(0))
+    } else {
+        Ok(SelectionFilter::And(and_filters))
+    }
+}
+
+fn parse_or_expression(tokens: &[String], pos: &mut usize, stop_words: &[&str], depth: usize) -> Result<SelectionFilter, ProtocolError> {
+    let mut or_filters = Vec::new();
+    or_filters.push(parse_primary_expression(tokens, pos, stop_words, depth)?);
+
+    while *pos < tokens.len() && tokens[*pos] == "|" {
+        *pos += 1; // skip |
+        or_filters.push(parse_primary_expression(tokens, pos, stop_words, depth)?);
+    }
+
+    if or_filters.len() == 1 {
+        Ok(or_filters.remove(0))
+    } else {
+        Ok(SelectionFilter::Or(or_filters))
+    }
+}
+
+fn parse_primary_expression(tokens: &[String], pos: &mut usize, stop_words: &[&str], depth: usize) -> Result<SelectionFilter, ProtocolError> {
+    if *pos >= tokens.len() {
+        return Err(ProtocolError::SyntaxError("Unexpected end of input".to_string()));
+    }
+
+    let token = &tokens[*pos];
+    if token == "(" {
+        *pos += 1;
+        let expr = parse_expression(tokens, pos, stop_words, depth + 1)?;
+        if *pos >= tokens.len() || tokens[*pos] != ")" {
+            return Err(ProtocolError::SyntaxError("Missing closing parenthesis".to_string()));
+        }
+        *pos += 1;
+        Ok(expr)
+    } else {
+        *pos += 1;
+        if let Some((k, v)) = parse_attr_value(token) {
+            Ok(SelectionFilter::Single(Some(k), v))
+        } else {
+            Ok(SelectionFilter::Single(None, token.clone()))
+        }
+    }
+}
+
 fn parse_attr_value(token: &str) -> Option<(String, String)> {
     if let Some(pos) = token.find('=') {
         let key = token[..pos].to_string();
@@ -209,11 +256,34 @@ mod tests {
     fn test_should_parse_query_with_projection() {
         let cmd = parse_command("query manufacturer=3m return name voltage").unwrap();
         if let Command::Query { selections, returns } = cmd {
-            assert_eq!(selections, vec![(Some("manufacturer".to_string()), "3m".to_string())]);
+            assert_eq!(selections, SelectionFilter::Single(Some("manufacturer".to_string()), "3m".to_string()));
             assert_eq!(returns, vec!["name".to_string(), "voltage".to_string()]);
         } else {
             panic!("Expected Query AST");
         }
+    }
+
+    #[test]
+    fn test_should_parse_query_with_or_grouping() {
+        let cmd = parse_command("query (manufacturer=hobart|manufacturer=vulcan) voltage=208").unwrap();
+        if let Command::Query { selections, .. } = cmd {
+            let expected = SelectionFilter::And(vec![
+                SelectionFilter::Or(vec![
+                    SelectionFilter::Single(Some("manufacturer".to_string()), "hobart".to_string()),
+                    SelectionFilter::Single(Some("manufacturer".to_string()), "vulcan".to_string()),
+                ]),
+                SelectionFilter::Single(Some("voltage".to_string()), "208".to_string()),
+            ]);
+            assert_eq!(selections, expected);
+        } else {
+            panic!("Expected Query AST");
+        }
+    }
+
+    #[test]
+    fn test_should_fail_on_unbalanced_parentheses() {
+        let result = parse_command("query (manufacturer=hobart");
+        assert!(result.is_err());
     }
 
     #[test]

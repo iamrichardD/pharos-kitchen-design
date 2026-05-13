@@ -11,6 +11,13 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, PartialEq, Eq, Serialize, Deserialize, Clone)]
+pub enum SelectionFilter {
+    Single(Option<String>, String),
+    And(Vec<SelectionFilter>),
+    Or(Vec<SelectionFilter>),
+}
+
+#[derive(Debug, PartialEq, Eq, Serialize, Deserialize, Clone)]
 pub enum Command {
     Status,
     SiteInfo,
@@ -25,12 +32,12 @@ pub enum Command {
     XLogin(u32, String),
     Add(Vec<(String, String)>),
     Query {
-        selections: Vec<(Option<String>, String)>,
+        selections: SelectionFilter,
         returns: Vec<String>,
     },
-    Delete(Vec<(Option<String>, String)>),
+    Delete(SelectionFilter),
     Change {
-        selections: Vec<(Option<String>, String)>,
+        selections: SelectionFilter,
         modifications: Vec<(String, String)>,
         force: bool,
     },
