@@ -12,9 +12,9 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { TruthEngine } from './engine.js';
 import Database from 'better-sqlite3';
 import { join } from 'node:path';
+import { WasmDialectLoader } from './loader.js';
 
 const WASM_PATH = '/work/dist/dialects/pkd_dialect_true.wasm';
-const WASM_HASH = '34fb34514096bd3731a18acc0e2a3f7ec5cc82575ee8e3655762f0ef11d21e07';
 
 describe('TruthEngine WASM Integration (True Mfg)', () => {
     let engine: TruthEngine;
@@ -25,11 +25,14 @@ describe('TruthEngine WASM Integration (True Mfg)', () => {
         engine = new TruthEngine(db);
         await engine.init();
 
+        // Dynamic retrieval of authoritative hash (ADR-0029)
+        const wasmHash = WasmDialectLoader.getManifestHash(WASM_PATH);
+
         // Setup True Manufacturing with WASM
         db.prepare(`
             INSERT INTO manufacturers (name, host, wasm_path, wasm_hash)
             VALUES ('True Manufacturing', 'www.truemfg.com', ?, ?)
-        `).run(WASM_PATH, WASM_HASH);
+        `).run(WASM_PATH, wasmHash);
 
         // Register a resource
         db.prepare(`
