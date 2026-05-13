@@ -58,6 +58,8 @@
 - [ ] **Issue #30**: "Ghost Link" Prototype & Marketing Demo (Task 4.3). [Thu]
 
 ### Sprint 4.10: Performance & Scale
+- [ ] **Issue #107**: Dependency Pruning for Lean WASM Binaries.
+- [ ] **Issue #108**: Parallel Sharding for CI/CD Acceleration.
 - [ ] **Issue #111**: Implement Parallelized JIT WASM Engine.
 - [ ] **Issue #113**: ADR Template Automation with Mandatory Prologue.
 - [ ] **Issue #114**: SDLC Update: Mandatory Regression Surface Mapping.

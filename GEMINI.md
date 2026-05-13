@@ -70,7 +70,7 @@ Before moving from **Research** to **Strategy/Execution**, you MUST explicitly c
 - [ ] **Issue Authority:** A GitHub Issue exists and is linked in the prologue of all modified files.
 - [ ] **Branch Integrity:** All changes are occurring on a `feat/issue-X` or `fix/issue-X` branch.
 - [ ] **Triviality Gate:** Explicitly state if the task is **Trivial** (Surgical Strike) or **Non-Trivial** (ADR-0017 Three-Option Rule).
-- [ ] **Complexity Assessment:** Assign a Complexity Tier (1-5) to inform team velocity tracking.
+- [ ] **Complexity Assessment:** Assign an **Estimated Complexity Tier (ECT)** (1-5) to inform team velocity tracking.
 - [ ] **Shift-Left Security:** Document potential attack vectors identified during research.
 - [ ] **Fix Summary Readiness:** Prepare a "Brutally Honest" summary of the resolution and its impact.
 - [ ] **TDD Strategy:** Define the atomic test cases that will be implemented *before* the code changes.
@@ -89,7 +89,8 @@ Before moving from **Research** to **Strategy/Execution**, you MUST explicitly c
 ### 5. Pharos Handover & Mentorship Protocol
 Every non-trivial task completion MUST follow this workflow:
 - **Brutal Self-Critique:** Before finalizing, perform a "Brutally Honest" gap and security analysis to identify technical debt or edge cases.
-- **Structured PR:** Create a Pull Request with a dedicated **'Fix Summary'**, **'Security Review'**, and **'DORA Metrics'** section. The 'Fix Summary' must provide a concise, brutally honest record of the changes and their impact.
+- **Structured PR:** Create a Pull Request with a dedicated **'Fix Summary'**, **'Security Review'**, and **'DORA Metrics'** section.
+    - **Fix Summary**: Provide a concise, brutally honest record of the changes, the **Actual Complexity Tier (ACT)**, and a **Velocity Variance** analysis (ACT vs. ECT).
 - **Instructive Peer Review:** Provide inline code comments that act as teaching tools.
     - **No Meta-Labels:** Prohibited from using "The Why/How," "Teachable Moment," or other prompt-leaking labels that signal "AI Slop."
     - **Integrated Mentorship:** Weave the technical rationale, safety implications, and alternative patterns directly into the critique (e.g., "We should avoid [X] here because [Y] results in [Z]. A more resilient approach is [A]...").

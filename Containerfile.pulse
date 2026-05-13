@@ -55,13 +55,8 @@ RUN cd packages/pkd-cli && cargo test && \
 RUN bash scripts/build-wasm.sh
 
 # Stage 5: Node.js (TypeScript & Security Audit)
-FROM mcr.microsoft.com/playwright@sha256:b0ab6f3cb99aa7803adbc14d9027ec1785fc6e433b97e134e0f8fe61683b6b53 AS ts-auditor
+FROM public.ecr.aws/docker/library/node:24-bookworm AS ts-auditor
 ARG BUILD_MODE=debug
-# Force Node 24 installation on top of Playwright image
-RUN apt-get update && apt-get install -y curl && \
-    curl -fsSL https://deb.nodesource.com/setup_24.x | bash - && \
-    apt-get install -y nodejs python3 make g++ libssl-dev pkg-config && \
-    rm -rf /var/lib/apt/lists/*
 WORKDIR /work
 COPY . .
 

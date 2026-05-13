@@ -271,19 +271,7 @@ async fn handle_core_search(query_parts: Vec<String>, env: PharosEnv) -> Result<
         let schema_json = include_str!("../../pkd-core/schema/pharos-schema.json");
         let schema: PharosSchema = serde_json::from_str(schema_json)?;
 
-        for (field_opt, _) in &selections {
-            if let Some(field) = field_opt {
-                let shared_param = schema.parameter_standards.shared_parameters.get(field)
-                    .ok_or_else(|| anyhow!("Field '{}' is not defined in the Pharos schema.", field))?;
-
-                if !shared_param.is_lookup() {
-                    return Err(anyhow!(
-                        "Field failure: '{}' is not marked as a 'Lookup' field. Search prohibited by ADR 0023.", 
-                        field
-                    ));
-                }
-            }
-        }
+        validate_selections(&selections, &schema)?;
 
         println!("{} Executing registry search...", "ℹ".blue());
         println!("{} Environment: {}", "  -".blue(), env.to_string().cyan());
@@ -297,6 +285,31 @@ async fn handle_core_search(query_parts: Vec<String>, env: PharosEnv) -> Result<
         println!("\n{} Search syntax is valid and compliant with RFC 2378.", "✔".green());
     }
 
+    Ok(())
+}
+
+fn validate_selections(filter: &pharos_protocol::ast::SelectionFilter, schema: &PharosSchema) -> anyhow::Result<()> {
+    use pharos_protocol::ast::SelectionFilter;
+    match filter {
+        SelectionFilter::Single(field_opt, _) => {
+            if let Some(field) = field_opt {
+                let shared_param = schema.parameter_standards.shared_parameters.get(field)
+                    .ok_or_else(|| anyhow!("Field '{}' is not defined in the Pharos schema.", field))?;
+
+                if !shared_param.is_lookup() {
+                    return Err(anyhow!(
+                        "Field failure: '{}' is not marked as a 'Lookup' field. Search prohibited by ADR 0023.", 
+                        field
+                    ));
+                }
+            }
+        }
+        SelectionFilter::And(filters) | SelectionFilter::Or(filters) => {
+            for f in filters {
+                validate_selections(f, schema)?;
+            }
+        }
+    }
     Ok(())
 }
 

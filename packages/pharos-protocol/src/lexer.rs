@@ -39,6 +39,12 @@ pub fn tokenize(line: &str) -> Result<Vec<String>, ProtocolError> {
             escaped = true;
         } else if c == '"' {
             in_quotes = !in_quotes;
+        } else if !in_quotes && (c == '(' || c == ')' || c == '|') {
+            if !current.is_empty() {
+                tokens.push(current.clone());
+                current.clear();
+            }
+            tokens.push(c.to_string());
         } else if c.is_whitespace() && !in_quotes {
             if !current.is_empty() {
                 tokens.push(current.clone());
@@ -93,5 +99,11 @@ mod tests {
     fn test_should_fail_on_unclosed_quotes() {
         let result = tokenize("query name=\"unclosed");
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_should_tokenize_structural_grouping() {
+        let tokens = tokenize("query (mfr=hobart|mfr=vulcan) voltage=208").unwrap();
+        assert_eq!(tokens, vec!["query", "(", "mfr=hobart", "|", "mfr=vulcan", ")", "voltage=208"]);
     }
 }

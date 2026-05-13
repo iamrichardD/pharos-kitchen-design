@@ -13,9 +13,11 @@ import { join } from 'node:path';
 import { WasmDialectLoader } from './loader.js';
 
 const WASM_PATH = '/work/dist/dialects/pkd_dialect_frymaster.wasm';
-const EXPECTED_HASH = '091c44280758d5a077ecb6bc12e24db9aca5decddafb1bf18b2ca0e1fede52c6';
 
 describe('WasmDialectLoader', () => {
+    // Dynamic retrieval of authoritative hash (ADR-0029) to ensure PR #119 parity.
+    const EXPECTED_HASH = WasmDialectLoader.getManifestHash(WASM_PATH);
+
     it('test_should_verify_hash_successfully_when_artifact_is_authentic', () => {
         const isValid = WasmDialectLoader.verifyHash(WASM_PATH, EXPECTED_HASH);
         expect(isValid).toBe(true);

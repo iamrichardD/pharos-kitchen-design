@@ -13,9 +13,11 @@ import { join } from 'node:path';
 import { WasmDialectLoader } from './loader.js';
 
 const WASM_PATH = '/work/dist/dialects/pkd_dialect_true.wasm';
-const EXPECTED_HASH = '34fb34514096bd3731a18acc0e2a3f7ec5cc82575ee8e3655762f0ef11d21e07';
 
 describe('True Manufacturing WASM Dialect', () => {
+    // Dynamic retrieval of authoritative hash (ADR-0029) to ensure PR #119 parity.
+    const EXPECTED_HASH = WasmDialectLoader.getManifestHash(WASM_PATH);
+
     it('test_should_extract_voltage_and_amps_from_true_mfg_specs', async () => {
         const plugin = await WasmDialectLoader.loadPlugin(WASM_PATH, EXPECTED_HASH);
         const rawInput = "Product Specifications: Voltage 115/60/1, Amps: 1.4, Weight 200lbs";

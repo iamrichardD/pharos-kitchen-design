@@ -62,6 +62,8 @@ jobs:
             ${{ runner.os }}-deps-
 
       - name: "🔍 Execute Integrated Pulse Validation (Zero-Host)"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mkdir -p ~/.cargo/registry ~/.cargo/git ~/.npm
           bash scripts/pulse.sh
