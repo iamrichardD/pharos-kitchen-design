@@ -154,7 +154,7 @@
 - [x] **Issue #60 (Spike)**: Option C: WASM-Based Manufacturer Dialects (Task 4.16). (Verified Universal Interop)
 - [x] **Issue #65 (CI/CD)**: Remediate WASM build failure via centralized `scripts/build-wasm.sh` and multi-stage Zero-Host promotion. (Verified Pharos Green)
 - [x] **Issue #74 (CI/CD)**: Remediate CI path failures via deterministic import.meta.url resolution and hardened Regex Warden (.js). (Verified Pharos Green)
-- [ ] **Issue #52 (Protocol)**: Upgrade `pharos-protocol` to support logical `OR` for complex queries (Task 4.15).
+- [x] **Issue #52 (Protocol)**: Upgrade `pharos-protocol` to support logical `OR` for complex queries (Task 4.15).
 
 ### Sprint 4.4: CLI Distribution & Installation Documentation (#76-78, #82-83) - 🔄 In Progress
 - [x] **Issue #76**: Implement `/install` route and platform-specific landing page (Task 3.10).
@@ -187,8 +187,20 @@
 - [x] **Issue #68**: WASM Engine Performance & Artifact Promotion (Task 4.18). [Tue]
 - [x] **Issue #109**: SHA-256 Manifest Generation for WASM (Task 4.19). [Tue]
 - [x] **Issue #110**: Enforce WASM Manifest Verification (Task 4.20). [Tue]
-- [ ] **Issue #52**: Protocol 'OR' grouping & Temporal Warden (Task 4.15).
+- [x] **Issue #52**: Protocol 'OR' grouping & Temporal Warden (Task 4.15). [Wed]
 - [ ] **Issue #30**: "Ghost Link" Prototype (Task 4.3).
+
+#### [2026-05-13] - Protocol Hardening & ReDoS Immunity (#52)
+- **Implemented** recursive logical `OR` grouping in `pharos-protocol` via recursive descent parser (ADR-0024).
+- **Hardened** `wildcard_match` with the **Temporal Warden** (`WardenError` / `Result` pattern) to distinguish security terminations from non-matches.
+- **Unified** `Containerfile.pulse` OS base to `node:24-bookworm`, resolving GLIBC symbol collisions and FFI instability.
+- **Remediated** `truth-engine` test suites to utilize dynamic manifest-based hash verification (ADR-0029).
+- **Passed** `GITHUB_TOKEN` to CI to enable non-interactive governance verification.
+- **DORA Metrics (Issue #52)**:
+    - **Lead Time**: 4 Hours (ECT 4 | ACT 4).
+    - **Change Failure Rate**: 0% (Successful Remediation).
+    - **Velocity Variance**: 0 (Planning Alignment).
+- **Audited** via Pharos Crucible (Result: 🟢 PHAROS GREEN).
 
 #### [2026-05-12] - WASM Supply Chain Hardening (#109, #110)
 - **Implemented** SHA-256 manifest generation in `pkd-cli` and `pkd-core` for deterministic artifact tracking (ADR-0029).

@@ -54,7 +54,7 @@
 - [x] **Issue #68**: WASM Engine Performance & Artifact Promotion (Task 4.18). [Tue]
 - [x] **Issue #109**: SHA-256 Manifest Generation for WASM (Task 4.19). [Tue]
 - [x] **Issue #110**: Enforce WASM Manifest Verification (Task 4.20). [Tue]
-- [ ] **Issue #52**: pharos-protocol 'OR' grouping & Temporal Warden (Task 4.15). [Wed]
+- [x] **Issue #52**: pharos-protocol 'OR' grouping & Temporal Warden (Task 4.15). [Wed]
 - [ ] **Issue #30**: "Ghost Link" Prototype & Marketing Demo (Task 4.3). [Thu]
 
 ### Sprint 4.10: Performance & Scale
@@ -123,7 +123,7 @@
 - [x] **Issue #62**: True Manufacturing Onboarding (Forensic KCL Spike) (Task 4.17).
 - [x] **Issue #65**: CI/CD: WASM Build Hardening & Zero-Host Remediation. (Verified Pharos Green)
 - [x] **Issue #99**: Consolidate Search, Wildcard, and Structural Clause Documentation (Task 4.23).
-- [ ] **Issue #52**: [DEFERRED] Upgrade `pharos-protocol` to support logical `OR` grouping (Task 4.15). (Requires #99)
+- [x] **Issue #52**: [DEFERRED] Upgrade `pharos-protocol` to support logical `OR` grouping (Task 4.15). (Requires #99)
 
 ### Sprint 4.4: CLI Distribution & Installation Documentation (#76-78, #82-83) - 📋 Backlog
 - [x] **Issue #76**: Implement `/install` route and platform-specific landing page (Task 3.10).
