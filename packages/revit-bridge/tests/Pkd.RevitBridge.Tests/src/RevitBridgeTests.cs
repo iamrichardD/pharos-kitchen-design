@@ -44,6 +44,41 @@ namespace Pkd.RevitBridge.Tests
 
         private string LoadSchema() => _schemaContent;
 
+        private string LoadMockRegistry()
+        {
+            return @"{
+                ""PHX-DW-001"": {
+                    ""metadata_id"": ""PHX-DW-001"",
+                    ""name"": ""Hobart LXeR Dishwasher (Test)"",
+                    ""schema_version"": ""1.0.0"",
+                    ""classification"": {
+                        ""omniclass_table_23"": ""23-75 50 11 11"",
+                        ""category"": ""Warewashing""
+                    },
+                    ""parameters"": {
+                        ""manufacturer"": ""Hobart"",
+                        ""model"": ""LXeR""
+                    },
+                    ""lod_geometry_specs"": {
+                        ""100"": {
+                            ""type"": ""PROCEDURAL_BOX"",
+                            ""dimensions"": {
+                                ""width"": ""2.5"",
+                                ""depth"": ""2.5"",
+                                ""height"": ""3.5""
+                            },
+                            ""description"": ""LOD 100 Volumetric Placeholder""
+                        }
+                    },
+                    ""performance_metadata"": {
+                        ""estimated_rfa_size_kb"": 450,
+                        ""procedural_lod_enabled"": true,
+                        ""ghost_link_active"": true
+                    }
+                }
+            }";
+        }
+
         [Fact]
         public void TestShould_ReturnVersion_When_Requested()
         {
@@ -153,16 +188,19 @@ namespace Pkd.RevitBridge.Tests
         [Fact]
         public void TestShould_ReturnGhostMetadata_When_ValidIdProvided()
         {
-            ValidationResponse result = _bridge.GetGhostMetadata("PHX-DW-001");
-            Assert.Equal("OK", result.Status);
-            Assert.True(result.Data.HasValue);
-            
-            var data = result.Data.Value;
-            Assert.True(data.TryGetProperty("parameters", out JsonElement parameters));
-            Assert.True(parameters.TryGetProperty("manufacturer", out JsonElement manufacturer));
-            Assert.True(parameters.TryGetProperty("model", out JsonElement model));
-            Assert.Equal("Hobart", manufacturer.GetString());
-            Assert.Equal("LXeR", model.GetString());
+            using (var registry = _bridge.LoadRegistry(LoadMockRegistry()))
+            {
+                ValidationResponse result = _bridge.GetGhostMetadata(registry, "PHX-DW-001");
+                Assert.Equal("OK", result.Status);
+                Assert.True(result.Data.HasValue);
+                
+                var data = result.Data.Value;
+                Assert.True(data.TryGetProperty("parameters", out JsonElement parameters));
+                Assert.True(parameters.TryGetProperty("manufacturer", out JsonElement manufacturer));
+                Assert.True(parameters.TryGetProperty("model", out JsonElement model));
+                Assert.Equal("Hobart", manufacturer.GetString());
+                Assert.Equal("LXeR", model.GetString());
+            }
         }
     }
 }
