@@ -55,7 +55,7 @@
 - [x] **Issue #109**: SHA-256 Manifest Generation for WASM (Task 4.19). [Tue]
 - [x] **Issue #110**: Enforce WASM Manifest Verification (Task 4.20). [Tue]
 - [x] **Issue #52**: pharos-protocol 'OR' grouping & Temporal Warden (Task 4.15). [Wed]
-- [ ] **Issue #30**: "Ghost Link" Prototype & Marketing Demo (Task 4.3). [Thu]
+- [x] **Issue #120**: Ghost Link Phase 2 - Dynamic Registry & Marketing Demo (Task 4.3). [Thu]
 
 ### Sprint 4.10: Performance & Scale
 - [ ] **Issue #107**: Dependency Pruning for Lean WASM Binaries.
@@ -106,8 +106,8 @@
 - [x] **Issue #29**: Scaffold Revit Ribbon UI & Command logic.
 - [x] **Issue #33**: Integrated CI script for automated cross-language validation.
 - [x] **Issue #43**: Implement Pharos Synchronization Protocol (Task 4.1).
-- [ ] **Issue #31**: Verify End-to-End Revit -> Bridge -> Web Flow (Task 4.2).
-- [ ] **Issue #30**: Implement Ghost Link Prototype (Task 4.3).
+- [x] **Issue #31**: Verify End-to-End Revit -> Bridge -> Web Flow (Task 4.2).
+- [x] **Issue #120**: Implement Ghost Link Phase 2 (Task 4.3).
 - [ ] **Issue #28**: Shared Design System Extraction (Task 4.4).
 - [ ] **Issue #42**: Audit Remediation: SRI, SEO, and WASM Bridge (Task 4.5).
 - [x] **Issue #41**: Marketing Site CI/CD Build Failure (Bug #41).

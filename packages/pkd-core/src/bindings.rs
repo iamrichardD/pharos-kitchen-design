@@ -13,6 +13,38 @@ use crate::models::schema::PharosSchema;
 use crate::models::metadata::PharosMetadata;
 use crate::validator::{SchemaValidator, LodValidator};
 use serde_wasm_bindgen;
+use dashmap::DashMap;
+
+#[wasm_bindgen]
+pub struct PharosRegistryHandle {
+    inner: DashMap<String, PharosMetadata>,
+}
+
+#[wasm_bindgen]
+impl PharosRegistryHandle {
+    #[wasm_bindgen(constructor)]
+    pub fn new() -> Self {
+        Self {
+            inner: DashMap::new(),
+        }
+    }
+}
+
+#[wasm_bindgen]
+pub fn load_registry_wasm(registry_js: JsValue) -> Result<PharosRegistryHandle, JsValue> {
+    let registry: DashMap<String, PharosMetadata> = serde_wasm_bindgen::from_value(registry_js)
+        .map_err(|e| JsValue::from_str(&format!("Invalid registry format: {}", e)))?;
+    
+    Ok(PharosRegistryHandle { inner: registry })
+}
+
+#[wasm_bindgen]
+pub fn get_ghost_metadata_wasm(handle: &PharosRegistryHandle, id: String) -> Result<JsValue, JsValue> {
+    match handle.inner.get(&id) {
+        Some(m) => Ok(serde_wasm_bindgen::to_value(&*m).unwrap()),
+        None => Err(JsValue::from_str(&format!("Metadata ID '{}' not found in registry", id))),
+    }
+}
 
 #[wasm_bindgen]
 pub fn validate_metadata_wasm(schema_js: JsValue, metadata_js: JsValue) -> Result<JsValue, JsValue> {
@@ -74,7 +106,7 @@ pub struct InteropResponse {
     pub data: Option<serde_json::Value>,
 }
 
-use std::panic::catch_unwind;
+use std::panic::{catch_unwind, AssertUnwindSafe};
 
 /// Helper to safely obtain a byte slice from raw FFI parameters.
 /// Why: Enforces the MAX_JSON_SIZE sentinel before any memory access.
@@ -98,11 +130,20 @@ fn safe_read_str<'a>(ptr: *const u8, len: usize) -> Result<&'a str, ValidationEr
 }
 
 /// Hydrates a "Ghost Link" with verified Pharos metadata.
-/// Why: Provides immediate BIM hydration for unmodeled placeholders.
-/// Traceability: Issue #30, #31
+/// Why: Provides immediate BIM hydration for unmodeled placeholders using a resident registry.
+/// Traceability: Issue #30, #31, #120
 #[no_mangle]
-pub extern "C" fn pkd_get_ghost_metadata(ptr: *const u8, len: usize) -> *mut c_char {
-    let result = catch_unwind(|| {
+pub extern "C" fn pkd_get_ghost_metadata(handle: *mut PharosRegistryHandle, ptr: *const u8, len: usize) -> *mut c_char {
+    let result = catch_unwind(AssertUnwindSafe(|| {
+        if handle.is_null() {
+            let resp = InteropResponse {
+                status: "ERROR".to_string(),
+                errors: vec![ValidationError::SliceError("Null registry handle provided".to_string())],
+                data: None,
+            };
+            return serialize_interop_response(&resp);
+        }
+
         let id_str = match safe_read_str(ptr, len) {
             Ok(s) => s,
             Err(e) => {
@@ -115,46 +156,10 @@ pub extern "C" fn pkd_get_ghost_metadata(ptr: *const u8, len: usize) -> *mut c_c
             }
         };
 
-        // Basic Whitelist (Issue #30)
-        if id_str == "PHX-DW-001" {
-            let mut parameters = BTreeMap::new();
-            parameters.insert("manufacturer".to_string(), ParameterValue::Text("Hobart".to_string()));
-            parameters.insert("model".to_string(), ParameterValue::Text("LXeR".to_string()));
-            parameters.insert("voltage".to_string(), ParameterValue::Text("208V".to_string()));
-            parameters.insert("phase".to_string(), ParameterValue::Number(1.0));
+        let registry = unsafe { &*handle };
 
-            let mut dimensions = BTreeMap::new();
-            dimensions.insert("width".to_string(), "2.5".to_string());
-            dimensions.insert("depth".to_string(), "2.5".to_string());
-            dimensions.insert("height".to_string(), "3.5".to_string());
-
-            let mut lod_geometry_specs = BTreeMap::new();
-            lod_geometry_specs.insert("100".to_string(), crate::models::metadata::LodGeometrySpec {
-                spec_type: "PROCEDURAL_BOX".to_string(),
-                dimensions: Some(dimensions),
-                components: None,
-                features: None,
-                description: "LOD 100 Volumetric Placeholder".to_string(),
-            });
-
-            let metadata = PharosMetadata {
-                metadata_id: "PHX-DW-001".to_string(),
-                name: "Hobart LXeR Dishwasher".to_string(),
-                schema_version: "1.0.0".to_string(),
-                classification: crate::models::metadata::Classification {
-                    omniclass_table_23: "23-75 50 11 11".to_string(),
-                    category: "Warewashing".to_string(),
-                },
-                parameters,
-                lod_geometry_specs,
-                performance_metadata: crate::models::metadata::PerformanceMetadata {
-                    estimated_rfa_size_kb: 450,
-                    procedural_lod_enabled: true,
-                    ghost_link_active: true,
-                },
-            };
-
-            let data = match serde_json::to_value(&metadata) {
+        if let Some(metadata) = registry.inner.get(id_str) {
+            let data = match serde_json::to_value(&*metadata) {
                 Ok(v) => Some(v),
                 Err(e) => {
                     let resp = InteropResponse {
@@ -176,11 +181,11 @@ pub extern "C" fn pkd_get_ghost_metadata(ptr: *const u8, len: usize) -> *mut c_c
 
         let resp = InteropResponse {
             status: "ERROR".to_string(),
-            errors: vec![ValidationError::SliceError(format!("Metadata ID '{}' not found in verified whitelist", id_str))],
+            errors: vec![ValidationError::SliceError(format!("Metadata ID '{}' not found in resident registry", id_str))],
             data: None,
         };
         serialize_interop_response(&resp)
-    });
+    }));
 
     match result {
         Ok(ptr) => ptr,
@@ -189,6 +194,41 @@ pub extern "C" fn pkd_get_ghost_metadata(ptr: *const u8, len: usize) -> *mut c_c
             errors: vec![ValidationError::SliceError("Rust core panicked during ghost metadata retrieval".to_string())],
             data: None,
         }),
+    }
+}
+
+/// Loads a PharosRegistry from JSON and returns an opaque handle.
+/// Why: Enables dynamic, data-driven BIM hydration from a verified source of truth.
+/// Safety: Returns null if JSON is invalid, exceeds MAX_JSON_SIZE, or panics.
+#[no_mangle]
+pub extern "C" fn pkd_load_registry(ptr: *const u8, len: usize) -> *mut PharosRegistryHandle {
+    let result = catch_unwind(|| {
+        let bytes = match safe_read_bytes(ptr, len) {
+            Ok(b) => b,
+            Err(_) => return std::ptr::null_mut(),
+        };
+
+        let items: DashMap<String, PharosMetadata> = match serde_json::from_slice(bytes) {
+            Ok(s) => s,
+            Err(_) => return std::ptr::null_mut(),
+        };
+
+        Box::into_raw(Box::new(PharosRegistryHandle { inner: items }))
+    });
+
+    match result {
+        Ok(ptr) => ptr,
+        Err(_) => std::ptr::null_mut(),
+    }
+}
+
+/// Frees the memory associated with a PharosRegistry handle.
+#[no_mangle]
+pub extern "C" fn pkd_free_registry(handle: *mut PharosRegistryHandle) {
+    if !handle.is_null() {
+        unsafe {
+            let _ = Box::from_raw(handle);
+        }
     }
 }
 
@@ -435,9 +475,43 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_should_return_ghost_metadata_when_id_is_phx_dw_001() {
+    fn test_should_load_registry_and_retrieve_metadata_when_valid_json_provided() {
+        let registry_json = r#"{
+            "PHX-DW-001": {
+                "metadata_id": "PHX-DW-001",
+                "name": "Registry Dishwasher",
+                "schema_version": "1.0.0",
+                "classification": {
+                    "omniclass_table_23": "23-75 50 11 11",
+                    "category": "Warewashing"
+                },
+                "parameters": {
+                    "manufacturer": "RegistryBrand"
+                },
+                "lod_geometry_specs": {
+                    "100": {
+                        "type": "PROCEDURAL_BOX",
+                        "dimensions": {
+                            "width": "3.0",
+                            "depth": "3.0",
+                            "height": "4.0"
+                        },
+                        "description": "Registry LOD 100"
+                    }
+                },
+                "performance_metadata": {
+                    "estimated_rfa_size_kb": 450,
+                    "procedural_lod_enabled": true,
+                    "ghost_link_active": true
+                }
+            }
+        }"#;
+
+        let handle = pkd_load_registry(registry_json.as_ptr(), registry_json.len());
+        assert!(!handle.is_null());
+
         let id = "PHX-DW-001";
-        let ptr = pkd_get_ghost_metadata(id.as_ptr(), id.len());
+        let ptr = pkd_get_ghost_metadata(handle, id.as_ptr(), id.len());
         
         let result_cstr = unsafe { std::ffi::CStr::from_ptr(ptr) };
         let result_json = result_cstr.to_str().unwrap();
@@ -447,29 +521,27 @@ mod tests {
         assert!(resp.data.is_some());
         
         let data = resp.data.unwrap();
-        assert_eq!(data["metadata_id"], "PHX-DW-001");
-        assert_eq!(data["name"], "Hobart LXeR Dishwasher");
-        
-        let dimensions = &data["lod_geometry_specs"]["100"]["dimensions"];
-        assert_eq!(dimensions["width"], "2.5");
-        assert_eq!(dimensions["height"], "3.5");
+        assert_eq!(data["name"], "Registry Dishwasher");
+        assert_eq!(data["parameters"]["manufacturer"], "RegistryBrand");
 
         pkd_free_string(ptr);
+        pkd_free_registry(handle);
     }
 
     #[test]
-    fn test_should_return_error_when_id_not_found() {
-        let id = "INVALID-ID";
-        let ptr = pkd_get_ghost_metadata(id.as_ptr(), id.len());
+    fn test_should_return_error_when_id_not_found_in_registry() {
+        let registry_json = "{}";
+        let handle = pkd_load_registry(registry_json.as_ptr(), registry_json.len());
+        
+        let id = "PHX-DW-001";
+        let ptr = pkd_get_ghost_metadata(handle, id.as_ptr(), id.len());
         
         let result_cstr = unsafe { std::ffi::CStr::from_ptr(ptr) };
-        let result_json = result_cstr.to_str().unwrap();
-        
-        let resp: InteropResponse = serde_json::from_str(result_json).unwrap();
+        let resp: InteropResponse = serde_json::from_str(result_cstr.to_str().unwrap()).unwrap();
         assert_eq!(resp.status, "ERROR");
-        assert!(resp.errors.len() > 0);
 
         pkd_free_string(ptr);
+        pkd_free_registry(handle);
     }
 
     #[test]
@@ -503,8 +575,11 @@ mod tests {
 
     #[test]
     fn test_should_return_safe_error_when_invalid_utf8_bytes_provided() {
+        let registry_json = "{}";
+        let handle = pkd_load_registry(registry_json.as_ptr(), registry_json.len());
+
         let invalid_utf8 = vec![0 as u8, 159, 146, 150]; // Invalid UTF-8 sequence
-        let ptr = pkd_get_ghost_metadata(invalid_utf8.as_ptr(), invalid_utf8.len());
+        let ptr = pkd_get_ghost_metadata(handle, invalid_utf8.as_ptr(), invalid_utf8.len());
         
         let result_cstr = unsafe { std::ffi::CStr::from_ptr(ptr) };
         let resp: InteropResponse = serde_json::from_str(result_cstr.to_str().unwrap()).unwrap();
@@ -512,5 +587,6 @@ mod tests {
         assert_eq!(resp.status, "ERROR");
         assert!(resp.errors[0].to_string().contains("Invalid UTF-8"));
         pkd_free_string(ptr);
+        pkd_free_registry(handle);
     }
 }

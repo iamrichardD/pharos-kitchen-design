@@ -69,6 +69,24 @@ namespace Pkd.RevitBridge
     }
 
     /// <summary>
+    /// Opaque handle to a PharosRegistry resident in Rust memory.
+    /// Why: Ensures dynamic registry memory is released via pkd_free_registry.
+    /// </summary>
+    public class PharosRegistryHandle : SafeHandleZeroOrMinusOneIsInvalid
+    {
+        private PharosRegistryHandle() : base(true) { }
+
+        [DllImport("pkd_core", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void pkd_free_registry(IntPtr handle);
+
+        protected override bool ReleaseHandle()
+        {
+            pkd_free_registry(handle);
+            return true;
+        }
+    }
+
+    /// <summary>
     /// SafeHandle for strings allocated by the Rust core.
     /// Why: Automates string memory cleanup via pkd_free_string.
     /// </summary>
@@ -115,24 +133,51 @@ namespace Pkd.RevitBridge
         private static extern SafeStringHandle pkd_trigger_panic();
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern unsafe SafeStringHandle pkd_get_ghost_metadata(byte* ptr, nuint length);
+        private static extern unsafe PharosRegistryHandle pkd_load_registry(byte* ptr, nuint length);
+
+        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
+        private static extern unsafe SafeStringHandle pkd_get_ghost_metadata(PharosRegistryHandle handle, byte* ptr, nuint length);
 
         /// <summary>
-        /// Retrieves verified metadata for a "Ghost Link" prototype.
-        /// Why: Enables metadata-first hydration of procedural geometry.
-        /// Traceability: Issue #30, #31
+        /// Retrieves verified metadata for a "Ghost Link" prototype using a registry handle.
+        /// Why: Enables metadata-first hydration of procedural geometry from a dynamic registry.
+        /// Traceability: Issue #120
         /// </summary>
-        public ValidationResponse GetGhostMetadata(string metadataId)
+        public ValidationResponse GetGhostMetadata(PharosRegistryHandle handle, string metadataId)
         {
+            if (handle == null || handle.IsInvalid)
+                throw new ArgumentException("Invalid registry handle");
+
             byte[] idBytes = Encoding.UTF8.GetBytes(metadataId);
             unsafe
             {
                 fixed (byte* ptr = idBytes)
                 {
-                    using (var result = pkd_get_ghost_metadata(ptr, (nuint)idBytes.Length))
+                    using (var result = pkd_get_ghost_metadata(handle, ptr, (nuint)idBytes.Length))
                     {
                         return ProcessRawResponse(result);
                     }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Loads a registry into resident memory.
+        /// Why: Enables dynamic, metadata-driven equipment discovery.
+        /// </summary>
+        public PharosRegistryHandle LoadRegistry(string registryJson)
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes(registryJson);
+            unsafe
+            {
+                fixed (byte* ptr = bytes)
+                {
+                    var handle = pkd_load_registry(ptr, (nuint)bytes.Length);
+                    if (handle.IsInvalid)
+                    {
+                        throw new InvalidOperationException("Failed to load Pharos Registry. Ensure JSON is valid and under 1MB.");
+                    }
+                    return handle;
                 }
             }
         }

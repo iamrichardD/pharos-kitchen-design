@@ -109,6 +109,7 @@
 
 ### Phase 4: Revit & Web Interop (Project Prism Bridge)
 - [x] **Issue #62**: True Manufacturing Onboarding (Forensic KCL Spike) (Task 4.17).
+- [x] **Issue #120**: Ghost Link Phase 2 - Dynamic Registry & Marketing Demo (Task 4.3).
 - [ ] **Issue #107**: Dependency Pruning for Lean WASM Binaries.
 - [ ] **Issue #108**: Parallel Sharding for CI/CD Acceleration.
 - [ ] **Issue #31**: Verify End-to-End Revit -> Bridge -> Web Flow (Task 4.2).
@@ -188,7 +189,15 @@
 - [x] **Issue #109**: SHA-256 Manifest Generation for WASM (Task 4.19). [Tue]
 - [x] **Issue #110**: Enforce WASM Manifest Verification (Task 4.20). [Tue]
 - [x] **Issue #52**: Protocol 'OR' grouping & Temporal Warden (Task 4.15). [Wed]
-- [ ] **Issue #30**: "Ghost Link" Prototype (Task 4.3).
+- [x] **Issue #120**: Ghost Link Phase 2 - Dynamic Registry & Marketing Demo (Task 4.3). [Thu]
+
+#### [2026-05-14] - Ghost Link Phase 2: Hybrid Handle Implementation (#120)
+- **Implemented** `PharosRegistryHandle` using `DashMap` for thread-safe, resident lookups in Rust.
+- **Exposed** `pkd_load_registry` and `pkd_get_ghost_metadata(handle, ...)` C-ABI and WASM bindings.
+- **Updated** Revit Bridge (`RevitBridge.cs`) with `SafeHandle` management for registry lifecycles.
+- **Refactored** `PharosCommands.cs` to drive procedural Revit extrusions from dynamic registry metadata.
+- **Integrated** WASM core into Astro Sandbox via `InteropSandbox.tsx` React component.
+- **Verified** "Pharos Green" status via Rust TDD suite and Astro build in Podman.
 
 #### [2026-05-13] - Protocol Hardening & ReDoS Immunity (#52)
 - **Implemented** recursive logical `OR` grouping in `pharos-protocol` via recursive descent parser (ADR-0024).
