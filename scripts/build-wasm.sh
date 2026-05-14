@@ -48,7 +48,7 @@ if ! command -v wasm-pack &> /dev/null; then
 fi
 
 echo "🦀 Building PKD WASM Core..."
-wasm-pack build packages/pkd-core --target nodejs
+wasm-pack build packages/pkd-core --target web
 
 echo "🍳 Building and Staging Manufacturer Dialects..."
 STAGING_DIR="dist/dialects"

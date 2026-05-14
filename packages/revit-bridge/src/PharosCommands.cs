@@ -37,76 +37,114 @@ namespace Pkd.RevitBridge
             {
                 // 1. Fetch Metadata (Fail Fast)
                 var bridge = new RevitBridge();
-                var response = bridge.GetGhostMetadata("PHX-DW-001");
 
-                if (!response.IsValid)
-                {
-                    TaskDialog.Show("Pharos Error", $"Failed to fetch metadata: {response.Status}");
-                    return Result.Failed;
-                }
-
-                // 2. Define Location (Prototype: Origin)
-                XYZ origin = new XYZ(0, 0, 0);
-
-                // 3. Extract Metadata-Driven Geometry (LOD 100)
-                double width = 2.0;
-                double depth = 2.0;
-                double height = 3.0;
-
-                if (response.Data.HasValue)
-                {
-                    var data = response.Data.Value;
-                    if (data.TryGetProperty("lod_geometry_specs", out JsonElement lodSpecs) && 
-                        lodSpecs.TryGetProperty("100", out JsonElement lod100) &&
-                        lod100.TryGetProperty("dimensions", out JsonElement dimensions))
-                    {
-                        // Mentorship: Metadata is the Source of Truth. 
-                        // We extract dimensions from the schema to eliminate "Hallucination Gaps."
-                        if (dimensions.TryGetProperty("width", out JsonElement w)) width = double.Parse(w.GetString() ?? "2.0");
-                        if (dimensions.TryGetProperty("depth", out JsonElement d)) depth = double.Parse(d.GetString() ?? "2.0");
-                        if (dimensions.TryGetProperty("height", out JsonElement h)) height = double.Parse(h.GetString() ?? "3.0");
+                // Hybrid Handle Demo Registry (Issue #120)
+                // Why: Transitions from hardcoded whitelists to dynamic, data-driven BIM hydration.
+                string mockRegistry = @"{
+                    ""PHX-DW-001"": {
+                        ""metadata_id"": ""PHX-DW-001"",
+                        ""name"": ""Hobart LXeR Dishwasher (Dynamic)"",
+                        ""schema_version"": ""1.0.0"",
+                        ""classification"": {
+                            ""omniclass_table_23"": ""23-75 50 11 11"",
+                            ""category"": ""Warewashing""
+                        },
+                        ""parameters"": {
+                            ""manufacturer"": ""Hobart"",
+                            ""model"": ""LXeR""
+                        },
+                        ""lod_geometry_specs"": {
+                            ""100"": {
+                                ""type"": ""PROCEDURAL_BOX"",
+                                ""dimensions"": {
+                                    ""width"": ""2.5"",
+                                    ""depth"": ""2.5"",
+                                    ""height"": ""3.5""
+                                },
+                                ""description"": ""LOD 100 Volumetric Placeholder""
+                            }
+                        },
+                        ""performance_metadata"": {
+                            ""estimated_rfa_size_kb"": 450,
+                            ""procedural_lod_enabled"": true,
+                            ""ghost_link_active"": true
+                        }
                     }
-                }
+                }";
 
-                // 4. Create Procedural Geometry
-                using (Transaction trans = new Transaction(doc, "Place Pharos Draft"))
+                using (var registry = bridge.LoadRegistry(mockRegistry))
                 {
-                    trans.Start();
+                    var response = bridge.GetGhostMetadata(registry, "PHX-DW-001");
 
-                    List<Curve> profile = new List<Curve>();
-                    profile.Add(Line.CreateBound(origin, origin + new XYZ(width, 0, 0)));
-                    profile.Add(Line.CreateBound(origin + new XYZ(width, 0, 0), origin + new XYZ(width, depth, 0)));
-                    profile.Add(Line.CreateBound(origin + new XYZ(width, depth, 0), origin + new XYZ(0, depth, 0)));
-                    profile.Add(Line.CreateBound(origin + new XYZ(0, depth, 0), origin));
+                    if (!response.IsValid)
+                    {
+                        TaskDialog.Show("Pharos Error", $"Failed to fetch metadata: {response.Status}");
+                        return Result.Failed;
+                    }
 
-                    CurveLoop curveLoop = CurveLoop.Create(profile);
-                    Solid box = GeometryCreationUtilities.CreateExtrusionGeometry(
-                        new List<CurveLoop> { curveLoop }, 
-                        XYZ.BasisZ, 
-                        height
-                    );
+                    // 2. Define Location (Prototype: Origin)
+                    XYZ origin = new XYZ(0, 0, 0);
 
-                    // Create DirectShape
-                    DirectShape ds = DirectShape.CreateElement(doc, new ElementId(BuiltInCategory.OST_FoodServiceEquipment));
-                    ds.ApplicationId = "PharosProjectPrism";
-                    ds.ApplicationDataId = "PHX-DW-001";
-                    ds.SetShape(new List<GeometryObject> { box });
-                    ds.Name = "Pharos Ghost: PHX-DW-001";
+                    // 3. Extract Metadata-Driven Geometry (LOD 100)
+                    double width = 2.0;
+                    double depth = 2.0;
+                    double height = 3.0;
 
-                    // 5. Apply Standardized Parameters (PKD_*)
                     if (response.Data.HasValue)
                     {
                         var data = response.Data.Value;
-                        if (data.TryGetProperty("parameters", out JsonElement parameters))
+                        if (data.TryGetProperty("lod_geometry_specs", out JsonElement lodSpecs) && 
+                            lodSpecs.TryGetProperty("100", out JsonElement lod100) &&
+                            lod100.TryGetProperty("dimensions", out JsonElement dimensions))
                         {
-                            // Mentorship: Standardized parameter binding ensures metadata persistence 
-                            // across different Revit templates and locales.
-                            ApplyParameter(ds, "PKD_Manufacturer", "manufacturer", parameters);
-                            ApplyParameter(ds, "PKD_ModelNumber", "model", parameters);
+                            // Mentorship: Metadata is the Source of Truth. 
+                            // We extract dimensions from the schema to eliminate "Hallucination Gaps."
+                            if (dimensions.TryGetProperty("width", out JsonElement w)) width = double.Parse(w.GetString() ?? "2.0");
+                            if (dimensions.TryGetProperty("depth", out JsonElement d)) depth = double.Parse(d.GetString() ?? "2.0");
+                            if (dimensions.TryGetProperty("height", out JsonElement h)) height = double.Parse(h.GetString() ?? "3.0");
                         }
                     }
 
-                    trans.Commit();
+                    // 4. Create Procedural Geometry
+                    using (Transaction trans = new Transaction(doc, "Place Pharos Draft"))
+                    {
+                        trans.Start();
+
+                        List<Curve> profile = new List<Curve>();
+                        profile.Add(Line.CreateBound(origin, origin + new XYZ(width, 0, 0)));
+                        profile.Add(Line.CreateBound(origin + new XYZ(width, 0, 0), origin + new XYZ(width, depth, 0)));
+                        profile.Add(Line.CreateBound(origin + new XYZ(width, depth, 0), origin + new XYZ(0, depth, 0)));
+                        profile.Add(Line.CreateBound(origin + new XYZ(0, depth, 0), origin));
+
+                        CurveLoop curveLoop = CurveLoop.Create(profile);
+                        Solid box = GeometryCreationUtilities.CreateExtrusionGeometry(
+                            new List<CurveLoop> { curveLoop }, 
+                            XYZ.BasisZ, 
+                            height
+                        );
+
+                        // Create DirectShape
+                        DirectShape ds = DirectShape.CreateElement(doc, new ElementId(BuiltInCategory.OST_FoodServiceEquipment));
+                        ds.ApplicationId = "PharosProjectPrism";
+                        ds.ApplicationDataId = "PHX-DW-001";
+                        ds.SetShape(new List<GeometryObject> { box });
+                        ds.Name = "Pharos Ghost: PHX-DW-001";
+
+                        // 5. Apply Standardized Parameters (PKD_*)
+                        if (response.Data.HasValue)
+                        {
+                            var data = response.Data.Value;
+                            if (data.TryGetProperty("parameters", out JsonElement parameters))
+                            {
+                                // Mentorship: Standardized parameter binding ensures metadata persistence 
+                                // across different Revit templates and locales.
+                                ApplyParameter(ds, "PKD_Manufacturer", "manufacturer", parameters);
+                                ApplyParameter(ds, "PKD_ModelNumber", "model", parameters);
+                            }
+                        }
+
+                        trans.Commit();
+                    }
                 }
 
                 return Result.Succeeded;
