@@ -54,6 +54,7 @@
 - [x] **Issue #68**: WASM Engine Performance & Artifact Promotion (Task 4.18). [Tue]
 - [x] **Issue #109**: SHA-256 Manifest Generation for WASM (Task 4.19). [Tue]
 - [x] **Issue #110**: Enforce WASM Manifest Verification (Task 4.20). [Tue]
+- [x] **Bug #127**: CI/CD: Fix Podman layer failure in ts-auditor stage.
 - [x] **Issue #52**: pharos-protocol 'OR' grouping & Temporal Warden (Task 4.15). [Wed]
 - [x] **Issue #120**: Ghost Link Phase 2 - Dynamic Registry & Marketing Demo (Task 4.3). [Thu]
 

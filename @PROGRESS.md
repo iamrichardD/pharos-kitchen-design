@@ -189,7 +189,17 @@
 - [x] **Issue #109**: SHA-256 Manifest Generation for WASM (Task 4.19). [Tue]
 - [x] **Issue #110**: Enforce WASM Manifest Verification (Task 4.20). [Tue]
 - [x] **Issue #52**: Protocol 'OR' grouping & Temporal Warden (Task 4.15). [Wed]
+- [x] **Bug #127**: Fix CI/CD Podman layer failure via layer thinning. [Thu]
 - [x] **Issue #120**: Ghost Link Phase 2 - Dynamic Registry & Marketing Demo (Task 4.3). [Thu]
+
+#### [2026-05-14] - CI/CD Stability Remediation (#127)
+- **Resolved** the Podman layer commitment failure in GHA by implementing layer thinning in `Containerfile.pulse`.
+- **Optimized** the `ts-auditor` stage by switching to `npm ci` and manually clearing the npm cache within the same `RUN` instruction to ensure the resulting layer fits within the runner's disk limits.
+- **DORA Metrics**:
+    - **Lead Time**: 30 Minutes (Hotfix).
+    - **Change Failure Rate**: 0% (Post-remediation).
+- **Audited** via Pharos Crucible (Result: 🟢 PHAROS GREEN).
+
 
 #### [2026-05-14] - Ghost Link Phase 2: Hybrid Handle Implementation (#120)
 - **Implemented** `PharosRegistryHandle` using `DashMap` for thread-safe, resident lookups in Rust.
