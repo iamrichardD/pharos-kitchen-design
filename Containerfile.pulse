@@ -72,10 +72,14 @@ RUN chmod +x /usr/local/bin/pkd
 RUN pkd core verify-manifest /work/dist/dialects
 
 # Perform dependency audit and TS unit tests.
-RUN npm install && \
+# Why: Enforces Fail-Fast on dependencies and executes the verification suite.
+# Optimization: Using 'npm ci' for reproducible builds and cleaning cache to reduce layer size (preventing commit issues).
+RUN npm ci && \
     npm rebuild better-sqlite3 && \
     (npm audit --workspaces || echo "⚠️ Warning: Audit found known issues, proceeding per SECURITY_LOG.md") && \
-    npm test
+    npm test && \
+    npm cache clean --force && \
+    rm -rf /root/.npm/_cacache
 
 # Stage 6: .NET SDK (Integrated \"Pulse\" Handshake)
 FROM mcr.microsoft.com/dotnet/sdk@sha256:3e7b0cefe1b00a350ffb0e06b4e1271a4e791df6b8ac4239be05f1ae2736fcff AS pulse-final
