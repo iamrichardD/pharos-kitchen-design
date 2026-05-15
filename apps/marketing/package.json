@@ -18,6 +18,7 @@
     "@astrojs/tailwind": "^6.0.0",
     "@aws-amplify/auth": "^6.19.1",
     "@pkd/core": "*",
+    "@pkd/toon": "file:../../packages/pkd-toon/pkg",
     "astro": "^5.18.1",
     "aws-amplify": "^6.16.3",
     "tailwindcss": "^3.4.0"

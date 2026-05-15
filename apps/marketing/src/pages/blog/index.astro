@@ -1,0 +1,158 @@
+---
+/* ========================================================================
+ * Project: Pharos Kitchen Design (Project Prism)
+ * Component: Marketing / Blog
+ * File: apps/marketing/src/pages/blog/index.astro
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * License: FSL-1.1 (See LICENSE file for details)
+ * Purpose: Authoritative Log landing page with dual-stream filtering.
+ * Traceability: Issue #129, RFC-2378
+ * ======================================================================== */
+
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import ToonLoader from '../../components/ToonLoader.astro';
+
+const allUpdates = await getCollection('updates');
+// Sort by ID (date-based filename) descending
+const sortedUpdates = allUpdates.sort((a, b) => b.id.localeCompare(a.id));
+
+const streams = ["Engineering", "Design", "Logistics"];
+---
+
+<BaseLayout title="Pharos Pulse | Authoritative Log" description="High-performance progress logs driven by the pkd-toon WASM parser. Verifiable AEC engineering updates.">
+  <div class="relative overflow-hidden bg-black pb-32">
+    <!-- Subtle Background Elements -->
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-emerald-500/5 blur-[120px] rounded-full pointer-events-none"></div>
+    
+    <main class="relative z-10 max-w-5xl mx-auto px-6 pt-24">
+      <header class="mb-20 text-center">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 mb-6">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </span>
+          <span class="text-[10px] font-bold uppercase tracking-widest text-emerald-400">Live Hackathon Stream</span>
+        </div>
+        <h1 class="text-5xl md:text-6xl font-black text-white mb-6 tracking-tighter">PHAROS PULSE</h1>
+        <p class="text-emerald-100/60 font-mono text-sm max-w-2xl mx-auto leading-relaxed">
+          Authoritative progress logs verified by the <span class="text-emerald-400">pkd-toon</span> WASM parser. 
+          Real-time engineering telemetry for the Pharos ecosystem.
+        </p>
+      </header>
+
+      <!-- RFC-2378 Command Bar -->
+      <div id="command-bar-container" class="mb-16 sticky top-24 z-40">
+        <div class="relative group">
+          <div class="absolute -inset-1 bg-gradient-to-r from-emerald-500/20 via-emerald-500/10 to-transparent rounded-xl blur opacity-25 group-focus-within:opacity-100 transition duration-500"></div>
+          <div class="relative bg-black/80 backdrop-blur-xl border border-emerald-500/20 rounded-xl flex items-center p-2 shadow-2xl">
+            <div class="flex items-center gap-3 px-4 py-2 bg-emerald-500/5 rounded-lg border border-emerald-500/10">
+               <span class="text-emerald-500/50 font-mono text-xs">pkd query ></span>
+            </div>
+            <input 
+              type="text" 
+              id="command-bar-input"
+              placeholder="Filter by stream=engineering, tag=wasm, or keywords..." 
+              class="bg-transparent border-none outline-none text-emerald-400 font-mono text-sm flex-grow px-4 placeholder:text-emerald-900/50"
+              aria-label="Pharos Command Bar"
+            />
+            <div class="flex gap-2 mr-2">
+               {streams.map(s => (
+                 <button class="stream-pill hidden md:block px-3 py-1 bg-white/5 border border-white/10 text-[10px] uppercase text-white/40 hover:text-emerald-400 hover:border-emerald-500/30 transition-all rounded" data-stream={s.toLowerCase()}>
+                   {s}
+                 </button>
+               ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Log Feed -->
+      <div id="blog-feed" class="space-y-24">
+        {sortedUpdates.length > 0 ? (
+          sortedUpdates.map((update) => (
+            <article class="blog-entry group" data-raw={update.data.content}>
+              <div class="flex flex-col md:flex-row gap-8">
+                <div class="md:w-32 flex-shrink-0 pt-2">
+                   <div class="sticky top-48">
+                      <div class="text-[10px] font-bold text-emerald-500/40 uppercase tracking-[0.2em] mb-1">Entry ID</div>
+                      <div class="text-lg font-mono text-white/20 group-hover:text-emerald-500/40 transition-colors">#${update.id}</div>
+                   </div>
+                </div>
+                <div class="flex-grow">
+                   <ToonLoader content={update.data.content} />
+                </div>
+              </div>
+            </article>
+          ))
+        ) : (
+          <div class="py-20 text-center border border-dashed border-emerald-500/10 rounded-2xl bg-emerald-500/5">
+             <p class="text-emerald-500/50 font-mono text-sm tracking-widest uppercase">No Authoritative Logs Found in Registry</p>
+          </div>
+        )}
+      </div>
+    </main>
+  </div>
+</BaseLayout>
+
+<script>
+  // PHAROS COMMAND BAR LOGIC (RFC-2378 Filter Patterns)
+  const input = document.getElementById('command-bar-input') as HTMLInputElement;
+  const entries = document.querySelectorAll('.blog-entry');
+  const pills = document.querySelectorAll('.stream-pill');
+
+  function applyFilter(query: string) {
+    const normalizedQuery = query.toLowerCase().trim();
+    
+    entries.forEach(entry => {
+      const raw = (entry as HTMLElement).dataset.raw?.toLowerCase() || '';
+      let match = true;
+
+      if (normalizedQuery.length > 0) {
+        if (normalizedQuery.includes('=')) {
+          // RFC-2378 Key=Value Search
+          const [key, value] = normalizedQuery.split('=');
+          if (key && value) {
+            // Check for "key: value" pattern in TOON metadata
+            match = raw.includes(`${key.trim()}: ${value.trim()}`);
+          }
+        } else {
+          // Global Keyword Search
+          match = raw.includes(normalizedQuery);
+        }
+      }
+
+      (entry as HTMLElement).style.display = match ? 'block' : 'none';
+      (entry as HTMLElement).classList.toggle('animate-in', match);
+      (entry as HTMLElement).classList.toggle('fade-in', match);
+    });
+  }
+
+  input?.addEventListener('input', (e) => {
+    applyFilter((e.target as HTMLInputElement).value);
+  });
+
+  pills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      const stream = (pill as HTMLElement).dataset.stream;
+      if (stream) {
+        input.value = `stream=${stream}`;
+        applyFilter(input.value);
+      }
+    });
+  });
+
+  // Hotkey support (Slash to focus)
+  window.addEventListener('keydown', (e) => {
+    if (e.key === '/' && document.activeElement?.tagName !== 'INPUT') {
+      e.preventDefault();
+      input?.focus();
+    }
+  });
+</script>
+
+<style>
+  .blog-entry {
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+</style>

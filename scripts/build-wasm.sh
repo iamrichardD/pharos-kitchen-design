@@ -50,6 +50,9 @@ fi
 echo "🦀 Building PKD WASM Core..."
 wasm-pack build packages/pkd-core --target web
 
+echo "🏷️ Building PKD TOON Parser (WASM)..."
+wasm-pack build packages/pkd-toon --target web
+
 echo "🍳 Building and Staging Manufacturer Dialects..."
 STAGING_DIR="dist/dialects"
 mkdir -p "$STAGING_DIR"
