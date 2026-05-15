@@ -112,7 +112,7 @@ const streams = ["Engineering", "Design", "Logistics"];
         if (normalizedQuery.includes('=')) {
           // RFC-2378 Key=Value Search
           const [key, value] = normalizedQuery.split('=');
-          if (value) {
+          if (key && value) {
             // Check for "key: value" pattern in TOON metadata
             match = raw.includes(`${key.trim()}: ${value.trim()}`);
           }
