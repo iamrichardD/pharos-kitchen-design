@@ -28,14 +28,27 @@ We adopt a standardized GitHub Label set for Estimated Complexity Tiers (ECT). T
 | **ECT: 4** | Orange | `D93F0B` | System Integration (~4-6h) |
 | **ECT: 5** | Red | `B60205` | Architectural Shift (> 1 day) |
 
-### 2. Operational Rules
+### 2. The Actual Complexity Tier (ACT)
+While ECT is used for *Planning*, the **ACT** label is applied upon *Task Closure* to record the actual effort expended. This enables the calculation of **Velocity Variance**.
+
+| Label | Color | Hex | Definition |
+| :--- | :--- | :--- | :--- |
+| **ACT: 1** | Lavender | `D4C5F9` | Actual: Surgical Strike |
+| **ACT: 2** | Lavender | `D4C5F9` | Actual: Component Logic |
+| **ACT: 3** | Lavender | `D4C5F9` | Actual: Cross-Cutting |
+| **ACT: 4** | Lavender | `D4C5F9` | Actual: System Integration |
+| **ACT: 5** | Lavender | `D4C5F9` | Actual: Architectural Shift |
+
+### 3. Operational Rules
 - **Mandatory Assignment**: No task may enter a "Sprint" or "Active" state without an assigned ECT label.
+- **Closing Audit**: Upon closing an issue, the agent MUST assign an ACT label.
 - **Decomposition Trigger**: Any issue labeled with `ECT: 4` or `ECT: 5` is a candidate for the Small Stones Mandate (ADR-0033).
-- **Velocity Tracking**: Weekly velocity is calculated by summing the ECT labels of all issues closed within the Friday-to-Friday window.
+- **Velocity Tracking**: Weekly velocity is calculated by summing the **ACT** labels of closed issues.
+- **Velocity Variance**: Calculated as `ECT - ACT`. A consistent negative variance indicates underestimation; positive indicates overestimation.
 
 ## Consequences
-- **Positive**: Instant visual audit of sprint risk, automated velocity calculations, and improved DORA observability.
-- **Negative**: Minor overhead in managing labels.
+- **Positive**: High-fidelity historical reporting (YTD/YoY), calibrated planning estimates, and visual audit of 'Estimated vs Reality'.
+- **Negative**: Minor overhead in managing a secondary label set.
 
 ## Traceability
 - **Metrics**: `docs/governance/WEEKLY_VELOCITY_LOG.toon`
