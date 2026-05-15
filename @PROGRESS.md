@@ -112,7 +112,7 @@
 - [x] **Issue #120**: Ghost Link Phase 2 - Dynamic Registry & Marketing Demo (Task 4.3).
 - [ ] **Issue #107**: Dependency Pruning for Lean WASM Binaries.
 - [ ] **Issue #108**: Parallel Sharding for CI/CD Acceleration.
-- [ ] **Issue #31**: Verify End-to-End Revit -> Bridge -> Web Flow (Task 4.2).
+- [x] **Issue #31**: Verify End-to-End Revit -> Bridge -> Web Flow (Task 4.2).
 - [ ] **Issue #30**: Implement Ghost Link Prototype (Task 4.3).
 - [ ] **Issue #28**: Shared Design System Extraction (Task 4.4).
 - [ ] **Issue #42**: Audit Remediation: SRI, SEO, and WASM Bridge (Task 4.5).

@@ -1,0 +1,35 @@
+/* ========================================================================
+ * Project: Pharos Kitchen Design (Project Prism)
+ * Component: Governance / Metrics
+ * File: docs/governance/WEEKLY_VELOCITY_LOG.toon
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * License: FSL-1.1 (See LICENSE file for details)
+ * Purpose: High-density, AI-ergonomic velocity and DORA metric tracking.
+ * Traceability: ADR-0033, ADR-0030, TOON Spec
+ * ======================================================================== */
+
+sprint: 4.9
+date: 2026-05-15
+team: PHAROS_STRATEGY_CORE
+
+# Core Capacity Metrics
+velocity[1]{target_ect, actual_ect, variance}:
+  20, 17, -3
+
+# DORA Performance Metrics
+performance[1]{lead_time_hrs, change_failure_rate, mttr_mins}:
+  2.4, 0.14, 30
+
+# Task Outcomes
+tasks[6]{id, title, ect, status}:
+  #120, Ghost Link Phase 2 - Dynamic Registry & Marketing Demo, 4, Done
+  #52, Protocol OR Grouping & Temporal Warden, 4, Done
+  #109, SHA-256 Manifest Generation for WASM Artifacts, 2, Done
+  #110, Enforce WASM Manifest Verification in Containerfile.pulse, 2, Done
+  #105, CI/CD Optimization and Security Hardening, 4, Done
+  #127, Bug: CI Build Failure - Podman Layer Commitment Error, 1, Done
+
+# Strategic Continuity
+handoff: docs/governance/FRIDAY_HANDOFF.md
+routine: ADR-0032
+mandate: ADR-0033

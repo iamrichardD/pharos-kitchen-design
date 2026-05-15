@@ -58,15 +58,33 @@
 - [x] **Issue #52**: pharos-protocol 'OR' grouping & Temporal Warden (Task 4.15). [Wed]
 - [x] **Issue #120**: Ghost Link Phase 2 - Dynamic Registry & Marketing Demo (Task 4.3). [Thu]
 
-### Sprint 4.10: Performance & Scale
-- [ ] **Issue #107**: Dependency Pruning for Lean WASM Binaries.
-- [ ] **Issue #108**: Parallel Sharding for CI/CD Acceleration.
-- [ ] **Issue #111**: Implement Parallelized JIT WASM Engine.
-- [ ] **Issue #113**: ADR Template Automation with Mandatory Prologue.
-- [ ] **Issue #114**: SDLC Update: Mandatory Regression Surface Mapping.
-- [ ] **Issue #115**: Implement Local Governance Linter (pkd gov lint).
-- [ ] **Issue #117**: Refactor Containerfile.pulse for Dedicated Verification Stage.
-- [ ] **Issue #118**: Implement High-Rigor Manifest Failure Tests in Truth Engine.
+### Sprint 4.10: Performance & Scale - 🚀 APPROVED (May 18–22)
+
+#### 🪨 Big Rock: #111 - Parallelized JIT WASM Engine [ECT: 5]
+- [ ] **Task 4.25.1**: Implement `WasmJitLoader` with explicit memory limits. [ECT: 2]
+- [ ] **Task 4.25.2**: Thread-Safe `DashMap` Registry for concurrent lookups. [ECT: 2]
+- [ ] **Task 4.25.3**: Parallel Query Dispatcher via `rayon` (sharding). [ECT: 2]
+- [ ] **Task 4.25.4**: JIT Performance Benchmark & Regression Audit. [ECT: 1]
+
+#### 🪨 Big Rock: #108 - CI/CD Sharding for Parallel Verification [ECT: 4]
+- [ ] **Task 4.26.1**: Partition `pulse.sh` into `core`, `bridge`, and `marketing` slices. [ECT: 2]
+- [ ] **Task 4.26.2**: Implement GitHub Actions Matrix for parallel slice execution. [ECT: 2]
+- [ ] **Task 4.26.3**: Centralized Artifact Promotion (OIDC-signed) between shards. [ECT: 2]
+
+#### 🪨 Big Rock: #124 - JIT Sharded Registry Scaling [ECT: 4]
+- [ ] **Task 5.2.1**: Refactor `BakeEngine` for incremental shard generation. [ECT: 2]
+- [ ] **Task 5.2.2**: Implement `LazyShardLoader` in `pkd-core` (WASM/C#). [ECT: 2]
+- [ ] **Task 5.2.3**: Verify Shard Integrity via SHA-256 Manifest. [ECT: 1]
+
+#### 💎 Small Stones: Operational & Debt
+- [ ] **Issue #88**: Task 4.22: Implement `pkd core pulse` Command. [ECT: 3]
+- [ ] **Issue #115**: Debt #115: Implement Local Governance Linter (pkd gov lint). [ECT: 3]
+- [ ] **Issue #107**: Debt #107: Audit and Prune pkd-core Dependencies. [ECT: 2]
+- [ ] **Issue #113**: Debt #113: ADR Template Automation with Mandatory Prologue. [ECT: 2]
+- [ ] **Issue #114**: Debt #114: SDLC Update: Mandatory Regression Surface Mapping. [ECT: 1]
+- [ ] **Issue #117**: Debt #117: Refactor Containerfile.pulse for Dedicated Verification Stage. [ECT: 2]
+- [ ] **Issue #118**: Debt #118: Implement High-Rigor Manifest Failure Tests in Truth Engine. [ECT: 2]
+- **Total Capacity**: 28 Tiers (Aggressive Scale)
 
 ### Phase 3: The CLI Bridge (Admin Control Plane)
 - [x] **Scaffold pkd-cli:** Rust binary with `clap` and the 5 `pkd_role` variants (IKD, OEM, VDC, ADMIN, AUDITOR, BOT).
@@ -109,12 +127,13 @@
 - [x] **Issue #43**: Implement Pharos Synchronization Protocol (Task 4.1).
 - [x] **Issue #31**: Verify End-to-End Revit -> Bridge -> Web Flow (Task 4.2).
 - [x] **Issue #120**: Implement Ghost Link Phase 2 (Task 4.3).
-- [ ] **Issue #28**: Shared Design System Extraction (Task 4.4).
-- [ ] **Issue #42**: Audit Remediation: SRI, SEO, and WASM Bridge (Task 4.5).
+- [ ] **Issue #28**: Shared Design System Extraction (Task 4.4). [ECT: 4]
+- [ ] **Issue #42**: Audit Remediation: SRI, SEO, and WASM Bridge (Task 4.5). [ECT: 3]
 - [x] **Issue #41**: Marketing Site CI/CD Build Failure (Bug #41).
 - [x] **Issue #44**: Implement Pharos Crucible Process (Task 4.6).
 - [x] **Issue #45**: Implement Pharos Crucible Enforcement Layer (Task 4.7).
 - [x] **Issue #74**: Remediate CI Test Paths (Deterministic Pathing) (Task 4.20). [HARDENED REGEX WARDEN]
+- [ ] **Issue #129**: Task 4.27: Implement WASM-Driven "Authoritative Log" (Pharos Pulse Blog). [ECT: 4] [Created: 2026-05-15]
 
 ### Sprint 4.3: Registry Distribution & Pulse Protocol (#51-54, #65) - 🔄 In Progress
 - [x] **Issue #53**: Implement `pkd core bake` engine for sharded JSON and binary indexes (Task 4.12).
@@ -143,14 +162,21 @@
 
 ### Sprint 4.5: Infrastructure & Identity Governance (#84-87) - 📋 Backlog
 - [x] **Issue #100**: Formalize SPM Role and Harden SDLC Governance (Verified Pharos Green).
-- [ ] **Issue #84**: Configure Dual-Stream Release Pipeline (Task 3.15).
-- [ ] **Issue #85**: Initialize Homebrew Tap (Official) (Task 3.16).
-- [ ] **Issue #86**: ADR-0027: Organization-Based Authority Scopes.
-- [ ] **Issue #87**: Implement Domain-to-Org Mapping (Task 4.21).
+- [ ] **Issue #84**: Configure Dual-Stream Release Pipeline (Task 3.15). [ECT: 4]
+- [ ] **Issue #85**: Initialize Homebrew Tap (Official) (Task 3.16). [ECT: 2]
+- [ ] **Issue #86**: Debt #86: ADR-0027: Organization-Based Authority Scopes. [ECT: 1]
+- [ ] **Issue #87**: Implement Domain-to-Org Mapping (Task 4.21). [ECT: 3]
 
 ### Sprint 4.6: The Pulse Evolution (#88-89) - 📋 Backlog
-- [ ] **Issue #88**: Implement `pkd core pulse` Command (Logic Center for JIT).
-- [ ] **Issue #89**: Develop Manufacturer Maintenance Sidecar (Task 4.22).
+- [ ] **Issue #88**: Implement `pkd core pulse` Command (Logic Center for JIT). [ECT: 3]
+- [ ] **Issue #89**: Develop Manufacturer Maintenance Sidecar (Task 4.22). [ECT: 4]
+
+### Phase 5: IKD Enablement (Ghost Links & Scale) - 📋 Backlog
+- [ ] **Issue #122**: Task 5.1: LOD 200+ Part-Based Procedural Geometry. [ECT: 5]
+- [ ] **Issue #124**: Task 5.2: JIT Sharded Registry Scaling. [ECT: 4]
+- [ ] **Issue #125**: Task 5.3: Bidirectional Web-to-Revit 'Ghost Tuning'. [ECT: 5]
+- [ ] **Issue #126**: Task 5.4: CLI Registry Management Subcommands. [ECT: 3]
+- [ ] **Issue #123**: Debt 5.5: .NET 8.0 Zero-Allocation Marshalling. [ECT: 4]
 
 ---
 
