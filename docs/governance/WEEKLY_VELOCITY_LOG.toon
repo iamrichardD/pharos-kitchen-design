@@ -16,6 +16,10 @@ team: PHAROS_STRATEGY_CORE
 velocity[1]{target_ect, actual_ect, variance}:
   20, 17, -3
 
+# Historical Baseline (Retroactive Audit #132)
+phase4_baseline[1]{total_ect, total_act, variance, issue_count}:
+  44, 43, 1, 23
+
 # DORA Performance Metrics
 performance[1]{lead_time_hrs, change_failure_rate, mttr_mins}:
   2.4, 0.14, 30
