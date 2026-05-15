@@ -17,4 +17,5 @@ members = [
     "packages/dialects/pkd-dialect-frymaster",
     "packages/dialects/pkd-dialect-template",
     "packages/dialects/pkd-dialect-true",
+    "packages/pkd-toon",
 ]
