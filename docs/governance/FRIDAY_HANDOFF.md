@@ -19,7 +19,7 @@
 - **Pharos Transparency Initiative**: Implementing the "Authoritative Log" (Pharos Pulse Blog) as a dogfooded proof-of-capability.
 - **Small Stones Mandate**: Ensuring all ECT 4/5 tasks are sharded into atomic, verifiable sub-tasks (ADR-0033).
 - **TOON Data Standard**: Formally adopted **TOON** for high-density, AI-ergonomic governance logs (`WEEKLY_VELOCITY_LOG.toon`).
-- **Hackathon Window**: Initiated the investigation into a **TOON-to-WASM Parser**. Tracked via the new `hackathon` label.
+- **Hackathon Window**: Initiated the investigation into a **TOON-to-WASM Parser** (#130). Tracked via the new `hackathon` label.
 
 ## 🛡️ Operational Mandates (Established 2026-05-15)
 - **High-Rigor Cadence**: 4+1 Weekly Routine codified in ADR-0032.
