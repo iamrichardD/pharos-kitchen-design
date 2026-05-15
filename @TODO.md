@@ -135,6 +135,7 @@
 - [x] **Issue #74**: Remediate CI Test Paths (Deterministic Pathing) (Task 4.20). [HARDENED REGEX WARDEN]
 - [ ] **Issue #129**: Task 4.27: Implement WASM-Driven "Authoritative Log" (Pharos Pulse Blog). [ECT: 4] [Created: 2026-05-15]
 - [ ] **Issue #130**: Task 4.28: [HACKATHON] Investigate TOON-to-WASM Parser for High-Density Logs. [ECT: 3] [Created: 2026-05-15]
+- [ ] **Issue #131**: Task 4.29: Implement ECT Labeling System for Capacity Governance. [ECT: 2] [Created: 2026-05-15]
 
 ### Sprint 4.3: Registry Distribution & Pulse Protocol (#51-54, #65) - 🔄 In Progress
 - [x] **Issue #53**: Implement `pkd core bake` engine for sharded JSON and binary indexes (Task 4.12).
