@@ -21,6 +21,7 @@
 - **TOON Data Standard**: Formally adopted **TOON** for high-density, AI-ergonomic governance logs (`WEEKLY_VELOCITY_LOG.toon`).
 - **ECT Labeling System**: Formalized complexity heatmaps in GitHub via **ECT: 1-5** labels (#131) and ADR-0034.
 - **IA Audit (Marketing)**: Completed high-rigor audit of IKD enablement. Identified 'CLI Barrier' and 'Revit Visibility' as core maturation gaps.
+- **Project Genesis**: Drafted the 'Project Genesis' manifesto (#145) as a narrative anchor for the community.
 - **Hackathon Window**: Completed the **Phase 4 Forensic Audit** (#132), the **TOON-to-WASM Parser** (#130) spike, and the **Extended Forensic Audit (Phases 2 & 3)** (#133). Established a 97.9% YTD estimation accuracy baseline.
 - **Next Innovation (Staged)**: Sharded maturation tasks for the Pulse Blog and **IKD Empowerment & Visibility** (#144).
 

@@ -146,6 +146,7 @@
 - [ ] **Issue #140**: Debt #140: Marketing Site Theme Alignment (Pulse Blog). [ECT: 1] [Created: 2026-05-15]
 - [ ] **Issue #141**: Task 4.33: Recursive Tabular Indentation for TOON Parser. [ECT: 3] [Created: 2026-05-15]
 - [ ] **Issue #144**: Task 4.34: IKD Empowerment & Visibility Maturation. [ECT: 3] [Created: 2026-05-15]
+- [ ] **Issue #145**: Task 4.35: Implement "Project Genesis" Manifesto Post. [ECT: 2] [Created: 2026-05-15]
 
 ### Sprint 4.3: Registry Distribution & Pulse Protocol (#51-54, #65) - 🔄 In Progress
 - [x] **Issue #53**: Implement `pkd core bake` engine for sharded JSON and binary indexes (Task 4.12).
