@@ -137,7 +137,7 @@
 - [x] **Issue #130**: Task 4.28: [HACKATHON] Investigate TOON-to-WASM Parser for High-Density Logs. [ECT: 3] [Created: 2026-05-15]
 - [x] **Issue #131**: Task 4.29: Implement ECT Labeling System for Capacity Governance. [ECT: 2] [Created: 2026-05-15]
 - [x] **Issue #132**: Task 4.30: [HACKATHON] Retroactive Complexity Audit & ACT Label Implementation. [ECT: 3] [Created: 2026-05-15]
-- [ ] **Issue #133**: Task 4.31: [HACKATHON] Extended Forensic Audit (Phases 2 & 3). [ECT: 3] [Created: 2026-05-15]
+- [x] **Issue #133**: Task 4.31: [HACKATHON] Extended Forensic Audit (Phases 2 & 3). [ECT: 3] [Created: 2026-05-15]
 
 ### Sprint 4.3: Registry Distribution & Pulse Protocol (#51-54, #65) - 🔄 In Progress
 - [x] **Issue #53**: Implement `pkd core bake` engine for sharded JSON and binary indexes (Task 4.12).
