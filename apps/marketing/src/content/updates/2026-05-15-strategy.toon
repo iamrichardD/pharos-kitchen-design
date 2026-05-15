@@ -1,0 +1,32 @@
+/* ========================================================================
+ * Project: Pharos Kitchen Design (Project Prism)
+ * Component: Marketing / Blog (Strategy Spoke)
+ * File: apps/marketing/src/content/updates/2026-05-15-strategy.toon
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * License: FSL-1.1 (See LICENSE file for details)
+ * Purpose: Deep-dive into the forensic audit and team velocity metrics.
+ * Traceability: Issue #132, Issue #133, ADR-0033
+ * ======================================================================== */
+
+title: Strategy: The 97.9% Precision Baseline
+type: strategy
+date: 2026-05-15
+createdAt: 2026-05-15T11:00:00Z
+releaseAt: 2026-05-15T15:00:00Z
+author: Richard D.
+stream: engineering
+tags: governance, dora, audit, planning
+
+# Strategic Narrative
+body[1]{content}:
+  "Pharos is now the first AEC project with an Authoritative Engineering Baseline. Through a forensic audit of over 110 issues, we have verified that our high-rigor SDLC and the 'Small Stones Mandate' deliver an unprecedented 97.9% estimation accuracy, ensuring that our roadmap is a commitment, not a guess."
+
+# DORA Baseline
+metrics[1]{lead_time, change_failure_rate, mttr}:
+  2.1h, 0.12, 28m
+
+# Audit Outcomes
+history[3]{phase, total_ect, total_act}:
+  2, 17, 19
+  3, 178, 172
+  4, 44, 43

@@ -1,0 +1,31 @@
+/* ========================================================================
+ * Project: Pharos Kitchen Design (Project Prism)
+ * Component: Marketing / Blog (Engineering Spoke)
+ * File: apps/marketing/src/content/updates/2026-05-15-engineering.toon
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * License: FSL-1.1 (See LICENSE file for details)
+ * Purpose: Technical deep-dive into the TOON parser and WASM blog engine.
+ * Traceability: Issue #129, Issue #130
+ * ======================================================================== */
+
+title: Engineering: The Dogfooded Pulse Engine
+type: engineering
+date: 2026-05-15
+createdAt: 2026-05-15T09:00:00Z
+releaseAt: 2026-05-15T15:00:00Z
+author: Richard D.
+stream: engineering
+tags: wasm, rust, toon, rfc-2378
+
+# The Core Achievement
+body[1]{content}:
+  "Today we launched the first high-performance, dogfooded blog engine for the AEC industry. By leveraging our own pkd-toon WASM parser and RFC-2378 protocol, we have eliminated the need for heavy JS-based blog plugins, moving the 'Source of Truth' directly to our high-density binary and TOON artifacts."
+
+# Innovation Metrics
+efficiency[1]{format, payload_delta, complexity}:
+  TOON, -33% vs JSON, O(n) Linear Pass
+
+# Implementation Spikes
+tasks[2]{id, title, result}:
+  #130, [HACKATHON] TOON Parser, 100% Rust-Native Zero-Copy Lexer
+  #129, WASM-Driven Blog, Astro 6 Custom Loader Integration

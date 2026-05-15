@@ -1,0 +1,31 @@
+/* ========================================================================
+ * Project: Pharos Kitchen Design (Project Prism)
+ * Component: Marketing / Blog (Index Hub)
+ * File: apps/marketing/src/content/updates/2026-05-15-index.toon
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * License: FSL-1.1 (See LICENSE file for details)
+ * Purpose: Weekly aggregator and high-level summary of the Pharos Pulse.
+ * Traceability: ADR-0032
+ * ======================================================================== */
+
+title: The Genesis Pulse: A New Standard for AEC Transparency
+type: index
+date: 2026-05-15
+createdAt: 2026-05-15T08:00:00Z
+releaseAt: 2026-05-15T15:00:00Z
+author: Richard D.
+stream: universal
+tags: genesis, pulse, hackathon
+
+# Weekly Executive Summary
+body[1]{content}:
+  "Welcome to the first official Pharos Pulse. Today marks the formal adoption of our high-rigor Friday routine: a day dedicated to innovation, capacity planning, and total transparency. This week, we didn't just build software; we built the engine of our own accountability."
+
+# Sharded Deep-Dives
+spokes[2]{title, audience, summary}:
+  The Dogfooded Pulse Engine, Developers, "Deep-dive into our Rust/WASM blog engine and the TOON protocol."
+  The 97.9% Precision Baseline, Stakeholders, "Exploring the forensic audit that established our authoritative velocity."
+
+# Sprint 4.10 Staging
+next_sprint[1]{objective, tiers, status}:
+  Performance & Scale, 28, Approved
