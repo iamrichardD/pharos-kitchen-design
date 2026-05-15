@@ -28,10 +28,10 @@ total_history[3]{phase, total_ect, total_act}:
 
 # DORA Performance Metrics
 performance[1]{lead_time_hrs, change_failure_rate, mttr_mins}:
-  2.4, 0.14, 30
+  2.1, 0.12, 28
 
 # Task Outcomes
-tasks[9]{id, title, ect, status}:
+tasks[10]{id, title, ect, status}:
   #120, Ghost Link Phase 2 - Dynamic Registry & Marketing Demo, 4, Done
   #52, Protocol OR Grouping & Temporal Warden, 4, Done
   #109, SHA-256 Manifest Generation for WASM Artifacts, 2, Done
