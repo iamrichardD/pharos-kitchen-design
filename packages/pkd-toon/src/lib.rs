@@ -35,8 +35,10 @@ pub enum ToonError {
     UnexpectedEOF,
     #[error("Invalid list declaration at line {0}")]
     InvalidListDeclaration(usize),
-    #[error("Tabular data mismatch at line {0}: expected {1} fields, found {2}")]
-    TabularDataMismatch(usize, usize, usize),
+    #[error("Tabular data mismatch at line {0}: expected {1} fields, found {2}. Raw line: \"{3}\"")]
+    TabularDataMismatch(usize, usize, usize, String),
+    #[error("Mismatched quotes at line {0}")]
+    MismatchedQuotes(usize),
 }
 
 #[wasm_bindgen]
@@ -48,6 +50,35 @@ pub fn parse_toon(input: &str) -> Result<JsValue, JsError> {
 struct ToonParser;
 
 impl ToonParser {
+    fn parse_line(line: &str, line_idx: usize) -> Result<Vec<String>, ToonError> {
+        let mut fields = Vec::new();
+        let mut current_field = String::new();
+        let mut in_quotes = false;
+        let mut chars = line.chars().peekable();
+
+        while let Some(c) = chars.next() {
+            match c {
+                '\"' => {
+                    in_quotes = !in_quotes;
+                }
+                ',' if !in_quotes => {
+                    fields.push(current_field.trim().to_string());
+                    current_field = String::new();
+                }
+                _ => {
+                    current_field.push(c);
+                }
+            }
+        }
+
+        if in_quotes {
+            return Err(ToonError::MismatchedQuotes(line_idx + 1));
+        }
+
+        fields.push(current_field.trim().to_string());
+        Ok(fields)
+    }
+
     fn parse(input: &str) -> Result<ToonDoc, ToonError> {
         let mut metadata = HashMap::new();
         let mut lists = HashMap::new();
@@ -91,9 +122,9 @@ impl ToonParser {
                 let mut items = Vec::new();
                 for _ in 0..count {
                     if let Some((item_idx, item_line)) = lines.next() {
-                        let fields: Vec<String> = item_line.split(',').map(|s| s.trim().to_string()).collect();
+                        let fields = Self::parse_line(item_line, item_idx)?;
                         if fields.len() != schema.len() {
-                            return Err(ToonError::TabularDataMismatch(item_idx + 1, schema.len(), fields.len()));
+                            return Err(ToonError::TabularDataMismatch(item_idx + 1, schema.len(), fields.len(), item_line.to_string()));
                         }
                         items.push(fields);
                     } else {
@@ -153,5 +184,21 @@ tasks[2]{id, title, status}:
         let tasks = doc.lists.get("tasks").unwrap();
         assert_eq!(tasks.items.len(), 2);
         assert_eq!(tasks.items[0][0], "#120");
+    }
+
+    #[test]
+    fn test_should_parse_quoted_commas_when_given_tabular_row() {
+        let input = "list[1]{title, status}:\n  \"Task, with comma\", Done";
+        let doc = ToonParser::parse(input).unwrap();
+        let list = doc.lists.get("list").unwrap();
+        assert_eq!(list.items[0][0], "Task, with comma");
+        assert_eq!(list.items[0][1], "Done");
+    }
+
+    #[test]
+    fn test_should_fail_fast_on_mismatched_quotes() {
+        let input = "list[1]{title}:\n  \"Mismatched";
+        let result = ToonParser::parse(input);
+        assert!(matches!(result, Err(ToonError::MismatchedQuotes(2))));
     }
 }
