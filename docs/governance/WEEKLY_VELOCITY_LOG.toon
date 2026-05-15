@@ -41,6 +41,7 @@ tasks[9]{id, title, ect, status}:
   #130, [HACKATHON] Investigate TOON-to-WASM Parser, 3, Done
   #133, [HACKATHON] Extended Forensic Audit (Phases 2 & 3), 3, Done
   #129, Implement WASM-Driven 'Authoritative Log' (Pharos Pulse Blog), 4, Done
+  #142, Bug: Production Build Failure (WASM Toolchain), 2, Done
 
 # Strategic Continuity
 handoff: docs/governance/FRIDAY_HANDOFF.md
