@@ -166,14 +166,14 @@
 
 ### Sprint 4.5: Infrastructure & Identity Governance (#84-87) - 📋 Backlog
 - [x] **Issue #100**: Formalize SPM Role and Harden SDLC Governance (Verified Pharos Green).
-- [ ] **Issue #84**: Configure Dual-Stream Release Pipeline (Task 3.15). [ECT: 4]
-- [ ] **Issue #85**: Initialize Homebrew Tap (Official) (Task 3.16). [ECT: 2]
+- [ ] **Issue #84**: Task 3.15: Configure Dual-Stream Release Pipeline. [ECT: 4]
+- [ ] **Issue #85**: Task 3.16: Initialize Homebrew Tap (Official). [ECT: 2]
 - [ ] **Issue #86**: Debt #86: ADR-0027: Organization-Based Authority Scopes. [ECT: 1]
-- [ ] **Issue #87**: Implement Domain-to-Org Mapping (Task 4.21). [ECT: 3]
+- [ ] **Issue #87**: Task 4.21: Implement Domain-to-Org Mapping. [ECT: 3]
 
 ### Sprint 4.6: The Pulse Evolution (#88-89) - 📋 Backlog
-- [ ] **Issue #88**: Implement `pkd core pulse` Command (Logic Center for JIT). [ECT: 3]
-- [ ] **Issue #89**: Develop Manufacturer Maintenance Sidecar (Task 4.22). [ECT: 4]
+- [ ] **Issue #88**: Task 4.22: Implement `pkd core pulse` Command. [ECT: 3]
+- [ ] **Issue #89**: Task 4.22: Develop Manufacturer Maintenance Sidecar. [ECT: 4]
 
 ### Phase 5: IKD Enablement (Ghost Links & Scale) - 📋 Backlog
 - [ ] **Issue #122**: Task 5.1: LOD 200+ Part-Based Procedural Geometry. [ECT: 5]
