@@ -20,7 +20,9 @@
 - **Small Stones Mandate**: Ensuring all ECT 4/5 tasks are sharded into atomic, verifiable sub-tasks (ADR-0033).
 - **TOON Data Standard**: Formally adopted **TOON** for high-density, AI-ergonomic governance logs (`WEEKLY_VELOCITY_LOG.toon`).
 - **ECT Labeling System**: Formalized complexity heatmaps in GitHub via **ECT: 1-5** labels (#131) and ADR-0034.
+- **IA Audit (Marketing)**: Completed high-rigor audit of IKD enablement. Identified 'CLI Barrier' and 'Revit Visibility' as core maturation gaps.
 - **Hackathon Window**: Completed the **Phase 4 Forensic Audit** (#132), the **TOON-to-WASM Parser** (#130) spike, and the **Extended Forensic Audit (Phases 2 & 3)** (#133). Established a 97.9% YTD estimation accuracy baseline.
+- **Next Innovation (Staged)**: Sharded maturation tasks for the Pulse Blog and **IKD Empowerment & Visibility** (#144).
 
 ## 🛡️ Operational Mandates (Established 2026-05-15)
 - **High-Rigor Cadence**: 4+1 Weekly Routine codified in ADR-0032.
