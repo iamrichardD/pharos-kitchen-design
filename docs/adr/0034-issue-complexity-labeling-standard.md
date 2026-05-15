@@ -46,9 +46,15 @@ While ECT is used for *Planning*, the **ACT** label is applied upon *Task Closur
 - **Velocity Tracking**: Weekly velocity is calculated by summing the **ACT** labels of closed issues.
 - **Velocity Variance**: Calculated as `ECT - ACT`. A consistent negative variance indicates underestimation; positive indicates overestimation.
 
+### 4. Innovation Telemetry (Out-of-Band)
+To maintain the integrity of core delivery DORA metrics, all innovation efforts tagged with the `hackathon` label are tracked in a separate telemetry stream. This allows the team to measure R&D velocity without skewing production performance data.
+
+- **Tracking Mechanism**: Logged in `WEEKLY_VELOCITY_LOG.toon` under the `innovation_telemetry` header.
+- **Metric: Innovation Signal**: A ratio (0.0 to 1.0) of modular/portable code generated during a hackathon vs. project-specific logic.
+
 ## Consequences
-- **Positive**: High-fidelity historical reporting (YTD/YoY), calibrated planning estimates, and visual audit of 'Estimated vs Reality'.
-- **Negative**: Minor overhead in managing a secondary label set.
+- **Positive**: High-fidelity R&D visibility, preserved integrity for core DORA metrics, and mathematical tracking of cross-project innovation.
+- **Negative**: Minor increase in logging overhead during Friday Synthesis.
 
 ## Traceability
 - **Metrics**: `docs/governance/WEEKLY_VELOCITY_LOG.toon`

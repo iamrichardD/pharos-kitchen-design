@@ -47,3 +47,8 @@ tasks[10]{id, title, ect, status}:
 handoff: docs/governance/FRIDAY_HANDOFF.md
 routine: ADR-0032
 mandate: ADR-0033
+
+# Innovation Telemetry (Out-of-Band)
+# Note: These metrics track high-innovation spikes separately from core delivery.
+hackathon[1]{spikes_completed, total_ect, lead_time_avg_hrs, innovation_signal}:
+  4, 14, 2.0, 0.95
