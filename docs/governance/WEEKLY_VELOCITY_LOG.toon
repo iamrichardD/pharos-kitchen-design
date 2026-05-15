@@ -25,13 +25,14 @@ performance[1]{lead_time_hrs, change_failure_rate, mttr_mins}:
   2.4, 0.14, 30
 
 # Task Outcomes
-tasks[6]{id, title, ect, status}:
+tasks[7]{id, title, ect, status}:
   #120, Ghost Link Phase 2 - Dynamic Registry & Marketing Demo, 4, Done
   #52, Protocol OR Grouping & Temporal Warden, 4, Done
   #109, SHA-256 Manifest Generation for WASM Artifacts, 2, Done
   #110, Enforce WASM Manifest Verification in Containerfile.pulse, 2, Done
   #105, CI/CD Optimization and Security Hardening, 4, Done
   #127, Bug: CI Build Failure - Podman Layer Commitment Error, 1, Done
+  #130, [HACKATHON] Investigate TOON-to-WASM Parser, 3, Done
 
 # Strategic Continuity
 handoff: docs/governance/FRIDAY_HANDOFF.md
