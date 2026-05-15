@@ -20,12 +20,18 @@ velocity[1]{target_ect, actual_ect, variance}:
 phase4_baseline[1]{total_ect, total_act, variance, issue_count}:
   44, 43, 1, 23
 
+# Total Project History (YTD Audit #133)
+total_history[3]{phase, total_ect, total_act}:
+  2, 17, 19
+  3, 178, 172
+  4, 44, 43
+
 # DORA Performance Metrics
 performance[1]{lead_time_hrs, change_failure_rate, mttr_mins}:
   2.4, 0.14, 30
 
 # Task Outcomes
-tasks[7]{id, title, ect, status}:
+tasks[8]{id, title, ect, status}:
   #120, Ghost Link Phase 2 - Dynamic Registry & Marketing Demo, 4, Done
   #52, Protocol OR Grouping & Temporal Warden, 4, Done
   #109, SHA-256 Manifest Generation for WASM Artifacts, 2, Done
@@ -33,6 +39,7 @@ tasks[7]{id, title, ect, status}:
   #105, CI/CD Optimization and Security Hardening, 4, Done
   #127, Bug: CI Build Failure - Podman Layer Commitment Error, 1, Done
   #130, [HACKATHON] Investigate TOON-to-WASM Parser, 3, Done
+  #133, [HACKATHON] Extended Forensic Audit (Phases 2 & 3), 3, Done
 
 # Strategic Continuity
 handoff: docs/governance/FRIDAY_HANDOFF.md
