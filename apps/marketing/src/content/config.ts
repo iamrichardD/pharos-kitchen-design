@@ -9,10 +9,30 @@
  * ======================================================================== */
 
 import { defineCollection, z } from 'astro:content';
+import { glob } from 'astro/loaders';
+import fs from 'node:fs';
+import path from 'node:path';
 
 const updates = defineCollection({
-  type: 'data',
-  schema: z.string(), // We store the raw TOON content as a string
+  loader: async () => {
+    const updatesDir = path.resolve('src/content/updates');
+    const files = fs.readdirSync(updatesDir).filter(f => f.endsWith('.toon'));
+    
+    return files.map(file => {
+      const id = file.replace('.toon', '');
+      const filePath = path.join(updatesDir, file);
+      const content = fs.readFileSync(filePath, 'utf-8');
+      
+      return {
+        id,
+        content,
+      };
+    });
+  },
+  schema: z.object({
+    id: z.string(),
+    content: z.string(),
+  }),
 });
 
 export const collections = {
