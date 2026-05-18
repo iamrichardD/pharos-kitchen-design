@@ -13,6 +13,8 @@ pub mod validator;
 pub mod bindings;
 pub mod slices;
 pub mod security;
+
+#[cfg(not(target_arch = "wasm32"))]
 pub mod jit;
 
 pub use models::schema::PharosSchema;

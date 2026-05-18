@@ -12,14 +12,13 @@ use wasm_bindgen::prelude::*;
 use crate::models::schema::PharosSchema;
 use crate::models::metadata::PharosMetadata;
 use crate::validator::{SchemaValidator, LodValidator};
-use crate::jit::ParallelQueryDispatcher;
 use serde_wasm_bindgen;
 use dashmap::DashMap;
 use std::sync::Arc;
 
 #[wasm_bindgen]
 pub struct PharosRegistryHandle {
-    inner: Arc<DashMap<String, PharosMetadata>>,
+    pub(crate) inner: Arc<DashMap<String, PharosMetadata>>,
 }
 
 #[wasm_bindgen]
@@ -31,17 +30,28 @@ impl PharosRegistryHandle {
         }
     }
 
-    /// Executes a parallel query across the registry.
-    /// Note: This is primarily for the native/C-ABI side.
+    /// Executes a query across the registry.
+    /// Uses Rayon parallelism on native targets, fallback to sync on WASM.
     pub fn query_ids_containing(&self, pattern: String) -> Vec<String> {
-        let dispatcher = ParallelQueryDispatcher::new(self.inner.clone());
-        dispatcher.query_parallel(|(id, _)| {
-            if id.contains(&pattern) {
-                Some(id.clone())
-            } else {
-                None
-            }
-        })
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let dispatcher = crate::jit::ParallelQueryDispatcher::new(self.inner.clone());
+            dispatcher.query_parallel(|(id, _)| {
+                if id.contains(&pattern) {
+                    Some(id.clone())
+                } else {
+                    None
+                }
+            })
+        }
+        #[cfg(target_arch = "wasm32")]
+        {
+            self.inner
+                .iter()
+                .filter(|item| item.key().contains(&pattern))
+                .map(|item| item.key().clone())
+                .collect()
+        }
     }
 }
 
@@ -106,10 +116,8 @@ pub fn verify_lod_wasm(metadata_js: JsValue, target_lod: String) -> Result<bool,
 use std::ffi::{CString};
 use std::os::raw::c_char;
 use std::path::Path;
-use std::collections::BTreeMap;
 use serde::{Serialize, Deserialize};
 use crate::validator::ValidationError;
-use pharos_protocol::metadata::ParameterValue;
 
 const MAX_JSON_SIZE: usize = 1024 * 1024; // 1MB Limit for Shift-Left Security (ADR-0016)
 
