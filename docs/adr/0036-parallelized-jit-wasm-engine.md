@@ -1,3 +1,13 @@
+/* ========================================================================
+ * Project: Pharos Kitchen Design (Project Prism)
+ * Component: Documentation / ADR
+ * File: 0036-parallelized-jit-wasm-engine.md
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * License: FSL-1.1 (See LICENSE file for details)
+ * Purpose: Define the parallelized JIT WASM engine architecture.
+ * Traceability: Issue #111
+ * ======================================================================== */
+
 # ADR 0036: Parallelized JIT WASM Engine
 
 ## Status
