@@ -40,6 +40,7 @@ This log provides an index of the technical and architectural decisions made for
 | **[ADR-0034]** | 2026-05-15 | Proposed | [Issue Complexity Labeling Standard](docs/adr/0034-issue-complexity-labeling-standard.md) |
 | **[ADR-0035]** | 2026-05-18 | Proposed | [Hub/Sibling Worktree Pattern for Multi-Agent Orchestration](docs/adr/0035-hub-sibling-worktree-pattern.md) |
 | **[ADR-0036]** | 2026-05-18 | Proposed | [Parallelized JIT WASM Engine](docs/adr/0036-parallelized-jit-wasm-engine.md) |
+| **[ADR-0037]** | 2026-05-18 | Proposed | [Multi-Agent Handover & Crucible Protocol](docs/adr/0037-multi-agent-handover-protocol.md) |
 
 ---
 *To add a new decision, create a new file in `docs/adr/` following the established template and append it to this index.*
