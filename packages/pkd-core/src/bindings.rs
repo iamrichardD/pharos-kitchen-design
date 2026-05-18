@@ -5,19 +5,21 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Unified WASM and C-ABI bindings for multi-platform interop.
- * Traceability: Issue #9, #31, ADR-0002, ADR-0025
+ * Traceability: Issue #9, #31, ADR-0002, ADR-0025, #111
  * ======================================================================== */
 
 use wasm_bindgen::prelude::*;
 use crate::models::schema::PharosSchema;
 use crate::models::metadata::PharosMetadata;
 use crate::validator::{SchemaValidator, LodValidator};
+use crate::jit::ParallelQueryDispatcher;
 use serde_wasm_bindgen;
 use dashmap::DashMap;
+use std::sync::Arc;
 
 #[wasm_bindgen]
 pub struct PharosRegistryHandle {
-    inner: DashMap<String, PharosMetadata>,
+    inner: Arc<DashMap<String, PharosMetadata>>,
 }
 
 #[wasm_bindgen]
@@ -25,8 +27,21 @@ impl PharosRegistryHandle {
     #[wasm_bindgen(constructor)]
     pub fn new() -> Self {
         Self {
-            inner: DashMap::new(),
+            inner: Arc::new(DashMap::new()),
         }
+    }
+
+    /// Executes a parallel query across the registry.
+    /// Note: This is primarily for the native/C-ABI side.
+    pub fn query_ids_containing(&self, pattern: String) -> Vec<String> {
+        let dispatcher = ParallelQueryDispatcher::new(self.inner.clone());
+        dispatcher.query_parallel(|(id, _)| {
+            if id.contains(&pattern) {
+                Some(id.clone())
+            } else {
+                None
+            }
+        })
     }
 }
 
@@ -35,7 +50,7 @@ pub fn load_registry_wasm(registry_js: JsValue) -> Result<PharosRegistryHandle, 
     let registry: DashMap<String, PharosMetadata> = serde_wasm_bindgen::from_value(registry_js)
         .map_err(|e| JsValue::from_str(&format!("Invalid registry format: {}", e)))?;
     
-    Ok(PharosRegistryHandle { inner: registry })
+    Ok(PharosRegistryHandle { inner: Arc::new(registry) })
 }
 
 #[wasm_bindgen]
@@ -213,7 +228,7 @@ pub extern "C" fn pkd_load_registry(ptr: *const u8, len: usize) -> *mut PharosRe
             Err(_) => return std::ptr::null_mut(),
         };
 
-        Box::into_raw(Box::new(PharosRegistryHandle { inner: items }))
+        Box::into_raw(Box::new(PharosRegistryHandle { inner: Arc::new(items) }))
     });
 
     match result {

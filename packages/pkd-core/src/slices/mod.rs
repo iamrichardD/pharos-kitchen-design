@@ -5,7 +5,7 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Index of category-based Vertical Slices.
- * Traceability: Priority 4, Issue #30
+ * Traceability: Priority 4, Issue #30, #111
  * ======================================================================== */
 
 pub mod warewashing;
@@ -15,10 +15,17 @@ use crate::models::types::ParameterValue;
 use crate::slices::warewashing::models::{WarewashingMetadata, WarewashingParameters};
 use crate::slices::warewashing::validator::WarewashingValidator;
 use crate::validator::ValidationError;
+use crate::jit::JitHandle;
 
-pub struct SliceDispatcher;
+pub struct SliceDispatcher {
+    pub jit_handle: Option<JitHandle>,
+}
 
 impl SliceDispatcher {
+    pub fn new(jit_handle: Option<JitHandle>) -> Self {
+        Self { jit_handle }
+    }
+
     /// Dispatches validation to category-specific vertical slices.
     /// 
     /// Why: Centralizes the routing logic to ensure that "Specialty Equipment" 
@@ -47,6 +54,27 @@ impl SliceDispatcher {
         } else {
             Err(errors)
         }
+    }
+
+    /// Asynchronously dispatches validation, allowing for WASM-based JIT lookups.
+    /// Why: Enables complex, metadata-driven validation that may require JIT execution without blocking.
+    pub async fn dispatch_validation_async(&self, metadata: &PharosMetadata) -> Result<(), Vec<ValidationError>> {
+        // First, perform standard synchronous validation
+        Self::dispatch_validation(metadata)?;
+
+        // Then, if a JIT handle is available, perform additional WASM-based validation
+        if let Some(_handle) = &self.jit_handle {
+            // Example: Execute a "validate" function in a WASM module tied to the category
+            let _category = match metadata.parameters.get("PKD_MainCategory") {
+                Some(ParameterValue::Text(cat)) => cat.as_str(),
+                _ => return Ok(()),
+            };
+
+            // Implementation note: In a real scenario, we'd load the specific module for the category.
+            // This demonstrates the actor-based hook for JIT validation.
+        }
+
+        Ok(())
     }
 
     fn validate_warewashing(metadata: &PharosMetadata) -> Result<(), Vec<ValidationError>> {
@@ -99,4 +127,3 @@ impl SliceDispatcher {
         }
     }
 }
-

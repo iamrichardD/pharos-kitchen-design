@@ -39,6 +39,7 @@ This log provides an index of the technical and architectural decisions made for
 | **[ADR-0033]** | 2026-05-15 | Proposed | [The Small Stones Mandate (Complexity Decomposition)](docs/adr/0033-the-small-stones-mandate.md) |
 | **[ADR-0034]** | 2026-05-15 | Proposed | [Issue Complexity Labeling Standard](docs/adr/0034-issue-complexity-labeling-standard.md) |
 | **[ADR-0035]** | 2026-05-18 | Proposed | [Hub/Sibling Worktree Pattern for Multi-Agent Orchestration](docs/adr/0035-hub-sibling-worktree-pattern.md) |
+| **[ADR-0036]** | 2026-05-18 | Proposed | [Parallelized JIT WASM Engine](docs/adr/0036-parallelized-jit-wasm-engine.md) |
 
 ---
 *To add a new decision, create a new file in `docs/adr/` following the established template and append it to this index.*
