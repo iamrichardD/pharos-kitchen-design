@@ -148,6 +148,13 @@
 
 - [ ] **Issue #137**: Debt #137: Implement Shared WASM Context for Astro UI. [ECT: 2] [Created: 2026-05-15]
 - [ ] **Issue #138**: Task 4.32: Implement Full RFC-2378 Query Logic in WASM Core. [ECT: 3] [Created: 2026-05-15]
+
+### Sprint 4.10: Performance & Scale - #111
+- [x] **Issue #111**: Parallelized JIT WASM Engine (Hybrid Rayon/Actor). [ECT: 5]
+- [x] Task 4.25.1: Implement `WasmJitLoader` with explicit memory limits.
+- [x] Task 4.25.2: Refactor `PharosRegistryHandle` for thread-safe `DashMap`.
+- [x] Task 4.25.3: Implement `Parallel Query Dispatcher` via Rayon.
+- [x] Task 4.25.4: Implement `JitActor` for dynamic dialect execution.
 - [ ] **Issue #139**: Debt #139: Enhanced TOON Diagnostics (Column & Snippet). [ECT: 2] [Created: 2026-05-15]
 - [ ] **Issue #140**: Debt #140: Marketing Site Theme Alignment (Pulse Blog). [ECT: 1] [Created: 2026-05-15]
 - [ ] **Issue #141**: Task 4.33: Recursive Tabular Indentation for TOON Parser. [ECT: 3] [Created: 2026-05-15]

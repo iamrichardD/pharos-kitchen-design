@@ -5,7 +5,7 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Entry point for the pkd-core Rust/WASM engine.
- * Traceability: Issue #9, ADR 0002
+ * Traceability: Issue #9, ADR 0002, #111
  * ======================================================================== */
 
 pub mod models;
@@ -13,6 +13,7 @@ pub mod validator;
 pub mod bindings;
 pub mod slices;
 pub mod security;
+pub mod jit;
 
 pub use models::schema::PharosSchema;
 pub use models::metadata::PharosMetadata;

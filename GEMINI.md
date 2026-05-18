@@ -89,13 +89,13 @@ Before moving from **Research** to **Strategy/Execution**, you MUST explicitly c
 - **Production Verification:** Before task closure, verify that the static build renders correctly at `iamrichardd.com/pharos-kitchen-design/demo` using `web_fetch`.
 
 ### 5. Pharos Handover & Mentorship Protocol
-Every non-trivial task completion MUST follow this workflow:
+Every non-trivial task completion MUST follow the **Multi-Agent Handover & Crucible Protocol (ADR-0037)**:
 - **Brutal Self-Critique:** Before finalizing, perform a "Brutally Honest" gap and security analysis to identify technical debt or edge cases.
 - **Structured PR:** Create a Pull Request with a dedicated **'Fix Summary'**, **'Security Review'**, and **'DORA Metrics'** section.
-    - **Fix Summary**: Provide a concise, brutally honest record of the changes, the **Actual Complexity Tier (ACT)**, and a **Velocity Variance** analysis (ACT vs. ECT).
+- **Auditor Invocation:** Generate an **Audit Invocation Prompt** for a fresh AI session to perform Phase 4 (The Crucible Audit).
 - **Instructive Peer Review:** Provide inline code comments that act as teaching tools.
     - **No Meta-Labels:** Prohibited from using "The Why/How," "Teachable Moment," or other prompt-leaking labels that signal "AI Slop."
-    - **Integrated Mentorship:** Weave the technical rationale, safety implications, and alternative patterns directly into the critique (e.g., "We should avoid [X] here because [Y] results in [Z]. A more resilient approach is [A]...").
+    - **Integrated Mentorship:** Weave the technical rationale, safety implications, and alternative patterns directly into the critique.
 
 ## 6. Team Topology & Personas
 To ensure context efficiency and architectural consistency across sessions, use the following **Team Keywords** to invoke specialized sub-agent rosters.
