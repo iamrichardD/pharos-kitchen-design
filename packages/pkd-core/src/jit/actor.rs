@@ -11,9 +11,14 @@
 use anyhow::{Result, anyhow, Context};
 use tokio::sync::{mpsc, oneshot};
 use wasmtime::*;
+use std::time::Duration;
 
 /// Memory limit for JIT WASM instances (64MB default).
 pub const MAX_WASM_MEMORY: usize = 64 * 1024 * 1024;
+
+/// Execution timeout for WASM modules (100ms mandate).
+/// Why: Prevents pathological or malicious WASM from blocking the actor (Temporal Warden).
+pub const WASM_EXECUTION_TIMEOUT_MS: u64 = 100;
 
 /// Requests handled by the JIT Actor.
 #[derive(Debug)]
@@ -45,9 +50,20 @@ impl JitActor {
         let mut config = Config::new();
         config.static_memory_maximum_size(MAX_WASM_MEMORY as u64);
         
+        // Fail-Fast: Enable Epoch-based interruption for temporal safety.
+        config.epoch_interruption(true);
+        
         let engine = Engine::new(&config)
             .context("Failed to create Wasmtime Engine with memory limits")?;
             
+        // Spawn the Temporal Warden's heartbeat thread.
+        // It increments the engine's epoch every 10ms.
+        let engine_clone = engine.clone();
+        std::thread::spawn(move || loop {
+            std::thread::sleep(Duration::from_millis(10));
+            engine_clone.increment_epoch();
+        });
+
         Ok(Self {
             engine,
             modules: dashmap::DashMap::new(),
@@ -82,6 +98,11 @@ impl JitActor {
             .ok_or_else(|| anyhow!("WASM module '{}' not loaded", id))?;
             
         let mut store = Store::new(&self.engine, ());
+        
+        // Enforce the Temporal Warden sentinel (100ms timeout).
+        // Since heartbeat is 10ms, a deadline of 10 epochs = 100ms.
+        store.set_epoch_deadline(10);
+        
         let linker = Linker::new(&self.engine);
         let instance = linker.instantiate(&mut store, &module)
             .context("Failed to instantiate WASM module")?;
@@ -91,7 +112,14 @@ impl JitActor {
             
         let mut results = vec![Val::I32(0); func.ty(&store).results().len()];
         func.call(&mut store, &params, &mut results)
-            .map_err(|e| anyhow!("Execution error in '{}::{}': {}", id, function_name, e))?;
+            .map_err(|e| {
+                let is_timeout = format!("{:?}", e).contains("interrupt") || format!("{:?}", e).contains("timeout");
+                if is_timeout {
+                    anyhow!("Execution timed out after {}ms (Temporal Warden)", WASM_EXECUTION_TIMEOUT_MS)
+                } else {
+                    anyhow!("Execution error in '{}::{}': {}", id, function_name, e)
+                }
+            })?;
             
         Ok(results)
     }
@@ -147,5 +175,29 @@ mod tests {
         let invalid_bytes = vec![0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00, 0xff];
         let res = handle.load("invalid_module".to_string(), invalid_bytes).await;
         assert!(res.is_err(), "Expected invalid WASM load to fail");
+    }
+
+    #[tokio::test]
+    async fn test_should_terminate_execution_when_timeout_exceeded() {
+        let (handle, actor) = JitHandle::new();
+        tokio::spawn(async move { actor.run().await });
+
+        // Infinite loop WASM module
+        let wat = r#"
+            (module
+                (func (export "infinite_loop")
+                    loop
+                        br 0
+                    end
+                )
+            )
+        "#;
+        let wasm_bytes = wat::parse_str(wat).unwrap();
+        handle.load("timeout_module".to_string(), wasm_bytes).await.expect("Failed to load module");
+
+        let res = handle.execute("timeout_module".to_string(), "infinite_loop".to_string(), vec![]).await;
+        
+        assert!(res.is_err(), "Expected execution to fail due to timeout");
+        assert!(res.unwrap_err().to_string().contains("timed out"), "Error message should mention timeout");
     }
 }
