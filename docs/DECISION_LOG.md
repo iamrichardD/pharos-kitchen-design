@@ -35,6 +35,10 @@ This log provides an index of the technical and architectural decisions made for
 | **[ADR-0029]** | 2026-05-12 | Approved | [Immutable WASM Promotion](docs/adr/0029-immutable-wasm-promotion.md) |
 | **[ADR-0030]** | 2026-05-12 | Approved | [Performance Engineering & Velocity Tracking](docs/adr/0030-performance-engineering-velocity-tracking.md) |
 | **[ADR-0031]** | 2026-05-12 | Approved | [Project Team Topology & Agentic Orchestration](docs/adr/0031-project-team-topology-agentic-orchestration.md) |
+| **[ADR-0032]** | 2026-05-15 | Proposed | [High-Rigor Weekly Cadence (The Pharos Routine)](docs/adr/0032-high-rigor-weekly-cadence.md) |
+| **[ADR-0033]** | 2026-05-15 | Proposed | [The Small Stones Mandate (Complexity Decomposition)](docs/adr/0033-the-small-stones-mandate.md) |
+| **[ADR-0034]** | 2026-05-15 | Proposed | [Issue Complexity Labeling Standard](docs/adr/0034-issue-complexity-labeling-standard.md) |
+| **[ADR-0035]** | 2026-05-18 | Proposed | [Hub/Sibling Worktree Pattern for Multi-Agent Orchestration](docs/adr/0035-hub-sibling-worktree-pattern.md) |
 
 ---
 *To add a new decision, create a new file in `docs/adr/` following the established template and append it to this index.*

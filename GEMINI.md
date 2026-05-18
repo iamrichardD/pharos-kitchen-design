@@ -145,6 +145,13 @@ To prevent "Persona Schizophrenia" and ensure objective verification, the **Buil
     - **Traceability**: All Pull Requests MUST reference the corresponding issue (e.g., `Closes #X`).
 - **CI/CD:** Utilize GitHub Actions for cross-compiling the Tauri binary and deploying the Astro site.
 
+### 4. Multi-Agent Worktree Protocol (Hub/Sibling)
+To ensure isolation and prevent "Search/Artifact Pollution" during parallel engineering (ADR-0035):
+- **Architecture**: All work occurs in **Sibling** directories checked out from a central **Bare Hub** (`<project>-hub/`).
+- **Mandatory Isolation**: AI agents are restricted to their assigned Sibling directory. They MUST NOT search or read files from other Siblings.
+- **Mount Integrity**: Each Sibling MUST be mounted independently into Podman. Path-based assumptions (e.g., `../package.json`) are prohibited unless verified within the Sibling context.
+- **Cleanup**: Sibling directories MUST be removed (`git worktree remove`) immediately after the branch is merged into `main` to prevent "Ghost Worktrees."
+
 ---
 ### Legal & Interoperability Compliance
 **Pharos Kitchen Design** (Project Prism) is an independent software development effort. Use of any third-party trademarks (e.g., KCL, AutoQuotes, Hobart, Vulcan) is strictly for **Nominative Fair Use** to identify compatibility and achieve software interoperability under **17 U.S.C. § 1201(f)**. Please see [DISCLAIMER.md](./DISCLAIMER.md) for full legal disclosures.
