@@ -8,4 +8,7 @@
  * Traceability: Issue #111
  * ======================================================================== */
 
+pub mod deserialization;
+
+#[cfg(not(target_arch = "wasm32"))]
 pub mod jit_actor;
