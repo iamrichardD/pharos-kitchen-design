@@ -8,7 +8,7 @@
  * Traceability: Issue #111, ADR-0036
  * ======================================================================== */
 
-use crate::jit_actor::{JitHandle, JitActor};
+use crate::jit::JitHandle;
 use wasmtime::Val;
 use tokio::time::{sleep, Duration};
 
@@ -55,6 +55,30 @@ async fn test_should_fail_fast_when_module_not_found() {
 }
 
 #[tokio::test]
+async fn test_should_terminate_execution_when_wasm_infinite_loop_detected() {
+    let (handle, actor) = JitHandle::new();
+    tokio::spawn(async move { actor.run().await });
+
+    // Infinite loop WASM module
+    let wat = r#"
+        (module
+            (func (export "infinite_loop")
+                loop
+                    br 0
+                end
+            )
+        )
+    "#;
+    let wasm_bytes = wat::parse_str(wat).unwrap();
+    handle.load("timeout_module".to_string(), wasm_bytes).await.expect("Failed to load module");
+
+    let res = handle.execute("timeout_module".to_string(), "infinite_loop".to_string(), vec![]).await;
+    
+    assert!(res.is_err(), "Expected execution to fail due to timeout");
+    assert!(res.unwrap_err().to_string().contains("timed out"), "Error message should mention timeout");
+}
+
+#[tokio::test]
 async fn test_should_handle_actor_termination_gracefully() {
     let (handle, actor) = JitHandle::new();
     let join_handle = tokio::spawn(async move { actor.run().await });
@@ -69,6 +93,6 @@ async fn test_should_handle_actor_termination_gracefully() {
     let res = handle.load("test".to_string(), wasm_bytes).await;
     
     assert!(res.is_err(), "Expected error when actor is terminated");
-    assert!(res.unwrap_err().to_string().contains("Failed to send Load request") || 
-            res.unwrap_err().to_string().contains("JitActor dropped"));
+    let err_msg = res.unwrap_err().to_string();
+    assert!(err_msg.contains("Failed to send Load request") || err_msg.contains("JitActor dropped"));
 }

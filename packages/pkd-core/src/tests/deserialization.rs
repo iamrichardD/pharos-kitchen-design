@@ -4,7 +4,7 @@
  * File: deserialization.rs
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
- * Purpose: Tests for schema and metadata deserialization.
+ * Purpose: Verification of schema and metadata deserialization.
  * Traceability: Issue #9, ADR 0002
  * ======================================================================== */
 
