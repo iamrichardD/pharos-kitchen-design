@@ -1,0 +1,59 @@
+# ========================================================================
+# Project: Pharos Kitchen Design (Project Prism)
+# Component: Infrastructure / CI
+# File: .github/workflows/pulse.yml
+# Author: Richard D. (https://github.com/iamrichardd)
+# License: FSL-1.1
+# Purpose: Draft configuration for parallelized CI sharding (Issue #108).
+# Why: ADR-0017 (Multi-Stage chaining) ensures cross-language FFI stability.
+# Traceability: Issue #108, Task 4.26.2, Task 4.26.3
+# ========================================================================
+
+name: Pulse (Sharded)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  id-token: write # Required for OIDC AWS Federation
+  contents: read
+
+jobs:
+  pulse:
+    name: Pulse / ${{ matrix.slice }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        slice: [core, bridge, marketing]
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Required for TDD traceability checks
+
+      - name: Set up Podman
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y podman
+
+      - name: Configure AWS Credentials (OIDC)
+        if: github.ref == 'refs/heads/main'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/pharos-github-oidc-deployer
+          aws-region: us-east-1
+
+      - name: Execute Pulse Slice
+        run: bash scripts/pulse.sh --slice ${{ matrix.slice }}
+        env:
+          BUILD_MODE: ${{ github.ref == 'refs/heads/main' && 'release' || 'debug' }}
+
+      - name: Promote Artifacts (OIDC Signed)
+        if: github.ref == 'refs/heads/main' && matrix.slice == 'core'
+        run: |
+          echo "🚀 Promoting authoritative WASM core to S3 Registry..."
+          # Logic to push pkd-core.wasm to registry/
