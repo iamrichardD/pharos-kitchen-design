@@ -5,7 +5,7 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Centralized error handling for the JIT engine.
- * Traceability: Issue #111, ADR-0036
+ * Traceability: Issue #146, ADR-0036
  * ======================================================================== */
 
 use thiserror::Error;
@@ -37,9 +37,6 @@ pub enum JitError {
 
     #[error("Communication error between actor and handle: {0}")]
     CommunicationError(String),
-
-    #[error("Registry error: {0}")]
-    RegistryError(String),
 }
 
 /// Specialized Result type for JIT operations.

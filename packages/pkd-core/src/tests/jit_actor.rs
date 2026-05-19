@@ -5,7 +5,7 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Atomic tests for the Actor-based JIT engine.
- * Traceability: Issue #111, ADR-0036
+ * Traceability: Issue #146, ADR-0036
  * ======================================================================== */
 
 use crate::jit::JitHandle;

@@ -5,7 +5,7 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Unified JIT WASM Engine vertical slice.
- * Traceability: Issue #111, ADR-0036
+ * Traceability: Issue #146, ADR-0036
  * ======================================================================== */
 
 pub mod actor;

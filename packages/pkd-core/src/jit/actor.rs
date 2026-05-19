@@ -5,12 +5,14 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Parallelized JIT WASM Engine using the Actor model (Tokio).
- * Traceability: Issue #111, ADR-0036
+ * Traceability: Issue #146, ADR-0036
  * ======================================================================== */
 
 use tokio::sync::{mpsc, oneshot};
 use wasmtime::*;
 use std::time::Duration;
+use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use crate::jit::{JitError, JitResult};
 
 /// Memory limit for JIT WASM instances (64MB default).
@@ -36,6 +38,8 @@ pub enum JitActorRequest {
         params: Vec<Val>,
         respond_to: oneshot::Sender<JitResult<Vec<Val>>>,
     },
+    /// Gracefully shutdown the actor and its warden.
+    Shutdown,
 }
 
 /// The JIT Actor managing WASM execution.
@@ -43,6 +47,7 @@ pub struct JitActor {
     engine: Engine,
     modules: dashmap::DashMap<String, Module>,
     receiver: mpsc::Receiver<JitActorRequest>,
+    shutdown_signal: Arc<AtomicBool>,
 }
 
 impl JitActor {
@@ -56,10 +61,16 @@ impl JitActor {
         let engine = Engine::new(&config)
             .map_err(|e| JitError::EngineInitialization(format!("Failed to create Wasmtime Engine with memory limits: {}", e)))?;
             
+        let shutdown_signal = Arc::new(AtomicBool::new(false));
+        let shutdown_clone = Arc::clone(&shutdown_signal);
+
         // Spawn the Temporal Warden's heartbeat thread.
         // It increments the engine's epoch every 10ms.
         let engine_clone = engine.clone();
         std::thread::spawn(move || loop {
+            if shutdown_clone.load(Ordering::Relaxed) {
+                break;
+            }
             std::thread::sleep(Duration::from_millis(10));
             engine_clone.increment_epoch();
         });
@@ -68,6 +79,7 @@ impl JitActor {
             engine,
             modules: dashmap::DashMap::new(),
             receiver,
+            shutdown_signal,
         })
     }
 
@@ -81,6 +93,10 @@ impl JitActor {
                 JitActorRequest::Execute { id, function_name, params, respond_to } => {
                     let res = self.handle_execute(id, function_name, params);
                     let _ = respond_to.send(res);
+                }
+                JitActorRequest::Shutdown => {
+                    self.shutdown_signal.store(true, Ordering::Relaxed);
+                    break;
                 }
             }
         }
@@ -113,13 +129,15 @@ impl JitActor {
         let mut results = vec![Val::I32(0); func.ty(&store).results().len()];
         func.call(&mut store, &params, &mut results)
             .map_err(|e| {
-                let err_str = format!("{:?}", e);
-                let is_timeout = err_str.contains("interrupt") || err_str.contains("timeout");
-                if is_timeout {
-                    JitError::ExecutionTimeout(WASM_EXECUTION_TIMEOUT_MS)
-                } else {
-                    JitError::ExecutionError(id.clone(), function_name.clone(), e.to_string())
+                // Robust detection of Temporal Warden interruption via Epoch deadline.
+                if let Some(trap) = e.downcast_ref::<Trap>() {
+                    if *trap == Trap::Interrupt {
+                        return JitError::ExecutionTimeout(WASM_EXECUTION_TIMEOUT_MS);
+                    }
                 }
+                
+                // Fallback for general execution errors.
+                JitError::ExecutionError(id.clone(), function_name.clone(), e.to_string())
             })?;
             
         Ok(results)
@@ -153,5 +171,10 @@ impl JitHandle {
             .map_err(|_| JitError::CommunicationError("Failed to send Execute request to JitActor".to_string()))?;
         receiver.await
             .map_err(|_| JitError::CommunicationError("JitActor dropped Execute response channel".to_string()))?
+    }
+
+    pub async fn shutdown(&self) -> JitResult<()> {
+        self.sender.send(JitActorRequest::Shutdown).await
+            .map_err(|_| JitError::CommunicationError("Failed to send Shutdown request to JitActor".to_string()))
     }
 }
