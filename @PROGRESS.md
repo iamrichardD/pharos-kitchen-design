@@ -182,7 +182,25 @@
 - [ ] **Issue #88**: Implement `pkd core pulse` Command (Logic Center for JIT).
 - [ ] **Issue #89**: Develop Manufacturer Maintenance Sidecar (Task 4.22).
 
-### Sprint 4.9: The IKD Empowerment Sprint (2026-05-11) - 🚀 ACTIVE
+### Sprint 4.10: Performance & Scale (2026-05-18) - 🚀 ACTIVE
+- **Goal**: Transition from synchronous execution to a parallelized hybrid JIT architecture to handle large-scale BIM hydration and multi-dialect validation.
+- [x] **Issue #111**: Parallelized JIT WASM Engine (Hybrid Rayon/Actor). [Mon]
+- [x] **ADR-0036**: Parallelized JIT WASM Engine Architecture. [Mon]
+- [x] **ADR-0037**: Multi-Agent Handover & Crucible Protocol. [Mon]
+
+#### [2026-05-18] - Parallelized JIT WASM Engine (#111)
+- **Implemented** a high-performance JIT execution model using **Rayon** for data-parallel registry sharding and a **Tokio Actor** for task-parallel WASM dialect execution.
+- **Enforced** strict **Temporal Warden** (100ms execution limit) via Wasmtime Epoch Interruption, mitigating DoS risks from pathological WASM modules.
+- **Secured** memory boundaries with 64MB static memory limits per JIT instance.
+- **Refactored** `pkd-core` to isolate native-only dependencies (Tokio, Rayon, Wasmtime) from the `wasm32-unknown-unknown` target, ensuring frontend build stability.
+- **Satisfied** Phase 4 Crucible Audit requirements, including YAGNI cleanup of the `SliceDispatcher`.
+- **DORA Metrics (Issue #111)**:
+    - **Lead Time**: 4.5 Hours (High-Rigor Integration & Remediation).
+    - **Change Failure Rate**: 75% (3 Failures on Main: Cross-compilation, Dependency features, Governance Audit).
+    - **Velocity Variance**: 0 (Matched ECT 5).
+- **Audited** via Pharos Crucible (Result: 🟢 PHAROS GREEN).
+
+### Sprint 4.9: The IKD Empowerment Sprint (2026-05-11) - ✅ COMPLETED
 - **Goal**: Empower Independent Kitchen Designers (IKD) with modern, high-efficiency tools via "Ghost Links" and Unified Interop metadata standards.
 - [x] **Issue #31**: Unified Interop Schema (Task 4.2). [Mon]
 - [x] **Issue #68**: WASM Engine Performance & Artifact Promotion (Task 4.18). [Tue]

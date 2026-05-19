@@ -8,40 +8,31 @@
  * Traceability: ADR-0033, ADR-0030, TOON Spec
  * ======================================================================== */
 
-sprint: 4.9
-date: 2026-05-15
+sprint: 4.10
+date: 2026-05-18
 team: PHAROS_STRATEGY_CORE
 
 # Core Capacity Metrics
 velocity[1]{target_ect, actual_ect, variance}:
-  20, 17, -3
+  5, 5, 0
 
 # Historical Baseline (Retroactive Audit #132)
 phase4_baseline[1]{total_ect, total_act, variance, issue_count}:
-  44, 43, 1, 23
+  49, 48, 1, 24
 
 # Total Project History (YTD Audit #133)
 total_history[3]{phase, total_ect, total_act}:
   2, 17, 19
   3, 178, 172
-  4, 44, 43
+  4, 49, 48
 
 # DORA Performance Metrics
 performance[1]{lead_time_hrs, change_failure_rate, mttr_mins}:
-  2.1, 0.12, 28
+  4.5, 0.75, 42
 
 # Task Outcomes
-tasks[10]{id, title, ect, status}:
-  #120, Ghost Link Phase 2 - Dynamic Registry & Marketing Demo, 4, Done
-  #52, Protocol OR Grouping & Temporal Warden, 4, Done
-  #109, SHA-256 Manifest Generation for WASM Artifacts, 2, Done
-  #110, Enforce WASM Manifest Verification in Containerfile.pulse, 2, Done
-  #105, CI/CD Optimization and Security Hardening, 4, Done
-  #127, Bug: CI Build Failure - Podman Layer Commitment Error, 1, Done
-  #130, [HACKATHON] Investigate TOON-to-WASM Parser, 3, Done
-  #133, [HACKATHON] Extended Forensic Audit (Phases 2 & 3), 3, Done
-  #129, Implement WASM-Driven 'Authoritative Log' (Pharos Pulse Blog), 4, Done
-  #142, Bug: Production Build Failure (WASM Toolchain), 2, Done
+tasks[1]{id, title, ect, status}:
+  #111, Parallelized JIT WASM Engine (Hybrid Rayon/Actor), 5, Done
 
 # Strategic Continuity
 handoff: docs/governance/FRIDAY_HANDOFF.md
@@ -49,6 +40,5 @@ routine: ADR-0032
 mandate: ADR-0033
 
 # Innovation Telemetry (Out-of-Band)
-# Note: These metrics track high-innovation spikes separately from core delivery.
 hackathon[1]{spikes_completed, total_ect, lead_time_avg_hrs, innovation_signal}:
   4, 14, 2.0, 0.95
