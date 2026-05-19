@@ -94,6 +94,7 @@ Before moving from **Research** to **Strategy/Execution**, you MUST explicitly c
 Every non-trivial task completion MUST follow the **Multi-Agent Handover & Crucible Protocol (ADR-0037)**:
 - **Brutal Self-Critique:** Before finalizing, perform a "Brutally Honest" gap and security analysis to identify technical debt or edge cases.
 - **Structured PR:** Create a Pull Request with a dedicated **'Fix Summary'**, **'Security Review'**, and **'DORA Metrics'** section.
+- **IA Clarity Pass (MANDATORY)**: Any changes to collaborator-facing documentation (`CONTRIBUTING.md`, `README.md`, `CLI_REFERENCE.md`) or the Marketing Site MUST be reviewed by **`PHAROS_IA_CORE`** to ensure cognitive flow and prevent jargon bloat.
 - **Auditor Invocation:** Generate an **Audit Invocation Prompt** for a fresh AI session to perform Phase 4 (The Crucible Audit).
 - **Instructive Peer Review:** Provide inline code comments that act as teaching tools.
     - **No Meta-Labels:** Prohibited from using "The Why/How," "Teachable Moment," or other prompt-leaking labels that signal "AI Slop."
