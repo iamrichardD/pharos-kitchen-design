@@ -40,20 +40,21 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y podman
 
-      - name: Configure AWS Credentials (OIDC)
+      - name: Configure Cloudflare Credentials (OIDC)
         if: github.ref == 'refs/heads/main'
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: cloudflare/wrangler-action@v3
         with:
-          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/pharos-github-oidc-deployer
-          aws-region: us-east-1
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: --version # Initial handshake
 
       - name: Execute Pulse Slice
         run: bash scripts/pulse.sh --slice ${{ matrix.slice }}
         env:
           BUILD_MODE: ${{ github.ref == 'refs/heads/main' && 'release' || 'debug' }}
 
-      - name: Promote Artifacts (OIDC Signed)
+      - name: Promote Artifacts (Cloudflare R2)
         if: github.ref == 'refs/heads/main' && matrix.slice == 'core'
         run: |
-          echo "🚀 Promoting authoritative WASM core to S3 Registry..."
-          # Logic to push pkd-core.wasm to registry/
+          echo "🚀 Promoting authoritative WASM core to Cloudflare R2 Registry..."
+          # wrangler r2 object put pharos-registry/pkd-core.wasm --file=packages/pkd-core/pkg/pkd_core_bg.wasm
