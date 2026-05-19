@@ -158,6 +158,8 @@
 - [ ] **Issue #139**: Debt #139: Enhanced TOON Diagnostics (Column & Snippet). [ECT: 2] [Created: 2026-05-15]
 - [ ] **Issue #140**: Debt #140: Marketing Site Theme Alignment (Pulse Blog). [ECT: 1] [Created: 2026-05-15]
 - [ ] **Issue #141**: Task 4.33: Recursive Tabular Indentation for TOON Parser. [ECT: 3] [Created: 2026-05-15]
+- [ ] **Issue #146**: Task 4.36: Refactor JIT error handling to use a dedicated `JitError` enum. [ECT: 2] [Created: 2026-05-18]
+- [ ] **Issue #147**: Task 4.37: Implement CI check for strict dependency isolation (`wasm32` vs `native`). [ECT: 3] [Created: 2026-05-18]
 - [ ] **Issue #144**: Task 4.34: IKD Empowerment & Visibility Maturation. [ECT: 3] [Created: 2026-05-15]
 - [ ] **Issue #145**: Task 4.35: Implement "Project Genesis" Manifesto Post. [ECT: 2] [Created: 2026-05-15]
 
