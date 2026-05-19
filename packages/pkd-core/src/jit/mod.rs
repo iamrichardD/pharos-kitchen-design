@@ -9,15 +9,16 @@
  * ======================================================================== */
 
 pub mod actor;
+pub mod error;
 
 use wasmtime::*;
-use anyhow::Result;
 use rayon::prelude::*;
 use std::sync::Arc;
 use crate::models::metadata::PharosMetadata;
 use dashmap::DashMap;
 
 pub use actor::{JitActor, JitHandle, JitActorRequest, MAX_WASM_MEMORY};
+pub use error::{JitError, JitResult};
 
 /// Configures and loads WASM modules for JIT execution.
 /// Why: Enforces strict memory limits to prevent host resource exhaustion during dynamic execution.
@@ -28,7 +29,7 @@ pub struct WasmJitLoader {
 
 impl WasmJitLoader {
     /// Creates a new JIT loader with a specified memory limit in MiB.
-    pub fn new(max_memory_mib: u64) -> Result<Self> {
+    pub fn new(max_memory_mib: u64) -> JitResult<Self> {
         let mut config = Config::new();
         config.strategy(Strategy::Cranelift);
         config.parallel_compilation(true);
@@ -37,7 +38,8 @@ impl WasmJitLoader {
         let max_memory_pages = (max_memory_mib * 1024 * 1024) / (64 * 1024);
         config.static_memory_maximum_size(max_memory_mib * 1024 * 1024);
 
-        let engine = Engine::new(&config)?;
+        let engine = Engine::new(&config)
+            .map_err(|e| JitError::EngineInitialization(e.to_string()))?;
 
         Ok(Self {
             engine,
@@ -46,8 +48,9 @@ impl WasmJitLoader {
     }
 
     /// Compiles a WASM module from bytes.
-    pub fn compile_module(&self, wasm_bytes: &[u8]) -> Result<Module> {
+    pub fn compile_module(&self, wasm_bytes: &[u8]) -> JitResult<Module> {
         Module::new(&self.engine, wasm_bytes)
+            .map_err(|e| JitError::CompilationFailed("anonymous".to_string(), e.to_string()))
     }
 
     /// Returns the configured memory limit sentinel.

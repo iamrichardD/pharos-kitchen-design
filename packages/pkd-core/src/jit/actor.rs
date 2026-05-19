@@ -8,10 +8,10 @@
  * Traceability: Issue #111, ADR-0036
  * ======================================================================== */
 
-use anyhow::{Result, anyhow, Context};
 use tokio::sync::{mpsc, oneshot};
 use wasmtime::*;
 use std::time::Duration;
+use crate::jit::{JitError, JitResult};
 
 /// Memory limit for JIT WASM instances (64MB default).
 pub const MAX_WASM_MEMORY: usize = 64 * 1024 * 1024;
@@ -27,14 +27,14 @@ pub enum JitActorRequest {
     Load {
         id: String,
         wasm_bytes: Vec<u8>,
-        respond_to: oneshot::Sender<Result<()>>,
+        respond_to: oneshot::Sender<JitResult<()>>,
     },
     /// Execute a function in a loaded module.
     Execute {
         id: String,
         function_name: String,
         params: Vec<Val>,
-        respond_to: oneshot::Sender<Result<Vec<Val>>>,
+        respond_to: oneshot::Sender<JitResult<Vec<Val>>>,
     },
 }
 
@@ -46,7 +46,7 @@ pub struct JitActor {
 }
 
 impl JitActor {
-    pub fn new(receiver: mpsc::Receiver<JitActorRequest>) -> Result<Self> {
+    pub fn new(receiver: mpsc::Receiver<JitActorRequest>) -> JitResult<Self> {
         let mut config = Config::new();
         config.static_memory_maximum_size(MAX_WASM_MEMORY as u64);
         
@@ -54,7 +54,7 @@ impl JitActor {
         config.epoch_interruption(true);
         
         let engine = Engine::new(&config)
-            .context("Failed to create Wasmtime Engine with memory limits")?;
+            .map_err(|e| JitError::EngineInitialization(format!("Failed to create Wasmtime Engine with memory limits: {}", e)))?;
             
         // Spawn the Temporal Warden's heartbeat thread.
         // It increments the engine's epoch every 10ms.
@@ -86,16 +86,16 @@ impl JitActor {
         }
     }
 
-    fn handle_load(&self, id: String, wasm_bytes: Vec<u8>) -> Result<()> {
+    fn handle_load(&self, id: String, wasm_bytes: Vec<u8>) -> JitResult<()> {
         let module = Module::new(&self.engine, wasm_bytes)
-            .map_err(|e| anyhow!("Failed to compile WASM module '{}': {}", id, e))?;
+            .map_err(|e| JitError::CompilationFailed(id.clone(), e.to_string()))?;
         self.modules.insert(id, module);
         Ok(())
     }
 
-    fn handle_execute(&self, id: String, function_name: String, params: Vec<Val>) -> Result<Vec<Val>> {
+    fn handle_execute(&self, id: String, function_name: String, params: Vec<Val>) -> JitResult<Vec<Val>> {
         let module = self.modules.get(&id)
-            .ok_or_else(|| anyhow!("WASM module '{}' not loaded", id))?;
+            .ok_or_else(|| JitError::ModuleNotFound(id.clone()))?;
             
         let mut store = Store::new(&self.engine, ());
         
@@ -105,19 +105,20 @@ impl JitActor {
         
         let linker = Linker::new(&self.engine);
         let instance = linker.instantiate(&mut store, &module)
-            .context("Failed to instantiate WASM module")?;
+            .map_err(|e| JitError::InstantiationFailed(id.clone(), e.to_string()))?;
             
         let func = instance.get_func(&mut store, &function_name)
-            .ok_or_else(|| anyhow!("Function '{}' not found in module '{}'", function_name, id))?;
+            .ok_or_else(|| JitError::FunctionNotFound(function_name.clone(), id.clone()))?;
             
         let mut results = vec![Val::I32(0); func.ty(&store).results().len()];
         func.call(&mut store, &params, &mut results)
             .map_err(|e| {
-                let is_timeout = format!("{:?}", e).contains("interrupt") || format!("{:?}", e).contains("timeout");
+                let err_str = format!("{:?}", e);
+                let is_timeout = err_str.contains("interrupt") || err_str.contains("timeout");
                 if is_timeout {
-                    anyhow!("Execution timed out after {}ms (Temporal Warden)", WASM_EXECUTION_TIMEOUT_MS)
+                    JitError::ExecutionTimeout(WASM_EXECUTION_TIMEOUT_MS)
                 } else {
-                    anyhow!("Execution error in '{}::{}': {}", id, function_name, e)
+                    JitError::ExecutionError(id.clone(), function_name.clone(), e.to_string())
                 }
             })?;
             
@@ -138,17 +139,19 @@ impl JitHandle {
         (Self { sender }, actor)
     }
 
-    pub async fn load(&self, id: String, wasm_bytes: Vec<u8>) -> Result<()> {
+    pub async fn load(&self, id: String, wasm_bytes: Vec<u8>) -> JitResult<()> {
         let (respond_to, receiver) = oneshot::channel();
         self.sender.send(JitActorRequest::Load { id, wasm_bytes, respond_to }).await
-            .map_err(|_| anyhow!("Failed to send Load request to JitActor"))?;
-        receiver.await.context("JitActor dropped Load response channel")?
+            .map_err(|_| JitError::CommunicationError("Failed to send Load request to JitActor".to_string()))?;
+        receiver.await
+            .map_err(|_| JitError::CommunicationError("JitActor dropped Load response channel".to_string()))?
     }
 
-    pub async fn execute(&self, id: String, function_name: String, params: Vec<Val>) -> Result<Vec<Val>> {
+    pub async fn execute(&self, id: String, function_name: String, params: Vec<Val>) -> JitResult<Vec<Val>> {
         let (respond_to, receiver) = oneshot::channel();
         self.sender.send(JitActorRequest::Execute { id, function_name, params, respond_to }).await
-            .map_err(|_| anyhow!("Failed to send Execute request to JitActor"))?;
-        receiver.await.context("JitActor dropped Execute response channel")?
+            .map_err(|_| JitError::CommunicationError("Failed to send Execute request to JitActor".to_string()))?;
+        receiver.await
+            .map_err(|_| JitError::CommunicationError("JitActor dropped Execute response channel".to_string()))?
     }
 }

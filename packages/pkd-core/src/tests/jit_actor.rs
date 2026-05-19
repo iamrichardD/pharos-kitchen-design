@@ -51,7 +51,7 @@ async fn test_should_fail_fast_when_module_not_found() {
 
     let res = handle.execute("non_existent".to_string(), "any".to_string(), vec![]).await;
     assert!(res.is_err());
-    assert!(res.unwrap_err().to_string().contains("WASM module 'non_existent' not loaded"));
+    assert!(res.unwrap_err().to_string().contains("WASM module 'non_existent' not found in registry"));
 }
 
 #[tokio::test]
