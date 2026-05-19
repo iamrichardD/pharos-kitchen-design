@@ -63,19 +63,19 @@
 #### 🪨 Big Rock: #146 - Hub/Sibling Multi-Agent Orchestration [ECT: 5]
 - [x] **Task 4.27.1**: Draft ADR-0035: Hub/Sibling Worktree Pattern. (2026-05-18)
 - [x] **Task 4.27.2**: Update `GEMINI.md` with Multi-Agent Worktree Protocol. (2026-05-18)
-- [ ] **Task 4.27.3**: Restructure local workspace to Hub/Sibling architecture. [ECT: 3]
-- [ ] **Task 4.27.4**: Verify `pulse.sh` and Podman parity in Sibling environment. [ECT: 2]
+- [x] **Task 4.27.3**: Restructure local workspace to Hub/Sibling architecture. [AUDITED: PHAROS GREEN] (2026-05-19)
+- [x] **Task 4.27.4**: Verify `pulse.sh` and Podman parity in Sibling environment. [AUDITED: PHAROS GREEN] (2026-05-19)
 
 #### 🪨 Big Rock: #111 - Parallelized JIT WASM Engine [ECT: 5]
-- [ ] **Task 4.25.1**: Implement `WasmJitLoader` with explicit memory limits. [ECT: 2]
-- [ ] **Task 4.25.2**: Thread-Safe `DashMap` Registry for concurrent lookups. [ECT: 2]
-- [ ] **Task 4.25.3**: Parallel Query Dispatcher via `rayon` (sharding). [ECT: 2]
-- [ ] **Task 4.25.4**: JIT Performance Benchmark & Regression Audit. [ECT: 1]
+- [x] **Task 4.25.1**: Implement `WasmJitLoader` with explicit memory limits. [AUDITED: PHAROS GREEN] (2026-05-19)
+- [x] **Task 4.25.2**: Thread-Safe `DashMap` Registry for concurrent lookups. [AUDITED: PHAROS GREEN] (2026-05-19)
+- [x] **Task 4.25.3**: Parallel Query Dispatcher via `rayon` (sharding). [AUDITED: PHAROS GREEN] (2026-05-19)
+- [x] **Task 4.25.4**: JIT Performance Benchmark & Regression Audit. [AUDITED: PHAROS GREEN] (2026-05-19)
 
 #### 🪨 Big Rock: #108 - CI/CD Sharding for Parallel Verification [ECT: 4]
-- [ ] **Task 4.26.1**: Partition `pulse.sh` into `core`, `bridge`, and `marketing` slices. [ECT: 2]
-- [ ] **Task 4.26.2**: Implement GitHub Actions Matrix for parallel slice execution. [ECT: 2]
-- [ ] **Task 4.26.3**: Centralized Artifact Promotion (OIDC-signed) between shards. [ECT: 2]
+- [x] **Task 4.26.1**: Partition `pulse.sh` into `core`, `bridge`, and `marketing` slices. [AUDITED: PHAROS GREEN] (2026-05-19)
+- [x] **Task 4.26.2**: Implement GitHub Actions Matrix for parallel slice execution. [AUDITED: PHAROS GREEN] (2026-05-19)
+- [x] **Task 4.26.3**: Centralized Artifact Promotion (OIDC-signed) between shards. [AUDITED: PHAROS GREEN] (2026-05-19)
 
 #### 🪨 Big Rock: #124 - JIT Sharded Registry Scaling [ECT: 4]
 - [ ] **Task 5.2.1**: Refactor `BakeEngine` for incremental shard generation. [ECT: 2]
