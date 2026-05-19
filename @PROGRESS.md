@@ -200,10 +200,18 @@
     - **Velocity Variance**: 0 (Matched ECT 5).
 - **Audited** via Pharos Crucible (Result: 🟢 PHAROS GREEN).
 
-#### [2026-05-19] - Governance Hardening (#146)
+#### [2026-05-19] - Governance & JIT Hardening (#146)
 - **Formalized** ADR-0035 (Hub/Sibling Worktree Pattern) and integrated Multi-Agent Worktree Protocol into `GEMINI.md`.
 - **Synchronized** `CONTRIBUTING.md` and `docs/DECISION_LOG.md` to reflect Approved architectural status.
 - **Cross-referenced** ADR-0031 with the new physical isolation standards.
+- **Refactored** JIT error handling in `pkd-core` to use a specialized `JitError` enum, replacing generic `anyhow` results.
+- **Improved** diagnostic observability for Temporal Warden timeouts and instantiation failures within the Actor-based JIT engine.
+- **Verified** "Pharos Green" status via integrated `pulse.sh` handshake.
+- **DORA Metrics (Issue #146)**:
+    - **Lead Time**: 1 Hour (Including Sibling Isolation).
+    - **Change Failure Rate**: 0% (Clean Integration).
+    - **Velocity Variance**: 0.5 (Planning Alignment).
+- **Audited** via Pharos Crucible (Result: 🟢 PHAROS GREEN).
 
 ### Sprint 4.9: The IKD Empowerment Sprint (2026-05-11) - ✅ COMPLETED
 - **Goal**: Empower Independent Kitchen Designers (IKD) with modern, high-efficiency tools via "Ghost Links" and Unified Interop metadata standards.
