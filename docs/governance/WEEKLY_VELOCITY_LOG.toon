@@ -9,12 +9,13 @@
  * ======================================================================== */
 
 sprint: 4.10
-date: 2026-05-18
+date: 2026-05-19
 team: PHAROS_STRATEGY_CORE
 
 # Core Capacity Metrics
-velocity[1]{target_ect, actual_ect, variance}:
-  5, 5, 0
+velocity[2]{date, target_ect, actual_ect, variance}:
+  2026-05-18, 5, 5, 0
+  2026-05-19, 15, 15, 0
 
 # Historical Baseline (Retroactive Audit #132)
 phase4_baseline[1]{total_ect, total_act, variance, issue_count}:
@@ -24,15 +25,20 @@ phase4_baseline[1]{total_ect, total_act, variance, issue_count}:
 total_history[3]{phase, total_ect, total_act}:
   2, 17, 19
   3, 178, 172
-  4, 49, 48
+  4, 64, 63
 
 # DORA Performance Metrics
-performance[1]{lead_time_hrs, change_failure_rate, mttr_mins}:
-  4.5, 0.75, 42
+performance[2]{date, lead_time_hrs, change_failure_rate, mttr_mins}:
+  2026-05-18, 4.5, 0.75, 42
+  2026-05-19, 2.4, 0.50, 45
 
 # Task Outcomes
-tasks[1]{id, title, ect, status}:
+tasks[5]{id, title, ect, status}:
   #111, Parallelized JIT WASM Engine (Hybrid Rayon/Actor), 5, Done
+  #146, JIT Engine Hardening & Hub/Sibling Orchestration, 5, Done
+  #111, Final Performance Tier (Rayon Sharding), 5, Done
+  #108, CI/CD Sharding & GHA Matrix integration, 4, Done
+  #147, CI Dependency Isolation check (wasm32), 1, Done
 
 # Strategic Continuity
 handoff: docs/governance/FRIDAY_HANDOFF.md
