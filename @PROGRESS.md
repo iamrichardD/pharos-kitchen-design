@@ -205,12 +205,13 @@
 - **Synchronized** `CONTRIBUTING.md` and `docs/DECISION_LOG.md` to reflect Approved architectural status.
 - **Cross-referenced** ADR-0031 with the new physical isolation standards.
 - **Refactored** JIT error handling in `pkd-core` to use a specialized `JitError` enum, replacing generic `anyhow` results.
-- **Improved** diagnostic observability for Temporal Warden timeouts and instantiation failures within the Actor-based JIT engine.
-- **Verified** "Pharos Green" status via integrated `pulse.sh` handshake.
+- **Hardened** the **Temporal Warden** using robust `Trap::Interrupt` downcasting to prevent 100ms sentinel spoofing.
+- **Remediated** thread leakage by implementing an `AtomicBool` shutdown signal for the JIT Actor and heartbeat thread.
+- **Verified** "Pharos Green" status via integrated `pulse.sh` handshake and Phase 4 Crucible Audit.
 - **DORA Metrics (Issue #146)**:
-    - **Lead Time**: 1 Hour (Including Sibling Isolation).
-    - **Change Failure Rate**: 0% (Clean Integration).
-    - **Velocity Variance**: 0.5 (Planning Alignment).
+    - **Lead Time**: 2.5 Hours (Including High-Rigor Remediation Cycle).
+    - **Change Failure Rate**: 33% (1 Audit Failure remediated).
+    - **MTTR**: 45 Minutes.
 - **Audited** via Pharos Crucible (Result: 🟢 PHAROS GREEN).
 
 ### Sprint 4.9: The IKD Empowerment Sprint (2026-05-11) - ✅ COMPLETED
