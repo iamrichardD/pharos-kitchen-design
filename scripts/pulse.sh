@@ -6,7 +6,7 @@
 # Author: Richard D. (https://github.com/iamrichardd)
 # License: FSL-1.1 (See LICENSE file for details)
 # Purpose: Sharded validation of the PKD ecosystem (Core, Bridge, Marketing).
-# Traceability: Issue #108, ADR-0017, ADR-0035
+# Traceability: Issue #108, Issue #147, ADR-0017, ADR-0035
 # ========================================================================
 
 set -e
@@ -26,6 +26,8 @@ done
 
 # --- Slice Definitions ---
 
+# Why: Validates the Rust core, governance standards, and supply chain security.
+# This slice acts as the 'Security Warden' for the monorepo.
 run_core() {
     echo "🚀 [Slice: CORE] Verifying Rust, Governance, and Supply Chain..."
 
@@ -34,7 +36,6 @@ run_core() {
     bash scripts/test-quoting.sh
 
     # 2. Rust Unit Tests, Security Audit, and PKD-Core Compilation
-    # We use the rust-builder stage from the unified Containerfile.pulse.
     podman build \
         --security-opt seccomp=unconfined \
         --target rust-builder \
@@ -47,6 +48,7 @@ run_core() {
     bash scripts/lint-governance.sh
 
     # 4. File Prologue Audit (FSL-1.1 Legal Compliance)
+    # Why: Ensures every source file acknowledges the FSL-1.1 license and traceability.
     echo "   [Process] Verifying FSL-1.1 File Prologues..."
     MISSING_PROLOGUES=0
     while IFS= read -r file; do
@@ -54,7 +56,7 @@ run_core() {
             echo "      ❌ Missing prologue in: $file"
             MISSING_PROLOGUES=$((MISSING_PROLOGUES + 1))
         fi
-    done < <(find packages -name "*.ts" -not -path "*/node_modules/*" -not -path "*/pkg/*" -not -path "*/.wrangler/*")
+    done < <(find apps packages -type f \( -name "*.ts" -o -name "*.rs" -o -name "*.astro" -o -name "*.cs" \) -not -path "*/node_modules/*" -not -path "*/pkg/*" -not -path "*/.wrangler/*" -not -path "*/obj/*" -not -path "*/bin/*")
 
     if [ $MISSING_PROLOGUES -gt 0 ]; then
         echo "   ❌ Error: $MISSING_PROLOGUES files are missing the mandatory Standardized File Prologue."
@@ -76,6 +78,16 @@ run_core() {
     if [[ "$CURRENT_BRANCH" != "main" && ! $CURRENT_BRANCH =~ ^(feat|fix|debt|gov)/issue-[0-9]+ ]]; then
         echo "❌ Error: Branch '$CURRENT_BRANCH' violates naming standard (feat|fix|debt|gov)/issue-X."
         exit 1
+    fi
+
+    # Check PR Marker (ADR-0037 Mandate)
+    # Why: Enforces the 'Builder-to-Auditor' transition by requiring an audit log in the PR body.
+    if gh pr view --json body > /dev/null 2>&1; then
+        PR_BODY=$(gh pr view --json body -q '.body')
+        if [[ ! "$PR_BODY" == *"## ⚔️ The Pharos Crucible (Audit Log)"* ]]; then
+            echo "❌ Error: Pull Request body is missing the mandatory 'Pharos Crucible' audit log."
+            exit 1
+        fi
     fi
 
     # 7. PowerShell Installation Parity
@@ -118,6 +130,7 @@ run_core() {
     echo "✅ [Slice: CORE] Verified."
 }
 
+# Why: Validates the .NET 8 Revit Bridge and cross-language FFI boundary.
 run_bridge() {
     echo "🚀 [Slice: BRIDGE] Verifying .NET Revit Bridge & Handshake..."
     
@@ -133,6 +146,7 @@ run_bridge() {
     echo "✅ [Slice: BRIDGE] Verified."
 }
 
+# Why: Validates the Marketing Site (Astro) and frontend TypeScript audits.
 run_marketing() {
     echo "🚀 [Slice: MARKETING] Verifying Astro Site & TS Audits..."
 
@@ -162,4 +176,3 @@ else
         *) echo "❌ Error: Invalid slice '$SLICE'"; exit 1 ;;
     esac
 fi
-
