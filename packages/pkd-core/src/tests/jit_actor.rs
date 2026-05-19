@@ -96,3 +96,25 @@ async fn test_should_handle_actor_termination_gracefully() {
     let err_msg = res.unwrap_err().to_string();
     assert!(err_msg.contains("Failed to send Load request") || err_msg.contains("JitActor dropped"));
 }
+
+#[tokio::test]
+async fn test_should_shutdown_gracefully_when_shutdown_signal_received() {
+    let (handle, actor) = JitHandle::new();
+    let join_handle = tokio::spawn(async move { actor.run().await });
+
+    // Ensure it's running
+    let wasm_bytes = wat::parse_str("(module)").unwrap();
+    handle.load("test".to_string(), wasm_bytes).await.expect("Failed to load");
+
+    // Send shutdown signal
+    handle.shutdown().await.expect("Failed to send shutdown signal");
+
+    // Wait for actor to finish
+    tokio::time::timeout(Duration::from_millis(500), join_handle).await
+        .expect("Actor did not shutdown within timeout")
+        .expect("Actor task panicked or failed");
+
+    // Further requests should fail
+    let res = handle.load("test2".to_string(), vec![]).await;
+    assert!(res.is_err());
+}
