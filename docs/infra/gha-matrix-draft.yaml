@@ -1,0 +1,41 @@
+# ========================================================================
+# Project: Pharos Kitchen Design (Project Prism)
+# Component: Infrastructure / CI
+# File: docs/infra/gha-matrix-draft.yaml
+# Author: Richard D. (https://github.com/iamrichardd)
+# License: FSL-1.1
+# Purpose: Draft configuration for parallelized CI sharding (Issue #108).
+# Traceability: Task 4.26.2
+# ========================================================================
+
+name: Pulse (Sharded)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  pulse:
+    name: Pulse / ${{ matrix.slice }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        slice: [core, bridge, marketing]
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Required for TDD traceability checks
+
+      - name: Set up Podman
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y podman
+
+      - name: Execute Pulse Slice
+        run: bash scripts/pulse.sh --slice ${{ matrix.slice }}
+        env:
+          BUILD_MODE: ${{ github.ref == 'refs/heads/main' && 'release' || 'debug' }}
