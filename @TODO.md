@@ -61,8 +61,8 @@
 ### Sprint 4.10: Performance & Scale - 🚀 APPROVED (May 18–22)
 
 #### 🪨 Big Rock: #146 - Hub/Sibling Multi-Agent Orchestration [ECT: 5]
-- [ ] **Task 4.27.1**: Draft ADR-0035: Hub/Sibling Worktree Pattern. [ECT: 2]
-- [ ] **Task 4.27.2**: Update `GEMINI.md` with Multi-Agent Worktree Protocol. [ECT: 2]
+- [x] **Task 4.27.1**: Draft ADR-0035: Hub/Sibling Worktree Pattern. (2026-05-18)
+- [x] **Task 4.27.2**: Update `GEMINI.md` with Multi-Agent Worktree Protocol. (2026-05-18)
 - [ ] **Task 4.27.3**: Restructure local workspace to Hub/Sibling architecture. [ECT: 3]
 - [ ] **Task 4.27.4**: Verify `pulse.sh` and Podman parity in Sibling environment. [ECT: 2]
 

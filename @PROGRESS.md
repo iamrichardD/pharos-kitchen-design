@@ -200,6 +200,11 @@
     - **Velocity Variance**: 0 (Matched ECT 5).
 - **Audited** via Pharos Crucible (Result: 🟢 PHAROS GREEN).
 
+#### [2026-05-19] - Governance Hardening (#146)
+- **Formalized** ADR-0035 (Hub/Sibling Worktree Pattern) and integrated Multi-Agent Worktree Protocol into `GEMINI.md`.
+- **Synchronized** `CONTRIBUTING.md` and `docs/DECISION_LOG.md` to reflect Approved architectural status.
+- **Cross-referenced** ADR-0031 with the new physical isolation standards.
+
 ### Sprint 4.9: The IKD Empowerment Sprint (2026-05-11) - ✅ COMPLETED
 - **Goal**: Empower Independent Kitchen Designers (IKD) with modern, high-efficiency tools via "Ghost Links" and Unified Interop metadata standards.
 - [x] **Issue #31**: Unified Interop Schema (Task 4.2). [Mon]
