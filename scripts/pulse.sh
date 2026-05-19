@@ -6,7 +6,7 @@
 # Author: Richard D. (https://github.com/iamrichardd)
 # License: FSL-1.1 (See LICENSE file for details)
 # Purpose: Single-command validation of the entire PKD ecosystem.
-# Traceability: Issue #81
+# Traceability: Issue #81, Issue #147
 # ========================================================================
 
 set -e
@@ -135,6 +135,20 @@ fi
 echo "   [Process] Verifying installation script hardening..."
 ./scripts/podman-wrapper.sh "public.ecr.aws/docker/library/debian:bookworm-slim" \
     sh -c "apt-get update && apt-get install -y curl sudo && bash scripts/test-issue-93.sh"
+
+# Check 9: Dependency Isolation (Issue #147)
+echo "   [Process] Verifying Dependency Isolation (wasm32)..."
+# Ensure native-only dependencies (Wasmtime, Rayon, Tokio) do not leak into the wasm32-unknown-unknown target.
+# Why: Prevents frontend build bloat and runtime panics in the browser.
+./scripts/podman-wrapper.sh "public.ecr.aws/docker/library/rust@sha256:70aebe351faa35667ef36508deb19fe234ff03d67cfe102f095d920a53d0622c" \
+    sh -c "rustup target add wasm32-unknown-unknown > /dev/null 2>&1 && \
+    PROHIBITED='wasmtime|tokio|rayon' && \
+    RESULTS=\$(cargo tree --package pkd-core --target wasm32-unknown-unknown --all-features | grep -E \"\$PROHIBITED\" || true) && \
+    if [ -n \"\$RESULTS\" ]; then \
+        echo \"   ❌ Error: Prohibited native dependencies detected in wasm32 target:\"; \
+        echo \"\$RESULTS\"; \
+        exit 1; \
+    fi"
 
 echo "✅ Pulse Complete: Ecosystem & Process Stability Verified."
 
