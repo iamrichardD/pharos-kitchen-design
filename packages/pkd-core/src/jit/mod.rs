@@ -4,8 +4,8 @@
  * File: mod.rs
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
- * Purpose: Unified JIT WASM Engine vertical slice.
- * Traceability: Issue #146, ADR-0036
+ * Purpose: Unified JIT WASM Engine vertical slice with parallel dispatch.
+ * Traceability: Issue #111, ADR-0036
  * ======================================================================== */
 
 pub mod actor;
@@ -28,15 +28,19 @@ pub struct WasmJitLoader {
 }
 
 impl WasmJitLoader {
-    /// Creates a new JIT loader with a specified memory limit in MiB.
-    pub fn new(max_memory_mib: u64) -> JitResult<Self> {
+    /// Creates a new JIT loader with a specified memory limit.
+    /// If no limit is provided, it defaults to the MAX_WASM_MEMORY sentinel (64MB).
+    pub fn new(max_memory_bytes: Option<usize>) -> JitResult<Self> {
+        let limit = max_memory_bytes.unwrap_or(MAX_WASM_MEMORY);
+        
         let mut config = Config::new();
         config.strategy(Strategy::Cranelift);
         config.parallel_compilation(true);
         
-        // WASM pages are 64KiB. 1 MiB = 16 pages.
-        let max_memory_pages = (max_memory_mib * 1024 * 1024) / (64 * 1024);
-        config.static_memory_maximum_size(max_memory_mib * 1024 * 1024);
+        // Fail-Fast: Explicitly limit the maximum size of static linear memory.
+        // WASM pages are 64KiB.
+        let max_memory_pages = (limit as u64) / (64 * 1024);
+        config.static_memory_maximum_size(limit as u64);
 
         let engine = Engine::new(&config)
             .map_err(|e| JitError::EngineInitialization(e.to_string()))?;
@@ -53,14 +57,14 @@ impl WasmJitLoader {
             .map_err(|e| JitError::CompilationFailed("anonymous".to_string(), e.to_string()))
     }
 
-    /// Returns the configured memory limit sentinel.
+    /// Returns the configured memory limit in pages.
     pub fn max_memory_pages(&self) -> u64 {
         self.max_memory_pages
     }
 }
 
 /// Dispatches metadata queries across multiple threads using Rayon.
-/// Why: Maximizes throughput for large-scale BIM hydration tasks.
+/// Why: Maximizes throughput for large-scale BIM hydration tasks by sharding DashMap lookups.
 pub struct ParallelQueryDispatcher {
     registry: Arc<DashMap<String, PharosMetadata>>,
 }
@@ -71,14 +75,14 @@ impl ParallelQueryDispatcher {
     }
 
     /// Executes a filter/map operation across the registry in parallel.
+    /// Uses DashMap's native par_iter for lock-free sharded concurrency.
     pub fn query_parallel<F, R>(&self, predicate: F) -> Vec<R>
     where
         F: Fn((&String, &PharosMetadata)) -> Option<R> + Sync + Send,
         R: Send,
     {
         self.registry
-            .iter()
-            .par_bridge()
+            .par_iter()
             .filter_map(|item| {
                 let (id, metadata) = item.pair();
                 predicate((id, metadata))
@@ -114,8 +118,13 @@ mod tests {
 
     #[test]
     fn test_should_initialize_jit_loader_with_memory_limits() {
-        let loader = WasmJitLoader::new(128).expect("Failed to create JIT loader");
-        assert_eq!(loader.max_memory_pages(), 2048); // 128 MiB = 2048 pages
+        // Test with default sentinel (64MB)
+        let loader = WasmJitLoader::new(None).expect("Failed to create JIT loader");
+        assert_eq!(loader.max_memory_pages(), 1024); // 64 MiB = 1024 pages
+        
+        // Test with explicit 128MB
+        let loader_128 = WasmJitLoader::new(Some(128 * 1024 * 1024)).expect("Failed to create JIT loader");
+        assert_eq!(loader_128.max_memory_pages(), 2048);
     }
 
     #[test]

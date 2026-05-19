@@ -5,7 +5,7 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Parallelized JIT WASM Engine using the Actor model (Tokio).
- * Traceability: Issue #146, ADR-0036
+ * Traceability: Issue #111, ADR-0036
  * ======================================================================== */
 
 use tokio::sync::{mpsc, oneshot};
@@ -53,6 +53,7 @@ pub struct JitActor {
 impl JitActor {
     pub fn new(receiver: mpsc::Receiver<JitActorRequest>) -> JitResult<Self> {
         let mut config = Config::new();
+        // Fail-Fast: Explicitly limit linear memory at the engine level.
         config.static_memory_maximum_size(MAX_WASM_MEMORY as u64);
         
         // Fail-Fast: Enable Epoch-based interruption for temporal safety.
@@ -110,10 +111,21 @@ impl JitActor {
     }
 
     fn handle_execute(&self, id: String, function_name: String, params: Vec<Val>) -> JitResult<Vec<Val>> {
+        // Harden: Clone the module out of DashMap to release the sharded lock immediately.
+        // This ensures lock-free concurrent lookups while other executions are in progress.
         let module = self.modules.get(&id)
+            .map(|m| m.clone())
             .ok_or_else(|| JitError::ModuleNotFound(id.clone()))?;
             
-        let mut store = Store::new(&self.engine, ());
+        // Enforce strict resource limits via StoreLimits.
+        let mut store = Store::new(
+            &self.engine, 
+            StoreLimitsBuilder::new()
+                .memory_size(MAX_WASM_MEMORY)
+                .instances(1)
+                .build()
+        );
+        store.limiter(|s| s);
         
         // Enforce the Temporal Warden sentinel (100ms timeout).
         // Since heartbeat is 10ms, a deadline of 10 epochs = 100ms.

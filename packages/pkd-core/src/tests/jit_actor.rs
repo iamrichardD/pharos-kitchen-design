@@ -5,7 +5,7 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Atomic tests for the Actor-based JIT engine.
- * Traceability: Issue #146, ADR-0036
+ * Traceability: Issue #111, ADR-0036
  * ======================================================================== */
 
 use crate::jit::JitHandle;
@@ -76,6 +76,33 @@ async fn test_should_terminate_execution_when_wasm_infinite_loop_detected() {
     
     assert!(res.is_err(), "Expected execution to fail due to timeout");
     assert!(res.unwrap_err().to_string().contains("timed out"), "Error message should mention timeout");
+}
+
+#[tokio::test]
+async fn test_should_fail_when_wasm_exceeds_memory_limit() {
+    let (handle, actor) = JitHandle::new();
+    tokio::spawn(async move { actor.run().await });
+
+    // WASM module that tries to request more than 64MB (1024 pages) initially.
+    // 65 MiB = 1040 pages.
+    let wat = r#"
+        (module
+            (memory 1041)
+        )
+    "#;
+    let wasm_bytes = wat::parse_str(wat).unwrap();
+    handle.load("bloated_module".to_string(), wasm_bytes).await.expect("Failed to load module");
+
+    // Instantiation should fail because the initial memory request exceeds MAX_WASM_MEMORY.
+    let res = handle.execute("bloated_module".to_string(), "any".to_string(), vec![]).await;
+    
+    match res {
+        Err(e) => {
+            let err_msg = e.to_string();
+            assert!(err_msg.contains("Instantiation failed"), "Expected 'Instantiation failed', got: '{}'", err_msg);
+        },
+        Ok(_) => panic!("Execution should have failed due to memory limits"),
+    }
 }
 
 #[tokio::test]
