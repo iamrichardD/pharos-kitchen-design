@@ -11,7 +11,7 @@
 # ADR-0035: Hub/Sibling Worktree Pattern for Multi-Agent Orchestration
 
 ## Status
-Proposed (2026-05-18)
+Approved (2026-05-19)
 
 ## Context
 As the project enters Phase 4 and Phase 5, the complexity of tasks (e.g., #111 Parallelized JIT WASM Engine) requires high-rigor parallel engineering. Standard git branch-switching is insufficient because it creates "artifact pollution" in the `node_modules`, `target/`, and `dist/` directories, and risks race conditions during concurrent Podman builds.

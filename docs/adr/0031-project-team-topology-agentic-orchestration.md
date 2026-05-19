@@ -5,7 +5,7 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Define the team topology keywords and agentic orchestration strategy.
- * Traceability: ADR-0017, ADR-0028, ADR-0030
+ * Traceability: ADR-0017, ADR-0028, ADR-0030, ADR-0035
  * Status: Accepted
  * ======================================================================== -->
 # ADR-0031: Project Team Topology & Agentic Orchestration
@@ -13,7 +13,7 @@
 *   **Status**: Accepted
 *   **Date**: 2026-05-12
 *   **Deciders**: Senior Pharos Program Manager (PRC), Pharos Meta-Architect (PMA)
-*   **Traceability**: ADR-0017, ADR-0028, ADR-0030
+*   **Traceability**: ADR-0017, ADR-0028, ADR-0030, ADR-0035
 
 ## Context
 Pharos Kitchen Design (Project Prism) operates in an "AI-First" development environment. To maintain engineering rigor, architectural consistency, and context efficiency across multiple AI agent sessions, a structured "Team Topology" is required. Legacy agile structures often lack the role-based isolation needed to prevent "Persona Schizophrenia"—where a single agent attempts to act as both Builder and Auditor, compromising objective verification.

@@ -60,8 +60,10 @@ EVERY source file (JSON, RS, ASTRO) MUST begin with:
 - **SOLID Principles:** Strictly follow SRP, OCP, LSP, ISP, and DIP.
 - **TDD with Atomic Verification:** Write failing tests BEFORE implementation.
 - **Regression Integrity & Test Remediation**: When developing a feature or remediating a bug, any failure in the existing test suite MUST be resolved as an integral part of the process. You are strictly prohibited from ignoring, bypassing, or suppressing existing test failures to achieve "green" on new work.
-- **Naming Standard:** ALL test functions MUST follow this semantic format:
-    - `test_should_[expected_behavior]_when_[state_under_test]`
+- **Naming Standard**: ALL test functions MUST follow this semantic format, adapted for the target language:
+    - **Rust**: `test_should_[behavior]_when_[state]` (snake_case)
+    - **C#**: `TestShould_[Behavior]_When_[State]` (PascalCase with Underscores)
+    - **TypeScript**: `test_should_[behavior]_when_[state]` (snake_case string in `it()`)
 - **"Authoritative" ReDoS Immunity (Temporal Warden)**: To protect the host event loop from pathological regular expressions (ReDoS), all non-trivial regex execution MUST be offloaded to an isolated environment (e.g., `worker_threads` in Node.js) with a hard temporal sentinel.
     - **Sentinel Timeout**: Execution MUST be terminated after a maximum of 100ms.
     - **Fail-Fast Safety**: Upon timeout, the system MUST return a safe sentinel value (e.g., `UNVERIFIED_RAW_DATA`) and log the event for forensic analysis.

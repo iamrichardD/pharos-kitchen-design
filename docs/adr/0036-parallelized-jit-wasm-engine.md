@@ -11,7 +11,7 @@
 # ADR 0036: Parallelized JIT WASM Engine
 
 ## Status
-Proposed
+Approved (2026-05-19)
 
 ## Context
 As Pharos scales to handle thousands of BIM artifacts across hundreds of manufacturer dialects, the current synchronous validation and registry lookup paths in `pkd-core` are becoming a bottleneck. To maintain sub-100ms response times for large-scale "Ghost Link" hydration and validation, we need to transition from a single-threaded synchronous model to a parallelized JIT (Just-In-Time) execution model.

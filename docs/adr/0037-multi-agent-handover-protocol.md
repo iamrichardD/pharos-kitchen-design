@@ -11,7 +11,7 @@
 # ADR-0037: Multi-Agent Handover & Crucible Protocol
 
 ## Status
-Proposed (2026-05-18)
+Approved (2026-05-19)
 
 ## Context
 High-rigor engineering in Pharos requires that implementation (the "Builder") and review (the "Auditor") be performed by isolated AI sessions to prevent confirmation bias and ensure comprehensive security/gap analysis. With the adoption of the Hub/Sibling pattern (ADR-0035), we need a standardized way to package work and "summon" an Auditor.
