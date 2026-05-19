@@ -39,7 +39,8 @@ We treat every PR as a teaching tool. Code is "AI Slop" if it lacks the **Why**.
     *   **Standard Clone (Surgical Strike)**: For Tier 1-2 tasks (UI fixes, docs, minor logic) performed by humans, a standard git clone is sufficient.
     *   **Hub/Sibling Pattern (Agentic Parallel Engineering)**: For Tier 3-5 tasks involving multiple vertical slices, or when utilizing **AI Agents** for concurrent development, the **Hub/Sibling Worktree Pattern** (ADR-0035) is MANDATED. This physical disk isolation prevents AI "Search Pollution" and shared-cache corruption.
 3.  **Crucible-Slice**: For non-trivial tasks, evaluate three implementation options (ADR-0017).
-4.  **Atomic Verification**: Every change requires a new, semantic BDD test following language-specific idiomatic patterns:
+4.  **Audit Gate (MANDATORY)**: All non-trivial changes MUST be audited by an independent AI session. A physical audit log (`docs/governance/audits/issue-X.md`) with a `🟢 PHAROS GREEN` status is REQUIRED before code can be merged into `main`.
+5.  **Atomic Verification**: Every change requires a new, semantic BDD test following language-specific idiomatic patterns:
     *   **Rust (snake_case)**: `fn test_should_[expected_behavior]_when_[state_under_test]()`
     *   **C# (PascalCase_Underscore)**: `public void TestShould_[ExpectedBehavior]_When_[StateUnderTest]()`
     *   **TypeScript (snake_case string)**: `it("test_should_[expected_behavior]_when_[state_under_test]", ...)`

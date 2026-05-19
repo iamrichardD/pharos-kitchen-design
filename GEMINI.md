@@ -109,6 +109,14 @@ To ensure context efficiency and architectural consistency across sessions, use 
 | **`PHAROS_IA_CORE`** | **Information & UX** | **SPIA** (Information Architect), **Senior DX Engineer** (UX/Ergonomics), **BIM Schema Specialist**. *Mandate: Documentation structure, Marketing IA, and Schema-to-UI mapping.* |
 | **`PHAROS_DEV_CORE`** | **Implementation Team** | **Senior Engineer** (Lead Developer/Rust), **Senior DevSecOps Engineer** (CI/CD/Supply Chain), **Senior DX Engineer** (Loader/UX/Ergonomics). *Mandate: TDD implementation, Crucible evaluation, and Fail-Fast engineering.* |
 
+#### **Builder Persona Constraints (SDLC Protection):**
+To ensure the integrity of the Pharos "Three-Option Crucible" (ADR-0017), all **Builders** (Implementation Agents) MUST adhere to the following hard constraints:
+1.  **PROHIBITED from Main**: You MUST NOT commit or push directly to the `main` branch. 
+2.  **Feature Branch Sovereignty**: All work MUST occur on a feature branch (`feat/issue-X`) within your assigned Sibling worktree.
+3.  **Handoff Finality**: Your session is complete when your code is committed to your feature branch and verified 🟢 PHAROS GREEN in Podman. You then notify the **SPM/Orchestrator** that you are "Ready for Audit."
+4.  **No Self-Audit**: You are strictly PROHIBITED from auditing your own code or creating your own audit log.
+
+
 ## DevSecOps & Workflow
 
 ### 1. The Pharos Development Lifecycle

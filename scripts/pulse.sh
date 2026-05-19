@@ -63,7 +63,27 @@ run_core() {
         exit 1
     fi
 
-    # 5. Supply Chain Verification
+    # 5. Crucible Audit Log Verification (The Hard Gate)
+    # Why: Ensures every non-trivial task has been peer-reviewed by an independent auditor (ADR-0037).
+    echo "   [Process] Verifying Crucible Audit Log..."
+    if [[ "$CURRENT_BRANCH" =~ ^(feat|fix|debt|gov)/issue-([0-9]+) ]]; then
+        ISSUE_ID="${BASH_REMATCH[2]}"
+        AUDIT_FILE="docs/governance/audits/issue-${ISSUE_ID}.md"
+        
+        if [ ! -f "$AUDIT_FILE" ]; then
+            echo "      ❌ Error: Missing mandatory audit log: $AUDIT_FILE"
+            echo "      Builders are prohibited from merging until an independent PHAROS GREEN audit exists."
+            exit 1
+        fi
+        
+        if ! grep -q "Status: 🟢 **PHAROS GREEN**" "$AUDIT_FILE"; then
+            echo "      ❌ Error: Audit log $AUDIT_FILE exists but status is NOT PHAROS GREEN."
+            exit 1
+        fi
+        echo "      🟢 Audit Log Verified: Issue #$ISSUE_ID is PHAROS GREEN."
+    fi
+
+    # 6. Supply Chain Verification
     echo "   [Process] Verifying Supply Chain Security Logic..."
     podman run --rm --security-opt seccomp=unconfined pkd-core-builder \
         sh -c "echo 'Integrity-Test' > /tmp/good.txt && \
@@ -71,7 +91,7 @@ run_core() {
         /work/target/$BUILD_MODE/pkd core verify-manifest /tmp/good.txt \$GOOD_HASH && \
         if /work/target/$BUILD_MODE/pkd core verify-manifest /tmp/good.txt 'wrong-hash' > /dev/null 2>&1; then exit 1; fi"
 
-    # 6. Branch Naming & PR Markers
+    # 7. Branch Naming & PR Markers
     CURRENT_BRANCH=${GITHUB_HEAD_REF:-$(git rev-parse --abbrev-ref HEAD)}
     if [ "$CURRENT_BRANCH" == "HEAD" ]; then CURRENT_BRANCH=${GITHUB_REF_NAME:-"HEAD"}; fi
 
@@ -90,7 +110,7 @@ run_core() {
         fi
     fi
 
-    # 7. PowerShell Installation Parity
+    # 8. PowerShell Installation Parity
     echo "   [Process] Verifying scripts/install.ps1 integrity..."
     if [ -f "scripts/install.ps1" ]; then
         bash scripts/validate-ps1.sh
@@ -99,12 +119,12 @@ run_core() {
         exit 1
     fi
 
-    # 8. Installation Script Hardening
+    # 9. Installation Script Hardening
     echo "   [Process] Verifying installation script hardening..."
     ./scripts/podman-wrapper.sh "public.ecr.aws/docker/library/debian:bookworm-slim" \
         sh -c "apt-get update && apt-get install -y curl sudo && bash scripts/test-issue-93.sh"
 
-    # 9. Dependency Isolation (wasm32)
+    # 10. Dependency Isolation (wasm32)
     echo "   [Process] Verifying Dependency Isolation (wasm32)..."
     ./scripts/podman-wrapper.sh "public.ecr.aws/docker/library/rust@sha256:70aebe351faa35667ef36508deb19fe234ff03d67cfe102f095d920a53d0622c" \
         sh -c "rustup target add wasm32-unknown-unknown > /dev/null 2>&1 && \
@@ -115,7 +135,7 @@ run_core() {
             exit 1; \
         fi"
 
-    # 10. TDD Traceability (Beck Principle)
+    # 11. TDD Traceability (Beck Principle)
     echo "   [Process] Verifying TDD Traceability..."
     BASE_REF=${GITHUB_BASE_REF:-"main"}
     if git rev-parse --verify "$BASE_REF" >/dev/null 2>&1 || git rev-parse --verify "origin/$BASE_REF" >/dev/null 2>&1; then
