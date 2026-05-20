@@ -51,6 +51,8 @@ tar = "0.4.40"
 zstd = "0.13.0"
 walkdir = "2.5.0"
 serde_yaml = "0.9.34"
+ignore = "0.4.25"
+regex = "1.12.3"
 
 [dev-dependencies]
 mockall = "0.12.1"
