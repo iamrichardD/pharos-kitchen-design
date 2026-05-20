@@ -1,0 +1,25 @@
+{
+  "$comment": "========================================================================\n * Project: Pharos Kitchen Design (Project Prism)\n * Component: Core-Schema\n * File: registry-shard.schema.json\n * Author: Richard D. (https://github.com/iamrichardd)\n * License: FSL-1.1 (See LICENSE file for details)\n * Purpose: Schema for incremental data shards loaded by the JIT WASM engine.\n * Traceability: Issue #124\n * ========================================================================",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Pharos Registry Shard",
+  "description": "Schema for incremental data shards loaded by the JIT WASM engine.",
+  "type": "object",
+  "required": ["shard_id", "v", "records"],
+  "properties": {
+    "shard_id": {
+      "type": "string",
+      "description": "Unique identifier for the shard, typically [manufacturer_slug]_[category_slug]."
+    },
+    "v": {
+      "type": "string",
+      "description": "Schema version indicator for the shard."
+    },
+    "records": {
+      "type": "object",
+      "description": "Dictionary of PharosMetadata objects, keyed by SKU for O(1) lookups.",
+      "additionalProperties": {
+        "$ref": "pharos-schema.json#"
+      }
+    }
+  }
+}

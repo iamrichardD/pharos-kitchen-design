@@ -78,8 +78,8 @@
 - [x] **Task 4.26.3**: Centralized Artifact Promotion (OIDC-signed) between shards. [AUDITED: PHAROS GREEN] (2026-05-19)
 
 #### 🪨 Big Rock: #124 - JIT Sharded Registry Scaling [ECT: 4]
-- [ ] **Task 5.2.1**: Refactor `BakeEngine` for incremental shard generation. [ECT: 2]
-- [ ] **Task 5.2.2**: Implement `LazyShardLoader` in `pkd-core` (WASM/C#). [ECT: 2]
+- [x] **Task 5.2.1**: Refactor `BakeEngine` for incremental shard generation. [ECT: 2]
+- [x] **Task 5.2.2**: Implement `LazyShardLoader` in `pkd-core` (WASM/C#). [ECT: 2]
 - [ ] **Task 5.2.3**: Verify Shard Integrity via SHA-256 Manifest. [ECT: 1]
 
 #### 💎 Small Stones: Operational & Debt

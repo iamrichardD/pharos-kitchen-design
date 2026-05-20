@@ -5,7 +5,7 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Product metadata model for PKD assets.
- * Traceability: Issue #9, ADR 0002
+ * Traceability: Issue #9, ADR 0002, Issue #124
  * ======================================================================== */
 
 use serde::{Deserialize, Serialize};
@@ -44,4 +44,11 @@ pub struct PerformanceMetadata {
     pub estimated_rfa_size_kb: u32,
     pub procedural_lod_enabled: bool,
     pub ghost_link_active: bool,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+pub struct RegistryShard {
+    pub shard_id: String,
+    pub v: String,
+    pub records: BTreeMap<String, PharosMetadata>,
 }

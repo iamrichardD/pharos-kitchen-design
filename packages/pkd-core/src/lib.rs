@@ -13,6 +13,7 @@ pub mod validator;
 pub mod bindings;
 pub mod slices;
 pub mod security;
+pub mod lazy_loader;
 
 #[cfg(not(target_arch = "wasm32"))]
 pub mod jit;
@@ -22,4 +23,5 @@ pub mod tests;
 
 pub use models::schema::PharosSchema;
 pub use models::metadata::PharosMetadata;
+pub use models::metadata::RegistryShard;
 pub use models::types::ParameterValue;

@@ -5,7 +5,7 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Event-driven state machine for manufacturer data synchronization.
- * Traceability: Issue #46, Issue #47, Issue #50, ADR-0017
+ * Traceability: Issue #46, Issue #47, Issue #50, ADR-0017, Issue #124
  * ======================================================================== */
 import Database from 'better-sqlite3';
 import { chromium } from '@playwright/test';
@@ -238,14 +238,17 @@ export class TruthEngine {
      * Bakes the truth_engine.db registry into a sharded JSON file system.
      * Organization: [stagingDir]/[manufacturer]/[category]/[sku].json
      */
+    /**
+     * Bakes the truth_engine.db registry into a sharded JSON file system.
+     * Organization: [stagingDir]/shard_[manufacturer_slug]_[category_slug].json
+     */
     public async bake(stagingDir: string) {
         this.ensureInitialized();
 
         // 1. Path Integrity Sentinel: Prevent arbitrary deletion (Shift-Left Security)
-        // Harden: resolve and ensure trailing separator (ADR-0017)
         const absoluteStaging = resolve(stagingDir) + sep;
-        const allowedBase = resolve('.artifacts') + sep;
-        const allowedData = resolve('data') + sep;
+        const allowedBase = resolve(".artifacts") + sep;
+        const allowedData = resolve("data") + sep;
 
         if (!absoluteStaging.startsWith(allowedBase) && !absoluteStaging.startsWith(allowedData)) {
             throw new Error(`[Security] Bake aborted: stagingDir '${stagingDir}' is outside of allowed paths (.artifacts/ or data/).`);
@@ -260,14 +263,14 @@ export class TruthEngine {
         // 3. Manufacturer Enrichment & Metadata Generation
         const stmt = this._db.prepare(`
             SELECT 
-                r.sku, r.name, r.category, r.voltage, r.btu, r.metadata,
+                r.sku, r.name, r.category, r.metadata,
                 m.name as manufacturer_name
             FROM equipment_registry r
             JOIN manufacturers m ON r.mfr_id = m.id
         `);
 
         const records = stmt.all() as any[];
-        const writeTasks: Promise<void>[] = [];
+        const shards: Map<string, any> = new Map();
 
         for (const row of records) {
             const rawMetadata = JSON.parse(row.metadata);
@@ -275,39 +278,35 @@ export class TruthEngine {
             // 4. Split-Brain Validation Remediation: Validate before write
             const validation = this.validator.validate(rawMetadata);
             if (!validation.isValid) {
-                console.warn(`[Bake] Skipping invalid record ${row.sku}: ${validation.errors.join(', ')}`);
+                console.warn(`[Bake] Skipping invalid record ${row.sku}: ${validation.errors.join(", ")}`);
                 continue;
             }
 
-            // 5. Inject Standardized File Prologue (The Agentic Traceability)
-            const bakedRecord = {
-                pkd_prologue: {
-                    project: "Pharos Kitchen Design (Project Prism)",
-                    component: "Registry / Sharded Content",
-                    file: `${row.sku}.json`,
-                    author: "Pharos Bake Engine (https://github.com/iamrichardd)",
-                    license: "FSL-1.1 (See LICENSE file for details)",
-                    purpose: `Authoritative Truth for ${row.manufacturer_name} ${row.name}.`,
-                    traceability: `Issue #53 - ETL Bake`
-                },
-                sku: row.sku,
-                name: row.name,
-                manufacturer: row.manufacturer_name,
-                category: row.category || 'Uncategorized',
-                voltage: row.voltage,
-                btu: row.btu,
-                parameters: rawMetadata.parameters || {}
-            };
+            const mfrSlug = row.manufacturer_name.replace(/[^a-z0-9]/gi, "_").toLowerCase();
+            const catSlug = (row.category || "uncategorized").replace(/[^a-z0-9]/gi, "_").toLowerCase();
+            const shardId = `${mfrSlug}_${catSlug}`;
 
-            const manufacturerDir = join(stagingDir, row.manufacturer_name.replace(/[^a-z0-9]/gi, '_').toLowerCase());
-            const categoryDir = join(manufacturerDir, (row.category || 'uncategorized').replace(/[^a-z0-9]/gi, '_').toLowerCase());
+            if (!shards.has(shardId)) {
+                shards.set(shardId, {
+                    shard_id: shardId,
+                    v: "1.0.0",
+                    records: {}
+                });
+            }
 
-            // Concurrent I/O Optimization
-            writeTasks.push((async () => {
-                await mkdir(categoryDir, { recursive: true });
-                const filePath = join(categoryDir, `${row.sku}.json`);
-                await writeFile(filePath, JSON.stringify(bakedRecord, null, 2));
-            })());
+            // Remove pkd_prologue if present.
+            // Why: To ensure lean shards for fast JIT WASM parsing (Requirement: REJECTED from production data shards).
+            // Traceability: Issue #124
+            const leanMetadata = { ...rawMetadata };
+            delete leanMetadata.pkd_prologue;
+
+            shards.get(shardId).records[row.sku] = leanMetadata;
+        }
+
+        const writeTasks: Promise<void>[] = [];
+        for (const [shardId, shardData] of shards.entries()) {
+            const filePath = join(stagingDir, `shard_${shardId}.json`);
+            writeTasks.push(writeFile(filePath, JSON.stringify(shardData, null, 2)));
         }
 
         await Promise.all(writeTasks);
