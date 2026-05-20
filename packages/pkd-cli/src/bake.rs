@@ -5,7 +5,7 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Tantivy indexing and Zstd-compression for the Truth Engine.
- * Traceability: Issue #53 - ETL Bake
+ * Traceability: Issue #53 - ETL Bake, Issue #124
  * ======================================================================== */
 
 use anyhow::{Result, anyhow};

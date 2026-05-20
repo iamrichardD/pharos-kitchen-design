@@ -5,7 +5,7 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Product metadata model for PKD assets.
- * Traceability: Issue #9, ADR 0002
+ * Traceability: Issue #9, ADR 0002, Issue #124
  * ======================================================================== */
 
 use serde::{Deserialize, Serialize};

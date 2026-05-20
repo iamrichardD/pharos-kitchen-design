@@ -5,7 +5,7 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Event-driven state machine for manufacturer data synchronization.
- * Traceability: Issue #46, Issue #47, Issue #50, ADR-0017
+ * Traceability: Issue #46, Issue #47, Issue #50, ADR-0017, Issue #124
  * ======================================================================== */
 import Database from 'better-sqlite3';
 import { chromium } from '@playwright/test';
@@ -294,7 +294,9 @@ export class TruthEngine {
                 });
             }
 
-            // Remove pkd_prologue if present (Requirement: REJECTED from data)
+            // Remove pkd_prologue if present.
+            // Why: To ensure lean shards for fast JIT WASM parsing (Requirement: REJECTED from production data shards).
+            // Traceability: Issue #124
             const leanMetadata = { ...rawMetadata };
             delete leanMetadata.pkd_prologue;
 
