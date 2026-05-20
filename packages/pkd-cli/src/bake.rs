@@ -16,7 +16,7 @@ use walkdir::WalkDir;
 use std::fs::{File, self};
 use tar::Builder;
 use zstd::stream::write::Encoder;
-use pkd_core::{PharosMetadata, PharosSchema};
+use pkd_core::{PharosMetadata, PharosSchema, RegistryShard};
 use colored::*;
 
 pub struct BakeEngine {
@@ -56,33 +56,48 @@ impl BakeEngine {
     }
 
     pub async fn run(&self, source: &Path, output: &Path) -> Result<()> {
-        println!("{} Starting Bake Engine (Hybrid Hand-Off)...", "ℹ".blue());
+        println!("{} Starting Bake Engine (Incremental Shard Logic)...", "ℹ".blue());
         
-        // 1. Validation Hard Gate: Validate all JSON files before indexing
-        let mut files_to_index = Vec::new();
+        let mut metadata_records = Vec::new();
         let pharos_schema_json = include_str!("../../pkd-core/schema/pharos-schema.json");
         let pharos_schema: PharosSchema = serde_json::from_str(pharos_schema_json)?;
 
         for entry in WalkDir::new(source).into_iter().filter_map(|e| e.ok()) {
             if entry.path().extension().map_or(false, |ext| ext == "json") {
                 let content = fs::read_to_string(entry.path())?;
-                let metadata: PharosMetadata = serde_json::from_str(&content)
-                    .map_err(|e| anyhow!("JSON Parsing Failure in {:?}: {}", entry.path(), e))?;
-
-                // Validation Hard Gate (ADR-0023)
-                if let Err(errors) = pkd_core::validator::SchemaValidator::validate_metadata(&pharos_schema, &metadata) {
-                    println!("{} Validation FAILED for {:?}:", "✘".red(), entry.path());
-                    for err in errors {
-                        println!("  - {}", err.to_string().yellow());
-                    }
-                    return Err(anyhow!("Bake aborted: Integrity violation detected in source data."));
-                }
                 
-                files_to_index.push((entry.path().to_path_buf(), metadata));
+                // Try to parse as a Shard first
+                if let Ok(shard) = serde_json::from_str::<RegistryShard>(&content) {
+                    println!("{} Processing shard: {}", "ℹ".blue(), shard.shard_id);
+                    for (_, metadata) in shard.records {
+                        // Validation Hard Gate (ADR-0023)
+                        if let Err(errors) = pkd_core::validator::SchemaValidator::validate_metadata(&pharos_schema, &metadata) {
+                            println!("{} Validation FAILED for SKU {} in shard {}:", "✘".red(), metadata.metadata_id, shard.shard_id);
+                            for err in errors {
+                                println!("  - {}", err.to_string().yellow());
+                            }
+                            return Err(anyhow!("Bake aborted: Integrity violation detected in shard."));
+                        }
+                        metadata_records.push(metadata);
+                    }
+                } else {
+                    // Fallback for single metadata files (backward compatibility during transition)
+                    let metadata: PharosMetadata = serde_json::from_str(&content)
+                        .map_err(|e| anyhow!("JSON Parsing Failure in {:?}: {}", entry.path(), e))?;
+
+                    if let Err(errors) = pkd_core::validator::SchemaValidator::validate_metadata(&pharos_schema, &metadata) {
+                        println!("{} Validation FAILED for {:?}:", "✘".red(), entry.path());
+                        for err in errors {
+                            println!("  - {}", err.to_string().yellow());
+                        }
+                        return Err(anyhow!("Bake aborted: Integrity violation detected in source data."));
+                    }
+                    metadata_records.push(metadata);
+                }
             }
         }
 
-        println!("{} Validation complete. Indexing {} records...", "✔".green(), files_to_index.len());
+        println!("{} Validation complete. Indexing {} records...", "✔".green(), metadata_records.len());
 
         // 2. Tantivy Indexing
         let index_path = output.join("search-index");
@@ -94,7 +109,7 @@ impl BakeEngine {
         let index = Index::create_in_dir(&index_path, self.schema.clone())?;
         let mut index_writer: IndexWriter = index.writer(50_000_000)?; // 50MB heap
 
-        for (_, metadata) in files_to_index {
+        for metadata in metadata_records {
             let sku = metadata.parameters.get("PKD_ProductNumber")
                 .or_else(|| metadata.parameters.get("PKD_ModelNumber"))
                 .map(|v: &pkd_core::ParameterValue| v.to_string())
@@ -217,4 +232,49 @@ mod tests {
         let err_msg = result.unwrap_err().to_string();
         assert!(err_msg.contains("Bake aborted") || err_msg.contains("JSON Parsing Failure"));
     }
+
+    #[tokio::test]
+    async fn test_should_create_index_from_shard() {
+        let source_dir = TempDir::new().unwrap();
+        let output_dir = TempDir::new().unwrap();
+        
+        let shard_json = r#"{
+            "shard_id": "test_shard",
+            "v": "1.0.0",
+            "records": {
+                "SKU-SHARD-1": {
+                    "metadata_id": "SKU-SHARD-1",
+                    "name": "Shard Equipment",
+                    "schema_version": "1.0.0",
+                    "classification": { "omniclass_table_23": "23-33 11 11 11", "category": "Specialty Equipment" },
+                    "parameters": {
+                        "PKD_Manufacturer": "ShardMfr",
+                        "PKD_ModelNumber": "TEST-SHARD",
+                        "PKD_MainCategory": "Testing",
+                        "PKD_TargetMarket": "Commercial",
+                        "PKD_Voltage": "208V",
+                        "PKD_Phase": 3,
+                        "PKD_Wattage": "4500W",
+                        "PKD_BTU": "0",
+                        "PKD_DrainConnection": "2\"",
+                        "PKD_DocLinks": [],
+                        "PKD_Industry": ["Foodservice"],
+                        "PKD_TargetRegions": ["US"],
+                        "PKD_AssetViews": {}
+                    },
+                    "lod_geometry_specs": { "100": { "type": "BoundingBox", "dimensions": { "width": "1", "depth": "1", "height": "1" }, "description": "test" } },
+                    "performance_metadata": { "estimated_rfa_size_kb": 1, "procedural_lod_enabled": true, "ghost_link_active": false }
+                }
+            }
+        }"#;
+        
+        fs::write(source_dir.path().join("shard_test.json"), shard_json).unwrap();
+
+        let engine = BakeEngine::new();
+        let result = engine.run(source_dir.path(), output_dir.path()).await;
+        
+        assert!(result.is_ok());
+        assert!(output_dir.path().join("search-index").exists());
+    }
+
 }

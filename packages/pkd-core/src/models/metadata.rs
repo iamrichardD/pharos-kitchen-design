@@ -45,3 +45,10 @@ pub struct PerformanceMetadata {
     pub procedural_lod_enabled: bool,
     pub ghost_link_active: bool,
 }
+
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+pub struct RegistryShard {
+    pub shard_id: String,
+    pub v: String,
+    pub records: BTreeMap<String, PharosMetadata>,
+}

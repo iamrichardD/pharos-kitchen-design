@@ -22,4 +22,5 @@ pub mod tests;
 
 pub use models::schema::PharosSchema;
 pub use models::metadata::PharosMetadata;
+pub use models::metadata::RegistryShard;
 pub use models::types::ParameterValue;
