@@ -101,6 +101,24 @@ pub fn verify_manifest_json(dir: &Path) -> Result<(), SecurityError> {
     Ok(())
 }
 
+/// Verifies the integrity of raw bytes against an expected SHA-256 hash.
+pub fn verify_bytes(bytes: &[u8], expected_hash: &str) -> Result<(), SecurityError> {
+    let mut hasher = Sha256::new();
+    hasher.update(bytes);
+    let actual_hash = hex::encode(hasher.finalize());
+
+    let normalized_expected = expected_hash.strip_prefix("sha256:").unwrap_or(expected_hash);
+
+    if actual_hash == normalized_expected {
+        Ok(())
+    } else {
+        Err(SecurityError::HashMismatch {
+            expected: normalized_expected.to_string(),
+            actual: actual_hash,
+        })
+    }
+}
+
 /// Computes the SHA-256 hash of a file using chunked I/O.
 pub fn compute_hash(file_path: &Path) -> Result<String, SecurityError> {
     if !file_path.exists() {
@@ -145,6 +163,19 @@ mod tests {
         
         assert!(verify_manifest(path, &expected).is_ok());
         assert!(verify_manifest(path, &format!("sha256:{}", expected)).is_ok());
+    }
+
+    #[test]
+    fn test_should_verify_bytes_successfully_when_hash_matches() {
+        let content = "Pharos Kitchen Design - Byte Integrity Test";
+        let bytes = content.as_bytes();
+
+        let mut hasher = Sha256::new();
+        hasher.update(bytes);
+        let expected = hex::encode(hasher.finalize());
+        
+        assert!(verify_bytes(bytes, &expected).is_ok());
+        assert!(verify_bytes(bytes, &format!("sha256:{}", expected)).is_ok());
     }
 
     #[test]
@@ -197,5 +228,17 @@ mod tests {
             _ => panic!("Expected HashMismatch error"),
         }
     }
-}
 
+    #[test]
+    fn test_should_fail_byte_verification_when_hash_mismatch() {
+        let bytes = b"Original Content";
+        let wrong_hash = "deadbeef12345678";
+        
+        let result = verify_bytes(bytes, wrong_hash);
+        assert!(result.is_err());
+        match result.unwrap_err() {
+            SecurityError::HashMismatch { .. } => (),
+            _ => panic!("Expected HashMismatch error"),
+        }
+    }
+}
