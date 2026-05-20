@@ -15,6 +15,7 @@ mod models;
 mod guard;
 mod bake;
 mod config;
+mod gov;
 
 use anyhow::{Result, anyhow};
 use clap::{Parser, Subcommand};
@@ -64,8 +65,19 @@ enum Commands {
         #[command(subcommand)]
         action: CoreCommands,
     },
+    /// Local governance and standard enforcement
+    Gov {
+        #[command(subcommand)]
+        action: GovCommands,
+    },
     /// Update the pkd binary to the latest version
     SelfUpdate,
+}
+
+#[derive(Subcommand)]
+enum GovCommands {
+    /// Lint the codebase for Pharos standard compliance
+    Lint,
 }
 
 #[derive(Subcommand)]
@@ -210,6 +222,11 @@ async fn main() -> Result<()> {
                 }
                 CoreCommands::Promote => {
                     handle_core_promote(cli.env).await?;
+                }
+            },
+            Commands::Gov { action } => match action {
+                GovCommands::Lint => {
+                    gov::handle_gov_lint().await?;
                 }
             },
             Commands::SelfUpdate => {

@@ -69,6 +69,20 @@ Metadata and registry operations.
 - **`validate --path <PATH>`**: Validates a local metadata JSON file against the official PKD Schema.
 - **`search <QUERY>`**: Executes an RFC 2378 compliant search against the equipment registry.
 
+
+### `pkd gov` 
+Governance and SDLC compliance tools. 
+- **`lint`**: Executes the Pharos Governance Linter to ensure codebase compliance with high-rigor standards. 
+
+#### Governance Rules (GOV-001 to GOV-006) 
+- **GOV-001 (Standard Prologue)**: All source files (`.rs`, `.ts`, `.tsx`, `.js`, `.jsx`, `.astro`, `.json`) MUST include the standardized file prologue. 
+- **GOV-002 (FSL-1.1 License)**: The prologue MUST explicitly reference the `FSL-1.1` license. 
+- **GOV-003 (Traceability)**: The prologue MUST include a `Traceability:` field linked to a GitHub Issue or PRD. 
+- **GOV-004 (ADR Naming)**: Architecture Decision Records (ADRs) in `docs/adr/` MUST follow the `\d{4}-filename.md` naming convention. 
+- **GOV-005 (ADR Indexing)**: All ADRs MUST be indexed in the `docs/DECISION_LOG.md` master record. 
+- **GOV-006 (SPM Mandate)**: The `GEMINI.md` file MUST contain a definition for the `Senior Program Manager (SPM)` role. 
+
+> **Lean Shard Exception**: Runtime data shards (JSON files starting with `shard_` or located in `samples/`) are exempt from header requirements (GOV-001 through GOV-003) to maintain payload efficiency.
 ---
 
 ## 🔍 RFC 2378 Search Syntax
