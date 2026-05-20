@@ -80,7 +80,7 @@
 #### 🪨 Big Rock: #124 - JIT Sharded Registry Scaling [ECT: 4]
 - [x] **Task 5.2.1**: Refactor `BakeEngine` for incremental shard generation. [ECT: 2]
 - [x] **Task 5.2.2**: Implement `LazyShardLoader` in `pkd-core` (WASM/C#). [ECT: 2]
-- [ ] **Task 5.2.3**: Verify Shard Integrity via SHA-256 Manifest. [ECT: 1]
+- [x] **Task 5.2.3**: Verify Shard Integrity via SHA-256 Manifest. [ECT: 1]
 
 #### 💎 Small Stones: Operational & Debt
 - [ ] **Issue #88**: Task 4.22: Implement `pkd core pulse` Command. [ECT: 3]
