@@ -13,7 +13,7 @@ use chrono::DateTime;
 /// Scaling factors for data units.
 const KB: f64 = 1024.0;
 const MB: f64 = 1024.0 * 1024.0;
-const GB: f64 = 1024.0 * 1024.0 * 1024.0;
+const _GB: f64 = 1024.0 * 1024.0 * 1024.0;
 
 /// Formats raw protocol values into human-readable strings based on key hints.
 /// 

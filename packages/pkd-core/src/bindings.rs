@@ -11,7 +11,7 @@
 use wasm_bindgen::prelude::*;
 use crate::lazy_loader::{LazyShardLoader, ShardFetcher};
 use crate::models::metadata::RegistryShard;
-use std::collections::{VecDeque, HashMap};
+use std::collections::VecDeque;
 use std::sync::Mutex;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::pin::Pin;
@@ -54,9 +54,13 @@ impl ShardFetcher for FfiShardFetcher {
 pub struct PharosRegistryHandle {
     pub(crate) cache: Arc<DashMap<String, PharosMetadata>>,
     pub(crate) loader: Option<Arc<LazyShardLoader>>,
+    #[allow(dead_code)]
     pub(crate) memory_limit_kb: u64,
+    #[allow(dead_code)]
     pub(crate) current_size_kb: Arc<AtomicU64>,
+    #[allow(dead_code)]
     pub(crate) loaded_shards: Arc<Mutex<VecDeque<String>>>,
+    #[allow(dead_code)]
     pub(crate) shard_to_skus: Arc<DashMap<String, Vec<String>>>,
     pub(crate) sku_to_shard: Arc<DashMap<String, String>>,
 }
@@ -98,6 +102,7 @@ impl PharosRegistryHandle {
         }
     }
 
+    #[cfg(any(test, not(target_arch = "wasm32")))]
     pub(crate) fn add_shard(&self, shard: RegistryShard) {
         let mut loaded_shards = self.loaded_shards.lock().unwrap();
         let shard_id = shard.shard_id.clone();
@@ -119,6 +124,7 @@ impl PharosRegistryHandle {
         self.evict_if_needed_locked(&mut loaded_shards);
     }
 
+    #[cfg(any(test, not(target_arch = "wasm32")))]
     fn evict_if_needed_locked(&self, loaded_shards: &mut VecDeque<String>) {
         while self.current_size_kb.load(Ordering::SeqCst) > self.memory_limit_kb {
             if let Some(old_shard_id) = loaded_shards.pop_front() {
@@ -277,13 +283,12 @@ pub extern "C" fn pkd_get_ghost_metadata(handle: *mut PharosRegistryHandle, ptr:
 
         if let Some(loader) = &registry.loader {
             if let Some(shard_id_ref) = registry.sku_to_shard.get(id_str) {
-                let shard_id = shard_id_ref.clone();
-                let loader = loader.clone();
-                
                 #[cfg(not(target_arch = "wasm32"))]
                 {
+                    let _shard_id = shard_id_ref.clone();
+                    let _loader = loader.clone();
                     let rt = tokio::runtime::Builder::new_current_thread().enable_all().build().unwrap();
-                    match rt.block_on(loader.load_shard(&shard_id)) {
+                    match rt.block_on(_loader.load_shard(&_shard_id)) {
                         Ok(shard) => {
                             registry.add_shard(shard);
                             
