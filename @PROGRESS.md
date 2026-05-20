@@ -288,3 +288,12 @@
 - **Added** Vitest suite for platform detection logic (`platform.test.ts`).
 - **Verified** Zero-Host build in Podman (`pharos-ts` container).
 - **Audited** via Pharos Crucible (Result: Pharos Green).
+
+#### [2026-05-20] - JIT Sharded Registry Scaling (Task 5.2.1)
+- **Implemented** incremental data shard generation in the `BakeEngine` to support WASM JIT loading.
+- **Refactored** `engine.ts` to output lean JSON shards grouped by manufacturer and category.
+- **Removed** `pkd_prologue` from runtime artifacts to optimize WASM parsing speed, shifting traceability strictly to source and manifests.
+- **DORA Metrics (Task 5.2.1)**:
+    - **Lead Time**: ~1.5 Hours.
+    - **Change Failure Rate**: 100% (Failed initial pulse.sh, remediated via Builder phase; Failed initial Crucible Audit, remediated via Governance phase).
+- **Audited** via Pharos Crucible (Result: 🟢 PHAROS GREEN).
