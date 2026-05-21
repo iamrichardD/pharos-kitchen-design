@@ -162,6 +162,14 @@ To ensure isolation and prevent "Search/Artifact Pollution" during parallel engi
 - **Mandatory Isolation**: AI agents are restricted to their assigned Sibling directory. They MUST NOT search or read files from other Siblings.
 - **Mount Integrity**: Each Sibling MUST be mounted independently into Podman. Path-based assumptions (e.g., `../package.json`) are prohibited unless verified within the Sibling context.
 - **Cleanup**: Sibling directories MUST be removed (`git worktree remove`) immediately after the branch is merged into `main` to prevent "Ghost Worktrees."
+- **Resilience Protocol (ADR-0039)**:
+    - **Session Context**: Every Sibling MUST contain a `SESSION_CONTEXT.md` defining the current goal, strategy (Crucible Result), and verification plan.
+    - **Handshake**: Sub-agents MUST read `SESSION_CONTEXT.md` as their first action.
+    - **Atomic WIP**: Commit changes frequently (`git commit -m 'WIP: ...'`) to ensure the durable git state remains current.
+- **Multi-Agent Rigor (ADR-0041)**:
+    - **One-Issue-One-Sibling**: Batching multiple issues into a single sibling is STRICTLY PROHIBITED.
+    - **Durable Crucible**: The Three-Option Crucible rationale MUST be documented in `SESSION_CONTEXT.md` before implementation begins.
+    - **Physical Audit Gate**: No merge to `main` is permitted without a corresponding `docs/governance/audits/` log verified via the Auditor persona.
 
 ---
 ### Legal & Interoperability Compliance
