@@ -9,13 +9,14 @@
  * ======================================================================== */
 
 sprint: 4.10
-date: 2026-05-19
+date: 2026-05-20
 team: PHAROS_STRATEGY_CORE
 
 # Core Capacity Metrics
-velocity[2]{date, target_ect, actual_ect, variance}:
+velocity[3]{date, target_ect, actual_ect, variance}:
   2026-05-18, 5, 5, 0
   2026-05-19, 15, 15, 0
+  2026-05-20, 8, 8, 0
 
 # Historical Baseline (Retroactive Audit #132)
 phase4_baseline[1]{total_ect, total_act, variance, issue_count}:
@@ -25,20 +26,24 @@ phase4_baseline[1]{total_ect, total_act, variance, issue_count}:
 total_history[3]{phase, total_ect, total_act}:
   2, 17, 19
   3, 178, 172
-  4, 64, 63
+  4, 72, 71
 
 # DORA Performance Metrics
-performance[2]{date, lead_time_hrs, change_failure_rate, mttr_mins}:
+performance[3]{date, lead_time_hrs, change_failure_rate, mttr_mins}:
   2026-05-18, 4.5, 0.75, 42
   2026-05-19, 2.4, 0.50, 45
+  2026-05-20, 1.5, 0.25, 30
 
 # Task Outcomes
-tasks[5]{id, title, ect, status}:
+tasks[8]{id, title, ect, status}:
   #111, Parallelized JIT WASM Engine (Hybrid Rayon/Actor), 5, Done
   #146, JIT Engine Hardening & Hub/Sibling Orchestration, 5, Done
   #111, Final Performance Tier (Rayon Sharding), 5, Done
   #108, CI/CD Sharding & GHA Matrix integration, 4, Done
   #147, CI Dependency Isolation check (wasm32), 1, Done
+  #115, Local Governance Linter (pkd gov lint), 3, Done
+  #124, JIT Sharded Registry Scaling (Task 5.2), 4, Done
+  #038, ADR-0038: Free Forever Remote State (R2), 1, Done
 
 # Strategic Continuity
 handoff: docs/governance/FRIDAY_HANDOFF.md
