@@ -50,3 +50,9 @@ Before submitting a PR, ask yourself:
 4. Have I implemented a "Fail-Fast Sentinel" at the system seam? (**Martin**)
 5. Does the naming reflect the IKD domain language? (**Fowler**)
 6. Is this the simplest design that fulfills the requirement? (**Fowler**)
+
+## Regression Surface Mapping (ADR-0039)
+Every non-trivial PR MUST include a "Regression Surface Map" in its Fix Summary. This map identifies:
+1. **Directly Affected Components**: Components modified by the change.
+2. **Downstream Dependencies**: Components or features that rely on the modified logic.
+3. **Verified Invariants**: Existing tests that were run to ensure zero regression.
