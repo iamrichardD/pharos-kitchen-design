@@ -22,10 +22,7 @@ use crate::models::metadata::PharosMetadata;
 use crate::validator::{SchemaValidator, LodValidator};
 use serde_wasm_bindgen;
 #[cfg(not(target_arch = "wasm32"))]
-#[cfg(not(target_arch = "wasm32"))]
 use dashmap::DashMap;
-#[cfg(target_arch = "wasm32")]
-use std::collections::HashMap as DashMap;
 #[cfg(target_arch = "wasm32")]
 use std::collections::HashMap as DashMap;
 use std::sync::Arc;

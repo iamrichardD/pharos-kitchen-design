@@ -12,11 +12,10 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { TruthEngine } from './engine.js';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { rm, mkdir, readdir, readFile } from 'node:fs/promises';
+import { rm, mkdir, readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 
 describe('TruthEngine: Bake & Promotion', () => {
-    // High-Rigor: Use package-relative paths for test artifacts
     const __dirname = dirname(fileURLToPath(import.meta.url));
     const pkgRoot = join(__dirname, '..');
     const TEST_DB = join(pkgRoot, 'data', 'test_bake.db');
@@ -29,7 +28,6 @@ describe('TruthEngine: Bake & Promotion', () => {
         engine = new TruthEngine(TEST_DB);
         await engine.init();
         
-        // Setup mock manufacturer
         const db = (engine as any)._db;
         db.prepare("INSERT INTO manufacturers (name, host) VALUES ('Frymaster', 'www.frymaster.com')").run();
     });
@@ -40,25 +38,12 @@ describe('TruthEngine: Bake & Promotion', () => {
         if (existsSync(STAGING_DIR)) await rm(STAGING_DIR, { recursive: true, force: true });
     });
 
-    /**
-     * Why: Verifies the "Promotion" logic where a successful forensic normalization
-     * results in a new entry in the SQLite equipment registry.
-     */
     it('test_should_promote_to_registry_when_normalization_succeeds', async () => {
         const db = (engine as any)._db;
         db.prepare("INSERT INTO resources (mfr_id, resource_type, uri, sync_state) VALUES (1, 'PDF', 'https://www.frymaster.com/manual.pdf', 'STALE')").run();
         
-        // Mock a healthy normalization by the ForensicNormalizer (simulated)
-        // We'll manually trigger handleTransformation with data that matches a dialect
-        // For this test, we assume the normalizer is working and focus on the engine's promotion logic.
-        
         const rawInput = "Model: FPRE217, Voltage: 208V, Category: Fryers";
         
-        // Force a successful match in the mock normalizer logic (by providing valid fields)
-        // Since we are testing TruthEngine.handleTransformation, we need the ForensicNormalizer 
-        // to return a HEALTHY result.
-        
-        // We'll mock the normalizer's behavior by overriding the method for this test instance
         (engine as any).normalizer.normalize = async () => ({
             status: 'HEALTHY',
             data: {
@@ -79,10 +64,6 @@ describe('TruthEngine: Bake & Promotion', () => {
         expect(registryEntry.category).toBe("Fryers");
     });
 
-    /**
-     * Why: Ensures that incoming manufacturer data updates existing registry entries
-     * (matching by SKU) instead of creating duplicate records.
-     */
     it('test_should_replace_existing_sku_when_updated_data_arrives', async () => {
         const db = (engine as any)._db;
         db.prepare("INSERT INTO resources (mfr_id, resource_type, uri, sync_state) VALUES (1, 'PDF', 'https://www.frymaster.com/manual.pdf', 'STALE')").run();
@@ -110,10 +91,6 @@ describe('TruthEngine: Bake & Promotion', () => {
         expect(entry.name).toBe("New Fryer");
     });
 
-    /**
-     * Why: Core ETL verification. Confirms that the SQLite registry is correctly 
-     * transformed ("baked") into sharded JSON files for distribution to the CDN.
-     */
     it('test_should_bake_sharded_json_when_registry_is_populated', async () => {
         const db = (engine as any)._db;
         db.prepare("INSERT INTO resources (mfr_id, resource_type, uri, sync_state) VALUES (1, 'PDF', 'https://www.frymaster.com/manual.pdf', 'STALE')").run();
@@ -146,23 +123,18 @@ describe('TruthEngine: Bake & Promotion', () => {
         const count = await engine.bake(STAGING_DIR);
         expect(count).toBe(1);
 
-        const mfrPath = join(STAGING_DIR, 'frymaster');
-        const catPath = join(mfrPath, 'fryers');
-        const filePath = join(catPath, 'FRY-101.json');
+        const filePath = join(STAGING_DIR, 'shard_frymaster_fryers.json');
 
         expect(existsSync(filePath)).toBe(true);
         
-        const content = JSON.parse(await readFile(filePath, 'utf-8'));
-        expect(content.sku).toBe('FRY-101');
-        expect(content.manufacturer).toBe('Frymaster');
-        expect(content.pkd_prologue).toBeDefined();
+        const shardData = JSON.parse(await readFile(filePath, 'utf-8'));
+        expect(shardData.shard_id).toBe('frymaster_fryers');
+        
+        const content = shardData.records['FRY-101'];
+        expect(content.metadata_id).toBe('FRY-101');
         expect(content.parameters.PKD_Voltage).toBe('208V');
     });
 
-    /**
-     * Why: Confirms that the bake process is idempotent and clean, removing any
-     * stale artifacts from previous runs before generating new ones.
-     */
     it('test_should_perform_atomic_wipe_before_bake', async () => {
         await mkdir(STAGING_DIR, { recursive: true });
         const zombieFile = join(STAGING_DIR, 'zombie.json');
@@ -173,10 +145,6 @@ describe('TruthEngine: Bake & Promotion', () => {
         expect(existsSync(zombieFile)).toBe(false);
     });
 
-    /**
-     * Why: Verifies that the Truth Engine respects environmental overrides for pattern
-     * discovery. This is critical for regional deployments (e.g., es-MX) and local dev.
-     */
     it('test_should_load_dialects_from_custom_env_path', async () => {
         const customDir = join(pkgRoot, '.artifacts', 'custom_patterns');
         const { mkdirSync, writeFileSync, existsSync, rmSync } = await import('node:fs');
@@ -205,7 +173,6 @@ describe('TruthEngine: Bake & Promotion', () => {
             expect(result.status).toBe('HEALTHY');
             customEngine.close();
         } finally {
-            // High-Rigor: Ensure environment is restored even if test fails
             process.env.PKD_PATTERN_DIR = originalEnv;
             rmSync(customDir, { recursive: true, force: true });
             if (existsSync(customEnvDb)) rmSync(customEnvDb);

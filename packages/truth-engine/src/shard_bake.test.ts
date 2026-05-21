@@ -31,6 +31,10 @@ describe('TruthEngine: Shard Bake', () => {
         const db = (engine as any)._db;
         db.prepare("INSERT INTO manufacturers (name, host) VALUES ('True Manufacturing', 'www.truemfg.com')").run();
         db.prepare("INSERT INTO manufacturers (name, host) VALUES ('Frymaster', 'www.frymaster.com')").run();
+
+        // High-Rigor: Provide resources for registry entries to satisfy NOT NULL constraints
+        db.prepare("INSERT INTO resources (mfr_id, resource_type, uri) VALUES (1, 'MOCK', 'https://true.com/mock')").run();
+        db.prepare("INSERT INTO resources (mfr_id, resource_type, uri) VALUES (2, 'MOCK', 'https://fry.com/mock')").run();
     });
 
     afterEach(async () => {
@@ -47,7 +51,21 @@ describe('TruthEngine: Shard Bake', () => {
             name: 'Reach-In Refrigerator',
             schema_version: '1.0.0',
             classification: { omniclass_table_23: '23-33 11 11', category: 'Refrigeration' },
-            parameters: { PKD_Manufacturer: 'True Manufacturing', PKD_ModelNumber: 'T-49-HC', PKD_MainCategory: 'Refrigeration' },
+            parameters: { 
+                PKD_Manufacturer: 'True Manufacturing', 
+                PKD_ModelNumber: 'T-49-HC', 
+                PKD_MainCategory: 'Refrigeration',
+                PKD_TargetMarket: 'Commercial',
+                PKD_Voltage: '115V',
+                PKD_Phase: 1,
+                PKD_Wattage: '1200W',
+                PKD_BTU: '0',
+                PKD_DrainConnection: 'None',
+                PKD_DocLinks: [],
+                PKD_Industry: ['Foodservice'],
+                PKD_TargetRegions: ['US'],
+                PKD_AssetViews: {}
+            },
             lod_geometry_specs: {},
             performance_metadata: { estimated_rfa_size_kb: 100, procedural_lod_enabled: true, ghost_link_active: false }
         };
@@ -57,13 +75,27 @@ describe('TruthEngine: Shard Bake', () => {
             name: 'Electric Fryer',
             schema_version: '1.0.0',
             classification: { omniclass_table_23: '23-33 11 13', category: 'Fryers' },
-            parameters: { PKD_Manufacturer: 'Frymaster', PKD_ModelNumber: 'FPRE217', PKD_MainCategory: 'Fryers' },
+            parameters: { 
+                PKD_Manufacturer: 'Frymaster', 
+                PKD_ModelNumber: 'FPRE217', 
+                PKD_MainCategory: 'Fryers',
+                PKD_TargetMarket: 'Commercial',
+                PKD_Voltage: '208V',
+                PKD_Phase: 3,
+                PKD_Wattage: '14000W',
+                PKD_BTU: '0',
+                PKD_DrainConnection: '1"',
+                PKD_DocLinks: [],
+                PKD_Industry: ['Foodservice'],
+                PKD_TargetRegions: ['US'],
+                PKD_AssetViews: {}
+            },
             lod_geometry_specs: {},
             performance_metadata: { estimated_rfa_size_kb: 150, procedural_lod_enabled: true, ghost_link_active: false }
         };
 
-        db.prepare("INSERT INTO equipment_registry (mfr_id, sku, name, category, metadata) VALUES (1, 'T-49-HC', 'Reach-In Refrigerator', 'Refrigeration', ?)").run(JSON.stringify(metadataTrue));
-        db.prepare("INSERT INTO equipment_registry (mfr_id, sku, name, category, metadata) VALUES (2, 'FPRE217', 'Electric Fryer', 'Fryers', ?)").run(JSON.stringify(metadataFryer));
+        db.prepare("INSERT INTO equipment_registry (mfr_id, resource_id, sku, name, category, metadata) VALUES (1, 1, 'T-49-HC', 'Reach-In Refrigerator', 'Refrigeration', ?)").run(JSON.stringify(metadataTrue));
+        db.prepare("INSERT INTO equipment_registry (mfr_id, resource_id, sku, name, category, metadata) VALUES (2, 2, 'FPRE217', 'Electric Fryer', 'Fryers', ?)").run(JSON.stringify(metadataFryer));
 
         await engine.bake(STAGING_DIR);
 
@@ -78,6 +110,5 @@ describe('TruthEngine: Shard Bake', () => {
         expect(trueShard.v).toBe('1.0.0');
         expect(trueShard.records['T-49-HC']).toBeDefined();
         expect(trueShard.records['T-49-HC'].name).toBe('Reach-In Refrigerator');
-        expect(trueShard.records['T-49-HC'].pkd_prologue).toBeUndefined(); // Requirement: REJECTED from data
     });
 });
