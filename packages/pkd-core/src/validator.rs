@@ -42,6 +42,12 @@ pub enum ValidationError {
     #[error("Vertical Slice Validation Error: {0}")]
     #[serde(rename = "SLICE_VALIDATION_ERROR")]
     SliceError(String),
+    #[error("Authoritative 404: SKU not found in manifest")]
+    #[serde(rename = "GHOST_LINK_AUTH_NOT_FOUND")]
+    GhostLinkAuthNotFound,
+    #[error("Integrity failure: Shard hash mismatch")]
+    #[serde(rename = "GHOST_LINK_INTEGRITY_FAILURE")]
+    GhostLinkIntegrityFailure,
 }
 
 /// The Truth Engine's core validator for Pharos Metadata.

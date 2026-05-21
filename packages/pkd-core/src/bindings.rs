@@ -9,6 +9,14 @@
  * ======================================================================== */
 
 use wasm_bindgen::prelude::*;
+use crate::lazy_loader::{LazyShardLoader, ShardFetcher};
+use crate::models::metadata::RegistryShard;
+use std::collections::VecDeque;
+use std::sync::Mutex;
+use std::sync::atomic::{AtomicU64, Ordering};
+use std::pin::Pin;
+use std::future::Future;
+use std::os::raw::c_char;
 use crate::models::schema::PharosSchema;
 use crate::models::metadata::PharosMetadata;
 use crate::validator::{SchemaValidator, LodValidator};
@@ -16,9 +24,45 @@ use serde_wasm_bindgen;
 use dashmap::DashMap;
 use std::sync::Arc;
 
+pub type FfiFetcherCallback = extern "C" fn(url_ptr: *const u8, url_len: usize, out_ptr: *mut *mut u8, out_len: *mut usize) -> i32;
+
+struct FfiShardFetcher {
+    callback: FfiFetcherCallback,
+}
+
+impl ShardFetcher for FfiShardFetcher {
+    fn fetch(&self, url: String) -> Pin<Box<dyn Future<Output = Result<Vec<u8>, anyhow::Error>> + Send>> {
+        let callback = self.callback;
+        Box::pin(async move {
+            let mut out_ptr: *mut u8 = std::ptr::null_mut();
+            let mut out_len: usize = 0;
+            let url_bytes = url.as_bytes();
+            let res = (callback)(url_bytes.as_ptr(), url_bytes.len(), &mut out_ptr, &mut out_len);
+            if res != 0 {
+                return Err(anyhow::anyhow!("FFI fetcher failed with code {}", res));
+            }
+            if out_ptr.is_null() {
+                return Ok(Vec::new());
+            }
+            let bytes = unsafe { std::slice::from_raw_parts(out_ptr, out_len).to_vec() };
+            Ok(bytes)
+        })
+    }
+}
+
 #[wasm_bindgen]
 pub struct PharosRegistryHandle {
-    pub(crate) inner: Arc<DashMap<String, PharosMetadata>>,
+    pub(crate) cache: Arc<DashMap<String, PharosMetadata>>,
+    pub(crate) loader: Option<Arc<LazyShardLoader>>,
+    #[allow(dead_code)]
+    pub(crate) memory_limit_kb: u64,
+    #[allow(dead_code)]
+    pub(crate) current_size_kb: Arc<AtomicU64>,
+    #[allow(dead_code)]
+    pub(crate) loaded_shards: Arc<Mutex<VecDeque<String>>>,
+    #[allow(dead_code)]
+    pub(crate) shard_to_skus: Arc<DashMap<String, Vec<String>>>,
+    pub(crate) sku_to_shard: Arc<DashMap<String, String>>,
 }
 
 #[wasm_bindgen]
@@ -26,16 +70,20 @@ impl PharosRegistryHandle {
     #[wasm_bindgen(constructor)]
     pub fn new() -> Self {
         Self {
-            inner: Arc::new(DashMap::new()),
+            cache: Arc::new(DashMap::new()),
+            loader: None,
+            memory_limit_kb: 64 * 1024,
+            current_size_kb: Arc::new(AtomicU64::new(0)),
+            loaded_shards: Arc::new(Mutex::new(VecDeque::new())),
+            shard_to_skus: Arc::new(DashMap::new()),
+            sku_to_shard: Arc::new(DashMap::new()),
         }
     }
 
-    /// Executes a query across the registry.
-    /// Uses Rayon parallelism on native targets, fallback to sync on WASM.
     pub fn query_ids_containing(&self, pattern: String) -> Vec<String> {
         #[cfg(not(target_arch = "wasm32"))]
         {
-            let dispatcher = crate::jit::ParallelQueryDispatcher::new(self.inner.clone());
+            let dispatcher = crate::jit::ParallelQueryDispatcher::new(self.cache.clone());
             dispatcher.query_parallel(|(id, _)| {
                 if id.contains(&pattern) {
                     Some(id.clone())
@@ -46,11 +94,52 @@ impl PharosRegistryHandle {
         }
         #[cfg(target_arch = "wasm32")]
         {
-            self.inner
+            self.cache
                 .iter()
                 .filter(|item| item.key().contains(&pattern))
                 .map(|item| item.key().clone())
                 .collect()
+        }
+    }
+
+    #[cfg(any(test, not(target_arch = "wasm32")))]
+    pub(crate) fn add_shard(&self, shard: RegistryShard) {
+        let mut loaded_shards = self.loaded_shards.lock().unwrap();
+        let shard_id = shard.shard_id.clone();
+        
+        let mut skus = Vec::new();
+        let mut shard_size_kb = 0;
+
+        for (id, metadata) in shard.records {
+            let size = metadata.performance_metadata.estimated_rfa_size_kb as u64;
+            shard_size_kb += size;
+            skus.push(id.clone());
+            self.cache.insert(id, metadata);
+        }
+
+        self.shard_to_skus.insert(shard_id.clone(), skus);
+        self.current_size_kb.fetch_add(shard_size_kb, Ordering::SeqCst);
+        loaded_shards.push_back(shard_id);
+
+        self.evict_if_needed_locked(&mut loaded_shards);
+    }
+
+    #[cfg(any(test, not(target_arch = "wasm32")))]
+    fn evict_if_needed_locked(&self, loaded_shards: &mut VecDeque<String>) {
+        while self.current_size_kb.load(Ordering::SeqCst) > self.memory_limit_kb {
+            if let Some(old_shard_id) = loaded_shards.pop_front() {
+                if let Some((_, skus)) = self.shard_to_skus.remove(&old_shard_id) {
+                    let mut evicted_size = 0;
+                    for sku in skus {
+                        if let Some((_, metadata)) = self.cache.remove(&sku) {
+                            evicted_size += metadata.performance_metadata.estimated_rfa_size_kb as u64;
+                        }
+                    }
+                    self.current_size_kb.fetch_sub(evicted_size, Ordering::SeqCst);
+                }
+            } else {
+                break;
+            }
         }
     }
 }
@@ -60,12 +149,16 @@ pub fn load_registry_wasm(registry_js: JsValue) -> Result<PharosRegistryHandle, 
     let registry: DashMap<String, PharosMetadata> = serde_wasm_bindgen::from_value(registry_js)
         .map_err(|e| JsValue::from_str(&format!("Invalid registry format: {}", e)))?;
     
-    Ok(PharosRegistryHandle { inner: Arc::new(registry) })
+    let handle = PharosRegistryHandle::new();
+    for item in registry {
+        handle.cache.insert(item.0, item.1);
+    }
+    Ok(handle)
 }
 
 #[wasm_bindgen]
 pub fn get_ghost_metadata_wasm(handle: &PharosRegistryHandle, id: String) -> Result<JsValue, JsValue> {
-    match handle.inner.get(&id) {
+    match handle.cache.get(&id) {
         Some(m) => Ok(serde_wasm_bindgen::to_value(&*m).unwrap()),
         None => Err(JsValue::from_str(&format!("Metadata ID '{}' not found in registry", id))),
     }
@@ -114,7 +207,6 @@ pub fn verify_lod_wasm(metadata_js: JsValue, target_lod: String) -> Result<bool,
 // Strictly aligned with ADR-0025 (.NET 8.0+ Mandate).
 
 use std::ffi::{CString};
-use std::os::raw::c_char;
 use std::path::Path;
 use serde::{Serialize, Deserialize};
 use crate::validator::ValidationError;
@@ -157,58 +249,88 @@ fn safe_read_str<'a>(ptr: *const u8, len: usize) -> Result<&'a str, ValidationEr
 /// Traceability: Issue #30, #31, #120
 #[no_mangle]
 pub extern "C" fn pkd_get_ghost_metadata(handle: *mut PharosRegistryHandle, ptr: *const u8, len: usize) -> *mut c_char {
-    let result = catch_unwind(AssertUnwindSafe(|| {
-        if handle.is_null() {
-            let resp = InteropResponse {
-                status: "ERROR".to_string(),
-                errors: vec![ValidationError::SliceError("Null registry handle provided".to_string())],
-                data: None,
-            };
-            return serialize_interop_response(&resp);
-        }
+    if handle.is_null() {
+        return serialize_interop_response(&InteropResponse {
+            status: "ERROR".to_string(),
+            errors: vec![ValidationError::SliceError("Null registry handle provided".to_string())],
+            data: None,
+        });
+    }
+
+    let mut handle_safe = AssertUnwindSafe(unsafe { &mut *handle });
+    let result = catch_unwind(move || {
+        let registry = &mut **handle_safe;
 
         let id_str = match safe_read_str(ptr, len) {
             Ok(s) => s,
             Err(e) => {
-                let resp = InteropResponse {
+                return serialize_interop_response(&InteropResponse {
                     status: "ERROR".to_string(),
                     errors: vec![e],
                     data: None,
-                };
-                return serialize_interop_response(&resp);
+                });
             }
         };
 
-        let registry = unsafe { &*handle };
-
-        if let Some(metadata) = registry.inner.get(id_str) {
-            let data = match serde_json::to_value(&*metadata) {
-                Ok(v) => Some(v),
-                Err(e) => {
-                    let resp = InteropResponse {
-                        status: "ERROR".to_string(),
-                        errors: vec![ValidationError::SliceError(format!("Metadata serialization failed: {}", e))],
-                        data: None,
-                    };
-                    return serialize_interop_response(&resp);
-                }
-            };
-
-            let resp = InteropResponse {
+        if let Some(metadata) = registry.cache.get(id_str) {
+            let data = serde_json::to_value(&*metadata).unwrap();
+            return serialize_interop_response(&InteropResponse {
                 status: "OK".to_string(),
                 errors: Vec::new(),
-                data,
-            };
-            return serialize_interop_response(&resp);
+                data: Some(data),
+            });
         }
 
-        let resp = InteropResponse {
+        if let Some(loader) = &registry.loader {
+            if let Some(shard_id_ref) = registry.sku_to_shard.get(id_str) {
+                #[cfg(not(target_arch = "wasm32"))]
+                {
+                    let _shard_id = shard_id_ref.clone();
+                    let _loader = loader.clone();
+                    let rt = tokio::runtime::Builder::new_current_thread().enable_all().build().unwrap();
+                    match rt.block_on(_loader.load_shard(&_shard_id)) {
+                        Ok(shard) => {
+                            registry.add_shard(shard);
+                            
+                            if let Some(metadata) = registry.cache.get(id_str) {
+                                let data = serde_json::to_value(&*metadata).unwrap();
+                                return serialize_interop_response(&InteropResponse {
+                                    status: "OK".to_string(),
+                                    errors: Vec::new(),
+                                    data: Some(data),
+                                });
+                            }
+                        }
+                        Err(e) => {
+                            let error_msg = e.to_string();
+                            let validation_error = if error_msg.contains("Integrity check failed") {
+                                ValidationError::GhostLinkIntegrityFailure
+                            } else {
+                                ValidationError::GhostLinkAuthNotFound
+                            };
+                            return serialize_interop_response(&InteropResponse {
+                                status: "ERROR".to_string(),
+                                errors: vec![validation_error],
+                                data: None,
+                            });
+                        }
+                    }
+                }
+            } else {
+                return serialize_interop_response(&InteropResponse {
+                    status: "ERROR".to_string(),
+                    errors: vec![ValidationError::GhostLinkAuthNotFound],
+                    data: None,
+                });
+            }
+        }
+
+        serialize_interop_response(&InteropResponse {
             status: "ERROR".to_string(),
-            errors: vec![ValidationError::SliceError(format!("Metadata ID '{}' not found in resident registry", id_str))],
+            errors: vec![ValidationError::GhostLinkAuthNotFound],
             data: None,
-        };
-        serialize_interop_response(&resp)
-    }));
+        })
+    });
 
     match result {
         Ok(ptr) => ptr,
@@ -219,6 +341,59 @@ pub extern "C" fn pkd_get_ghost_metadata(handle: *mut PharosRegistryHandle, ptr:
         }),
     }
 }
+
+#[no_mangle]
+pub extern "C" fn pkd_register_shard_fetcher(
+    handle: *mut PharosRegistryHandle,
+    base_url_ptr: *const u8, base_url_len: usize,
+    manifest_ptr: *const u8, manifest_len: usize,
+    callback: FfiFetcherCallback
+) -> i32 {
+    if handle.is_null() { return -1; }
+    let mut handle_safe = AssertUnwindSafe(unsafe { &mut *handle });
+    let result = catch_unwind(move || {
+        let registry = &mut **handle_safe;
+        
+        let base_url = match safe_read_str(base_url_ptr, base_url_len) {
+            Ok(s) => s.to_string(),
+            Err(_) => return -2,
+        };
+
+        let manifest_bytes = match safe_read_bytes(manifest_ptr, manifest_len) {
+            Ok(b) => b,
+            Err(_) => return -3,
+        };
+
+        #[derive(Deserialize)]
+        struct ManifestDto {
+            skus: std::collections::HashMap<String, String>,
+            shards: std::collections::HashMap<String, String>,
+        }
+
+        let manifest_dto: ManifestDto = match serde_json::from_slice(manifest_bytes) {
+            Ok(m) => m,
+            Err(_) => return -4,
+        };
+
+        for (sku, shard_id) in manifest_dto.skus {
+            registry.sku_to_shard.insert(sku, shard_id);
+        }
+
+        let fetcher = Arc::new(FfiShardFetcher { callback });
+        let loader = Arc::new(LazyShardLoader::new(base_url, manifest_dto.shards, fetcher));
+        
+        registry.loader = Some(loader);
+        
+        0
+    });
+    
+    match result {
+        Ok(code) => code,
+        Err(_) => -5,
+    }
+}
+
+
 
 /// Loads a PharosRegistry from JSON and returns an opaque handle.
 /// Why: Enables dynamic, data-driven BIM hydration from a verified source of truth.
@@ -236,7 +411,11 @@ pub extern "C" fn pkd_load_registry(ptr: *const u8, len: usize) -> *mut PharosRe
             Err(_) => return std::ptr::null_mut(),
         };
 
-        Box::into_raw(Box::new(PharosRegistryHandle { inner: Arc::new(items) }))
+        let handle = PharosRegistryHandle::new();
+        for (k, v) in items {
+            handle.cache.insert(k, v);
+        }
+        Box::into_raw(Box::new(handle))
     });
 
     match result {
@@ -285,17 +464,18 @@ pub extern "C" fn pkd_load_schema(ptr: *const u8, len: usize) -> *mut PharosSche
 /// Safety: Catches panics to prevent host process (Revit) from crashing.
 #[no_mangle]
 pub extern "C" fn pkd_validate_with_handle(handle: *mut PharosSchema, ptr: *const u8, len: usize) -> *mut c_char {
-    let result = catch_unwind(|| {
-        if handle.is_null() {
-            let resp = InteropResponse {
-                status: "ERROR".to_string(),
-                errors: vec![ValidationError::SliceError("Null schema handle provided".to_string())],
-                data: None,
-            };
-            return serialize_interop_response(&resp);
-        }
+    if handle.is_null() {
+        let resp = InteropResponse {
+            status: "ERROR".to_string(),
+            errors: vec![ValidationError::SliceError("Null schema handle provided".to_string())],
+            data: None,
+        };
+        return serialize_interop_response(&resp);
+    }
 
-        let schema = unsafe { &*handle };
+    let handle_safe = AssertUnwindSafe(unsafe { &*handle });
+    let result = catch_unwind(move || {
+        let schema = &**handle_safe;
         let bytes = match safe_read_bytes(ptr, len) {
             Ok(b) => b,
             Err(e) => {
@@ -611,5 +791,82 @@ mod tests {
         assert!(resp.errors[0].to_string().contains("Invalid UTF-8"));
         pkd_free_string(ptr);
         pkd_free_registry(handle);
+    }
+
+    #[test]
+    fn test_should_evict_shards_when_memory_limit_exceeded() {
+        let handle = PharosRegistryHandle::new();
+        // Set a very small limit: 10KB
+        unsafe {
+            let h = &mut *(Box::into_raw(Box::new(handle)));
+            h.memory_limit_kb = 10;
+            
+            // Shard A: 6KB
+            let shard_a = RegistryShard {
+                shard_id: "shard_a".to_string(),
+                v: "1.0.0".to_string(),
+                records: [
+                    ("SKU-A".to_string(), create_mock_metadata("SKU-A", 6))
+                ].into_iter().collect(),
+            };
+            h.add_shard(shard_a);
+            assert_eq!(h.current_size_kb.load(Ordering::SeqCst), 6);
+            assert!(h.cache.contains_key("SKU-A"));
+
+            // Shard B: 6KB -> Total 12KB > 10KB. Shard A should be evicted.
+            let shard_b = RegistryShard {
+                shard_id: "shard_b".to_string(),
+                v: "1.0.0".to_string(),
+                records: [
+                    ("SKU-B".to_string(), create_mock_metadata("SKU-B", 6))
+                ].into_iter().collect(),
+            };
+            h.add_shard(shard_b);
+            
+            assert_eq!(h.current_size_kb.load(Ordering::SeqCst), 6);
+            assert!(!h.cache.contains_key("SKU-A"));
+            assert!(h.cache.contains_key("SKU-B"));
+            
+            let _ = Box::from_raw(h);
+        }
+    }
+
+    fn create_mock_metadata(id: &str, size_kb: u32) -> PharosMetadata {
+        use crate::models::metadata::{Classification, PerformanceMetadata};
+        use std::collections::BTreeMap;
+        PharosMetadata {
+            metadata_id: id.to_string(),
+            name: "Mock".to_string(),
+            schema_version: "1.0.0".to_string(),
+            classification: Classification {
+                omniclass_table_23: "23-00".to_string(),
+                category: "Test".to_string(),
+            },
+            parameters: BTreeMap::new(),
+            lod_geometry_specs: BTreeMap::new(),
+            performance_metadata: PerformanceMetadata {
+                estimated_rfa_size_kb: size_kb,
+                procedural_lod_enabled: true,
+                ghost_link_active: true,
+            },
+        }
+    }
+
+    #[test]
+    fn test_should_return_auth_404_when_sku_missing_from_both_cache_and_manifest() {
+        let handle = PharosRegistryHandle::new();
+        let handle_ptr = Box::into_raw(Box::new(handle));
+        
+        let id = "MISSING-SKU";
+        let ptr = pkd_get_ghost_metadata(handle_ptr, id.as_ptr(), id.len());
+        
+        let result_cstr = unsafe { std::ffi::CStr::from_ptr(ptr) };
+        let resp: InteropResponse = serde_json::from_str(result_cstr.to_str().unwrap()).unwrap();
+        
+        assert_eq!(resp.status, "ERROR");
+        assert_eq!(resp.errors[0], ValidationError::GhostLinkAuthNotFound);
+        
+        pkd_free_string(ptr);
+        unsafe { let _ = Box::from_raw(handle_ptr); }
     }
 }

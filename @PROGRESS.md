@@ -306,3 +306,13 @@
     - **Lead Time**: ~1 Hour.
     - **Change Failure Rate**: 0% (Clean implementation; TDD discrepancy resolved during Builder phase).
 - **Audited** via Pharos Crucible (Result: 🟢 PHAROS GREEN).
+
+#### [2026-05-20] - Ghost-Link JIT Integration (Task 5.2.3)
+- **Refactored** `PharosRegistryHandle` into a dynamic JIT engine with LRU caching and atomic memory tracking.
+- **Implemented** "Authoritative 404" logic in `pkd_get_ghost_metadata`, ensuring distinct error codes for missing shards vs. integrity failures.
+- **Enforced** FFI boundary safety using `AssertUnwindSafe` to protect host environments from Rust panics during dynamic loading.
+- **Verified** LRU "Thermal Sentinel" logic via atomic TDD, ensuring shard eviction at the 64MB limit.
+- **DORA Metrics (Task 5.2.3)**:
+    - **Lead Time**: ~2 Hours.
+    - **Change Failure Rate**: 0% (Post-remediation of initial FFI safety errors).
+- **Audited** via Pharos Crucible (Result: 🟢 PHAROS GREEN).

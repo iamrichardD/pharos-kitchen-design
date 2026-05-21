@@ -22,9 +22,10 @@ The Auth Bridge will be implemented as a **Cloudflare Worker**.
 - **Cost**: 100k free requests/day; $5/mo "Pro" tier for 10M requests.
 
 ### 2. Edge Storage: **Cloudflare D1 (SQLite)**
-Ephemeral `device_code` and `user_code` pairs will be stored in **Cloudflare D1**.
-- **Schema**: `auth_codes (device_code PK, user_code, status, sub, ttl)`.
-- **Retention**: Records are ephemeral, with a 10-minute TTL enforced at the application layer.
+Both ephemeral auth codes and persistent user state will be stored in **Cloudflare D1**.
+- **Ephemeral Schema**: `auth_codes (device_code PK, user_code, status, sub, ttl)`.
+- **Persistent Schema**: `user_state (sub PK, email, pkd_role, org_id, created_at, last_login)`.
+- **Retention**: Auth codes are ephemeral (10-minute TTL); user state is persistent and authoritative.
 
 ### 3. Local Parity: **Wrangler (Miniflare)**
 Local development will utilize **Wrangler** inside **Podman Compose**, providing 100% fidelity with the production Cloudflare environment without host-level dependencies.
@@ -33,12 +34,12 @@ Local development will utilize **Wrangler** inside **Podman Compose**, providing
 Cloudflare will serve as the unified entry point. We will map `iamrichardd.com/api/auth/*` to the Worker, eliminating the need for CORS preflight and complex origin management.
 
 ## Rationale
-Cloudflare Workers provide a superior "DX" (Developer Experience) and "UX" (User Experience) for polling-intensive flows like RFC 8628. The $5/mo "Pro" tier provides a more predictable cost ceiling than AWS's granular per-request pricing as we scale beyond the initial 50k users.
+Cloudflare Workers provide a superior "DX" (Developer Experience) and "UX" (User Experience) for polling-intensive flows like RFC 8628. By migrating user state from AWS DynamoDB to Cloudflare D1, we eliminate the **50ms–200ms "Cross-Cloud Latency"** incurred during network handshakes between the Cloudflare Edge and AWS Regions. D1's zero-egress model and sub-10ms edge-local read performance ensure that the "Command-First" UX remains snappy and zero-cost for long-term maintenance.
 
 ## Impact
-- **UX**: Handshakes feel instantaneous globally.
-- **Security**: Reduced attack surface; no raw AWS URLs exposed to the client.
-- **Maintenance**: Simplified IaC; Cloudflare handles the edge distribution.
+- **UX**: Auth handshakes and profile lookups feel instantaneous globally.
+- **Security**: Reduced attack surface; user state is co-located with the edge logic, minimizing data transit.
+- **Maintenance**: Simplified IaC; Cloudflare handles the edge distribution and zero-egress state management.
 
 ## Verification Plan
 - [ ] `wrangler dev --local` succeeds in Podman.
