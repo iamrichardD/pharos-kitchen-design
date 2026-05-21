@@ -6,7 +6,7 @@
 # License: FSL-1.1
 # Purpose: Unified "Pulse" validation for Rust, .NET, and TypeScript.
 # Why: ADR-0017 (Multi-Stage chaining) ensures cross-language FFI stability.
-# Traceability: Issue #105 (CI/CD Optimization & Hardening)
+# Traceability: Issue #117 (CI Pipeline Hardening)
 # ========================================================================
 
 # Stage 1: Rust Chef (Common layer for caching)
@@ -54,7 +54,15 @@ RUN cd packages/pkd-cli && cargo test && \
 # Build and stage WASM dialects for the TS auditor
 RUN bash scripts/build-wasm.sh
 
-# Stage 5: Node.js (TypeScript & Security Audit)
+# Stage 5: Manifest Verification (Dedicated Hard Gate)
+# Why: ADR-0029 (Immutable WASM Promotion) ensures that only verified artifacts reach the next stage.
+FROM rust-builder AS manifest-verifier
+WORKDIR /work
+# Copy the built pkd binary (implicitly available from rust-builder)
+# MANDATORY CI GATE: Verify WASM manifest integrity
+RUN /usr/local/cargo/bin/pkd core verify-manifest /work/dist/dialects
+
+# Stage 6: Node.js (TypeScript & Security Audit)
 FROM public.ecr.aws/docker/library/node:24-bookworm AS ts-auditor
 ARG BUILD_MODE=debug
 WORKDIR /work
@@ -64,16 +72,13 @@ COPY . .
 # Copy pre-compiled WASM dialects and core bindings from the Rust builder stage.
 COPY --from=rust-builder /work/dist/dialects /work/dist/dialects
 COPY --from=rust-builder /work/packages/pkd-core/pkg /work/packages/pkd-core/pkg
-# Copy pkd-cli for manifest verification (Issue #110)
-COPY --from=rust-builder /work/target/$BUILD_MODE/pkd /usr/local/bin/pkd
+# Copy verified pkd-cli from Stage 5 to ensure chain of trust.
+COPY --from=manifest-verifier /usr/local/cargo/bin/pkd /usr/local/bin/pkd
 RUN chmod +x /usr/local/bin/pkd
-
-# MANDATORY CI GATE: Verify WASM manifest integrity before testing (ADR-0029)
-RUN pkd core verify-manifest /work/dist/dialects
 
 # Perform dependency audit and TS unit tests.
 # Why: Enforces Fail-Fast on dependencies and executes the verification suite.
-# Optimization: Using 'npm ci' for reproducible builds and cleaning cache to reduce layer size (preventing commit issues).
+# Optimization: Using 'npm ci' for reproducible builds and cleaning cache to reduce layer size.
 RUN npm ci && \
     npm rebuild better-sqlite3 && \
     (npm audit --workspaces || echo "⚠️ Warning: Audit found known issues, proceeding per SECURITY_LOG.md") && \
@@ -81,7 +86,7 @@ RUN npm ci && \
     npm cache clean --force && \
     rm -rf /root/.npm/_cacache
 
-# Stage 6: .NET SDK (Integrated \"Pulse\" Handshake)
+# Stage 7: .NET SDK (Integrated "Pulse" Handshake)
 FROM mcr.microsoft.com/dotnet/sdk@sha256:3e7b0cefe1b00a350ffb0e06b4e1271a4e791df6b8ac4239be05f1ae2736fcff AS pulse-final
 ARG BUILD_MODE=debug
 ENV BUILD_MODE=$BUILD_MODE
@@ -100,5 +105,4 @@ RUN chmod +x /usr/local/bin/pkd
 COPY --from=ts-auditor /work/package.json /work/ts-auditor-marker
 
 # Default entrypoint: Run the Revit Bridge integration tests.
-# Why: Pass the configuration to dotnet test to match the Rust build mode.
 CMD ["sh", "-c", "if [ \"$BUILD_MODE\" = \"release\" ]; then CONF=\"Release\"; else CONF=\"Debug\"; fi && dotnet test -c $CONF packages/revit-bridge/tests/Pkd.RevitBridge.Tests/Pkd.RevitBridge.Tests.csproj"]
