@@ -316,3 +316,10 @@
     - **Lead Time**: ~2 Hours.
     - **Change Failure Rate**: 0% (Post-remediation of initial FFI safety errors).
 - **Audited** via Pharos Crucible (Result: 🟢 PHAROS GREEN).
+
+#### [2026-05-21] - Final Scale & Resilience Hardening (#107, #088, #117, #118)
+- **Landed** the Pharos Resilience Protocol (ADR-0039) for asynchronous agentic recovery.
+- **Optimized** WASM binaries by pruning native dependencies and implementing conditional FFI aliasing.
+- **Hardenened** CI/CD with Stage 5 Manifest Verification isolation and negative security tests.
+- **Automated** ADR rituals and codified ADR-0040 (Mandatory Regression Mapping).
+- **Verified** monolithic stability via monolithic pulse.sh (Result: Pharos Green).

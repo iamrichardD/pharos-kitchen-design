@@ -9,14 +9,15 @@
  * ======================================================================== */
 
 sprint: 4.10
-date: 2026-05-20
+date: 2026-05-21
 team: PHAROS_STRATEGY_CORE
 
 # Core Capacity Metrics
-velocity[3]{date, target_ect, actual_ect, variance}:
+velocity[4]{date, target_ect, actual_ect, variance}:
   2026-05-18, 5, 5, 0
   2026-05-19, 15, 15, 0
   2026-05-20, 8, 8, 0
+  2026-05-21, 12, 12, 0
 
 # Historical Baseline (Retroactive Audit #132)
 phase4_baseline[1]{total_ect, total_act, variance, issue_count}:
@@ -26,16 +27,17 @@ phase4_baseline[1]{total_ect, total_act, variance, issue_count}:
 total_history[3]{phase, total_ect, total_act}:
   2, 17, 19
   3, 178, 172
-  4, 72, 71
+  4, 84, 83
 
 # DORA Performance Metrics
-performance[3]{date, lead_time_hrs, change_failure_rate, mttr_mins}:
+performance[4]{date, lead_time_hrs, change_failure_rate, mttr_mins}:
   2026-05-18, 4.5, 0.75, 42
   2026-05-19, 2.4, 0.50, 45
   2026-05-20, 1.5, 0.25, 30
+  2026-05-21, 4.5, 0.12, 45
 
 # Task Outcomes
-tasks[8]{id, title, ect, status}:
+tasks[16]{id, title, ect, status}:
   #111, Parallelized JIT WASM Engine (Hybrid Rayon/Actor), 5, Done
   #146, JIT Engine Hardening & Hub/Sibling Orchestration, 5, Done
   #111, Final Performance Tier (Rayon Sharding), 5, Done
@@ -44,6 +46,14 @@ tasks[8]{id, title, ect, status}:
   #115, Local Governance Linter (pkd gov lint), 3, Done
   #124, JIT Sharded Registry Scaling (Task 5.2), 4, Done
   #038, ADR-0038: Free Forever Remote State (R2), 1, Done
+  #107, Rust WASM Dependency Pruning, 2, Done
+  #088, pkd core pulse diagnostic logic, 2, Done
+  #117, CI/CD Stage 5 Verification Isolation, 2, Done
+  #118, High-Rigor Manifest Failure Tests, 2, Done
+  #113, gen-adr.sh Automation Script, 1, Done
+  #114, ADR-0040 Policy Implementation, 1, Done
+  #039, ADR-0039: Agentic Resilience Protocol, 1, Done
+  #040, ADR-0040: Mandatory Regression Mapping, 1, Done
 
 # Strategic Continuity
 handoff: docs/governance/FRIDAY_HANDOFF.md
