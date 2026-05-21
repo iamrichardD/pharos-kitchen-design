@@ -26,7 +26,6 @@ anyhow = "1.0"
 wasmtime = "16.0"
 rayon = "1.8"
 tokio = { version = "1.36", features = ["rt", "rt-multi-thread", "macros", "sync", "time"] }
-# Enable rayon feature for dashmap only on non-wasm32 targets
 dashmap = { version = "5.5", features = ["serde", "rayon"] }
 
 [dev-dependencies]

@@ -10,6 +10,7 @@
 
 pub mod models;
 pub mod validator;
+pub mod pulse;
 pub mod bindings;
 pub mod slices;
 pub mod security;
