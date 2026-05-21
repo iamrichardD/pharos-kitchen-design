@@ -41,6 +41,7 @@ This log provides an index of the technical and architectural decisions made for
 | **[ADR-0035]** | 2026-05-18 | Approved | [Hub/Sibling Worktree Pattern for Multi-Agent Orchestration](docs/adr/0035-hub-sibling-worktree-pattern.md) |
 | **[ADR-0036]** | 2026-05-18 | Approved | [Parallelized JIT WASM Engine](docs/adr/0036-parallelized-jit-wasm-engine.md) |
 | **[ADR-0037]** | 2026-05-18 | Approved | [Multi-Agent Handover & Crucible Protocol](docs/adr/0037-multi-agent-handover-protocol.md) |
+| **[ADR-2379]** | 2026-05-21 | Proposed | [Mandatory Regression Surface Mapping](docs/adr/2379-mandatory-regression-surface-mapping.md) |
 
 ---
 *To add a new decision, create a new file in `docs/adr/` following the established template and append it to this index.*

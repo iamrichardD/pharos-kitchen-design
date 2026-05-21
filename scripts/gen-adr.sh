@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-/* ========================================================================
- * Project: Pharos Kitchen Design (Project Prism)
- * Component: Governance
- * File: scripts/gen-adr.sh
- * Author: Pharos IA Core (Builder)
- * License: FSL-1.1 (See LICENSE file for details)
- * Purpose: Automate the generation and indexing of ADRs.
- * Traceability: Issue #113
- * ======================================================================== */
+# ========================================================================
+# Project: Pharos Kitchen Design (Project Prism)
+# Component: Governance
+# File: scripts/gen-adr.sh
+# Author: Pharos IA Core (Builder)
+# License: FSL-1.1 (See LICENSE file for details)
+# Purpose: Automate the generation and indexing of ADRs.
+# Traceability: Issue #113
+# ========================================================================
 
 set -e
 
@@ -27,7 +27,7 @@ FILENAME="docs/adr/${NEXT_ID}-${SLUG}.md"
 DATE=$(date +%Y-%m-%d)
 
 # 3. Generate content
-cat <<EOF > "$FILENAME"
+cat <<ADR_CONTENT > "$FILENAME"
 <!-- ========================================================================
  * Project: Pharos Kitchen Design (Project Prism)
  * Component: Documentation
@@ -52,7 +52,7 @@ cat <<EOF > "$FILENAME"
 
 ## Impact
 - [List expected outcomes or constraints]
-EOF
+ADR_CONTENT
 
 # 4. Append to DECISION_LOG.md
 NEW_ENTRY="| **[ADR-${NEXT_ID}]** | ${DATE} | Proposed | [${TITLE}](${FILENAME}) |"
