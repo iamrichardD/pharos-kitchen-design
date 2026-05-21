@@ -21,7 +21,13 @@ use crate::models::schema::PharosSchema;
 use crate::models::metadata::PharosMetadata;
 use crate::validator::{SchemaValidator, LodValidator};
 use serde_wasm_bindgen;
+#[cfg(not(target_arch = "wasm32"))]
+#[cfg(not(target_arch = "wasm32"))]
 use dashmap::DashMap;
+#[cfg(target_arch = "wasm32")]
+use std::collections::HashMap as DashMap;
+#[cfg(target_arch = "wasm32")]
+use std::collections::HashMap as DashMap;
 use std::sync::Arc;
 
 pub type FfiFetcherCallback = extern "C" fn(url_ptr: *const u8, url_len: usize, out_ptr: *mut *mut u8, out_len: *mut usize) -> i32;
@@ -96,8 +102,8 @@ impl PharosRegistryHandle {
         {
             self.cache
                 .iter()
-                .filter(|item| item.key().contains(&pattern))
-                .map(|item| item.key().clone())
+                .filter(|(k, _)| k.contains(&pattern))
+                .map(|(k, _)| k.clone())
                 .collect()
         }
     }
@@ -146,12 +152,24 @@ impl PharosRegistryHandle {
 
 #[wasm_bindgen]
 pub fn load_registry_wasm(registry_js: JsValue) -> Result<PharosRegistryHandle, JsValue> {
-    let registry: DashMap<String, PharosMetadata> = serde_wasm_bindgen::from_value(registry_js)
+    let items: DashMap<String, PharosMetadata> = serde_wasm_bindgen::from_value(registry_js)
         .map_err(|e| JsValue::from_str(&format!("Invalid registry format: {}", e)))?;
     
-    let handle = PharosRegistryHandle::new();
-    for item in registry {
-        handle.cache.insert(item.0, item.1);
+    #[allow(unused_mut)]
+    #[allow(unused_mut)]
+        let mut handle = PharosRegistryHandle::new();
+    #[cfg(target_arch = "wasm32")]
+    {
+        let cache = Arc::get_mut(&mut handle.cache).unwrap();
+        for (k, v) in items {
+            cache.insert(k, v);
+        }
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        for (k, v) in items {
+            handle.cache.insert(k, v);
+        }
     }
     Ok(handle)
 }
@@ -376,6 +394,9 @@ pub extern "C" fn pkd_register_shard_fetcher(
         };
 
         for (sku, shard_id) in manifest_dto.skus {
+            #[cfg(target_arch = "wasm32")]
+            std::sync::Arc::make_mut(&mut registry.sku_to_shard).insert(sku, shard_id);
+            #[cfg(not(target_arch = "wasm32"))]
             registry.sku_to_shard.insert(sku, shard_id);
         }
 
@@ -411,9 +432,19 @@ pub extern "C" fn pkd_load_registry(ptr: *const u8, len: usize) -> *mut PharosRe
             Err(_) => return std::ptr::null_mut(),
         };
 
-        let handle = PharosRegistryHandle::new();
-        for (k, v) in items {
-            handle.cache.insert(k, v);
+        let mut handle = PharosRegistryHandle::new();
+        #[cfg(target_arch = "wasm32")]
+        {
+            let cache = Arc::get_mut(&mut handle.cache).unwrap();
+            for (k, v) in items {
+                cache.insert(k, v);
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            for (k, v) in items {
+                handle.cache.insert(k, v);
+            }
         }
         Box::into_raw(Box::new(handle))
     });
