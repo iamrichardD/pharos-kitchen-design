@@ -1,3 +1,13 @@
+/* ========================================================================
+ * Project: Pharos Kitchen Design (Project Prism)
+ * Component: Marketing / Automation
+ * File: scripts/capture-prototypes.ts
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * License: FSL-1.1 (See LICENSE file for details)
+ * Purpose: Automated screenshot capture of interactive prototypes for marketing.
+ * Traceability: Issue #12, Task 1.12
+ * ======================================================================== */
+
 import { chromium } from '@playwright/test';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';

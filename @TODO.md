@@ -83,7 +83,7 @@
 - [x] **Task 5.2.3**: Verify Shard Integrity via SHA-256 Manifest. [ECT: 1]
 
 #### 💎 Small Stones: Operational & Debt
-- [ ] **Issue #88**: Task 4.22: Implement `pkd core pulse` Command. [ECT: 3]
+- [x] **Issue #88**: Task 4.22: Implement `pkd core pulse` Command. [ECT: 3]
 - [ ] **Issue #115**: Debt #115: Implement Local Governance Linter (pkd gov lint). [ECT: 3]
 - [ ] **Issue #107**: Debt #107: Audit and Prune pkd-core Dependencies. [ECT: 2]
 - [ ] **Issue #113**: Debt #113: ADR Template Automation with Mandatory Prologue. [ECT: 2]
@@ -196,7 +196,7 @@
 - [ ] **Issue #87**: Task 4.21: Implement Domain-to-Org Mapping. [ECT: 3]
 
 ### Sprint 4.6: The Pulse Evolution (#88-89) - 📋 Backlog
-- [ ] **Issue #88**: Task 4.22: Implement `pkd core pulse` Command. [ECT: 3]
+- [x] **Issue #88**: Task 4.22: Implement `pkd core pulse` Command. [ECT: 3]
 - [ ] **Issue #89**: Task 4.22: Develop Manufacturer Maintenance Sidecar. [ECT: 4]
 
 ### Phase 5: IKD Enablement (Ghost Links & Scale) - 📋 Backlog

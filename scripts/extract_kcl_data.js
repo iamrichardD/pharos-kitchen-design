@@ -1,3 +1,13 @@
+/* ========================================================================
+ * Project: Pharos Kitchen Design (Project Prism)
+ * Component: DevSecOps / Forensics
+ * File: scripts/extract_kcl_data.js
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * License: FSL-1.1 (See LICENSE file for details)
+ * Purpose: Forensic extraction of legacy KCL metadata for Truth Engine seeding.
+ * Traceability: Issue #62, Task 4.17
+ * ======================================================================== */
+
 const fs = require('fs');
 const path = require('path');
 

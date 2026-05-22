@@ -10,6 +10,33 @@
 
 # Friday State Handoff (FSH)
 
+## 📅 Session Context: 2026-05-22 (Friday Synthesis)
+- **Previous Week Velocity**: 28 Tiers (ECT)
+- **Current Sprint Status**: 🟢 PHAROS GREEN. Sprint 4.10 Finalized.
+- **Governance Status**: 100% Compliant (7 Violations remediated via #115).
+- **Strategic Focus**: Transitioning to Phase 5: IKD Enablement.
+
+### 🚀 Synthesis Outcomes
+- **Validated #088**: The `pkd core pulse` command is now functional and verified within Podman.
+- **Governance Green**: Issue #115 (Linter) has been used to scrub the codebase, identifying and resolving 7 legacy prologue violations.
+- **Public Sync**: Friday Pulse #2 has been published, documenting the performance leap to hybrid JIT.
+
+### 🛡️ Operational Mandates (Current)
+- **Zero-Host Execution**: No exceptions. All Rust/.NET/TS validation MUST use `podman-wrapper.sh`.
+- **Physical Isolation**: Maintain 1:1 ratio between Sibling worktrees and Issues.
+- **Prepend FSH**: Future handoffs must be prepended below the header.
+
+### 🪨 Phase 5 Watchlist (Monday Start)
+- **#122: Part-Based Geometry**: Moving from placeholders to LOD 200+ procedural extrusions.
+- **#125: Bidirectional Ghost Tuning**: Enabling Revit-to-Web parameter synchronization.
+- **#138: Full RFC-2378 Support**: Porting query logic to Rust core.
+
+### 📊 Today's Hackathon Goals (Phase 3)
+- [ ] Reconcile Hackathon TOON parser (#130) with the sharded registry.
+- [ ] Investigate WASM memory limit overhead during high-density log parsing.
+
+---
+
 ## 📅 Session Context: 2026-05-21 (Sprint 4.10 Landed)
 - **Previous Week Velocity**: 17 Tiers (ECT)
 - **Current Sprint Velocity**: 28+ Tiers (Aggressive over-delivery)

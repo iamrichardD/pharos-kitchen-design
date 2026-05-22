@@ -1,0 +1,30 @@
+/* ========================================================================
+ * Project: Pharos Kitchen Design (Project Prism)
+ * Component: Marketing / Blog (Index Hub)
+ * File: apps/marketing/src/content/updates/2026-05-22-index.toon
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * License: FSL-1.1 (See LICENSE file for details)
+ * Purpose: Weekly aggregator and high-level summary of the Pharos Pulse.
+ * Traceability: ADR-0032
+ * ======================================================================== */
+
+title: The Scaling Pulse: Parallelism and Resilience
+type: index
+date: 2026-05-22
+createdAt: 2026-05-22T08:00:00Z
+releaseAt: 2026-05-22T15:00:00Z
+author: Richard D.
+stream: universal
+tags: scaling, resilience, sprint-wrapup
+
+# Weekly Executive Summary
+body[1]{content}:
+  "Sprint 4.10 marks the conclusion of our foundational scaling phase. By parallelizing our development and data engines, we have built a resilient system capable of delivering specialized equipment dialects faster and more reliably. We are now ready for Phase 5: empowering the independent designer with procedural geometry."
+
+# Sharded Deep-Dives
+spokes[1]{title, audience, summary}:
+  Engineering for Infinite Scale, Developers, "Deep-dive into the hybrid Rayon/Actor WASM engine and CI sharding."
+
+# Sprint 5.1 Staging
+next_sprint[1]{objective, tiers, status}:
+  IKD Enablement (Geometry & Tuning), 20, Proposed
