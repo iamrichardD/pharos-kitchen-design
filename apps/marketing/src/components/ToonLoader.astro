@@ -17,19 +17,19 @@ interface Props {
 const { content } = Astro.props;
 ---
 
-<div id="toon-container" data-toon={content} class="bg-gray-950 border border-emerald-500/30 rounded-lg p-6 font-mono text-sm text-emerald-400 shadow-2xl">
-  <div id="toon-status" class="flex items-center gap-2 mb-4">
+<div class="toon-container bg-gray-950 border border-emerald-500/30 rounded-lg p-6 font-mono text-sm text-emerald-400 shadow-2xl" data-toon={content}>
+  <div class="toon-status flex items-center gap-2 mb-4">
     <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
     <span class="text-xs uppercase tracking-tighter">Initializing Pharos WASM Runtime...</span>
   </div>
   
-  <div id="toon-output" class="hidden">
-    <div id="toon-header" class="mb-6 border-b border-emerald-500/20 pb-4"></div>
-    <div id="toon-body" class="prose prose-invert prose-emerald max-w-none text-emerald-100/90 leading-relaxed mb-8"></div>
-    <div id="toon-lists" class="mt-8 space-y-10"></div>
+  <div class="toon-output hidden">
+    <div class="toon-header mb-6 border-b border-emerald-500/20 pb-4"></div>
+    <div class="toon-body prose prose-invert prose-emerald max-w-none text-emerald-100/90 leading-relaxed mb-8"></div>
+    <div class="toon-lists mt-8 space-y-10"></div>
   </div>
 
-  <div id="toon-fallback" class="hidden py-12 text-center border-2 border-dashed border-red-900/50 rounded-lg bg-red-950/20">
+  <div class="toon-fallback hidden py-12 text-center border-2 border-dashed border-red-900/50 rounded-lg bg-red-950/20">
     <div class="text-4xl mb-4">📡</div>
     <h2 class="text-red-500 font-bold text-lg uppercase tracking-widest">Pharos Signal Interrupted</h2>
     <p class="text-red-400/60 text-xs mt-2 max-w-xs mx-auto">
@@ -45,99 +45,114 @@ const { content } = Astro.props;
   // @ts-ignore
   import init, { parse_toon } from '@pkd/toon';
 
-  async function loadToon() {
-    const container = document.getElementById('toon-container');
-    const status = document.getElementById('toon-status');
-    const output = document.getElementById('toon-output');
-    const fallback = document.getElementById('toon-fallback');
-    const header = document.getElementById('toon-header');
-    const body = document.getElementById('toon-body');
-    const lists = document.getElementById('toon-lists');
+  let wasmInitialized = false;
 
-    const rawToon = container?.dataset.toon;
+  async function loadAllToons() {
+    const containers = document.querySelectorAll('.toon-container');
+    if (containers.length === 0) return;
 
     try {
-      // Initialize WASM
-      await init();
-      
-      if (!rawToon) throw new Error("No TOON content found in data-attributes.");
-
-      // Parse using the Rust/WASM module
-      const doc = parse_toon(rawToon);
-      
-      if (status) status.classList.add('hidden');
-      if (output) output.classList.remove('hidden');
-
-      // 1. Render Header Metadata
-      if (header && doc.metadata) {
-        header.innerHTML = `
-          <div class="flex justify-between items-start mb-2">
-            <h1 class="text-2xl font-bold text-white tracking-tight">${doc.metadata.title || 'Pharos Update'}</h1>
-            <span class="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/30 text-[10px] uppercase text-emerald-400 rounded">
-              Verified Log
-            </span>
-          </div>
-          <div class="flex gap-4 text-[10px] uppercase tracking-wider opacity-60">
-            <span>By: ${doc.metadata.author || 'PMA'}</span>
-            <span>Ref: ${doc.metadata.date || '2026-XX-XX'}</span>
-            <span class="text-emerald-500">Stream: ${doc.metadata.stream || 'Engineering'}</span>
-          </div>
-        `;
+      if (!wasmInitialized) {
+        // Initialize WASM once for the entire page
+        await init();
+        wasmInitialized = true;
       }
+      
+      containers.forEach(container => {
+        // Skip if already rendered
+        if (container.querySelector('.toon-status')?.classList.contains('hidden')) return;
 
-      // 2. Render Primary Body (Extract from 'body' list if it exists)
-      if (body) {
-          if (doc.lists?.body?.items?.[0]?.[0]) {
-            body.innerHTML = `<p>${doc.lists.body.items[0][0]}</p>`;
-          } else {
-            body.innerHTML = `<p class="italic opacity-50 text-xs text-center">No narrative content in this log.</p>`;
-          }
-      }
+        const status = container.querySelector('.toon-status');
+        const output = container.querySelector('.toon-output');
+        const fallback = container.querySelector('.toon-fallback');
+        const header = container.querySelector('.toon-header');
+        const body = container.querySelector('.toon-body');
+        const lists = container.querySelector('.toon-lists');
 
-      // 3. Render Tabular Data (Metrics, Sprint Logs, etc.)
-      if (lists && doc.lists) {
-        lists.innerHTML = ''; // Clear existing
-        Object.entries(doc.lists).forEach(([name, list]: [string, any]) => {
-          if (name === 'body') return; // Skip body as it's handled above
+        const rawToon = (container as HTMLElement).dataset.toon;
+
+        try {
+          if (!rawToon) throw new Error("No TOON content found");
+
+          // Parse using the Rust/WASM module
+          const doc = parse_toon(rawToon);
           
-          const listEl = document.createElement('div');
-          listEl.className = "group animate-in fade-in slide-in-from-bottom-2 duration-700";
-          listEl.innerHTML = `
-            <div class="flex items-center gap-2 mb-3">
-               <div class="h-[1px] flex-grow bg-emerald-500/20"></div>
-               <h3 class="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-500/60">${name}</h3>
-               <div class="h-[1px] w-8 bg-emerald-500/20"></div>
-            </div>
-            <div class="overflow-hidden border border-emerald-500/10 rounded-sm bg-black/20">
-              <table class="w-full text-left border-collapse text-[11px]">
-                <thead>
-                  <tr class="bg-emerald-500/5">
-                    ${list.schema.map((s: string) => `<th class="py-2.5 px-4 uppercase opacity-40 font-bold border-r border-emerald-500/10 last:border-0">${s}</th>`).join('')}
-                  </tr>
-                </thead>
-                <tbody>
-                  ${list.items.map((row: string[]) => `
-                    <tr class="border-t border-emerald-500/5 hover:bg-emerald-500/5 transition-colors group/row">
-                      ${row.map(cell => `<td class="py-2 px-4 border-r border-emerald-500/5 last:border-0 group-hover/row:text-white transition-colors">${cell}</td>`).join('')}
-                    </tr>
-                  `).join('')}
-                </tbody>
-              </table>
-            </div>
-          `;
-          lists.appendChild(listEl);
-        });
-      }
+          if (status) status.classList.add('hidden');
+          if (output) output.classList.remove('hidden');
+
+          // 1. Render Header Metadata
+          if (header && doc.metadata) {
+            header.innerHTML = `
+              <div class="flex justify-between items-start mb-2">
+                <h1 class="text-2xl font-bold text-white tracking-tight">${doc.metadata.title || 'Pharos Update'}</h1>
+                <span class="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/30 text-[10px] uppercase text-emerald-400 rounded">
+                  Verified Log
+                </span>
+              </div>
+              <div class="flex gap-4 text-[10px] uppercase tracking-wider opacity-60">
+                <span>By: ${doc.metadata.author || 'PMA'}</span>
+                <span>Ref: ${doc.metadata.date || '2026-XX-XX'}</span>
+                <span class="text-emerald-500">Stream: ${doc.metadata.stream || 'Engineering'}</span>
+              </div>
+            `;
+          }
+
+          // 2. Render Primary Body (Extract from 'body' list if it exists)
+          if (body) {
+              if (doc.lists?.body?.items?.[0]?.[0]) {
+                body.innerHTML = `<p>${doc.lists.body.items[0][0]}</p>`;
+              } else {
+                body.innerHTML = `<p class="italic opacity-50 text-xs text-center">No narrative content in this log.</p>`;
+              }
+          }
+
+          // 3. Render Tabular Data (Metrics, Sprint Logs, etc.)
+          if (lists && doc.lists) {
+            lists.innerHTML = ''; // Clear existing
+            Object.entries(doc.lists).forEach(([name, list]: [string, any]) => {
+              if (name === 'body') return; // Skip body as it's handled above
+              
+              const listEl = document.createElement('div');
+              listEl.className = "group animate-in fade-in slide-in-from-bottom-2 duration-700";
+              listEl.innerHTML = `
+                <div class="flex items-center gap-2 mb-3">
+                   <div class="h-[1px] flex-grow bg-emerald-500/20"></div>
+                   <h3 class="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-500/60">${name}</h3>
+                   <div class="h-[1px] w-8 bg-emerald-500/20"></div>
+                </div>
+                <div class="overflow-hidden border border-emerald-500/10 rounded-sm bg-black/20">
+                  <table class="w-full text-left border-collapse text-[11px]">
+                    <thead>
+                      <tr class="bg-emerald-500/5">
+                        ${list.schema.map((s: string) => \`<th class="py-2.5 px-4 uppercase opacity-40 font-bold border-r border-emerald-500/10 last:border-0">\${s}</th>\`).join('')}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${list.items.map((row: string[]) => \`
+                        <tr class="border-t border-emerald-500/5 hover:bg-emerald-500/5 transition-colors group/row">
+                          \${row.map(cell => \`<td class="py-2 px-4 border-r border-emerald-500/5 last:border-0 group-hover/row:text-white transition-colors">\${cell}</td>\`).join('')}
+                        </tr>
+                      \`).join('')}
+                    </tbody>
+                  </table>
+                </div>
+              `;
+              lists.appendChild(listEl);
+            });
+          }
+        } catch (innerError) {
+          console.error("Individual TOON Parse Error:", innerError);
+          if (status) status.classList.add('hidden');
+          if (fallback) fallback.classList.remove('hidden');
+        }
+      });
 
     } catch (e) {
-      console.error("Pharos WASM Error:", e);
-      if (status) status.classList.add('hidden');
-      if (fallback) fallback.classList.remove('hidden');
-      if (container) container.classList.replace('border-emerald-500/30', 'border-red-500/30');
+      console.error("Pharos WASM Global Error:", e);
     }
   }
 
-  // Handle initialization on page load and client-side navigation
-  loadToon();
-  document.addEventListener('astro:after-swap', loadToon);
+  // Handle initialization
+  loadAllToons();
+  document.addEventListener('astro:after-swap', loadAllToons);
 </script>

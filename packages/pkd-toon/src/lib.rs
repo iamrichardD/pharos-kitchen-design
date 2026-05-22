@@ -8,7 +8,7 @@
  * Traceability: Issue #130 (Hackathon)
  * ======================================================================== */
 
-use serde::{Serialize, Deserialize};
+use serde::{Serialize, Deserialize, ser::Serialize as _};
 use std::collections::HashMap;
 use wasm_bindgen::prelude::*;
 use thiserror::Error;
@@ -44,7 +44,8 @@ pub enum ToonError {
 #[wasm_bindgen]
 pub fn parse_toon(input: &str) -> Result<JsValue, JsError> {
     let doc = ToonParser::parse(input).map_err(|e| JsError::new(&e.to_string()))?;
-    Ok(serde_wasm_bindgen::to_value(&doc)?)
+    let serializer = serde_wasm_bindgen::Serializer::new().serialize_maps_as_objects(true);
+    Ok(doc.serialize(&serializer)?)
 }
 
 struct ToonParser;
