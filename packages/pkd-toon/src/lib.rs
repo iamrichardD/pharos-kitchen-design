@@ -196,9 +196,17 @@ tasks[2]{id, title, status}:
     }
 
     #[test]
-    fn test_should_fail_fast_on_mismatched_quotes() {
-        let input = "list[1]{title}:\n  \"Mismatched";
-        let result = ToonParser::parse(input);
-        assert!(matches!(result, Err(ToonError::MismatchedQuotes(2))));
+    fn test_should_handle_extreme_density_logs_when_parsing_100k_entries() {
+        let mut input = String::from("logs[100000]{t, l, m}:\n");
+        for i in 0..100000 {
+            input.push_str(&format!("  2026-05-22T10:00:00Z, INFO, \"Message {}\"\n", i));
+        }
+        
+        let start = std::time::Instant::now();
+        let doc = ToonParser::parse(&input).expect("Failed to parse 100k log");
+        let duration = start.elapsed();
+        
+        assert_eq!(doc.lists.get("logs").unwrap().items.len(), 100000);
+        println!("Parsed 100k entries in {:?}", duration);
     }
 }

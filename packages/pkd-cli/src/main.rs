@@ -159,6 +159,8 @@ enum CoreCommands {
         /// The directory containing .wasm artifacts
         path: PathBuf,
     },
+    /// Perform a high-rigor 'Pulse' check on the system state
+    Pulse,
     /// Promote local artifacts to the production CDN (Cloudflare R2)
     Promote,
 }
@@ -220,6 +222,9 @@ async fn main() -> Result<()> {
                 CoreCommands::GenerateManifest { path } => {
                     handle_core_generate_manifest(path).await?;
                 }
+                CoreCommands::Pulse => {
+                    handle_core_pulse().await?;
+                }
                 CoreCommands::Promote => {
                     handle_core_promote(cli.env).await?;
                 }
@@ -247,6 +252,26 @@ async fn main() -> Result<()> {
     }
 
     Ok(())
+}
+
+async fn handle_core_pulse() -> Result<()> {
+    println!("{} Performing system pulse check...", "ℹ".blue());
+    
+    // Call the core PulseEngine (ADR-0026)
+    let status = pkd_core::pulse::PulseEngine::heartbeat()
+        .map_err(|e| anyhow!("Pulse check failed: {}", e))?;
+
+    println!("{} Status: {}", "  -".blue(), status.status.cyan());
+    println!("{} Integrity: {}", "  -".blue(), 
+        if status.integrity_verified { "Verified".green() } else { "Failed".red() }
+    );
+    
+    if status.integrity_verified {
+        println!("\n{} System is healthy and synchronized.", "✔".green());
+        Ok(())
+    } else {
+        Err(anyhow!("System integrity violation detected."))
+    }
 }
 
 async fn handle_core_validate(path: PathBuf) -> Result<()> {

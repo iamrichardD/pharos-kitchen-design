@@ -5,6 +5,7 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Vitest configuration for the Truth Engine vertical slice.
+ * Traceability: Issue #50
  * ======================================================================== */
 
 import { defineConfig } from 'vitest/config';

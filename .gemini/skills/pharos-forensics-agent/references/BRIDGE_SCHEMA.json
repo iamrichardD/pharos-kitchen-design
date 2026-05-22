@@ -1,4 +1,13 @@
 {
+  "pkd_prologue": {
+    "project": "Pharos Kitchen Design (Project Prism)",
+    "component": "Bridge / Reference",
+    "file": "BRIDGE_SCHEMA.json",
+    "author": "Richard D. (https://github.com/iamrichardd)",
+    "license": "FSL-1.1 (See LICENSE file for details)",
+    "purpose": "Industry standard mapping reference for forensics.",
+    "traceability": "ADR 0003, ADR 0005"
+  },
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "pkd-bridge",
   "description": "Mapping schema for Legacy Industry Standard fields to Pharos Kitchen Design (PKD) standard.",

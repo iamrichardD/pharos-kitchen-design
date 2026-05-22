@@ -107,13 +107,13 @@ fn lint_source_headers(root: &Path) -> Result<u32> {
         }
 
         // GOV-002: FSL-1.1 License
-        if !header_blob.to_lowercase().contains("license: fsl-1.1") {
+        if !header_blob.to_lowercase().contains("license") || !header_blob.to_lowercase().contains("fsl-1.1") {
             println!("{} {} - Missing FSL-1.1 License (GOV-002)", "✘".red(), path.display());
             file_violated = true;
         }
 
         // GOV-003: Traceability
-        if !header_blob.to_lowercase().contains("traceability:") {
+        if !header_blob.to_lowercase().contains("traceability") {
             println!("{} {} - Missing Traceability (GOV-003)", "✘".red(), path.display());
             file_violated = true;
         }
