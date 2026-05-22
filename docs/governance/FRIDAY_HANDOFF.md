@@ -10,30 +10,25 @@
 
 # Friday State Handoff (FSH)
 
-## 📅 Session Context: 2026-05-22 (Friday Synthesis)
-- **Previous Week Velocity**: 28 Tiers (ECT)
-- **Current Sprint Status**: 🟢 PHAROS GREEN. Sprint 4.10 Finalized.
-- **Governance Status**: 100% Compliant (7 Violations remediated via #115).
-- **Strategic Focus**: Transitioning to Phase 5: IKD Enablement.
+## 📅 Session Context: 2026-05-22 (Emergency State Reconciliation & Friday Synthesis)
+- **Status**: 🟢 PHAROS GREEN. Sprint 4.10 Finalized.
+- **Governance Update**: Successfully executed emergency de-batching of feat/issue-115 to strictly enforce ADR-0041 (One-Issue-One-Sibling).
 
-### 🚀 Synthesis Outcomes
-- **Validated #088**: The `pkd core pulse` command is now functional and verified within Podman.
-- **Governance Green**: Issue #115 (Linter) has been used to scrub the codebase, identifying and resolving 7 legacy prologue violations.
-- **Public Sync**: Friday Pulse #2 has been published, documenting the performance leap to hybrid JIT.
+### 🚀 Synthesis & Reconciliation Outcomes
+- **Isolated #130**: Separated TOON parser logic and Astro rendering optimizations. Passed Crucible audit and Podman pulse verification.
+- **Isolated #088**: Delegated pkd core pulse command validation into its own isolated worktree. Passed Crucible audit and Zero-Host verification.
+- **Strict #115 Compliance**: Scrubbed the feat/issue-115 branch to contain *only* Governance Linter fixes and Sprint closure docs. Corrected the PR body to include the missing Crucible Audit header. Passed final Pulse validation.
+- **Multi-Agent Rigor**: All branches successfully transitioned through Phase 4 utilizing the generalist sub-agent for impartial gap analysis (ADR-0037).
 
 ### 🛡️ Operational Mandates (Current)
-- **Zero-Host Execution**: No exceptions. All Rust/.NET/TS validation MUST use `podman-wrapper.sh`.
-- **Physical Isolation**: Maintain 1:1 ratio between Sibling worktrees and Issues.
-- **Prepend FSH**: Future handoffs must be prepended below the header.
+- **Zero-Host Execution**: No exceptions. All Rust/.NET/TS validation MUST use podman-wrapper.sh (or its equivalent via pulse.sh).
+- **Physical Isolation**: The 1:1 ratio between Sibling worktrees and Issues is actively enforced and proven effective for state reconciliation.
+- **Crucible PR Verification**: All PRs must contain the The Pharos Crucible (Audit Log) marker in their body to pass the Pulse test.
 
 ### 🪨 Phase 5 Watchlist (Monday Start)
 - **#122: Part-Based Geometry**: Moving from placeholders to LOD 200+ procedural extrusions.
 - **#125: Bidirectional Ghost Tuning**: Enabling Revit-to-Web parameter synchronization.
 - **#138: Full RFC-2378 Support**: Porting query logic to Rust core.
-
-### 📊 Today's Hackathon Goals (Phase 3)
-- [ ] Reconcile Hackathon TOON parser (#130) with the sharded registry.
-- [ ] Investigate WASM memory limit overhead during high-density log parsing.
 
 ---
 
