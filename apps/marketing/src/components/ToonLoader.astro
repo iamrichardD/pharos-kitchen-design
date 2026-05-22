@@ -124,15 +124,15 @@ const { content } = Astro.props;
                   <table class="w-full text-left border-collapse text-[11px]">
                     <thead>
                       <tr class="bg-emerald-500/5">
-                        ${list.schema.map((s: string) => \`<th class="py-2.5 px-4 uppercase opacity-40 font-bold border-r border-emerald-500/10 last:border-0">\${s}</th>\`).join('')}
+                        ${list.schema.map((s: string) => `<th class="py-2.5 px-4 uppercase opacity-40 font-bold border-r border-emerald-500/10 last:border-0">${s}</th>`).join('')}
                       </tr>
                     </thead>
                     <tbody>
-                      ${list.items.map((row: string[]) => \`
+                      ${list.items.map((row: string[]) => `
                         <tr class="border-t border-emerald-500/5 hover:bg-emerald-500/5 transition-colors group/row">
-                          \${row.map(cell => \`<td class="py-2 px-4 border-r border-emerald-500/5 last:border-0 group-hover/row:text-white transition-colors">\${cell}</td>\`).join('')}
+                          ${row.map(cell => `<td class="py-2 px-4 border-r border-emerald-500/5 last:border-0 group-hover/row:text-white transition-colors">${cell}</td>`).join('')}
                         </tr>
-                      \`).join('')}
+                      `).join('')}
                     </tbody>
                   </table>
                 </div>
