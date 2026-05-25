@@ -14,7 +14,8 @@ if [ -z "$REPO_ROOT" ]; then
     exit 1
 fi
 
-HOOKS_DIR="$REPO_ROOT/.git/hooks"
+# Use --git-path to correctly find hooks in Hub/Sibling worktrees
+HOOKS_DIR=$(git rev-parse --git-path hooks)
 mkdir -p "$HOOKS_DIR"
 
 # 1. Install pre-push hook
