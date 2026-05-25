@@ -201,7 +201,7 @@
 
 ### Phase 5: IKD Enablement (Ghost Links & Scale) - 🚀 ACTIVE
 - [x] **Issue #122.1**: Rust Schema Definition (Option A: Parametric Operations). [AUDITED: PHAROS GREEN]
-- [ ] **Issue #122.2**: Implement `ExtrusionGenerator` in Rust core. [ECT: 3]
+- [x] **Issue #122.2**: Implement `ExtrusionGenerator` in Rust core. [AUDITED: PHAROS GREEN]
 - [x] **Issue #122.3**: Implement `GeometryResolver` in Revit Bridge. [AUDITED: PHAROS GREEN]
 - [ ] **Issue #124**: Task 5.2: JIT Sharded Registry Scaling. [ECT: 4]
 - [ ] **Issue #125**: Task 5.3: Bidirectional Web-to-Revit 'Ghost Tuning'. [ECT: 5]

@@ -10,10 +10,14 @@
 
 use wasm_bindgen::prelude::*;
 use crate::lazy_loader::{LazyShardLoader, ShardFetcher};
+#[cfg(any(test, not(target_arch = "wasm32")))]
 use crate::models::metadata::RegistryShard;
 use std::collections::VecDeque;
 use std::sync::Mutex;
+#[cfg(any(test, not(target_arch = "wasm32")))]
 use std::sync::atomic::{AtomicU64, Ordering};
+#[cfg(target_arch = "wasm32")]
+use std::sync::atomic::AtomicU64;
 use std::pin::Pin;
 use std::future::Future;
 use std::os::raw::c_char;
@@ -287,16 +291,21 @@ pub extern "C" fn pkd_get_ghost_metadata(handle: *mut PharosRegistryHandle, ptr:
             }
         };
 
-        if let Some(mut metadata) = registry.cache.get_mut(id_str) {
+        if let Some(metadata) = registry.cache.get(id_str) {
             // JIT Baking (Shard #122.2 Remediation)
             // Why: Ensures the product has valid BIM geometry before FFI delivery.
             // Performance Note: JIT baking is performant for single-SKU hydration but 
             // will introduce latency if Revit Bridge requests thousands of ghost-links 
             // sequentially. Future Optimization: Implement a "BatchBake" endpoint.
-            if metadata.performance_metadata.procedural_lod_enabled && metadata.geometry_manifest.is_none() {
-                metadata.geometry_manifest = crate::geometry::procedural::ProceduralGenerator::generate_manifest(&metadata);
+            
+            #[cfg(not(target_arch = "wasm32"))]
+            let metadata = &*metadata; // Deref DashMap Ref
+
+            let mut final_metadata = metadata.clone();
+            if final_metadata.performance_metadata.procedural_lod_enabled && final_metadata.geometry_manifest.is_none() {
+                final_metadata.geometry_manifest = crate::geometry::procedural::ProceduralGenerator::generate_manifest(&final_metadata);
             }
-            let data = serde_json::to_value(&*metadata).unwrap();
+            let data = serde_json::to_value(&final_metadata).unwrap();
             return serialize_interop_response(&InteropResponse {
                 status: "OK".to_string(),
                 errors: Vec::new(),
@@ -304,23 +313,27 @@ pub extern "C" fn pkd_get_ghost_metadata(handle: *mut PharosRegistryHandle, ptr:
             });
         }
 
-        if let Some(loader) = &registry.loader {
-            if let Some(shard_id_ref) = registry.sku_to_shard.get(id_str) {
+        if let Some(_loader) = &registry.loader {
+            if let Some(_shard_id_ref) = registry.sku_to_shard.get(id_str) {
                 #[cfg(not(target_arch = "wasm32"))]
                 {
-                    let _shard_id = shard_id_ref.clone();
-                    let _loader = loader.clone();
+                    let shard_id = _shard_id_ref.clone();
+                    let loader = _loader.clone();
                     let rt = tokio::runtime::Builder::new_current_thread().enable_all().build().unwrap();
-                    match rt.block_on(_loader.load_shard(&_shard_id)) {
+                    match rt.block_on(loader.load_shard(&shard_id)) {
                         Ok(shard) => {
                             registry.add_shard(shard);
                             
-                            if let Some(mut metadata) = registry.cache.get_mut(id_str) {
+                            if let Some(metadata) = registry.cache.get(id_str) {
                                 // JIT Baking (Shard #122.2 Remediation)
-                                if metadata.performance_metadata.procedural_lod_enabled && metadata.geometry_manifest.is_none() {
-                                    metadata.geometry_manifest = crate::geometry::procedural::ProceduralGenerator::generate_manifest(&metadata);
+                                #[cfg(not(target_arch = "wasm32"))]
+                                let metadata = &*metadata;
+
+                                let mut final_metadata = metadata.clone();
+                                if final_metadata.performance_metadata.procedural_lod_enabled && final_metadata.geometry_manifest.is_none() {
+                                    final_metadata.geometry_manifest = crate::geometry::procedural::ProceduralGenerator::generate_manifest(&final_metadata);
                                 }
-                                let data = serde_json::to_value(&*metadata).unwrap();
+                                let data = serde_json::to_value(&final_metadata).unwrap();
                                 return serialize_interop_response(&InteropResponse {
                                     status: "OK".to_string(),
                                     errors: Vec::new(),

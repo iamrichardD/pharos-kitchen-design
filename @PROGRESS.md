@@ -343,3 +343,14 @@
     - **Lead Time**: ~2.5 Hours (including reconciliation).
     - **Change Failure Rate**: 0% (post-audit reconciliation).
 - **Audited** via Pharos Crucible (Result: 🟢 PHAROS GREEN).
+
+#### [2026-05-25] - Shard #122.2: Rust Procedural Geometry Engine
+- **Implemented** the `ProceduralGenerator` (formerly `ExtrusionGenerator`) in the Rust core for JIT geometry baking.
+- **Remediated** architectural gaps by decoupling geometry logic from `PharosMetadata` (SRP compliance).
+- **Hardened** numerical stability via `GEOMETRY_TOLERANCE` (1e-6) epsilon guarding.
+- **Integrated** JIT baking into the FFI boundary (`pkd_get_ghost_metadata`), enabling dynamic geometry generation for all consumers.
+- **Verified** "Pharos Green" status with 39 passing unit tests in Podman.
+- **DORA Metrics (Shard #122.2)**:
+    - **Lead Time**: ~3 Hours (including antagonistic audit remediation).
+    - **Change Failure Rate**: 0% (post-remediation).
+- **Audited** via Pharos Crucible (Result: 🟢 PHAROS GREEN).
