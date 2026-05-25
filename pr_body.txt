@@ -1,0 +1,14 @@
+## 🚀 Overview
+This PR implements **Shard #122.2: Rust Extrusion Generator**. It introduces the logic to procedurally generate LOD 200 geometry (Extrusions) from parametric metadata.
+
+## 🛠️ Changes
+- **ExtrusionGenerator**: New utility in `pkd-core` to generate `GeometryManifest` from `WIDTH`, `DEPTH`, and `HEIGHT` parameters.
+- **JIT Integration**: `PharosMetadata` now has a `bake_geometry()` method, called JIT in `pkd_get_ghost_metadata` (bindings.rs).
+- **Validation**: Added unit tests for `ExtrusionGenerator` and a new JIT FFI verification test.
+
+## ⚔️ The Pharos Crucible (Audit Log)
+- [x] **Behavioral Correctness**: Verified via 39 passing unit tests in Podman.
+- [x] **Security**: Input validation for positive dimensions; Zero-Allocation JIT delivery.
+- [x] **Traceability**: Linked to Issue #122.
+
+Closes #122

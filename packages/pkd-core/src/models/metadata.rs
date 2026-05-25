@@ -78,3 +78,13 @@ pub struct RegistryShard {
     pub v: String,
     pub records: BTreeMap<String, PharosMetadata>,
 }
+
+impl PharosMetadata {
+    /// Bakes the geometry manifest for this product if procedural LOD is enabled.
+    /// Why: Ensures the product has valid BIM geometry representation before FFI delivery.
+    pub fn bake_geometry(&mut self) {
+        if self.performance_metadata.procedural_lod_enabled && self.geometry_manifest.is_none() {
+            self.geometry_manifest = crate::geometry::extrusion::ExtrusionGenerator::bake(self);
+        }
+    }
+}
