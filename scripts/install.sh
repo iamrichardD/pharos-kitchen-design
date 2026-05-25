@@ -559,6 +559,12 @@ main() {
     macos_security_authorization
     path_audit
     
+    # Git Hook Integration (RET-03)
+    if [ -d ".git" ]; then
+        log_info "Git repository detected. Installing Pharos Rigor Gates..."
+        bash scripts/setup-hooks.sh || log_warn "Failed to install git hooks. Ensure scripts/setup-hooks.sh is present."
+    fi
+    
     log_info "Installation complete. Stay remarkable."
     "${INSTALL_DIR}/${BINARY_NAME}" --version || log_warn "Verification command failed. Ensure ${INSTALL_DIR} is in your PATH."
 }

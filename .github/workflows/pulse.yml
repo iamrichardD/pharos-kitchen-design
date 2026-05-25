@@ -40,6 +40,12 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y podman
 
+      - name: Start CI Watchdog (RET-04)
+        run: |
+          chmod +x scripts/ci-watchdog.sh
+          ./scripts/ci-watchdog.sh &
+          echo "WATCHDOG_PID=$!" >> $GITHUB_ENV
+
       - name: Configure Cloudflare Credentials (OIDC)
         if: github.ref == 'refs/heads/main'
         uses: cloudflare/wrangler-action@v3

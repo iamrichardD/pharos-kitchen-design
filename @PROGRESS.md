@@ -376,3 +376,9 @@
 - **Implemented** the `SHARD_PROGRESS.md` pattern in `GEMINI.md` to prevent git merge conflicts in the root progress log.
 - **Mandated** that all parallel agents use local sibling logs for iterative updates.
 - **Audited** via Senior PM (Result: 🟢 PHAROS GREEN).
+
+#### [2026-05-25] - Issue #160 & #161: Technical Process Enforcers
+- **Implemented** the `ci-watchdog.sh` (RET-04) and integrated it into the `pulse.yml` workflow to automatically terminate GHA hangs.
+- **Developed** the `rigor-verify.sh` (RET-03) git-hook and `setup-hooks.sh` installation logic to enforce manual rigor checks for high-complexity tasks.
+- **Updated** `install.sh` to automatically provision these rigor gates for local developers.
+- **Audited** via Senior PM (Result: 🟢 PHAROS GREEN).
