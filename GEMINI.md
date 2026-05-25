@@ -94,6 +94,7 @@ Before moving from **Research** to **Strategy/Execution**, you MUST explicitly c
 Every non-trivial task completion MUST follow the **Multi-Agent Handover & Crucible Protocol (ADR-0037)** and the **Mandatory PR Gate (ADR-0043)**:
 - **Brutal Self-Critique:** Before finalizing, perform a "Brutally Honest" gap and security analysis to identify technical debt or edge cases.
 - **The Mandatory PR Gate:** The Builder MUST create a high-rigor Pull Request BEFORE the Audit phase begins. This PR serves as the "Long-Term Memory" of the task.
+- **Shard-Based Logging (Conflict Mitigation):** Parallel agents MUST NOT edit the root `@PROGRESS.md` directly. Instead, write all progress to `SHARD_PROGRESS.md` in your sibling root. The SPM will aggregate these into the master log during the final integration merge.
 - **PR-Centric Mentorship (Hybrid Model):** Provide inline peer review comments within the GitHub PR (not the source code) that act as teaching tools.
     - **No Meta-Labels:** Prohibited from using "The Why/How," "Teachable Moment," or other prompt-leaking labels.
     - **Integrated Mentorship:** Weave the technical rationale, safety implications, and alternative patterns directly into the PR review.
