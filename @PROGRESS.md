@@ -365,3 +365,9 @@
     - **Lead Time**: ~1.5 Hours.
     - **Change Failure Rate**: 0%.
 - **Audited** via Pharos Crucible (Result: 🟢 PHAROS GREEN).
+
+#### [2026-05-25] - ADR-0043: Federated Governance & Mandatory PR Gate
+- **Codified** the **Mandatory PR Gate** protocol to ensure durable architectural memory across parallel AI sessions.
+- **Implemented** the **PR-Centric Mentorship** model, moving deep peer-review feedback to GitHub history to maintain a lean, high-signal codebase.
+- **Transitioned** to **Sprint-Isolated Velocity Reporting**, archiving historical metrics in `docs/governance/REPORTS/` to optimize context efficiency.
+- **Audited** via Pharos Crucible (Result: 🟢 PHAROS GREEN).
