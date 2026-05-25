@@ -372,7 +372,7 @@
 - **Transitioned** to **Sprint-Isolated Velocity Reporting**, archiving historical metrics in `docs/governance/REPORTS/` to optimize context efficiency.
 - **Audited** via Pharos Crucible (Result: 🟢 PHAROS GREEN).
 
-#### [2026-05-25] - Issue #161: Shard-Based Logging
+#### [2026-05-25] - Issue #159: Shard-Based Logging (RET-01)
 - **Implemented** the `SHARD_PROGRESS.md` pattern in `GEMINI.md` to prevent git merge conflicts in the root progress log.
 - **Mandated** that all parallel agents use local sibling logs for iterative updates.
 - **Audited** via Senior PM (Result: 🟢 PHAROS GREEN).

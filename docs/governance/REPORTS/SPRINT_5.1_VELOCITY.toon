@@ -26,7 +26,7 @@ tasks[5]{id, title, ect, status}:
   #122.2, Rust Procedural Geometry Engine (JIT Baking), 3, Done
   #122.3, Revit Bridge Geometry Interpreter (DirectShape), 3, Done
   #122.4, Web Astro Three.js Interpreter (R3F), 3, Done
-  #043, ADR-0043: Mandatory PR Gate & PR-Centric Mentorship, 1, Done
+  #159, Implement Shard-Based Logging (RET-01), 1, Done
 
 # Strategic Continuity
 handoff: docs/governance/FRIDAY_HANDOFF.md
