@@ -1,0 +1,31 @@
+{
+  "name": "@pkd/protocol",
+  "version": "0.1.0",
+  "description": "Shared protocols and types for Pharos Kitchen Design",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "module": "./dist/index.mjs",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "dev": "tsup src/index.ts --format cjs,esm --watch --dts",
+    "lint": "eslint src/**/*.ts"
+  },
+  "keywords": [
+    "pharos",
+    "aec",
+    "bim"
+  ],
+  "author": "Richard D. (https://github.com/iamrichardd)",
+  "license": "FSL-1.1",
+  "dependencies": {
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3",
+    "tsup": "^8.3.5"
+  }
+}

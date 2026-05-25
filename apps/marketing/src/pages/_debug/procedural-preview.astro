@@ -2,16 +2,17 @@
 /* ========================================================================
  * Project: Pharos Kitchen Design (Project Prism)
  * Component: Marketing / Demo
- * File: apps/marketing/src/pages/demo-geometry.astro
+ * File: apps/marketing/src/pages/_debug/procedural-preview.astro
  * Author: Richard D. (https://github.com/iamrichardd)
- * Purpose: Visual verification of the ThreeJsInterpreter.
+ * Purpose: Visual verification of the ThreeJsInterpreter (Debug Route).
  * Traceability: Issue #122
  * ======================================================================== */
 
-import BaseLayout from "../layouts/BaseLayout.astro";
-import { ThreeJsInterpreter } from "../components/ThreeJsInterpreter";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { ThreeJsInterpreter } from "../../components/ThreeJsInterpreter";
+import type { GeometryManifest } from "@pkd/protocol";
 
-const mockManifest = {
+const mockManifest: GeometryManifest = {
   "lod": 200,
   "operations": [
     {

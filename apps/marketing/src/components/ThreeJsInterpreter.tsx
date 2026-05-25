@@ -10,26 +10,14 @@
 
 import React, { useMemo, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Stage, Bounds, Edges, ContactShadows, Environment } from '@react-three/drei';
+import { OrbitControls, Stage, Bounds, Edges } from '@react-three/drei';
 import * as THREE from 'three';
-
-export interface GeometryOperation {
-    id: string;
-    type: 'Extrusion';
-    profile: 'Rectangle';
-    dimensions: {
-        width: number;
-        depth: number;
-        height: number;
-    };
-    origin: [number, number, number];
-    material_class?: string;
-}
-
-export interface GeometryManifest {
-    lod: number;
-    operations: GeometryOperation[];
-}
+import { 
+    type GeometryManifest, 
+    type GeometryOperation, 
+    GeometryManifestSchema 
+} from '@pkd/protocol';
+import { CoordinateTransformer } from '../utils/CoordinateTransformer';
 
 interface Props {
     manifest: GeometryManifest;
@@ -44,27 +32,26 @@ const MaterialMap: Record<string, THREE.MeshStandardMaterialParameters> = {
 
 const OperationMesh: React.FC<{ op: GeometryOperation }> = ({ op }) => {
     const { width, depth, height } = op.dimensions;
-    const [x, y, z] = op.origin;
-
+    
     const materialParams = useMemo(() => 
         MaterialMap[op.material_class || 'Default'] || MaterialMap['Default'], 
     [op.material_class]);
+
+    const position = useMemo(() => 
+        CoordinateTransformer.calculateThreeCenter(op.origin, op.dimensions),
+    [op.origin, op.dimensions]);
 
     return (
         <mesh 
             castShadow 
             receiveShadow 
-            position={[
-                x + width / 2, 
-                z + height / 2, 
-                y + depth / 2
-            ]}
+            position={position}
         >
             <boxGeometry args={[width, height, depth]} />
             <meshStandardMaterial {...materialParams} />
             <Edges 
                 scale={1.0}
-                threshold={15} // Only show edges for angles > 15 degrees
+                threshold={15}
                 color="#ffffff" 
             />
         </mesh>
@@ -72,24 +59,39 @@ const OperationMesh: React.FC<{ op: GeometryOperation }> = ({ op }) => {
 };
 
 export const ThreeJsInterpreter: React.FC<Props> = ({ manifest, height = '400px' }) => {
-    if (!manifest || !manifest.operations) {
+    // 🛡️ Schema Validation (The Zod Guard)
+    const validationResult = useMemo(() => {
+        return GeometryManifestSchema.safeParse(manifest);
+    }, [manifest]);
+
+    if (!validationResult.success) {
+        console.error("Pharos Geometry Validation Failure:", validationResult.error);
         return (
             <div style={{ 
                 width: '100%', 
                 height, 
                 background: '#0a0a0a', 
                 display: 'flex', 
+                flexDirection: 'column',
                 alignItems: 'center', 
                 justifyContent: 'center',
                 color: '#ef4444',
                 fontFamily: 'monospace',
                 border: '1px solid #ef444433',
-                borderRadius: '8px'
+                borderRadius: '8px',
+                padding: '2rem',
+                textAlign: 'center'
             }}>
-                [ INVALID_GEOMETRY_MANIFEST ]
+                <div style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>⚠️</div>
+                <div style={{ fontWeight: 'bold' }}>[ INVALID_GEOMETRY_MANIFEST ]</div>
+                <div style={{ fontSize: '10px', marginTop: '0.5rem', opacity: 0.7 }}>
+                    {validationResult.error.errors[0].message} at {validationResult.error.errors[0].path.join('.')}
+                </div>
             </div>
         );
     }
+
+    const validatedManifest = validationResult.data;
 
     return (
         <div style={{ 
@@ -119,11 +121,11 @@ export const ThreeJsInterpreter: React.FC<Props> = ({ manifest, height = '400px'
                     fontWeight: 'bold',
                     letterSpacing: '0.1em'
                 }}>
-                    LOD {manifest.lod} Visualizer
+                    LOD {validatedManifest.lod} Visualizer
                 </div>
             </div>
 
-            <Canvas shadows camera={{ position: [width_center(manifest) * 2, height_center(manifest) * 2, depth_center(manifest) * 2], fov: 45 }}>
+            <Canvas shadows camera={{ position: [50, 50, 50], fov: 45 }}>
                 <Suspense fallback={null}>
                     <Stage 
                         intensity={0.5} 
@@ -133,7 +135,7 @@ export const ThreeJsInterpreter: React.FC<Props> = ({ manifest, height = '400px'
                     >
                         <Bounds fit observe margin={1.2}>
                             <group>
-                                {manifest.operations.map(op => (
+                                {validatedManifest.operations.map(op => (
                                     <OperationMesh key={op.id} op={op} />
                                 ))}
                             </group>
@@ -145,19 +147,3 @@ export const ThreeJsInterpreter: React.FC<Props> = ({ manifest, height = '400px'
         </div>
     );
 };
-
-// Helper functions for initial camera placement if Bounds hasn't kicked in
-function width_center(manifest: GeometryManifest) {
-    if (!manifest.operations.length) return 0;
-    return manifest.operations[0].dimensions.width / 2;
-}
-
-function height_center(manifest: GeometryManifest) {
-    if (!manifest.operations.length) return 0;
-    return manifest.operations[0].dimensions.height / 2;
-}
-
-function depth_center(manifest: GeometryManifest) {
-    if (!manifest.operations.length) return 0;
-    return manifest.operations[0].dimensions.depth / 2;
-}
