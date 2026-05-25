@@ -203,6 +203,7 @@
 - [x] **Issue #122.1**: Rust Schema Definition (Option A: Parametric Operations). [AUDITED: PHAROS GREEN]
 - [x] **Issue #122.2**: Implement `ExtrusionGenerator` in Rust core. [AUDITED: PHAROS GREEN]
 - [x] **Issue #122.3**: Implement `GeometryResolver` in Revit Bridge. [AUDITED: PHAROS GREEN]
+- [x] **Issue #122.4**: Web/Astro Three.js Interpreter. [AUDITED: PHAROS GREEN]
 - [ ] **Issue #124**: Task 5.2: JIT Sharded Registry Scaling. [ECT: 4]
 - [ ] **Issue #125**: Task 5.3: Bidirectional Web-to-Revit 'Ghost Tuning'. [ECT: 5]
 - [ ] **Issue #126**: Task 5.4: CLI Registry Management Subcommands. [ECT: 3]

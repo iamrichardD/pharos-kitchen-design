@@ -59,6 +59,30 @@ pub struct PharosMetadataBuffer {
     pub rejection_reason: Option<String>,
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+pub struct GeometryManifest {
+    pub lod: u32,
+    pub operations: Vec<GeometryOperation>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+pub struct GeometryOperation {
+    pub id: String,
+    #[serde(rename = "type")]
+    pub operation_type: String,
+    pub profile: String,
+    pub dimensions: OperationDimensions,
+    pub origin: [f64; 3],
+    pub material_class: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+pub struct OperationDimensions {
+    pub width: f64,
+    pub depth: f64,
+    pub height: f64,
+}
+
 impl PharosMetadataBuffer {
     pub fn new(manufacturer: &str, raw_input: &str) -> Self {
         Self {

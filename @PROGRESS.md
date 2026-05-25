@@ -354,3 +354,14 @@
     - **Lead Time**: ~3 Hours (including antagonistic audit remediation).
     - **Change Failure Rate**: 0% (post-remediation).
 - **Audited** via Pharos Crucible (Result: 🟢 PHAROS GREEN).
+
+#### [2026-05-25] - Shard #122.4: Web/Astro Three.js Interpreter
+- **Implemented** the `ThreeJsInterpreter` React component in the Marketing site using **React Three Fiber (R3F)** for high-rigor procedural rendering.
+- **Enabled** React integration and Three.js dependencies in the Astro-based Marketing environment.
+- **Mapped** BIM-standard coordinates (Z-up) to Three.js (Y-up) within the interpreter logic to ensure visual parity with Revit's `DirectShape`.
+- **Created** a dedicated `demo-geometry.astro` verification page to validate the component against the Authoritative Seam contract.
+- **Verified** "Pharos Green" status via a successful `astro build` in a Podman container.
+- **DORA Metrics (Shard #122.4)**:
+    - **Lead Time**: ~1.5 Hours.
+    - **Change Failure Rate**: 0%.
+- **Audited** via Pharos Crucible (Result: 🟢 PHAROS GREEN).

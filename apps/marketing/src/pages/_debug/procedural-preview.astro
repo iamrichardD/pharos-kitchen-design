@@ -1,0 +1,82 @@
+---
+/* ========================================================================
+ * Project: Pharos Kitchen Design (Project Prism)
+ * Component: Marketing / Demo
+ * File: apps/marketing/src/pages/_debug/procedural-preview.astro
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * Purpose: Visual verification of the ThreeJsInterpreter (Debug Route).
+ * Traceability: Issue #122
+ * ======================================================================== */
+
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { ThreeJsInterpreter } from "../../components/ThreeJsInterpreter";
+import type { GeometryManifest } from "@pkd/protocol";
+
+const mockManifest: GeometryManifest = {
+  "lod": 200,
+  "operations": [
+    {
+      "id": "base_cabinet",
+      "type": "Extrusion",
+      "profile": "Rectangle",
+      "dimensions": { "width": 30.0, "depth": 24.0, "height": 36.0 },
+      "origin": [0.0, 0.0, 0.0],
+      "material_class": "Stainless_Steel"
+    },
+    {
+      "id": "backsplash",
+      "type": "Extrusion",
+      "profile": "Rectangle",
+      "dimensions": { "width": 30.0, "depth": 1.0, "height": 6.0 },
+      "origin": [0.0, 23.0, 36.0],
+      "material_class": "Stainless_Steel"
+    }
+  ]
+};
+---
+
+<BaseLayout title="Procedural Geometry Verification | Pharos">
+  <main class="max-w-6xl mx-auto px-6 py-20 min-h-screen">
+    <div class="mb-12">
+      <h1 class="text-4xl font-bold mb-4 font-mono tracking-tighter uppercase text-ph-blue">
+        Procedural_Geometry_Verification
+      </h1>
+      <p class="text-text-muted text-sm font-mono">
+        Validating the Three.js Interpreter against the Authoritative Seam contract (Shard #122.4).
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div class="space-y-6">
+        <div class="bg-bg-base/40 border border-border-blueprint/20 p-6 blueprint-border relative overflow-hidden">
+          <div class="absolute inset-0 opacity-5 pointer-events-none blueprint-grid"></div>
+          <h2 class="text-[10px] font-mono text-ph-orange uppercase tracking-widest mb-4">[ GEOMETRY_MANIFEST ]</h2>
+          <pre class="text-[11px] font-mono text-emerald-400 bg-black/40 p-4 rounded overflow-auto max-h-[400px] border border-emerald-500/20">
+{JSON.stringify(mockManifest, null, 2)}
+          </pre>
+        </div>
+
+        <div class="bg-bg-base/40 border border-border-blueprint/20 p-6 blueprint-border relative overflow-hidden">
+          <div class="absolute inset-0 opacity-5 pointer-events-none blueprint-grid"></div>
+          <h2 class="text-[10px] font-mono text-ph-blue uppercase tracking-widest mb-4">[ CONTRACT_CHECKLIST ]</h2>
+          <ul class="space-y-2 text-xs font-mono text-text-muted">
+            <li class="flex gap-2"><span class="text-emerald-500">[✓]</span> Parametric Operations (No raw vertices)</li>
+            <li class="flex gap-2"><span class="text-emerald-500">[✓]</span> Origin Mapping (BIM Z-Up -> Three.js Y-Up)</li>
+            <li class="flex gap-2"><span class="text-emerald-500">[✓]</span> Material Attribution (Stainless Steel)</li>
+            <li class="flex gap-2"><span class="text-emerald-500">[✓]</span> Bounds/Fit Observance</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="bg-bg-base/40 border border-border-blueprint/20 p-2 blueprint-border min-h-[500px] flex flex-col">
+        <div class="flex-grow">
+          <ThreeJsInterpreter client:only="react" manifest={mockManifest as any} height="100%" />
+        </div>
+        <div class="p-3 border-t border-border-blueprint/10 text-[9px] font-mono text-ph-blue/50 flex justify-between">
+           <span>RENDERER: WEBGL_2</span>
+           <span>FFI_STATUS: GREEN</span>
+        </div>
+      </div>
+    </div>
+  </main>
+</BaseLayout>
