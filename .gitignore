@@ -6,6 +6,11 @@ search-index/
 # scripts/  <-- Removed to allow CI scripts
 node_modules/
 dist/
+# Pharos Agent Artifacts
+SESSION_CONTEXT.md
+*.append
+
+# Rust artifacts
 target/
 .astro/
 .DS_Store
