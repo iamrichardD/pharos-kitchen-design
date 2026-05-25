@@ -56,7 +56,7 @@ run_core() {
             echo "      ❌ Missing prologue in: $file"
             MISSING_PROLOGUES=$((MISSING_PROLOGUES + 1))
         fi
-    done < <(find apps packages -type f \( -name "*.ts" -o -name "*.rs" -o -name "*.astro" -o -name "*.cs" \) -not -path "*/node_modules/*" -not -path "*/pkg/*" -not -path "*/.wrangler/*" -not -path "*/obj/*" -not -path "*/bin/*")
+    done < <(find apps packages -type f \( -name "*.ts" -o -name "*.rs" -o -name "*.astro" -o -name "*.cs" \) -not -path "*/node_modules/*" -not -path "*/pkg/*" -not -path "*/.wrangler/*" -not -path "*/obj/*" -not -path "*/bin/*" -not -path "*/.astro/*")
 
     if [ $MISSING_PROLOGUES -gt 0 ]; then
         echo "   ❌ Error: $MISSING_PROLOGUES files are missing the mandatory Standardized File Prologue."

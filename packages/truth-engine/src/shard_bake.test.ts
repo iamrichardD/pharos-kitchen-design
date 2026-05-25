@@ -67,7 +67,7 @@ describe('TruthEngine: Shard Bake', () => {
                 PKD_AssetViews: {}
             },
             lod_geometry_specs: {},
-            performance_metadata: { estimated_rfa_size_kb: 100, procedural_lod_enabled: true, ghost_link_active: false }
+            performance_metadata: { estimated_rfa_size_kb: 100, procedural_lod_enabled: false, ghost_link_active: false }
         };
 
         const metadataFryer = {
@@ -91,7 +91,7 @@ describe('TruthEngine: Shard Bake', () => {
                 PKD_AssetViews: {}
             },
             lod_geometry_specs: {},
-            performance_metadata: { estimated_rfa_size_kb: 150, procedural_lod_enabled: true, ghost_link_active: false }
+            performance_metadata: { estimated_rfa_size_kb: 150, procedural_lod_enabled: false, ghost_link_active: false }
         };
 
         db.prepare("INSERT INTO equipment_registry (mfr_id, resource_id, sku, name, category, metadata) VALUES (1, 1, 'T-49-HC', 'Reach-In Refrigerator', 'Refrigeration', ?)").run(JSON.stringify(metadataTrue));

@@ -70,6 +70,7 @@ namespace Pkd.RevitBridge.Tests
                             ""description"": ""LOD 100 Volumetric Placeholder""
                         }
                     },
+                    ""geometry_manifest"": { ""lod"": 200, ""operations"": [] },
                     ""performance_metadata"": {
                         ""estimated_rfa_size_kb"": 450,
                         ""procedural_lod_enabled"": true,
@@ -178,6 +179,7 @@ namespace Pkd.RevitBridge.Tests
                     "\"PKD_AssetViews\":{}" +
                 "}," +
                 "\"lod_geometry_specs\":{}," +
+                "\"geometry_manifest\":{\"lod\":200,\"operations\":[]}," +
                 "\"performance_metadata\":{\"estimated_rfa_size_kb\":34,\"procedural_lod_enabled\":true,\"ghost_link_active\":true}" +
                 "}";
             

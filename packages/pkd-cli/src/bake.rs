@@ -200,7 +200,7 @@ mod tests {
                 "PKD_AssetViews": {}
             },
             "lod_geometry_specs": { "100": { "type": "BoundingBox", "dimensions": { "width": "1", "depth": "1", "height": "1" }, "description": "test" } },
-            "performance_metadata": { "estimated_rfa_size_kb": 1, "procedural_lod_enabled": true, "ghost_link_active": false }
+            "performance_metadata": { "estimated_rfa_size_kb": 1, "procedural_lod_enabled": false, "ghost_link_active": false }
         }"#;
         
         fs::write(source_dir.path().join("test.json"), valid_json).unwrap();
@@ -263,7 +263,7 @@ mod tests {
                         "PKD_AssetViews": {}
                     },
                     "lod_geometry_specs": { "100": { "type": "BoundingBox", "dimensions": { "width": "1", "depth": "1", "height": "1" }, "description": "test" } },
-                    "performance_metadata": { "estimated_rfa_size_kb": 1, "procedural_lod_enabled": true, "ghost_link_active": false }
+                    "performance_metadata": { "estimated_rfa_size_kb": 1, "procedural_lod_enabled": false, "ghost_link_active": false }
                 }
             }
         }"#;
