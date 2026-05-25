@@ -5,7 +5,7 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Revit UI command implementations.
- * Traceability: Issue #29
+ * Traceability: Issue #29, Issue #122
  * ======================================================================== */
 
 #if REVIT_UI
@@ -40,6 +40,7 @@ namespace Pkd.RevitBridge
 
                 // Hybrid Handle Demo Registry (Issue #120)
                 // Why: Transitions from hardcoded whitelists to dynamic, data-driven BIM hydration.
+                // Updated for Issue #122: Added geometry_manifest for LOD 200 procedural geometry.
                 string mockRegistry = @"{
                     ""PHX-DW-001"": {
                         ""metadata_id"": ""PHX-DW-001"",
@@ -64,6 +65,27 @@ namespace Pkd.RevitBridge
                                 ""description"": ""LOD 100 Volumetric Placeholder""
                             }
                         },
+                        ""geometry_manifest"": {
+                            ""lod"": 200,
+                            ""operations"": [
+                                {
+                                    ""id"": ""base_cabinet"",
+                                    ""type"": ""Extrusion"",
+                                    ""profile"": ""Rectangle"",
+                                    ""dimensions"": { ""width"": 2.5, ""depth"": 2.5, ""height"": 3.0 },
+                                    ""origin"": [0.0, 0.0, 0.0],
+                                    ""material_class"": ""Stainless_Steel""
+                                },
+                                {
+                                    ""id"": ""top_panel"",
+                                    ""type"": ""Extrusion"",
+                                    ""profile"": ""Rectangle"",
+                                    ""dimensions"": { ""width"": 2.5, ""depth"": 2.5, ""height"": 0.1 },
+                                    ""origin"": [0.0, 0.0, 3.0],
+                                    ""material_class"": ""Stainless_Steel""
+                                }
+                            ]
+                        },
                         ""performance_metadata"": {
                             ""estimated_rfa_size_kb"": 450,
                             ""procedural_lod_enabled"": true,
@@ -85,61 +107,70 @@ namespace Pkd.RevitBridge
                     // 2. Define Location (Prototype: Origin)
                     XYZ origin = new XYZ(0, 0, 0);
 
-                    // 3. Extract Metadata-Driven Geometry (LOD 100)
-                    double width = 2.0;
-                    double depth = 2.0;
-                    double height = 3.0;
-
-                    if (response.Data.HasValue)
-                    {
-                        var data = response.Data.Value;
-                        if (data.TryGetProperty("lod_geometry_specs", out JsonElement lodSpecs) && 
-                            lodSpecs.TryGetProperty("100", out JsonElement lod100) &&
-                            lod100.TryGetProperty("dimensions", out JsonElement dimensions))
-                        {
-                            // Mentorship: Metadata is the Source of Truth. 
-                            // We extract dimensions from the schema to eliminate "Hallucination Gaps."
-                            if (dimensions.TryGetProperty("width", out JsonElement w)) width = double.Parse(w.GetString() ?? "2.0");
-                            if (dimensions.TryGetProperty("depth", out JsonElement d)) depth = double.Parse(d.GetString() ?? "2.0");
-                            if (dimensions.TryGetProperty("height", out JsonElement h)) height = double.Parse(h.GetString() ?? "3.0");
-                        }
-                    }
-
-                    // 4. Create Procedural Geometry
+                    // 3. Extract Metadata-Driven Geometry (LOD 200 Manifest vs LOD 100 Fallback)
                     using (Transaction trans = new Transaction(doc, "Place Pharos Draft"))
                     {
                         trans.Start();
 
-                        List<Curve> profile = new List<Curve>();
-                        profile.Add(Line.CreateBound(origin, origin + new XYZ(width, 0, 0)));
-                        profile.Add(Line.CreateBound(origin + new XYZ(width, 0, 0), origin + new XYZ(width, depth, 0)));
-                        profile.Add(Line.CreateBound(origin + new XYZ(width, depth, 0), origin + new XYZ(0, depth, 0)));
-                        profile.Add(Line.CreateBound(origin + new XYZ(0, depth, 0), origin));
-
-                        CurveLoop curveLoop = CurveLoop.Create(profile);
-                        Solid box = GeometryCreationUtilities.CreateExtrusionGeometry(
-                            new List<CurveLoop> { curveLoop }, 
-                            XYZ.BasisZ, 
-                            height
-                        );
-
-                        // Create DirectShape
-                        DirectShape ds = DirectShape.CreateElement(doc, new ElementId(BuiltInCategory.OST_FoodServiceEquipment));
-                        ds.ApplicationId = "PharosProjectPrism";
-                        ds.ApplicationDataId = "PHX-DW-001";
-                        ds.SetShape(new List<GeometryObject> { box });
-                        ds.Name = "Pharos Ghost: PHX-DW-001";
-
-                        // 5. Apply Standardized Parameters (PKD_*)
-                        if (response.Data.HasValue)
+                        if (response.Data.HasValue && response.Data.Value.TryGetProperty("geometry_manifest", out JsonElement manifestElement))
                         {
-                            var data = response.Data.Value;
-                            if (data.TryGetProperty("parameters", out JsonElement parameters))
+                            // Path A: LOD 200 Procedural Interpreter (Issue #122)
+                            // Why: Enables complex, multi-part geometry without Revit family overhead.
+                            var interpreter = new ProceduralDirectShapeInterpreter();
+                            var manifest = interpreter.ParseManifest(manifestElement);
+                            interpreter.Interpret(doc, manifest);
+                        }
+                        else
+                        {
+                            // Path B: LOD 100 Volumetric Placeholder (Fallback)
+                            double width = 2.0;
+                            double depth = 2.0;
+                            double height = 3.0;
+
+                            if (response.Data.HasValue)
                             {
-                                // Mentorship: Standardized parameter binding ensures metadata persistence 
-                                // across different Revit templates and locales.
-                                ApplyParameter(ds, "PKD_Manufacturer", "manufacturer", parameters);
-                                ApplyParameter(ds, "PKD_ModelNumber", "model", parameters);
+                                var data = response.Data.Value;
+                                if (data.TryGetProperty("lod_geometry_specs", out JsonElement lodSpecs) && 
+                                    lodSpecs.TryGetProperty("100", out JsonElement lod100) &&
+                                    lod100.TryGetProperty("dimensions", out JsonElement dimensions))
+                                {
+                                    // Mentorship: Metadata is the Source of Truth. 
+                                    // We extract dimensions from the schema to eliminate "Hallucination Gaps."
+                                    if (dimensions.TryGetProperty("width", out JsonElement w)) width = double.Parse(w.GetString() ?? "2.0");
+                                    if (dimensions.TryGetProperty("depth", out JsonElement d)) depth = double.Parse(d.GetString() ?? "2.0");
+                                    if (dimensions.TryGetProperty("height", out JsonElement h)) height = double.Parse(h.GetString() ?? "3.0");
+                                }
+                            }
+
+                            List<Curve> profile = new List<Curve>();
+                            profile.Add(Line.CreateBound(origin, origin + new XYZ(width, 0, 0)));
+                            profile.Add(Line.CreateBound(origin + new XYZ(width, 0, 0), origin + new XYZ(width, depth, 0)));
+                            profile.Add(Line.CreateBound(origin + new XYZ(width, depth, 0), origin + new XYZ(0, depth, 0)));
+                            profile.Add(Line.CreateBound(origin + new XYZ(0, depth, 0), origin));
+
+                            CurveLoop curveLoop = CurveLoop.Create(profile);
+                            Solid box = GeometryCreationUtilities.CreateExtrusionGeometry(
+                                new List<CurveLoop> { curveLoop }, 
+                                XYZ.BasisZ, 
+                                height
+                            );
+
+                            // Create DirectShape
+                            DirectShape ds = DirectShape.CreateElement(doc, new ElementId(BuiltInCategory.OST_FoodServiceEquipment));
+                            ds.ApplicationId = "PharosProjectPrism";
+                            ds.ApplicationDataId = "PHX-DW-001";
+                            ds.SetShape(new List<GeometryObject> { box });
+                            ds.Name = "Pharos Ghost: PHX-DW-001";
+
+                            // 5. Apply Standardized Parameters (PKD_*)
+                            if (response.Data.HasValue)
+                            {
+                                var data = response.Data.Value;
+                                if (data.TryGetProperty("parameters", out JsonElement parameters))
+                                {
+                                    ApplyParameter(ds, "PKD_Manufacturer", "manufacturer", parameters);
+                                    ApplyParameter(ds, "PKD_ModelNumber", "model", parameters);
+                                }
                             }
                         }
 
