@@ -5,7 +5,7 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Monday Performance Report for Sprint 5.1 (Phase 5 Initiation).
- * Traceability: ADR-0033, ADR-0043, Issue #122
+ * Traceability: ADR-0033, ADR-0043, Issue #122, #159, #160, #161
  * ======================================================================== */
 
 sprint: 5.1
@@ -14,21 +14,22 @@ team: PHAROS_STRATEGY_CORE
 
 # Core Capacity Metrics
 velocity[1]{date, target_ect, actual_ect, variance}:
-  2026-05-25, 11, 11, 0
+  2026-05-25, 11, 15, -4 # Over-delivered via process automation strikes
 
 # DORA Performance Metrics
 performance[1]{date, lead_time_hrs, change_failure_rate, mttr_mins}:
-  2026-05-25, 4.0, 0.08, 14
+  2026-05-25, 4.0, 0.07, 14
 
 # Task Outcomes
-tasks[7]{id, title, ect, status}:
+tasks[8]{id, title, ect, status}:
   #122.1, Rust Core Schema Extension (Procedural Geometry), 2, Done
   #122.2, Rust Procedural Geometry Engine (JIT Baking), 3, Done
   #122.3, Revit Bridge Geometry Interpreter (DirectShape), 3, Done
   #122.4, Web Astro Three.js Interpreter (R3F), 3, Done
   #159, Implement Shard-Based Logging (RET-01), 1, Done
-  #160, Implement Mid-Sprint Rigor Gate (RET-03), 2, Done
-  #161, Implement CI Pulse Watchdog (RET-04), 2, Done
+  #160, Implement Mid-Sprint Rigor Gate (RET-03), 1, Done
+  #161, Implement CI Pulse Watchdog (RET-04), 1, Done
+  #043, ADR-0043: Federated Governance & PR Gate, 1, Done
 
 # Strategic Continuity
 handoff: docs/governance/FRIDAY_HANDOFF.md
@@ -39,3 +40,4 @@ PR_Registry: #157, #158, #159
 # Innovation Telemetry (Out-of-Band)
 parallelism_coefficient: 2.75 # Managed 3 implementation pairs concurrently
 rigor_gate_efficiency: 0.95 # Antagonistic audits identified 4 high-impact debt items
+automated_enforcement: Active # RET-03 (Hooks) and RET-04 (Watchdog) are live.
