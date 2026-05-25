@@ -1,0 +1,26 @@
+## 🚀 Overview
+This PR implements **Shard #122.2: Rust Extrusion Generator** (Procedural Engine). It introduces the logic to procedurally generate LOD 200 geometry from parametric metadata.
+
+## 🛠️ Changes (Audit Remediation)
+- **ProceduralGenerator Service**: Moved geometry logic from `PharosMetadata` to a dedicated service struct (SRP Enforcement).
+- **Numerical Stability**: Implemented `GEOMETRY_TOLERANCE (1e-6)` for epsilon-guarded dimension validation.
+- **Future-Proofing**: Renamed logic to `ProceduralGenerator` to support future 'Sweep' and 'Revolve' operations.
+- **Performance Guards**: Documented FFI latency implications and proposed a 'BatchBake' optimization path in `bindings.rs`.
+
+## 🛡️ The Three-Option Crucible (Procedural Strategy)
+As mandated by ADR-0017 and Audit-Remediation, the following options were evaluated for geometry delivery:
+
+1. **Option A: Pre-Bake during ETL (Rejected)**: 
+   - *Rationale*: Storing pre-baked geometry manifests for millions of SKUs in the registry shards would significantly increase the WASM memory footprint and shard download times.
+2. **Option B: JIT Baking at FFI Boundary (Promoted Winner)**: 
+   - *Rationale*: Metadata remains a lean "Truth Model" in the registry. Geometry is generated only when requested by the Revit Bridge or Web UI. This balances memory efficiency with immediate availability.
+3. **Option C: On-Demand Bridge Generation (Rejected)**: 
+   - *Rationale*: Moving the procedural logic entirely into the Revit Bridge (.NET) would violate the "Cross-Platform Truth" mandate, as the Web UI (WASM) would lack the ability to render the same geometry.
+
+## ⚔️ The Pharos Crucible (Audit Log)
+- [x] **Behavioral Correctness**: Verified via 38 passing unit tests in Podman.
+- [x] **SRP Compliance**: Metadata is a pure data model; logic is in `ProceduralGenerator`.
+- [x] **Stability**: Epsilon-guarded numerical checks.
+- [x] **Traceability**: Linked to Issue #122.
+
+Closes #122

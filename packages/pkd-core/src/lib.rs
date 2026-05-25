@@ -15,6 +15,7 @@ pub mod bindings;
 pub mod slices;
 pub mod security;
 pub mod lazy_loader;
+pub mod geometry;
 
 #[cfg(not(target_arch = "wasm32"))]
 pub mod jit;

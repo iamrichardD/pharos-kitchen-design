@@ -287,7 +287,15 @@ pub extern "C" fn pkd_get_ghost_metadata(handle: *mut PharosRegistryHandle, ptr:
             }
         };
 
-        if let Some(metadata) = registry.cache.get(id_str) {
+        if let Some(mut metadata) = registry.cache.get_mut(id_str) {
+            // JIT Baking (Shard #122.2 Remediation)
+            // Why: Ensures the product has valid BIM geometry before FFI delivery.
+            // Performance Note: JIT baking is performant for single-SKU hydration but 
+            // will introduce latency if Revit Bridge requests thousands of ghost-links 
+            // sequentially. Future Optimization: Implement a "BatchBake" endpoint.
+            if metadata.performance_metadata.procedural_lod_enabled && metadata.geometry_manifest.is_none() {
+                metadata.geometry_manifest = crate::geometry::procedural::ProceduralGenerator::generate_manifest(&metadata);
+            }
             let data = serde_json::to_value(&*metadata).unwrap();
             return serialize_interop_response(&InteropResponse {
                 status: "OK".to_string(),
@@ -307,7 +315,11 @@ pub extern "C" fn pkd_get_ghost_metadata(handle: *mut PharosRegistryHandle, ptr:
                         Ok(shard) => {
                             registry.add_shard(shard);
                             
-                            if let Some(metadata) = registry.cache.get(id_str) {
+                            if let Some(mut metadata) = registry.cache.get_mut(id_str) {
+                                // JIT Baking (Shard #122.2 Remediation)
+                                if metadata.performance_metadata.procedural_lod_enabled && metadata.geometry_manifest.is_none() {
+                                    metadata.geometry_manifest = crate::geometry::procedural::ProceduralGenerator::generate_manifest(&metadata);
+                                }
                                 let data = serde_json::to_value(&*metadata).unwrap();
                                 return serialize_interop_response(&InteropResponse {
                                     status: "OK".to_string(),
@@ -704,6 +716,7 @@ pub extern "C" fn pkd_trigger_panic() -> *mut c_char {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::models::types::ParameterValue;
 
     #[test]
     fn test_should_load_registry_and_retrieve_metadata_when_valid_json_provided() {
@@ -894,6 +907,33 @@ mod tests {
         
         assert_eq!(resp.status, "ERROR");
         assert_eq!(resp.errors[0], ValidationError::GhostLinkAuthNotFound);
+        
+        pkd_free_string(ptr);
+        unsafe { let _ = Box::from_raw(handle_ptr); }
+    }
+
+    #[test]
+    fn test_should_jit_bake_geometry_when_metadata_retrieved_via_ffi() {
+        let handle = PharosRegistryHandle::new();
+        let mut metadata = create_mock_metadata("SKU-JIT", 10);
+        metadata.parameters.insert("PKD_WIDTH".to_string(), ParameterValue::Number(10.0));
+        metadata.parameters.insert("PKD_DEPTH".to_string(), ParameterValue::Number(20.0));
+        metadata.parameters.insert("PKD_HEIGHT".to_string(), ParameterValue::Number(30.0));
+        
+        // Ensure manifest is None initially
+        metadata.geometry_manifest = None;
+        handle.cache.insert("SKU-JIT".to_string(), metadata);
+        
+        let handle_ptr = Box::into_raw(Box::new(handle));
+        let id = "SKU-JIT";
+        let ptr = pkd_get_ghost_metadata(handle_ptr, id.as_ptr(), id.len());
+        
+        let result_cstr = unsafe { std::ffi::CStr::from_ptr(ptr) };
+        let resp_json: serde_json::Value = serde_json::from_str(result_cstr.to_str().unwrap()).unwrap();
+        
+        assert_eq!(resp_json["status"], "OK");
+        assert!(resp_json["data"]["geometry_manifest"].is_object());
+        assert_eq!(resp_json["data"]["geometry_manifest"]["operations"][0]["dimensions"]["width"], 10.0);
         
         pkd_free_string(ptr);
         unsafe { let _ = Box::from_raw(handle_ptr); }
