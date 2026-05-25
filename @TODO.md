@@ -199,12 +199,15 @@
 - [x] **Issue #88**: Task 4.22: Implement `pkd core pulse` Command. [ECT: 3]
 - [ ] **Issue #89**: Task 4.22: Develop Manufacturer Maintenance Sidecar. [ECT: 4]
 
-### Phase 5: IKD Enablement (Ghost Links & Scale) - 📋 Backlog
-- [ ] **Issue #122**: Task 5.1: LOD 200+ Part-Based Procedural Geometry. [ECT: 5]
+### Phase 5: IKD Enablement (Ghost Links & Scale) - 🚀 ACTIVE
+- [x] **Issue #122.1**: Rust Schema Definition (Option A: Parametric Operations). [AUDITED: PHAROS GREEN]
+- [ ] **Issue #122.2**: Implement `ExtrusionGenerator` in Rust core. [ECT: 3]
+- [x] **Issue #122.3**: Implement `GeometryResolver` in Revit Bridge. [AUDITED: PHAROS GREEN]
 - [ ] **Issue #124**: Task 5.2: JIT Sharded Registry Scaling. [ECT: 4]
 - [ ] **Issue #125**: Task 5.3: Bidirectional Web-to-Revit 'Ghost Tuning'. [ECT: 5]
 - [ ] **Issue #126**: Task 5.4: CLI Registry Management Subcommands. [ECT: 3]
 - [ ] **Issue #123**: Debt 5.5: .NET 8.0 Zero-Allocation Marshalling. [ECT: 4]
+- [ ] **Issue #148**: Debt: Implement `PharosMetadata::builder()` pattern. [ECT: 2]
 
 ---
 

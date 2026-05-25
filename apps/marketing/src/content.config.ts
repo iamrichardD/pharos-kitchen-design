@@ -22,15 +22,21 @@ const updates = defineCollection({
       const filePath = path.join(updatesDir, file);
       const content = fs.readFileSync(filePath, 'utf-8');
       
+      // Extract date from content (e.g., date: 2026-05-22)
+      const dateMatch = content.match(/^date:\s*([\d-]+)/m);
+      const date = dateMatch ? dateMatch[1] : '1970-01-01';
+      
       return {
         id,
         content,
+        date,
       };
     });
   },
   schema: z.object({
     id: z.string(),
     content: z.string(),
+    date: z.string(),
   }),
 });
 

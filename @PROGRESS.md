@@ -323,3 +323,23 @@
 - **Hardenened** CI/CD with Stage 5 Manifest Verification isolation and negative security tests.
 - **Automated** ADR rituals and codified ADR-0040 (Mandatory Regression Mapping).
 - **Verified** monolithic stability via monolithic pulse.sh (Result: Pharos Green).
+
+#### [2026-05-25] - Shard #122.1: Rust Core Schema Extension
+- **Implemented** the high-performance procedural geometry schema in `pkd-core` (Option A: Parametric Operations).
+- **Extended** `PharosMetadata` with `GeometryManifest` and applied `serde(default)` for backward compatibility.
+- **Hardened** the system with a **Fail-Fast Sentinel** in `validator.rs`, enforcing manifest presence when procedural LOD is enabled.
+- **Updated** `commercial-dishwasher.json` with the authoritative LOD 200 ground truth.
+- **DORA Metrics (Shard #122.1)**:
+    - **Lead Time**: ~1.5 Hours.
+    - **Change Failure Rate**: 0% (Clean Implementation).
+- **Audited** via Pharos Crucible (Result: 🟢 PHAROS GREEN).
+
+#### [2026-05-25] - Shard #122.3: Revit Bridge Geometry Interpreter
+- **Implemented** the `ProceduralDirectShapeInterpreter` in C# to transform Parametric Operations (Option A) into native Revit `DirectShape` elements.
+- **Reconciled** C# structs with Rust ground truth, ensuring typed `OperationDimensions` parity.
+- **Hardened** the bridge with `double.IsFinite` guards and a `MAX_DIMENSION` (500ft) sanity bound to prevent host overflows.
+- **Verified** "Pharos Green" status with 15 passing integration tests in Podman, resolving the `DllNotFoundException` environmental gap.
+- **DORA Metrics (Shard #122.3)**:
+    - **Lead Time**: ~2.5 Hours (including reconciliation).
+    - **Change Failure Rate**: 0% (post-audit reconciliation).
+- **Audited** via Pharos Crucible (Result: 🟢 PHAROS GREEN).

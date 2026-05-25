@@ -15,8 +15,12 @@ import { getCollection } from 'astro:content';
 import ToonLoader from '../../components/ToonLoader.astro';
 
 const allUpdates = await getCollection('updates');
-// Sort by ID (date-based filename) descending
-const sortedUpdates = allUpdates.sort((a, b) => b.id.localeCompare(a.id));
+// Sort by Date descending, then ID descending
+const sortedUpdates = allUpdates.sort((a, b) => {
+  const dateCompare = b.data.date.localeCompare(a.data.date);
+  if (dateCompare !== 0) return dateCompare;
+  return b.id.localeCompare(a.id);
+});
 
 const streams = ["Engineering", "Design", "Logistics"];
 ---

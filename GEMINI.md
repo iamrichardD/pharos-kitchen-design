@@ -91,14 +91,15 @@ Before moving from **Research** to **Strategy/Execution**, you MUST explicitly c
 - **Production Verification:** Before task closure, verify that the static build renders correctly at `iamrichardd.com/pharos-kitchen-design/demo` using `web_fetch`.
 
 ### 5. Pharos Handover & Mentorship Protocol
-Every non-trivial task completion MUST follow the **Multi-Agent Handover & Crucible Protocol (ADR-0037)**:
+Every non-trivial task completion MUST follow the **Multi-Agent Handover & Crucible Protocol (ADR-0037)** and the **Mandatory PR Gate (ADR-0043)**:
 - **Brutal Self-Critique:** Before finalizing, perform a "Brutally Honest" gap and security analysis to identify technical debt or edge cases.
-- **Structured PR:** Create a Pull Request with a dedicated **'Fix Summary'**, **'Security Review'**, and **'DORA Metrics'** section.
-- **IA Clarity Pass (MANDATORY)**: Any changes to collaborator-facing documentation (`CONTRIBUTING.md`, `README.md`, `CLI_REFERENCE.md`) or the Marketing Site MUST be reviewed by **`PHAROS_IA_CORE`** to ensure cognitive flow and prevent jargon bloat.
-- **Auditor Invocation:** Generate an **Audit Invocation Prompt** for a fresh AI session to perform Phase 4 (The Crucible Audit).
-- **Instructive Peer Review:** Provide inline code comments that act as teaching tools.
-    - **No Meta-Labels:** Prohibited from using "The Why/How," "Teachable Moment," or other prompt-leaking labels that signal "AI Slop."
-    - **Integrated Mentorship:** Weave the technical rationale, safety implications, and alternative patterns directly into the critique.
+- **The Mandatory PR Gate:** The Builder MUST create a high-rigor Pull Request BEFORE the Audit phase begins. This PR serves as the "Long-Term Memory" of the task.
+- **PR-Centric Mentorship (Hybrid Model):** Provide inline peer review comments within the GitHub PR (not the source code) that act as teaching tools.
+    - **No Meta-Labels:** Prohibited from using "The Why/How," "Teachable Moment," or other prompt-leaking labels.
+    - **Integrated Mentorship:** Weave the technical rationale, safety implications, and alternative patterns directly into the PR review.
+- **Codebase Leaness:** Source code should remain lean. For non-trivial logic, include a single-line reference: `// Rationale: See PR #X (Feature Name)`.
+- **IA Clarity Pass (MANDATORY):** Any changes to collaborator-facing documentation or the Marketing Site MUST be reviewed by **`PHAROS_IA_CORE`**.
+- **Auditor Invocation:** Generate an **Audit Invocation Prompt** for a fresh AI session to perform Phase 4 (The Crucible Audit), referencing the PR as the primary context.
 
 ## 6. Team Topology & Personas
 To ensure context efficiency and architectural consistency across sessions, use the following **Team Keywords** to invoke specialized sub-agent rosters.
