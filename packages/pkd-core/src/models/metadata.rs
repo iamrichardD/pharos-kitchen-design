@@ -20,7 +20,33 @@ pub struct PharosMetadata {
     pub classification: Classification,
     pub parameters: BTreeMap<String, ParameterValue>,
     pub lod_geometry_specs: BTreeMap<String, LodGeometrySpec>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub geometry_manifest: Option<GeometryManifest>,
     pub performance_metadata: PerformanceMetadata,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+pub struct GeometryManifest {
+    pub lod: u32,
+    pub operations: Vec<GeometryOperation>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+pub struct GeometryOperation {
+    pub id: String,
+    #[serde(rename = "type")]
+    pub operation_type: String,
+    pub profile: String,
+    pub dimensions: OperationDimensions,
+    pub origin: [f64; 3],
+    pub material_class: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+pub struct OperationDimensions {
+    pub width: f64,
+    pub depth: f64,
+    pub height: f64,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]

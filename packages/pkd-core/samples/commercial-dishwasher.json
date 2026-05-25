@@ -77,6 +77,27 @@
       "description": "Accurate geometry for fabrication modeling and MEP coordination."
     }
   },
+  "geometry_manifest": {
+    "lod": 200,
+    "operations": [
+      {
+        "id": "main_chassis",
+        "type": "Extrusion",
+        "profile": "Rectangle",
+        "dimensions": {
+          "width": 24.0,
+          "depth": 24.0,
+          "height": 34.0
+        },
+        "origin": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "material_class": "Stainless_Steel"
+      }
+    ]
+  },
   "performance_metadata": {
     "estimated_rfa_size_kb": 34,
     "procedural_lod_enabled": true,

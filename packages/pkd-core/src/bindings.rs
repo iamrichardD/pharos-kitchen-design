@@ -872,6 +872,7 @@ mod tests {
             },
             parameters: BTreeMap::new(),
             lod_geometry_specs: BTreeMap::new(),
+            geometry_manifest: None,
             performance_metadata: PerformanceMetadata {
                 estimated_rfa_size_kb: size_kb,
                 procedural_lod_enabled: true,

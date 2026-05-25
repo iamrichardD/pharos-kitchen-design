@@ -48,6 +48,9 @@ pub enum ValidationError {
     #[error("Integrity failure: Shard hash mismatch")]
     #[serde(rename = "GHOST_LINK_INTEGRITY_FAILURE")]
     GhostLinkIntegrityFailure,
+    #[error("Procedural LOD is enabled but geometry_manifest is missing")]
+    #[serde(rename = "MISSING_PROCEDURAL_MANIFEST")]
+    MissingProceduralManifest,
 }
 
 /// The Truth Engine's core validator for Pharos Metadata.
@@ -92,6 +95,14 @@ impl SchemaValidator {
                     }
                 }
             }
+        }
+
+        // 3. Procedural Geometry Sentinel (Shard #122.1)
+        // Why: If the product flags procedural_lod_enabled, the GeometryManifest
+        // is the "Authoritative Seam" for generating BIM geometry. Missing it 
+        // would cause a downstream failure in the Revit Bridge Interpreter.
+        if metadata.performance_metadata.procedural_lod_enabled && metadata.geometry_manifest.is_none() {
+            errors.push(ValidationError::MissingProceduralManifest);
         }
 
         if errors.is_empty() {
@@ -183,9 +194,10 @@ mod tests {
             },
             parameters: params,
             lod_geometry_specs: BTreeMap::new(),
+            geometry_manifest: None,
             performance_metadata: PerformanceMetadata {
                 estimated_rfa_size_kb: 10,
-                procedural_lod_enabled: true,
+                procedural_lod_enabled: false,
                 ghost_link_active: false,
             },
         }
@@ -209,5 +221,34 @@ mod tests {
         assert!(result.is_err());
         let errors = result.unwrap_err();
         assert!(matches!(errors[0], ValidationError::InvalidType { .. }));
+    }
+
+    #[test]
+    fn test_should_fail_validation_when_procedural_enabled_but_manifest_missing() {
+        let schema = create_mock_schema();
+        let mut metadata = create_mock_metadata();
+        
+        // State: Procedural enabled, but manifest is None (default in mock)
+        metadata.performance_metadata.procedural_lod_enabled = true;
+        metadata.geometry_manifest = None;
+
+        let result = SchemaValidator::validate_metadata(&schema, &metadata);
+        assert!(result.is_err());
+        let errors = result.unwrap_err();
+        assert!(errors.contains(&ValidationError::MissingProceduralManifest));
+    }
+
+    #[test]
+    fn test_should_pass_validation_when_procedural_enabled_and_manifest_present() {
+        let schema = create_mock_schema();
+        let mut metadata = create_mock_metadata();
+        
+        metadata.performance_metadata.procedural_lod_enabled = true;
+        metadata.geometry_manifest = Some(crate::models::metadata::GeometryManifest {
+            lod: 200,
+            operations: vec![],
+        });
+
+        assert!(SchemaValidator::validate_metadata(&schema, &metadata).is_ok());
     }
 }
