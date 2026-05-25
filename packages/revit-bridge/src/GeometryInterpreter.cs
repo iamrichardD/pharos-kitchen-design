@@ -34,6 +34,22 @@ namespace Pkd.RevitBridge
     }
 
     /// <summary>
+    /// Represents the parametric dimensions for a geometry operation.
+    /// Why: Structural reconciliation with Rust Core (Shard #122.1).
+    /// </summary>
+    public class OperationDimensions
+    {
+        [JsonPropertyName("width")]
+        public double Width { get; set; }
+
+        [JsonPropertyName("depth")]
+        public double Depth { get; set; }
+
+        [JsonPropertyName("height")]
+        public double Height { get; set; }
+    }
+
+    /// <summary>
     /// Represents a single parametric geometry operation (e.g., Extrusion).
     /// </summary>
     public class GeometryOperation
@@ -48,7 +64,7 @@ namespace Pkd.RevitBridge
         public string Profile { get; set; } = string.Empty; // e.g., "Rectangle"
 
         [JsonPropertyName("dimensions")]
-        public Dictionary<string, double> Dimensions { get; set; } = new Dictionary<string, double>();
+        public OperationDimensions Dimensions { get; set; } = new OperationDimensions();
 
         [JsonPropertyName("origin")]
         public List<double> Origin { get; set; } = new List<double> { 0.0, 0.0, 0.0 };
@@ -63,6 +79,9 @@ namespace Pkd.RevitBridge
     /// </summary>
     public class ProceduralDirectShapeInterpreter
     {
+        // Security: Sanity bound to prevent Revit geometry engine overflows (ADR-0035/Audit)
+        private const double MAX_DIMENSION = 500.0; // Feet
+
         /// <summary>
         /// Parses the geometry manifest from a JSON element with Fail-Fast validation.
         /// Why: Ensures the manifest is valid before any Revit transactions are started.
@@ -89,15 +108,34 @@ namespace Pkd.RevitBridge
             if (string.IsNullOrEmpty(op.Id)) throw new ArgumentException("Operation missing 'id'");
             if (string.IsNullOrEmpty(op.Type)) throw new ArgumentException($"Operation '{op.Id}' missing 'type'");
             
-            // Revit-specific constraint: dimensions must be positive
-            foreach (var dim in op.Dimensions)
-            {
-                if (dim.Value <= 0)
-                    throw new ArgumentException($"Operation '{op.Id}' dimension '{dim.Key}' must be greater than zero.");
-            }
+            // Security (Finite Guard): Check all dimension components
+            ValidateFinite(op.Dimensions.Width, "width", op.Id);
+            ValidateFinite(op.Dimensions.Depth, "depth", op.Id);
+            ValidateFinite(op.Dimensions.Height, "height", op.Id);
+
+            // BIM Integrity: Required dimensions must be greater than zero
+            if (op.Dimensions.Width <= 0) throw new ArgumentException($"Operation '{op.Id}' width must be greater than zero.");
+            if (op.Dimensions.Depth <= 0) throw new ArgumentException($"Operation '{op.Id}' depth must be greater than zero.");
+            if (op.Dimensions.Height <= 0) throw new ArgumentException($"Operation '{op.Id}' height must be greater than zero.");
+
+            // Security (Sanity Bound): Prevent oversized geometry
+            if (op.Dimensions.Width > MAX_DIMENSION) throw new ArgumentException($"Operation '{op.Id}' width exceeds MAX_DIMENSION ({MAX_DIMENSION} ft).");
+            if (op.Dimensions.Depth > MAX_DIMENSION) throw new ArgumentException($"Operation '{op.Id}' depth exceeds MAX_DIMENSION ({MAX_DIMENSION} ft).");
+            if (op.Dimensions.Height > MAX_DIMENSION) throw new ArgumentException($"Operation '{op.Id}' height exceeds MAX_DIMENSION ({MAX_DIMENSION} ft).");
 
             if (op.Origin.Count < 3)
                 throw new ArgumentException($"Operation '{op.Id}' origin must have 3 components [x, y, z].");
+
+            foreach (var coord in op.Origin)
+            {
+                if (!double.IsFinite(coord)) throw new ArgumentException($"Operation '{op.Id}' origin coordinates must be finite.");
+            }
+        }
+
+        private void ValidateFinite(double value, string name, string opId)
+        {
+            if (!double.IsFinite(value))
+                throw new ArgumentException($"Operation '{opId}' {name} must be a finite number.");
         }
 
 #if REVIT_UI
@@ -128,13 +166,10 @@ namespace Pkd.RevitBridge
 
         private void CreateExtrusionRectangle(Document doc, GeometryOperation op, string applicationId)
         {
-            double width = 1.0;
-            double depth = 1.0;
-            double height = 1.0;
-
-            if (op.Dimensions.TryGetValue("width", out double w)) width = w;
-            if (op.Dimensions.TryGetValue("depth", out double d)) depth = d;
-            if (op.Dimensions.TryGetValue("height", out double h)) height = h;
+            // BIM Integrity: No defaulting allowed. Use direct values from reconciled struct.
+            double width = op.Dimensions.Width;
+            double depth = op.Dimensions.Depth;
+            double height = op.Dimensions.Height;
 
             XYZ origin = new XYZ(op.Origin[0], op.Origin[1], op.Origin[2]);
 
