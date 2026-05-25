@@ -8,4 +8,4 @@
  * Traceability: Issue #122
  * ======================================================================== */
 
-pub mod extrusion;
+pub mod procedural;

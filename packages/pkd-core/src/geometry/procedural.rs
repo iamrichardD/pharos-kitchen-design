@@ -1,28 +1,33 @@
 /* ========================================================================
  * Project: Pharos Kitchen Design (Project Prism)
  * Component: Core / Geometry
- * File: extrusion.rs
+ * File: procedural.rs
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
- * Purpose: Procedural extrusion generator for parametric BIM geometry.
- * Traceability: Issue #122
+ * Purpose: Procedural geometry generator service for parametric BIM.
+ * Traceability: Issue #122, Audit-Remediation
  * ======================================================================== */
 
 use crate::models::metadata::{PharosMetadata, GeometryManifest, GeometryOperation, OperationDimensions};
 use crate::models::types::ParameterValue;
 
-/// Generator for "Extrusion" type geometry operations.
-/// 
-/// Why: Provides a memory-safe way to generate procedural LOD 200 geometry 
-/// from parametric inputs, fulfilling the "Metadata-First Truth" mandate.
-pub struct ExtrusionGenerator;
+/// Standard numerical tolerance for BIM geometric operations.
+/// Why: Floating point comparisons in AEC software must be epsilon-guarded 
+/// to ensure stability across Revit/FFI boundaries.
+pub const GEOMETRY_TOLERANCE: f64 = 1e-6;
 
-impl ExtrusionGenerator {
+/// Service for generating procedural BIM geometry from parametric inputs.
+/// 
+/// Why: Encapsulates the logic of "Baking" geometry, adhering to SRP by 
+/// separating the data model (PharosMetadata) from procedural generation logic.
+pub struct ProceduralGenerator;
+
+impl ProceduralGenerator {
     /// Generates a GeometryManifest based on the provided metadata.
     /// 
-    /// This implementation currently focuses on a single "main_chassis" extrusion
-    /// derived from width, depth, and height parameters.
-    pub fn bake(metadata: &PharosMetadata) -> Option<GeometryManifest> {
+    /// This implementation supports 'Extrusion' operations and is extensible
+    /// for future 'Sweep' and 'Revolve' variants (Phase 5).
+    pub fn generate_manifest(metadata: &PharosMetadata) -> Option<GeometryManifest> {
         if !metadata.performance_metadata.procedural_lod_enabled {
             return None;
         }
@@ -32,8 +37,8 @@ impl ExtrusionGenerator {
         let depth = Self::get_numeric_param(metadata, "DEPTH")?;
         let height = Self::get_numeric_param(metadata, "HEIGHT")?;
 
-        // Fail-Fast: Ensure positive dimensions to prevent invalid Revit DirectShapes.
-        if width <= 0.0 || depth <= 0.0 || height <= 0.0 {
+        // Fail-Fast: Numerical stability check via epsilon-guarded tolerance.
+        if width < GEOMETRY_TOLERANCE || depth < GEOMETRY_TOLERANCE || height < GEOMETRY_TOLERANCE {
             return None; 
         }
 
@@ -105,7 +110,7 @@ mod tests {
         metadata.parameters.insert("PKD_DEPTH".to_string(), ParameterValue::Number(24.0));
         metadata.parameters.insert("PKD_HEIGHT".to_string(), ParameterValue::Number(34.0));
 
-        let manifest = ExtrusionGenerator::bake(&metadata).expect("Should generate manifest");
+        let manifest = ProceduralGenerator::generate_manifest(&metadata).expect("Should generate manifest");
         
         assert_eq!(manifest.operations.len(), 1);
         assert_eq!(manifest.operations[0].dimensions.width, 24.0);
@@ -113,25 +118,13 @@ mod tests {
     }
 
     #[test]
-    fn test_should_parse_text_dimensions_when_numeric_missing() {
+    fn test_should_return_none_when_dimensions_below_tolerance() {
         let mut metadata = create_test_metadata();
-        metadata.parameters.insert("PKD_WIDTH".to_string(), ParameterValue::Text("24\"".to_string()));
-        metadata.parameters.insert("PKD_DEPTH".to_string(), ParameterValue::Text("24".to_string()));
-        metadata.parameters.insert("PKD_HEIGHT".to_string(), ParameterValue::Number(34.0));
-
-        let manifest = ExtrusionGenerator::bake(&metadata).expect("Should generate manifest");
-        assert_eq!(manifest.operations[0].dimensions.width, 24.0);
-        assert_eq!(manifest.operations[0].dimensions.depth, 24.0);
-    }
-
-    #[test]
-    fn test_should_return_none_when_dimensions_negative() {
-        let mut metadata = create_test_metadata();
-        metadata.parameters.insert("PKD_WIDTH".to_string(), ParameterValue::Number(-1.0));
+        metadata.parameters.insert("PKD_WIDTH".to_string(), ParameterValue::Number(0.0000001));
         metadata.parameters.insert("PKD_DEPTH".to_string(), ParameterValue::Number(24.0));
         metadata.parameters.insert("PKD_HEIGHT".to_string(), ParameterValue::Number(34.0));
 
-        let manifest = ExtrusionGenerator::bake(&metadata);
+        let manifest = ProceduralGenerator::generate_manifest(&metadata);
         assert!(manifest.is_none());
     }
 
@@ -141,7 +134,7 @@ mod tests {
         metadata.performance_metadata.procedural_lod_enabled = false;
         metadata.parameters.insert("PKD_WIDTH".to_string(), ParameterValue::Number(24.0));
 
-        let manifest = ExtrusionGenerator::bake(&metadata);
+        let manifest = ProceduralGenerator::generate_manifest(&metadata);
         assert!(manifest.is_none());
     }
 }

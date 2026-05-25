@@ -288,7 +288,14 @@ pub extern "C" fn pkd_get_ghost_metadata(handle: *mut PharosRegistryHandle, ptr:
         };
 
         if let Some(mut metadata) = registry.cache.get_mut(id_str) {
-            metadata.bake_geometry();
+            // JIT Baking (Shard #122.2 Remediation)
+            // Why: Ensures the product has valid BIM geometry before FFI delivery.
+            // Performance Note: JIT baking is performant for single-SKU hydration but 
+            // will introduce latency if Revit Bridge requests thousands of ghost-links 
+            // sequentially. Future Optimization: Implement a "BatchBake" endpoint.
+            if metadata.performance_metadata.procedural_lod_enabled && metadata.geometry_manifest.is_none() {
+                metadata.geometry_manifest = crate::geometry::procedural::ProceduralGenerator::generate_manifest(&metadata);
+            }
             let data = serde_json::to_value(&*metadata).unwrap();
             return serialize_interop_response(&InteropResponse {
                 status: "OK".to_string(),
@@ -309,7 +316,10 @@ pub extern "C" fn pkd_get_ghost_metadata(handle: *mut PharosRegistryHandle, ptr:
                             registry.add_shard(shard);
                             
                             if let Some(mut metadata) = registry.cache.get_mut(id_str) {
-                                metadata.bake_geometry();
+                                // JIT Baking (Shard #122.2 Remediation)
+                                if metadata.performance_metadata.procedural_lod_enabled && metadata.geometry_manifest.is_none() {
+                                    metadata.geometry_manifest = crate::geometry::procedural::ProceduralGenerator::generate_manifest(&metadata);
+                                }
                                 let data = serde_json::to_value(&*metadata).unwrap();
                                 return serialize_interop_response(&InteropResponse {
                                     status: "OK".to_string(),
