@@ -8,17 +8,17 @@
  * Traceability: Issue #51 - Task 4.14
  * ======================================================================== */
 
-use std::path::PathBuf;
 use crate::models::PharosEnv;
-use anyhow::{Result, anyhow};
+use anyhow::{anyhow, Result};
+use std::path::PathBuf;
 
 pub struct PathResolver;
 
 impl PathResolver {
     /// Resolves the cache directory for the given environment.
     ///
-    /// Why: Adheres to ADR-0026, ensuring that 'prod' data is isolated in XDG 
-    /// paths while 'dev/stage' can reside in project-relative artifacts to 
+    /// Why: Adheres to ADR-0026, ensuring that 'prod' data is isolated in XDG
+    /// paths while 'dev/stage' can reside in project-relative artifacts to
     /// facilitate rapid testing without polluting the user's home directory.
     pub fn resolve_cache_dir(env: PharosEnv) -> Result<PathBuf> {
         match env {
@@ -50,22 +50,22 @@ impl PathResolver {
 
     /// Resolves the configuration directory for the given environment.
     ///
-    /// Why: Adheres to XDG standards by using config_dir() instead of cluttering 
-    /// the user's HOME. Isolates administrative context per environment to 
+    /// Why: Adheres to XDG standards by using config_dir() instead of cluttering
+    /// the user's HOME. Isolates administrative context per environment to
     /// prevent session leakage.
     pub fn resolve_config_dir(env: PharosEnv) -> Result<PathBuf> {
-        let base_dir = dirs::config_dir()
-            .ok_or_else(|| anyhow!("Could not find system config directory"))?;
-        
+        let base_dir =
+            dirs::config_dir().ok_or_else(|| anyhow!("Could not find system config directory"))?;
+
         let path = match env {
             PharosEnv::Prod => base_dir.join("pharos"),
             _ => base_dir.join("pharos").join(env.to_string()),
         };
-        
+
         if !path.exists() {
             std::fs::create_dir_all(&path)?;
         }
-        
+
         Ok(path)
     }
 
@@ -87,7 +87,7 @@ impl PathResolver {
 mod tests {
     use super::*;
 
-    /// Why: Verifies that production data is correctly routed to authoritative 
+    /// Why: Verifies that production data is correctly routed to authoritative
     /// system paths, maintaining host-system governance.
     #[test]
     fn test_should_resolve_xdg_cache_path_when_env_is_prod() {
@@ -98,7 +98,7 @@ mod tests {
         assert!(path.to_string_lossy().contains("prod"));
     }
 
-    /// Why: Ensures that development artifacts remain sandboxed in the project 
+    /// Why: Ensures that development artifacts remain sandboxed in the project
     /// root, enabling "Zero-Host" iteration without impacting the local user.
     #[test]
     fn test_should_resolve_local_artifacts_path_when_env_is_dev() {

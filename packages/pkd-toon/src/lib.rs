@@ -8,10 +8,10 @@
  * Traceability: Issue #130 (Hackathon)
  * ======================================================================== */
 
-use serde::{Serialize, Deserialize, ser::Serialize as _};
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use wasm_bindgen::prelude::*;
 use thiserror::Error;
+use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
 #[derive(Debug, Serialize, Deserialize)]
@@ -35,7 +35,9 @@ pub enum ToonError {
     UnexpectedEOF,
     #[error("Invalid list declaration at line {0}")]
     InvalidListDeclaration(usize),
-    #[error("Tabular data mismatch at line {0}: expected {1} fields, found {2}. Raw line: \"{3}\"")]
+    #[error(
+        "Tabular data mismatch at line {0}: expected {1} fields, found {2}. Raw line: \"{3}\""
+    )]
     TabularDataMismatch(usize, usize, usize, String),
     #[error("Mismatched quotes at line {0}")]
     MismatchedQuotes(usize),
@@ -55,9 +57,9 @@ impl ToonParser {
         let mut fields = Vec::new();
         let mut current_field = String::new();
         let mut in_quotes = false;
-        let mut chars = line.chars().peekable();
+        let chars = line.chars().peekable();
 
-        while let Some(c) = chars.next() {
+        for c in chars {
             match c {
                 '\"' => {
                     in_quotes = !in_quotes;
@@ -83,13 +85,13 @@ impl ToonParser {
     fn parse(input: &str) -> Result<ToonDoc, ToonError> {
         let mut metadata = HashMap::new();
         let mut lists = HashMap::new();
-        
+
         let mut lines = input.lines().enumerate();
         let mut in_block_comment = false;
 
         while let Some((line_idx, line)) = lines.next() {
             let trimmed = line.trim();
-            
+
             // Handle block comments
             if trimmed.starts_with("/*") {
                 in_block_comment = true;
@@ -107,32 +109,54 @@ impl ToonParser {
             }
 
             // Detect list declaration: list_name[N]{f1, f2}:
-            if trimmed.contains('[') && trimmed.contains(']') && trimmed.contains('{') && trimmed.ends_with(':') {
-                let (name, rest) = trimmed.split_once('[').ok_or(ToonError::InvalidListDeclaration(line_idx + 1))?;
-                let (count_str, rest) = rest.split_once(']').ok_or(ToonError::InvalidListDeclaration(line_idx + 1))?;
-                let count: usize = count_str.parse().map_err(|_| ToonError::InvalidListDeclaration(line_idx + 1))?;
-                
-                let _ = rest.split_once('{').ok_or(ToonError::InvalidListDeclaration(line_idx + 1))?;
-                let _ = rest.split_once('}').ok_or(ToonError::InvalidListDeclaration(line_idx + 1))?;
-                
+            if trimmed.contains('[')
+                && trimmed.contains(']')
+                && trimmed.contains('{')
+                && trimmed.ends_with(':')
+            {
+                let (name, rest) = trimmed
+                    .split_once('[')
+                    .ok_or(ToonError::InvalidListDeclaration(line_idx + 1))?;
+                let (count_str, rest) = rest
+                    .split_once(']')
+                    .ok_or(ToonError::InvalidListDeclaration(line_idx + 1))?;
+                let count: usize = count_str
+                    .parse()
+                    .map_err(|_| ToonError::InvalidListDeclaration(line_idx + 1))?;
+
+                let _ = rest
+                    .split_once('{')
+                    .ok_or(ToonError::InvalidListDeclaration(line_idx + 1))?;
+                let _ = rest
+                    .split_once('}')
+                    .ok_or(ToonError::InvalidListDeclaration(line_idx + 1))?;
+
                 let schema_start = trimmed.find('{').unwrap() + 1;
                 let schema_end = trimmed.find('}').unwrap();
                 let schema_raw = &trimmed[schema_start..schema_end];
-                let schema: Vec<String> = schema_raw.split(',').map(|s| s.trim().to_string()).collect();
-                
+                let schema: Vec<String> = schema_raw
+                    .split(',')
+                    .map(|s| s.trim().to_string())
+                    .collect();
+
                 let mut items = Vec::new();
                 for _ in 0..count {
                     if let Some((item_idx, item_line)) = lines.next() {
                         let fields = Self::parse_line(item_line, item_idx)?;
                         if fields.len() != schema.len() {
-                            return Err(ToonError::TabularDataMismatch(item_idx + 1, schema.len(), fields.len(), item_line.to_string()));
+                            return Err(ToonError::TabularDataMismatch(
+                                item_idx + 1,
+                                schema.len(),
+                                fields.len(),
+                                item_line.to_string(),
+                            ));
                         }
                         items.push(fields);
                     } else {
                         return Err(ToonError::UnexpectedEOF);
                     }
                 }
-                
+
                 lists.insert(name.trim().to_string(), ToonList { schema, items });
             } else if let Some((key, value)) = trimmed.split_once(':') {
                 // Regular key-value pair
@@ -177,9 +201,12 @@ tasks[2]{id, title, status}:
         let doc = ToonParser::parse(input).expect("Failed to parse log");
         assert_eq!(doc.metadata.get("sprint").unwrap(), "4.9");
         assert_eq!(doc.metadata.get("team").unwrap(), "PHAROS_STRATEGY_CORE");
-        
+
         let velocity = doc.lists.get("velocity").unwrap();
-        assert_eq!(velocity.schema, vec!["target_ect", "actual_ect", "variance"]);
+        assert_eq!(
+            velocity.schema,
+            vec!["target_ect", "actual_ect", "variance"]
+        );
         assert_eq!(velocity.items[0], vec!["20", "17", "-3"]);
 
         let tasks = doc.lists.get("tasks").unwrap();
@@ -200,13 +227,16 @@ tasks[2]{id, title, status}:
     fn test_should_handle_extreme_density_logs_when_parsing_100k_entries() {
         let mut input = String::from("logs[100000]{t, l, m}:\n");
         for i in 0..100000 {
-            input.push_str(&format!("  2026-05-22T10:00:00Z, INFO, \"Message {}\"\n", i));
+            input.push_str(&format!(
+                "  2026-05-22T10:00:00Z, INFO, \"Message {}\"\n",
+                i
+            ));
         }
-        
+
         let start = std::time::Instant::now();
         let doc = ToonParser::parse(&input).expect("Failed to parse 100k log");
         let duration = start.elapsed();
-        
+
         assert_eq!(doc.lists.get("logs").unwrap().items.len(), 100000);
         println!("Parsed 100k entries in {:?}", duration);
     }

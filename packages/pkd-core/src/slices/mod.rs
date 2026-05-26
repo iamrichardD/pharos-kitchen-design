@@ -33,13 +33,10 @@ impl SliceDispatcher {
         };
 
         // 2. Route based on Category
-        match category {
-            "Dishwashers" => {
-                if let Err(e) = Self::validate_warewashing(metadata) {
-                    errors.extend(e);
-                }
+        if category == "Dishwashers" {
+            if let Err(e) = Self::validate_warewashing(metadata) {
+                errors.extend(e);
             }
-            _ => {} // Fallback for categories without slices.
         }
 
         if errors.is_empty() {

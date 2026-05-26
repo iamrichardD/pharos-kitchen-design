@@ -8,15 +8,15 @@
  * Traceability: Issue #10 - Auth Handshake
  * ======================================================================== */
 
-use crate::models::{PharosRole, PharosEnv};
-use anyhow::{Result, anyhow};
+use crate::models::{PharosEnv, PharosRole};
+use anyhow::{anyhow, Result};
+use colored::*;
+use jsonwebtoken::{decode, decode_header, DecodingKey, Validation};
 use keyring::Entry;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
 use tokio::time::sleep;
-use colored::*;
-use jsonwebtoken::{decode_header, decode, DecodingKey, Validation};
 
 const AUTH_SERVICE_BASE: &str = "pharos-kitchen-design";
 const TOKEN_KEY: &str = "access_token";
@@ -58,9 +58,9 @@ pub(crate) struct Claims {
 }
 
 /// Implementation of the Pharos Identity Bridge client.
-/// 
-/// Purpose: Manages the lifecycle of a CLI session, including RFC 8628 
-/// authorization, secure token storage in the system keyring, and 
+///
+/// Purpose: Manages the lifecycle of a CLI session, including RFC 8628
+/// authorization, secure token storage in the system keyring, and
 /// identity display.
 #[derive(Clone)]
 pub struct AuthManager {
@@ -86,16 +86,17 @@ impl AuthManager {
     }
 
     /// Initiates the RFC 8628 Device Authorization Flow.
-    /// 
-    /// Why: This flow is essential for CLI-based identity without local 
-    /// browser redirection. It ensures that designers can authenticate on 
-    /// restricted workstations (e.g., BIM managers' machines) while 
+    ///
+    /// Why: This flow is essential for CLI-based identity without local
+    /// browser redirection. It ensures that designers can authenticate on
+    /// restricted workstations (e.g., BIM managers' machines) while
     /// approving the session via a secure personal device.
     pub async fn login(&self) -> Result<()> {
         println!("{} Connecting to Pharos Identity Bridge...", "ℹ".blue());
 
         // 1. Request Device Code
-        let device_resp: DeviceAuthResponse = self.client
+        let device_resp: DeviceAuthResponse = self
+            .client
             .post(format!("{}/auth/device", self.base_url))
             .json(&serde_json::json!({ "client_id": "pkd-cli" }))
             .send()
@@ -104,8 +105,14 @@ impl AuthManager {
             .await?;
 
         println!("\n{} Action Required!", "⚠".yellow().bold());
-        println!("1. Open your browser and navigate to: {}", device_resp.verification_uri.cyan().underline());
-        println!("2. Enter the following code: {}", device_resp.user_code.green().bold());
+        println!(
+            "1. Open your browser and navigate to: {}",
+            device_resp.verification_uri.cyan().underline()
+        );
+        println!(
+            "2. Enter the following code: {}",
+            device_resp.user_code.green().bold()
+        );
         println!("\n{} Waiting for authorization...", "⌛".blue());
 
         // 2. Poll for Token
@@ -113,7 +120,8 @@ impl AuthManager {
         loop {
             sleep(poll_interval).await;
 
-            let token_resp: TokenResponse = self.client
+            let token_resp: TokenResponse = self
+                .client
                 .post(format!("{}/auth/token", self.base_url))
                 .json(&serde_json::json!({
                     "device_code": device_resp.device_code,
@@ -125,7 +133,12 @@ impl AuthManager {
                 .await?;
 
             match token_resp {
-                TokenResponse::Success { access_token, id_token, refresh_token, .. } => {
+                TokenResponse::Success {
+                    access_token,
+                    id_token,
+                    refresh_token,
+                    ..
+                } => {
                     self.store_tokens(&access_token, &id_token, &refresh_token)?;
                     println!("{} Login successful!", "✔".green());
                     return Ok(());
@@ -142,9 +155,9 @@ impl AuthManager {
     }
 
     /// Revokes the local session and clears the system keyring.
-    /// 
-    /// Why: To ensure that abandoned CLI sessions do not become permanent 
-    /// attack vectors. Clearing the keyring is the primary security gate 
+    ///
+    /// Why: To ensure that abandoned CLI sessions do not become permanent
+    /// attack vectors. Clearing the keyring is the primary security gate
     /// for Pharos local-host integrity.
     pub fn logout(&self) -> Result<()> {
         let service = self.get_service_name();
@@ -156,14 +169,18 @@ impl AuthManager {
         let _ = entry_id.delete_password();
         let _ = entry_refresh.delete_password();
 
-        println!("{} Logged out successfully from '{}' environment.", "✔".green(), self.env);
+        println!(
+            "{} Logged out successfully from '{}' environment.",
+            "✔".green(),
+            self.env
+        );
         Ok(())
     }
 
     /// Displays the current identity and roles for the active session.
-    /// 
-    /// Why: Provides immediate feedback to the user on their authorization 
-    /// state (e.g., verifying their role as IKD or ADMIN) without performing 
+    ///
+    /// Why: Provides immediate feedback to the user on their authorization
+    /// state (e.g., verifying their role as IKD or ADMIN) without performing
     /// a full server-side signature check, reducing latency.
     pub fn whoami(&self) -> Result<()> {
         let service = self.get_service_name();
@@ -171,8 +188,16 @@ impl AuthManager {
         match entry.get_password() {
             Ok(token) => {
                 let claims = self.decode_id_token_insecure(&token)?;
-                println!("{} Environment: {}", "ℹ".blue(), self.env.to_string().cyan());
-                println!("{} Authenticated as: {}", "✔".green(), claims.email.unwrap_or_else(|| claims.sub.clone()).bold());
+                println!(
+                    "{} Environment: {}",
+                    "ℹ".blue(),
+                    self.env.to_string().cyan()
+                );
+                println!(
+                    "{} Authenticated as: {}",
+                    "✔".green(),
+                    claims.email.unwrap_or_else(|| claims.sub.clone()).bold()
+                );
                 if let Some(role) = claims.role {
                     println!("{} Role: {}", "ℹ".blue(), role.yellow());
                 }
@@ -186,8 +211,8 @@ impl AuthManager {
     }
 
     /// Retrieves the current role from the stored ID token.
-    /// 
-    /// Why: Enables local "Fail Fast" authorization checks before making 
+    ///
+    /// Why: Enables local "Fail Fast" authorization checks before making
     /// expensive network calls to the Auth Bridge.
     pub fn get_current_role(&self) -> Result<Option<PharosRole>> {
         let service = self.get_service_name();
@@ -199,7 +224,9 @@ impl AuthManager {
                     Some(role_str) => {
                         // Cognito roles are stored as SCREAMING_SNAKE_CASE strings
                         let role: PharosRole = serde_json::from_str(&format!("\"{}\"", role_str))
-                            .map_err(|e| anyhow!("Unknown Pharos role '{}': {}", role_str, e))?;
+                            .map_err(|e| {
+                            anyhow!("Unknown Pharos role '{}': {}", role_str, e)
+                        })?;
                         Ok(Some(role))
                     }
                     None => Ok(None),
@@ -215,11 +242,8 @@ impl AuthManager {
         validation.validate_exp = false; // We want to check roles even if session is stale
         validation.insecure_disable_signature_validation();
 
-        let token_data = decode::<Claims>(
-            token, 
-            &DecodingKey::from_secret("".as_ref()),
-            &validation
-        )?;
+        let token_data =
+            decode::<Claims>(token, &DecodingKey::from_secret("".as_ref()), &validation)?;
         Ok(token_data.claims)
     }
 
@@ -232,7 +256,13 @@ impl AuthManager {
         }
         let service = self.get_service_name();
         let entry = Entry::new(&service, TOKEN_KEY)?;
-        entry.get_password().map_err(|_| anyhow!("Not authenticated in '{}' environment. Please run `pkd --env {} auth login`", self.env, self.env))
+        entry.get_password().map_err(|_| {
+            anyhow!(
+                "Not authenticated in '{}' environment. Please run `pkd --env {} auth login`",
+                self.env,
+                self.env
+            )
+        })
     }
 
     fn store_tokens(&self, access: &str, id: &str, refresh: &str) -> Result<()> {
@@ -247,9 +277,15 @@ impl AuthManager {
         let entry_id = Entry::new(&service, ID_TOKEN_KEY)?;
         let entry_refresh = Entry::new(&service, REFRESH_TOKEN_KEY)?;
 
-        entry_access.set_password(access).map_err(|e| anyhow!("Failed to store access token: {}", e))?;
-        entry_id.set_password(id).map_err(|e| anyhow!("Failed to store ID token: {}", e))?;
-        entry_refresh.set_password(refresh).map_err(|e| anyhow!("Failed to store refresh token: {}", e))?;
+        entry_access
+            .set_password(access)
+            .map_err(|e| anyhow!("Failed to store access token: {}", e))?;
+        entry_id
+            .set_password(id)
+            .map_err(|e| anyhow!("Failed to store ID token: {}", e))?;
+        entry_refresh
+            .set_password(refresh)
+            .map_err(|e| anyhow!("Failed to store refresh token: {}", e))?;
 
         Ok(())
     }
@@ -258,16 +294,18 @@ impl AuthManager {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use wiremock::matchers::{body_json, method, path};
     use wiremock::MockServer;
-    use wiremock::matchers::{method, path, body_json};
-    use wiremock::{ResponseTemplate, Mock};
+    use wiremock::{Mock, ResponseTemplate};
 
     #[tokio::test]
     async fn test_should_return_role_when_id_token_contains_it() {
         let auth_mgr = AuthManager::new("http://localhost", PharosEnv::Dev);
-        
+
         // For this unit test, we'll verify the parsing logic in get_current_role
-        let claims_decoded = auth_mgr.decode_id_token_insecure(&format_mock_token("ADMIN")).unwrap();
+        let claims_decoded = auth_mgr
+            .decode_id_token_insecure(&format_mock_token("ADMIN"))
+            .unwrap();
         assert_eq!(claims_decoded.role, Some("ADMIN".to_string()));
     }
 
@@ -279,8 +317,9 @@ mod tests {
             "exp": 9999999999u64
         });
         // This is a minimal JWT format for insecure decoding (UrlSafeNoPad)
-        use base64::{Engine as _, engine::general_purpose};
-        let payload = general_purpose::URL_SAFE_NO_PAD.encode(serde_json::to_string(&claims).unwrap());
+        use base64::{engine::general_purpose, Engine as _};
+        let payload =
+            general_purpose::URL_SAFE_NO_PAD.encode(serde_json::to_string(&claims).unwrap());
         format!("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.{}.signature", payload)
     }
 

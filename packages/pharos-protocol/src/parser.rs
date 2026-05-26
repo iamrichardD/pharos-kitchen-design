@@ -8,9 +8,9 @@
  * Traceability: ADR 0024, RFC 2378 Appendix C
  * ======================================================================== */
 
-use thiserror::Error;
 use crate::ast::{Command, SelectionFilter};
 use crate::lexer::tokenize;
+use thiserror::Error;
 
 #[derive(Error, Debug, PartialEq, Eq)]
 pub enum ProtocolError {
@@ -36,41 +36,55 @@ pub fn parse_command(line: &str) -> Result<Command, ProtocolError> {
         "fields" => Ok(Command::Fields(tokens[1..].to_vec())),
         "id" => {
             if tokens.len() < 2 {
-                return Err(ProtocolError::SyntaxError("ID command requires an identifier".to_string()));
+                return Err(ProtocolError::SyntaxError(
+                    "ID command requires an identifier".to_string(),
+                ));
             }
             Ok(Command::Id(tokens[1..].join(" ")))
         }
         "set" => Ok(Command::Set(tokens[1..].to_vec())),
         "login" => {
             if tokens.len() < 2 {
-                return Err(ProtocolError::SyntaxError("Login command requires an alias".to_string()));
+                return Err(ProtocolError::SyntaxError(
+                    "Login command requires an alias".to_string(),
+                ));
             }
             Ok(Command::Login(tokens[1].clone()))
         }
         "logout" => Ok(Command::Logout),
         "answer" => {
             if tokens.len() < 2 {
-                return Err(ProtocolError::SyntaxError("Answer command requires a response".to_string()));
+                return Err(ProtocolError::SyntaxError(
+                    "Answer command requires a response".to_string(),
+                ));
             }
             Ok(Command::Answer(tokens[1].clone()))
         }
         "clear" => {
             if tokens.len() < 2 {
-                return Err(ProtocolError::SyntaxError("Clear command requires a password".to_string()));
+                return Err(ProtocolError::SyntaxError(
+                    "Clear command requires a password".to_string(),
+                ));
             }
             Ok(Command::Clear(tokens[1].clone()))
         }
         "email" => {
             if tokens.len() < 2 {
-                return Err(ProtocolError::SyntaxError("Email command requires a user ID".to_string()));
+                return Err(ProtocolError::SyntaxError(
+                    "Email command requires a user ID".to_string(),
+                ));
             }
             Ok(Command::Email(tokens[1].clone()))
         }
         "xlogin" => {
             if tokens.len() < 3 {
-                return Err(ProtocolError::SyntaxError("XLogin requires an option and an alias".to_string()));
+                return Err(ProtocolError::SyntaxError(
+                    "XLogin requires an option and an alias".to_string(),
+                ));
             }
-            let option = tokens[1].parse::<u32>().map_err(|_| ProtocolError::InvalidArgument("XLogin option must be numeric".to_string()))?;
+            let option = tokens[1].parse::<u32>().map_err(|_| {
+                ProtocolError::InvalidArgument("XLogin option must be numeric".to_string())
+            })?;
             Ok(Command::XLogin(option, tokens[2].clone()))
         }
         "add" => {
@@ -79,7 +93,10 @@ pub fn parse_command(line: &str) -> Result<Command, ProtocolError> {
                 if let Some((k, v)) = parse_attr_value(token) {
                     pairs.push((k, v));
                 } else {
-                    return Err(ProtocolError::SyntaxError(format!("Add command expects field=value pairs, found '{}'", token)));
+                    return Err(ProtocolError::SyntaxError(format!(
+                        "Add command expects field=value pairs, found '{}'",
+                        token
+                    )));
                 }
             }
             Ok(Command::Add(pairs))
@@ -93,7 +110,10 @@ pub fn parse_command(line: &str) -> Result<Command, ProtocolError> {
                 pos += 1;
                 returns.extend(tokens[pos..].iter().cloned());
             }
-            Ok(Command::Query { selections, returns })
+            Ok(Command::Query {
+                selections,
+                returns,
+            })
         }
         "delete" => {
             let mut pos = 1;
@@ -119,11 +139,18 @@ pub fn parse_command(line: &str) -> Result<Command, ProtocolError> {
                 if let Some((k, v)) = parse_attr_value(&tokens[pos]) {
                     modifications.push((k, v));
                 } else {
-                    return Err(ProtocolError::SyntaxError(format!("Change modification expects field=value, found '{}'", tokens[pos])));
+                    return Err(ProtocolError::SyntaxError(format!(
+                        "Change modification expects field=value, found '{}'",
+                        tokens[pos]
+                    )));
                 }
                 pos += 1;
             }
-            Ok(Command::Change { selections, modifications, force })
+            Ok(Command::Change {
+                selections,
+                modifications,
+                force,
+            })
         }
         "help" => {
             let mut target = None;
@@ -141,7 +168,9 @@ pub fn parse_command(line: &str) -> Result<Command, ProtocolError> {
         }
         "auth" => {
             if tokens.len() < 3 {
-                return Err(ProtocolError::SyntaxError("Auth requires public_key and signature".to_string()));
+                return Err(ProtocolError::SyntaxError(
+                    "Auth requires public_key and signature".to_string(),
+                ));
             }
             Ok(Command::Auth {
                 public_key: tokens[1].clone(),
@@ -150,7 +179,9 @@ pub fn parse_command(line: &str) -> Result<Command, ProtocolError> {
         }
         "auth-check" => {
             if tokens.len() < 4 {
-                return Err(ProtocolError::SyntaxError("AuthCheck requires public_key, signature, and challenge".to_string()));
+                return Err(ProtocolError::SyntaxError(
+                    "AuthCheck requires public_key, signature, and challenge".to_string(),
+                ));
             }
             Ok(Command::AuthCheck {
                 public_key: tokens[1].clone(),
@@ -165,9 +196,16 @@ pub fn parse_command(line: &str) -> Result<Command, ProtocolError> {
 
 const MAX_PARSE_DEPTH: usize = 10;
 
-fn parse_expression(tokens: &[String], pos: &mut usize, stop_words: &[&str], depth: usize) -> Result<SelectionFilter, ProtocolError> {
+fn parse_expression(
+    tokens: &[String],
+    pos: &mut usize,
+    stop_words: &[&str],
+    depth: usize,
+) -> Result<SelectionFilter, ProtocolError> {
     if depth > MAX_PARSE_DEPTH {
-        return Err(ProtocolError::SyntaxError("Maximum query nesting depth exceeded".to_string()));
+        return Err(ProtocolError::SyntaxError(
+            "Maximum query nesting depth exceeded".to_string(),
+        ));
     }
 
     let mut and_filters = Vec::new();
@@ -193,7 +231,12 @@ fn parse_expression(tokens: &[String], pos: &mut usize, stop_words: &[&str], dep
     }
 }
 
-fn parse_or_expression(tokens: &[String], pos: &mut usize, stop_words: &[&str], depth: usize) -> Result<SelectionFilter, ProtocolError> {
+fn parse_or_expression(
+    tokens: &[String],
+    pos: &mut usize,
+    stop_words: &[&str],
+    depth: usize,
+) -> Result<SelectionFilter, ProtocolError> {
     let mut or_filters = Vec::new();
     or_filters.push(parse_primary_expression(tokens, pos, stop_words, depth)?);
 
@@ -209,9 +252,16 @@ fn parse_or_expression(tokens: &[String], pos: &mut usize, stop_words: &[&str], 
     }
 }
 
-fn parse_primary_expression(tokens: &[String], pos: &mut usize, stop_words: &[&str], depth: usize) -> Result<SelectionFilter, ProtocolError> {
+fn parse_primary_expression(
+    tokens: &[String],
+    pos: &mut usize,
+    stop_words: &[&str],
+    depth: usize,
+) -> Result<SelectionFilter, ProtocolError> {
     if *pos >= tokens.len() {
-        return Err(ProtocolError::SyntaxError("Unexpected end of input".to_string()));
+        return Err(ProtocolError::SyntaxError(
+            "Unexpected end of input".to_string(),
+        ));
     }
 
     let token = &tokens[*pos];
@@ -219,7 +269,9 @@ fn parse_primary_expression(tokens: &[String], pos: &mut usize, stop_words: &[&s
         *pos += 1;
         let expr = parse_expression(tokens, pos, stop_words, depth + 1)?;
         if *pos >= tokens.len() || tokens[*pos] != ")" {
-            return Err(ProtocolError::SyntaxError("Missing closing parenthesis".to_string()));
+            return Err(ProtocolError::SyntaxError(
+                "Missing closing parenthesis".to_string(),
+            ));
         }
         *pos += 1;
         Ok(expr)
@@ -255,8 +307,15 @@ mod tests {
     #[test]
     fn test_should_parse_query_with_projection() {
         let cmd = parse_command("query manufacturer=3m return name voltage").unwrap();
-        if let Command::Query { selections, returns } = cmd {
-            assert_eq!(selections, SelectionFilter::Single(Some("manufacturer".to_string()), "3m".to_string()));
+        if let Command::Query {
+            selections,
+            returns,
+        } = cmd
+        {
+            assert_eq!(
+                selections,
+                SelectionFilter::Single(Some("manufacturer".to_string()), "3m".to_string())
+            );
             assert_eq!(returns, vec!["name".to_string(), "voltage".to_string()]);
         } else {
             panic!("Expected Query AST");
@@ -265,7 +324,8 @@ mod tests {
 
     #[test]
     fn test_should_parse_query_with_or_grouping() {
-        let cmd = parse_command("query (manufacturer=hobart|manufacturer=vulcan) voltage=208").unwrap();
+        let cmd =
+            parse_command("query (manufacturer=hobart|manufacturer=vulcan) voltage=208").unwrap();
         if let Command::Query { selections, .. } = cmd {
             let expected = SelectionFilter::And(vec![
                 SelectionFilter::Or(vec![

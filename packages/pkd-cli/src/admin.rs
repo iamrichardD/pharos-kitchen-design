@@ -8,15 +8,15 @@
  * Traceability: Issue #12 - Admin Control Plane, ADR 0023
  * ======================================================================== */
 
-use anyhow::{Result, anyhow};
-use reqwest::{Client, RequestBuilder};
-use serde::{Deserialize, Serialize};
-use colored::*;
-use std::fs;
-use std::path::PathBuf;
-use crate::models::{PharosRole, PharosEnv};
 use crate::auth::AuthManager;
 use crate::config::PathResolver;
+use crate::models::{PharosEnv, PharosRole};
+use anyhow::{anyhow, Result};
+use colored::*;
+use reqwest::{Client, RequestBuilder};
+use serde::{Deserialize, Serialize};
+use std::fs;
+use std::path::PathBuf;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct User {
@@ -36,9 +36,9 @@ struct LocalContext {
 }
 
 /// Implementation of the Pharos Admin Control Plane client.
-/// 
-/// Purpose: Orchestrates administrative actions via the Identity Bridge, 
-/// ensuring that platform-wide role assignments and metadata updates 
+///
+/// Purpose: Orchestrates administrative actions via the Identity Bridge,
+/// ensuring that platform-wide role assignments and metadata updates
 /// are strictly audited and performed only by authorized administrators.
 pub struct AdminManager {
     client: Client,
@@ -60,6 +60,7 @@ impl AdminManager {
     }
 
     /// Allows overriding the context path for testing isolation.
+    #[allow(dead_code)]
     pub fn with_context_path(mut self, path: PathBuf) -> Self {
         self.context_path = Some(path);
         self
@@ -69,7 +70,7 @@ impl AdminManager {
         if let Some(ref p) = self.context_path {
             return Ok(p.clone());
         }
-        
+
         let config_dir = PathResolver::resolve_config_dir(self.env)?;
         Ok(config_dir.join(".pkd_context"))
     }
@@ -105,8 +106,8 @@ impl AdminManager {
     }
 
     /// Fetches the list of all users from the Pharos Identity Bridge.
-    /// 
-    /// Why: Essential for platform transparency, allowing administrators 
+    ///
+    /// Why: Essential for platform transparency, allowing administrators
     /// to audit active designers and their current access levels.
     pub async fn list_users(&self) -> Result<()> {
         let rb = self.client.get(format!("{}/admin/users", self.base_url));
@@ -123,22 +124,38 @@ impl AdminManager {
         println!("{}", "-".repeat(65));
 
         for user in data.users {
-            let email = user.attributes.get("email").map(|s| s.as_str()).unwrap_or(&user.username);
-            let role = user.attributes.get("custom:role").map(|s| s.as_str()).unwrap_or("NONE");
-            println!("{:<30} {:<15} {:<15}", email.cyan(), user.status.green(), role.yellow());
+            let email = user
+                .attributes
+                .get("email")
+                .map(|s| s.as_str())
+                .unwrap_or(&user.username);
+            let role = user
+                .attributes
+                .get("custom:role")
+                .map(|s| s.as_str())
+                .unwrap_or("NONE");
+            println!(
+                "{:<30} {:<15} {:<15}",
+                email.cyan(),
+                user.status.green(),
+                role.yellow()
+            );
         }
 
         Ok(())
     }
 
     /// Updates a user's role in the Pharos platform.
-    /// 
-    /// Why: Provides the mechanism for granting or revoking high-rigor 
-    /// access (e.g., promoting an IKD to ADMIN) through a secure, 
+    ///
+    /// Why: Provides the mechanism for granting or revoking high-rigor
+    /// access (e.g., promoting an IKD to ADMIN) through a secure,
     /// audited CLI command.
     pub async fn update_user(&self, email: &str, role: PharosRole) -> Result<()> {
-        let rb = self.client.post(format!("{}/admin/users/update", self.base_url));
-        let resp = self.inject_auth(rb)?
+        let rb = self
+            .client
+            .post(format!("{}/admin/users/update", self.base_url));
+        let resp = self
+            .inject_auth(rb)?
             .json(&serde_json::json!({
                 "email": email,
                 "role": role.to_string()
@@ -151,18 +168,23 @@ impl AdminManager {
             return Err(anyhow!("Failed to update user: {}", err_body));
         }
 
-        println!("{} Successfully updated {} to role: {}", "✔".green(), email.bold(), role.to_string().yellow());
+        println!(
+            "{} Successfully updated {} to role: {}",
+            "✔".green(),
+            email.bold(),
+            role.to_string().yellow()
+        );
         Ok(())
     }
 
     /// Prepares the local environment for user impersonation.
-    /// 
-    /// Why: Vital for debugging and compliance audits. Impersonation 
-    /// allows administrators to see exactly what a designer sees 
+    ///
+    /// Why: Vital for debugging and compliance audits. Impersonation
+    /// allows administrators to see exactly what a designer sees
     /// without requiring their private credentials.
     pub fn impersonate(&self, email: &str) -> Result<()> {
         let mut ctx = self.load_context();
-        
+
         if email == "clear" || email == "none" {
             ctx.impersonated_user = None;
             self.save_context(&ctx)?;
@@ -170,10 +192,17 @@ impl AdminManager {
         } else {
             ctx.impersonated_user = Some(email.to_string());
             self.save_context(&ctx)?;
-            println!("{} Impersonation context set for: {}", "✔".green(), email.bold());
-            println!("{} All subsequent commands will use the identity of this user.", "ℹ".blue());
+            println!(
+                "{} Impersonation context set for: {}",
+                "✔".green(),
+                email.bold()
+            );
+            println!(
+                "{} All subsequent commands will use the identity of this user.",
+                "ℹ".blue()
+            );
         }
-        
+
         Ok(())
     }
 }
@@ -181,17 +210,17 @@ impl AdminManager {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use wiremock::MockServer;
-    use wiremock::matchers::{method, path, header, body_json};
-    use wiremock::{ResponseTemplate, Mock};
     use tempfile::NamedTempFile;
+    use wiremock::matchers::{body_json, header, method, path};
+    use wiremock::MockServer;
+    use wiremock::{Mock, ResponseTemplate};
 
     #[tokio::test]
     async fn test_should_list_users_when_admin_authenticated() {
         let mock_server = MockServer::start().await;
         let auth_mgr = AuthManager::new(&mock_server.uri(), PharosEnv::Dev);
         let temp_context = NamedTempFile::new().unwrap();
-        
+
         // Mock token retrieval
         std::env::set_var("CI", "true"); // Keyring bypass
         std::env::set_var("PHAROS_TEST_TOKEN", "mock_access_admin");
@@ -216,7 +245,7 @@ mod tests {
 
         let admin_mgr = AdminManager::new(&mock_server.uri(), auth_mgr, PharosEnv::Dev)
             .with_context_path(temp_context.path().to_path_buf());
-        
+
         let result = admin_mgr.list_users().await;
         assert!(result.is_ok());
     }
@@ -226,7 +255,7 @@ mod tests {
         let mock_server = MockServer::start().await;
         let auth_mgr = AuthManager::new(&mock_server.uri(), PharosEnv::Dev);
         let temp_context = NamedTempFile::new().unwrap();
-        
+
         std::env::set_var("CI", "true");
         std::env::set_var("PHAROS_TEST_TOKEN", "mock_access_admin");
 
@@ -245,8 +274,10 @@ mod tests {
 
         let admin_mgr = AdminManager::new(&mock_server.uri(), auth_mgr, PharosEnv::Dev)
             .with_context_path(temp_context.path().to_path_buf());
-        
-        let result = admin_mgr.update_user("test@example.com", PharosRole::Admin).await;
+
+        let result = admin_mgr
+            .update_user("test@example.com", PharosRole::Admin)
+            .await;
         assert!(result.is_ok());
     }
 
@@ -255,7 +286,7 @@ mod tests {
         let mock_server = MockServer::start().await;
         let auth_mgr = AuthManager::new(&mock_server.uri(), PharosEnv::Dev);
         let temp_context = NamedTempFile::new().unwrap();
-        
+
         std::env::set_var("CI", "true");
         std::env::set_var("PHAROS_TEST_TOKEN", "mock_access_admin");
 
@@ -271,9 +302,9 @@ mod tests {
 
         let admin_mgr = AdminManager::new(&mock_server.uri(), auth_mgr, PharosEnv::Dev)
             .with_context_path(temp_context.path().to_path_buf());
-        
+
         let _ = admin_mgr.impersonate("target@example.com");
-        
+
         let result = admin_mgr.list_users().await;
         assert!(result.is_ok());
     }

@@ -16,11 +16,11 @@ const MB: f64 = 1024.0 * 1024.0;
 const _GB: f64 = 1024.0 * 1024.0 * 1024.0;
 
 /// Formats raw protocol values into human-readable strings based on key hints.
-/// 
+///
 /// Why: To provide a consistent UX across all Pharos CLI tools (pkd, mdb, ph).
 pub fn format_human(key: &str, value: &str) -> String {
     let lower_key = key.to_lowercase();
-    
+
     // 1. Memory/Storage conversions
     if lower_key.ends_with("_kb") {
         if let Ok(kb) = value.parse::<f64>() {

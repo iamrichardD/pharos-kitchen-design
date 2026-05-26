@@ -9,9 +9,9 @@
  * ======================================================================== */
 
 use extism_pdk::*;
-use pharos_protocol::metadata::{PharosMetadataBuffer, NormalizationStatus, ParameterValue};
-use regex::Regex;
 use once_cell::sync::Lazy;
+use pharos_protocol::metadata::{NormalizationStatus, ParameterValue, PharosMetadataBuffer};
+use regex::Regex;
 
 // Mandate: [PERF-GAP] Regex recompilation prevention.
 // Pre-compile regexes once when the WASM module loads.
@@ -20,7 +20,9 @@ static RE_PHASE: Lazy<Regex> = Lazy::new(|| Regex::new(r"(?i)(\d)PH|(\d)\s*Phase
 static RE_HZ: Lazy<Regex> = Lazy::new(|| Regex::new(r"(?i)(\d{2})HZ").unwrap());
 
 #[plugin_fn]
-pub fn normalize(Json(mut buffer): Json<PharosMetadataBuffer>) -> FnResult<Json<PharosMetadataBuffer>> {
+pub fn normalize(
+    Json(mut buffer): Json<PharosMetadataBuffer>,
+) -> FnResult<Json<PharosMetadataBuffer>> {
     let input = &buffer.raw_input;
     let mut matched = false;
 
@@ -28,7 +30,9 @@ pub fn normalize(Json(mut buffer): Json<PharosMetadataBuffer>) -> FnResult<Json<
     if let Some(caps) = RE_VOLT.captures(input) {
         let val = caps.get(1).or(caps.get(2)).unwrap().as_str();
         if let Ok(n) = val.parse::<f64>() {
-            buffer.parameters.insert("voltage".to_string(), ParameterValue::Number(n));
+            buffer
+                .parameters
+                .insert("voltage".to_string(), ParameterValue::Number(n));
             matched = true;
         }
     }
@@ -37,7 +41,9 @@ pub fn normalize(Json(mut buffer): Json<PharosMetadataBuffer>) -> FnResult<Json<
     if let Some(caps) = RE_PHASE.captures(input) {
         let val = caps.get(1).or(caps.get(2)).unwrap().as_str();
         if let Ok(n) = val.parse::<f64>() {
-            buffer.parameters.insert("phase".to_string(), ParameterValue::Number(n));
+            buffer
+                .parameters
+                .insert("phase".to_string(), ParameterValue::Number(n));
             matched = true;
         }
     }
@@ -46,7 +52,9 @@ pub fn normalize(Json(mut buffer): Json<PharosMetadataBuffer>) -> FnResult<Json<
     if let Some(caps) = RE_HZ.captures(input) {
         let val = caps.get(1).unwrap().as_str();
         if let Ok(n) = val.parse::<f64>() {
-            buffer.parameters.insert("hertz".to_string(), ParameterValue::Number(n));
+            buffer
+                .parameters
+                .insert("hertz".to_string(), ParameterValue::Number(n));
             matched = true;
         }
     }
@@ -57,6 +65,6 @@ pub fn normalize(Json(mut buffer): Json<PharosMetadataBuffer>) -> FnResult<Json<
         buffer.status = NormalizationStatus::UnverifiedRawData;
         buffer.rejection_reason = Some("No Frymaster patterns matched".to_string());
     }
-    
+
     Ok(Json(buffer))
 }

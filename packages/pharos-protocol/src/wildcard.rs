@@ -17,8 +17,12 @@ pub enum WardenError {
 impl std::fmt::Display for WardenError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            WardenError::DepthExceeded => write!(f, "Temporal Warden: Maximum recursion depth exceeded."),
-            WardenError::IterationsExceeded => write!(f, "Temporal Warden: Maximum iteration count exceeded."),
+            WardenError::DepthExceeded => {
+                write!(f, "Temporal Warden: Maximum recursion depth exceeded.")
+            }
+            WardenError::IterationsExceeded => {
+                write!(f, "Temporal Warden: Maximum iteration count exceeded.")
+            }
         }
     }
 }
@@ -63,7 +67,7 @@ impl Warden {
 }
 
 /// Matches a string against a pattern containing RFC 2378 wildcards.
-/// 
+///
 /// Wildcards:
 /// - `*`: Matches zero or more characters.
 /// - `+`: Matches one or more characters.
@@ -73,11 +77,15 @@ pub fn wildcard_match(text: &str, pattern: &str) -> Result<bool, WardenError> {
     let text_chars: Vec<char> = text.chars().collect();
     let pattern_chars: Vec<char> = pattern.chars().collect();
     let mut warden = Warden::new();
-    
+
     match_internal(&text_chars, &pattern_chars, &mut warden)
 }
 
-fn match_internal(text: &[char], pattern: &[char], warden: &mut Warden) -> Result<bool, WardenError> {
+fn match_internal(
+    text: &[char],
+    pattern: &[char],
+    warden: &mut Warden,
+) -> Result<bool, WardenError> {
     warden.enter()?;
 
     let result = if pattern.is_empty() {
@@ -86,7 +94,8 @@ fn match_internal(text: &[char], pattern: &[char], warden: &mut Warden) -> Resul
         match pattern[0] {
             '*' => {
                 // zero or more: skip '*' in pattern, or skip one char in text and keep '*'
-                Ok(match_internal(text, &pattern[1..], warden)? || (!text.is_empty() && match_internal(&text[1..], pattern, warden)?))
+                Ok(match_internal(text, &pattern[1..], warden)?
+                    || (!text.is_empty() && match_internal(&text[1..], pattern, warden)?))
             }
             '+' => {
                 // one or more: must consume at least one char, then acts like '*'
@@ -94,7 +103,8 @@ fn match_internal(text: &[char], pattern: &[char], warden: &mut Warden) -> Resul
                     Ok(false)
                 } else {
                     // consume one, then allow zero or more of pattern '*' (recursive)
-                    Ok(match_internal(&text[1..], &pattern[1..], warden)? || match_internal(&text[1..], pattern, warden)?)
+                    Ok(match_internal(&text[1..], &pattern[1..], warden)?
+                        || match_internal(&text[1..], pattern, warden)?)
                 }
             }
             '?' => {
@@ -105,15 +115,21 @@ fn match_internal(text: &[char], pattern: &[char], warden: &mut Warden) -> Resul
                 // character set [abc]
                 if let Some(end_idx) = pattern.iter().position(|&c| c == ']') {
                     let set = &pattern[1..end_idx];
-                    Ok(!text.is_empty() && set.contains(&text[0]) && match_internal(&text[1..], &pattern[end_idx+1..], warden)?)
+                    Ok(!text.is_empty()
+                        && set.contains(&text[0])
+                        && match_internal(&text[1..], &pattern[end_idx + 1..], warden)?)
                 } else {
                     // Malformed pattern, treat as literal '['
-                    Ok(!text.is_empty() && text[0] == '[' && match_internal(&text[1..], &pattern[1..], warden)?)
+                    Ok(!text.is_empty()
+                        && text[0] == '['
+                        && match_internal(&text[1..], &pattern[1..], warden)?)
                 }
             }
             _ => {
                 // literal match
-                Ok(!text.is_empty() && text[0] == pattern[0] && match_internal(&text[1..], &pattern[1..], warden)?)
+                Ok(!text.is_empty()
+                    && text[0] == pattern[0]
+                    && match_internal(&text[1..], &pattern[1..], warden)?)
             }
         }
     };
@@ -162,11 +178,11 @@ mod tests {
 
     #[test]
     fn test_should_trigger_warden_on_pathological_wildcard() {
-        // This pattern causes exponential backtracking. 
+        // This pattern causes exponential backtracking.
         // With max_depth=10 and max_iterations=10000, it should fail fast.
         let text = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!";
         let pattern = "*a*a*a*a*a*a*a*a*a*a*a*a*a*a*b";
-        
+
         let result = wildcard_match(text, pattern);
         assert!(result.is_err());
         // Note: The specific error (Depth vs Iterations) may vary based on pattern complexity.

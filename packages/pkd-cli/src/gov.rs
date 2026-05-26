@@ -8,33 +8,40 @@
  * Traceability: Issue #115 - Local Governance Linter
  * ======================================================================== */
 
-use anyhow::{Result, anyhow};
+use anyhow::{anyhow, Result};
 use colored::*;
 use ignore::WalkBuilder;
+use regex::Regex;
 use std::fs;
 use std::path::{Path, PathBuf};
-use regex::Regex;
 
 pub async fn handle_gov_lint() -> Result<()> {
     println!("{} Running Pharos Governance Linter...", "ℹ".blue());
-    
+
     let mut violations = 0;
     let root = find_project_root()?;
-    
+
     // GOV-001, 002, 003: Source File Headers
     violations += lint_source_headers(&root)?;
-    
+
     // GOV-004, 005: ADR Standards
     violations += lint_adr_standards(&root)?;
-    
+
     // GOV-006: SPM Mandate
     violations += lint_spm_mandate(&root)?;
 
     if violations > 0 {
-        println!("\n{} Governance audit failed with {} violations.", "✘".red(), violations);
+        println!(
+            "\n{} Governance audit failed with {} violations.",
+            "✘".red(),
+            violations
+        );
         Err(anyhow!("Governance standards not met."))
     } else {
-        println!("\n{} Governance audit passed. Codebase is compliant.", "✔".green());
+        println!(
+            "\n{} Governance audit passed. Codebase is compliant.",
+            "✔".green()
+        );
         Ok(())
     }
 }
@@ -45,7 +52,9 @@ fn find_project_root() -> Result<PathBuf> {
         if let Some(parent) = current.parent() {
             current = parent.to_path_buf();
         } else {
-            return Err(anyhow!("Could not find project root (no .git directory found)."));
+            return Err(anyhow!(
+                "Could not find project root (no .git directory found)."
+            ));
         }
     }
     Ok(current)
@@ -61,7 +70,7 @@ fn lint_source_headers(root: &Path) -> Result<u32> {
     for entry in walker {
         let entry = entry?;
         let path = entry.path();
-        
+
         if !path.is_file() {
             continue;
         }
@@ -76,18 +85,22 @@ fn lint_source_headers(root: &Path) -> Result<u32> {
         if file_name.starts_with("shard_") && ext == "json" {
             continue;
         }
-        
-        // Standard Tooling Exemptions 
-        if file_name == "package-lock.json" || file_name == "SESSION_STATE.json" || file_name == "tsconfig.json" || file_name == "package.json" { 
-            continue; 
-        } 
-        
-        if path.to_string_lossy().contains("kcl-catalog/metadata/") && ext == "json" { 
-            continue; 
+
+        // Standard Tooling Exemptions
+        if file_name == "package-lock.json"
+            || file_name == "SESSION_STATE.json"
+            || file_name == "tsconfig.json"
+            || file_name == "package.json"
+        {
+            continue;
+        }
+
+        if path.to_string_lossy().contains("kcl-catalog/metadata/") && ext == "json" {
+            continue;
         }
         // Runtime Data Shards (explicit check)
         if path.to_string_lossy().contains("samples/") && ext == "json" {
-             continue;
+            continue;
         }
 
         let content = match fs::read_to_string(path) {
@@ -102,19 +115,33 @@ fn lint_source_headers(root: &Path) -> Result<u32> {
 
         // GOV-001: Standard Prologue
         if !header_blob.to_lowercase().contains("pharos kitchen design") {
-            println!("{} {} - Missing Standard Prologue (GOV-001)", "✘".red(), path.display());
+            println!(
+                "{} {} - Missing Standard Prologue (GOV-001)",
+                "✘".red(),
+                path.display()
+            );
             file_violated = true;
         }
 
         // GOV-002: FSL-1.1 License
-        if !header_blob.to_lowercase().contains("license") || !header_blob.to_lowercase().contains("fsl-1.1") {
-            println!("{} {} - Missing FSL-1.1 License (GOV-002)", "✘".red(), path.display());
+        if !header_blob.to_lowercase().contains("license")
+            || !header_blob.to_lowercase().contains("fsl-1.1")
+        {
+            println!(
+                "{} {} - Missing FSL-1.1 License (GOV-002)",
+                "✘".red(),
+                path.display()
+            );
             file_violated = true;
         }
 
         // GOV-003: Traceability
         if !header_blob.to_lowercase().contains("traceability") {
-            println!("{} {} - Missing Traceability (GOV-003)", "✘".red(), path.display());
+            println!(
+                "{} {} - Missing Traceability (GOV-003)",
+                "✘".red(),
+                path.display()
+            );
             file_violated = true;
         }
 
@@ -154,13 +181,21 @@ fn lint_adr_standards(root: &Path) -> Result<u32> {
 
         // GOV-004: ADR Naming
         if !adr_regex.is_match(file_name) {
-            println!("{} {} - Invalid ADR filename (GOV-004). Must match \\d{{4}}-.*\\.md", "✘".red(), file_name);
+            println!(
+                "{} {} - Invalid ADR filename (GOV-004). Must match \\d{{4}}-.*\\.md",
+                "✘".red(),
+                file_name
+            );
             adr_violated = true;
         }
 
         // GOV-005: ADR Indexing
         if !decision_log.contains(file_name) {
-            println!("{} {} - ADR not indexed in docs/DECISION_LOG.md (GOV-005)", "✘".red(), file_name);
+            println!(
+                "{} {} - ADR not indexed in docs/DECISION_LOG.md (GOV-005)",
+                "✘".red(),
+                file_name
+            );
             adr_violated = true;
         }
 
@@ -183,7 +218,10 @@ fn lint_spm_mandate(root: &Path) -> Result<u32> {
     let content = fs::read_to_string(gemini_md)?;
     // GOV-006: SPM Mandate
     if !content.contains("Senior Program Manager (SPM)") {
-        println!("{} GEMINI.md - Missing SPM role definition (GOV-006)", "✘".red());
+        println!(
+            "{} GEMINI.md - Missing SPM role definition (GOV-006)",
+            "✘".red()
+        );
         violations += 1;
     }
 
@@ -193,21 +231,29 @@ fn lint_spm_mandate(root: &Path) -> Result<u32> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tempfile::tempdir;
     use std::fs::File;
     use std::io::Write;
+    use tempfile::tempdir;
 
     #[test]
     fn test_should_pass_when_prologue_is_correct() {
         let dir = tempdir().unwrap();
         let file_path = dir.path().join("test.rs");
         let mut file = File::create(&file_path).unwrap();
-        writeln!(file, "/* ========================================================================").unwrap();
+        writeln!(
+            file,
+            "/* ========================================================================"
+        )
+        .unwrap();
         writeln!(file, " * Project: Pharos Kitchen Design (Project Prism)").unwrap();
         writeln!(file, " * License: FSL-1.1").unwrap();
         writeln!(file, " * Traceability: Issue #115").unwrap();
-        writeln!(file, " * ======================================================================== */").unwrap();
-        
+        writeln!(
+            file,
+            " * ======================================================================== */"
+        )
+        .unwrap();
+
         let violations = lint_source_headers(dir.path()).unwrap();
         assert_eq!(violations, 0);
     }
@@ -218,7 +264,7 @@ mod tests {
         let file_path = dir.path().join("test.rs");
         let mut file = File::create(&file_path).unwrap();
         writeln!(file, "// Just a comment").unwrap();
-        
+
         let violations = lint_source_headers(dir.path()).unwrap();
         assert!(violations > 0);
     }
@@ -229,7 +275,7 @@ mod tests {
         let file_path = dir.path().join("shard_123.json");
         let mut file = File::create(&file_path).unwrap();
         writeln!(file, "{{ \"data\": [] }}").unwrap();
-        
+
         let violations = lint_source_headers(dir.path()).unwrap();
         assert_eq!(violations, 0);
     }

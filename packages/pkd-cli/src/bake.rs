@@ -8,16 +8,16 @@
  * Traceability: Issue #53 - ETL Bake, Issue #124
  * ======================================================================== */
 
-use anyhow::{Result, anyhow};
+use anyhow::{anyhow, Result};
+use colored::*;
+use pkd_core::{PharosMetadata, PharosSchema, RegistryShard};
+use std::fs::{self, File};
 use std::path::Path;
 use tantivy::schema::*;
-use tantivy::{Index, IndexWriter, doc};
-use walkdir::WalkDir;
-use std::fs::{File, self};
+use tantivy::{doc, Index, IndexWriter};
 use tar::Builder;
+use walkdir::WalkDir;
 use zstd::stream::write::Encoder;
-use pkd_core::{PharosMetadata, PharosSchema, RegistryShard};
-use colored::*;
 
 pub struct BakeEngine {
     schema: Schema,
@@ -33,7 +33,7 @@ pub struct BakeEngine {
 impl BakeEngine {
     pub fn new() -> Self {
         let mut schema_builder = Schema::builder();
-        
+
         // Define Tantivy schema matching RFC 2378 attributes
         let f_sku = schema_builder.add_text_field("sku", STRING | STORED);
         let f_name = schema_builder.add_text_field("name", TEXT | STORED);
@@ -56,48 +56,71 @@ impl BakeEngine {
     }
 
     pub async fn run(&self, source: &Path, output: &Path) -> Result<()> {
-        println!("{} Starting Bake Engine (Incremental Shard Logic)...", "ℹ".blue());
-        
+        println!(
+            "{} Starting Bake Engine (Incremental Shard Logic)...",
+            "ℹ".blue()
+        );
+
         let mut metadata_records = Vec::new();
         let pharos_schema_json = include_str!("../../pkd-core/schema/pharos-schema.json");
         let pharos_schema: PharosSchema = serde_json::from_str(pharos_schema_json)?;
 
         for entry in WalkDir::new(source).into_iter().filter_map(|e| e.ok()) {
-            if entry.path().extension().map_or(false, |ext| ext == "json") {
+            if entry.path().extension().is_some_and(|ext| ext == "json") {
                 let content = fs::read_to_string(entry.path())?;
-                
+
                 // Try to parse as a Shard first
                 if let Ok(shard) = serde_json::from_str::<RegistryShard>(&content) {
                     println!("{} Processing shard: {}", "ℹ".blue(), shard.shard_id);
                     for (_, metadata) in shard.records {
                         // Validation Hard Gate (ADR-0023)
-                        if let Err(errors) = pkd_core::validator::SchemaValidator::validate_metadata(&pharos_schema, &metadata) {
-                            println!("{} Validation FAILED for SKU {} in shard {}:", "✘".red(), metadata.metadata_id, shard.shard_id);
+                        if let Err(errors) = pkd_core::validator::SchemaValidator::validate_metadata(
+                            &pharos_schema,
+                            &metadata,
+                        ) {
+                            println!(
+                                "{} Validation FAILED for SKU {} in shard {}:",
+                                "✘".red(),
+                                metadata.metadata_id,
+                                shard.shard_id
+                            );
                             for err in errors {
                                 println!("  - {}", err.to_string().yellow());
                             }
-                            return Err(anyhow!("Bake aborted: Integrity violation detected in shard."));
+                            return Err(anyhow!(
+                                "Bake aborted: Integrity violation detected in shard."
+                            ));
                         }
                         metadata_records.push(metadata);
                     }
                 } else {
                     // Fallback for single metadata files (backward compatibility during transition)
-                    let metadata: PharosMetadata = serde_json::from_str(&content)
-                        .map_err(|e| anyhow!("JSON Parsing Failure in {:?}: {}", entry.path(), e))?;
+                    let metadata: PharosMetadata = serde_json::from_str(&content).map_err(|e| {
+                        anyhow!("JSON Parsing Failure in {:?}: {}", entry.path(), e)
+                    })?;
 
-                    if let Err(errors) = pkd_core::validator::SchemaValidator::validate_metadata(&pharos_schema, &metadata) {
+                    if let Err(errors) = pkd_core::validator::SchemaValidator::validate_metadata(
+                        &pharos_schema,
+                        &metadata,
+                    ) {
                         println!("{} Validation FAILED for {:?}:", "✘".red(), entry.path());
                         for err in errors {
                             println!("  - {}", err.to_string().yellow());
                         }
-                        return Err(anyhow!("Bake aborted: Integrity violation detected in source data."));
+                        return Err(anyhow!(
+                            "Bake aborted: Integrity violation detected in source data."
+                        ));
                     }
                     metadata_records.push(metadata);
                 }
             }
         }
 
-        println!("{} Validation complete. Indexing {} records...", "✔".green(), metadata_records.len());
+        println!(
+            "{} Validation complete. Indexing {} records...",
+            "✔".green(),
+            metadata_records.len()
+        );
 
         // 2. Tantivy Indexing
         let index_path = output.join("search-index");
@@ -110,17 +133,35 @@ impl BakeEngine {
         let mut index_writer: IndexWriter = index.writer(50_000_000)?; // 50MB heap
 
         for metadata in metadata_records {
-            let sku = metadata.parameters.get("PKD_ProductNumber")
+            let sku = metadata
+                .parameters
+                .get("PKD_ProductNumber")
                 .or_else(|| metadata.parameters.get("PKD_ModelNumber"))
                 .map(|v: &pkd_core::ParameterValue| v.to_string())
                 .unwrap_or_else(|| metadata.metadata_id.clone());
 
             let name = metadata.name.clone();
-            let mfr = metadata.parameters.get("PKD_Manufacturer").map(|v: &pkd_core::ParameterValue| v.to_string()).unwrap_or_default();
-            let cat = metadata.parameters.get("PKD_MainCategory").map(|v: &pkd_core::ParameterValue| v.to_string()).unwrap_or_default();
-            let volt = metadata.parameters.get("PKD_Voltage").map(|v: &pkd_core::ParameterValue| v.to_string()).unwrap_or_default();
-            let btu = metadata.parameters.get("PKD_BTU").map(|v: &pkd_core::ParameterValue| v.to_string()).unwrap_or_default();
-            
+            let mfr = metadata
+                .parameters
+                .get("PKD_Manufacturer")
+                .map(|v: &pkd_core::ParameterValue| v.to_string())
+                .unwrap_or_default();
+            let cat = metadata
+                .parameters
+                .get("PKD_MainCategory")
+                .map(|v: &pkd_core::ParameterValue| v.to_string())
+                .unwrap_or_default();
+            let volt = metadata
+                .parameters
+                .get("PKD_Voltage")
+                .map(|v: &pkd_core::ParameterValue| v.to_string())
+                .unwrap_or_default();
+            let btu = metadata
+                .parameters
+                .get("PKD_BTU")
+                .map(|v: &pkd_core::ParameterValue| v.to_string())
+                .unwrap_or_default();
+
             // Full body search index
             let body = serde_json::to_string(&metadata.parameters)?;
 
@@ -140,8 +181,12 @@ impl BakeEngine {
 
         // 3. Tar-and-Compress (search-index.tar.zst)
         let archive_path = output.join("search-index.tar.zst");
-        println!("{} Compressing index into {:?}...", "ℹ".blue(), archive_path);
-        
+        println!(
+            "{} Compressing index into {:?}...",
+            "ℹ".blue(),
+            archive_path
+        );
+
         let archive_file = File::create(&archive_path)?;
         let mut encoder = Encoder::new(archive_file, 3)?; // Compression level 3
 
@@ -162,7 +207,10 @@ impl BakeEngine {
         fs::write(&manifest_path, &hash)?;
         println!("{} SHA-256: {}", "✔".green(), hash.cyan());
 
-        println!("{} Bake complete. Artifacts ready for promotion.", "✔".green());
+        println!(
+            "{} Bake complete. Artifacts ready for promotion.",
+            "✔".green()
+        );
         Ok(())
     }
 }
@@ -176,7 +224,7 @@ mod tests {
     async fn test_should_create_index_and_archive_when_valid_json_provided() {
         let source_dir = TempDir::new().unwrap();
         let output_dir = TempDir::new().unwrap();
-        
+
         // Create a valid Pharos JSON file with all mandatory parameters
         let valid_json = r#"{
             "pkd_prologue": { "project": "Pharos", "component": "Test", "file": "test.json", "author": "me", "license": "FSL-1.1", "purpose": "Testing", "traceability": "Issue-53" },
@@ -202,12 +250,12 @@ mod tests {
             "lod_geometry_specs": { "100": { "type": "BoundingBox", "dimensions": { "width": "1", "depth": "1", "height": "1" }, "description": "test" } },
             "performance_metadata": { "estimated_rfa_size_kb": 1, "procedural_lod_enabled": false, "ghost_link_active": false }
         }"#;
-        
+
         fs::write(source_dir.path().join("test.json"), valid_json).unwrap();
 
         let engine = BakeEngine::new();
         let result = engine.run(source_dir.path(), output_dir.path()).await;
-        
+
         if let Err(e) = &result {
             println!("Bake Error: {}", e);
         }
@@ -220,14 +268,14 @@ mod tests {
     async fn test_should_fail_fast_when_invalid_json_provided() {
         let source_dir = TempDir::new().unwrap();
         let output_dir = TempDir::new().unwrap();
-        
+
         // Missing mandatory fields
         let invalid_json = r#"{"name": "Incomplete"}"#;
         fs::write(source_dir.path().join("bad.json"), invalid_json).unwrap();
 
         let engine = BakeEngine::new();
         let result = engine.run(source_dir.path(), output_dir.path()).await;
-        
+
         assert!(result.is_err());
         let err_msg = result.unwrap_err().to_string();
         assert!(err_msg.contains("Bake aborted") || err_msg.contains("JSON Parsing Failure"));
@@ -237,7 +285,7 @@ mod tests {
     async fn test_should_create_index_from_shard() {
         let source_dir = TempDir::new().unwrap();
         let output_dir = TempDir::new().unwrap();
-        
+
         let shard_json = r#"{
             "shard_id": "test_shard",
             "v": "1.0.0",
@@ -267,14 +315,13 @@ mod tests {
                 }
             }
         }"#;
-        
+
         fs::write(source_dir.path().join("shard_test.json"), shard_json).unwrap();
 
         let engine = BakeEngine::new();
         let result = engine.run(source_dir.path(), output_dir.path()).await;
-        
+
         assert!(result.is_ok());
         assert!(output_dir.path().join("search-index").exists());
     }
-
 }

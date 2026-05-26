@@ -4,28 +4,28 @@
  * File: packages/pkd-cli/src/main.rs
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
- * Purpose: Entry point for the Pharos CLI (pkd). Implements the Admin-First 
+ * Purpose: Entry point for the Pharos CLI (pkd). Implements the Admin-First
  *          Control Plane strategy defined in ADR-0006.
  * Traceability: Issue #10 - CLI Implementation
  * ======================================================================== */
 
-mod auth;
 mod admin;
-mod models;
-mod guard;
+mod auth;
 mod bake;
 mod config;
 mod gov;
+mod guard;
+mod models;
 
-use anyhow::{Result, anyhow};
+use crate::admin::AdminManager;
+use crate::auth::AuthManager;
+use crate::config::PathResolver;
+use crate::guard::{Authorizable, Guard};
+use crate::models::{PharosEnv, PharosRole};
+use anyhow::{anyhow, Result};
 use clap::{Parser, Subcommand};
 use colored::*;
-use pkd_core::{PharosSchema, PharosMetadata};
-use crate::auth::AuthManager;
-use crate::admin::AdminManager;
-use crate::models::{PharosRole, PharosEnv};
-use crate::guard::{Guard, Authorizable};
-use crate::config::PathResolver;
+use pkd_core::{PharosMetadata, PharosSchema};
 use std::path::PathBuf;
 
 /// Pharos CLI (pkd) - The Admin-First Control Plane for Project Prism.
@@ -169,7 +169,7 @@ enum CoreCommands {
 async fn main() -> Result<()> {
     tracing_subscriber::fmt::init();
     let cli = Cli::parse();
-    
+
     let auth_url = PathResolver::resolve_auth_url(cli.env, cli.auth_url);
     let auth_mgr = AuthManager::new(&auth_url, cli.env);
     let admin_mgr = AdminManager::new(&auth_url, auth_mgr.clone(), cli.env);
@@ -256,16 +256,22 @@ async fn main() -> Result<()> {
 
 async fn handle_core_pulse() -> Result<()> {
     println!("{} Performing system pulse check...", "ℹ".blue());
-    
+
     // Call the core PulseEngine (ADR-0026)
     let status = pkd_core::pulse::PulseEngine::heartbeat()
         .map_err(|e| anyhow!("Pulse check failed: {}", e))?;
 
     println!("{} Status: {}", "  -".blue(), status.status.cyan());
-    println!("{} Integrity: {}", "  -".blue(), 
-        if status.integrity_verified { "Verified".green() } else { "Failed".red() }
+    println!(
+        "{} Integrity: {}",
+        "  -".blue(),
+        if status.integrity_verified {
+            "Verified".green()
+        } else {
+            "Failed".red()
+        }
     );
-    
+
     if status.integrity_verified {
         println!("\n{} System is healthy and synchronized.", "✔".green());
         Ok(())
@@ -278,7 +284,7 @@ async fn handle_core_validate(path: PathBuf) -> Result<()> {
     println!("{} Validating metadata at {:?}...", "ℹ".blue(), path);
     let content = std::fs::read_to_string(&path)?;
     let metadata: PharosMetadata = serde_json::from_str(&content)?;
-    
+
     // Load schema from embedded or local file (using embedded for now)
     let schema_json = include_str!("../../pkd-core/schema/pharos-schema.json");
     let schema: PharosSchema = serde_json::from_str(schema_json)?;
@@ -286,7 +292,11 @@ async fn handle_core_validate(path: PathBuf) -> Result<()> {
     match pkd_core::validator::SchemaValidator::validate_metadata(&schema, &metadata) {
         Ok(_) => println!("{} Metadata is valid and compliant.", "✔".green()),
         Err(errors) => {
-            println!("{} Validation failed with {} errors:", "✘".red(), errors.len() as u32);
+            println!(
+                "{} Validation failed with {} errors:",
+                "✘".red(),
+                errors.len() as u32
+            );
             for err in errors {
                 println!("  - {}", err.to_string().yellow());
             }
@@ -298,17 +308,23 @@ async fn handle_core_validate(path: PathBuf) -> Result<()> {
 
 async fn handle_core_search(query_parts: Vec<String>, env: PharosEnv) -> Result<()> {
     if query_parts.is_empty() {
-        return Err(anyhow!("Search query is empty. Example: pkd core search manufacturer=3m"));
+        return Err(anyhow!(
+            "Search query is empty. Example: pkd core search manufacturer=3m"
+        ));
     }
 
     let raw_query = query_parts.join(" ");
     let cache_dir = PathResolver::resolve_cache_dir(env)?;
-    
+
     // 1. Fail Fast: Parse the query using the shared pharos-protocol library
     let command = pharos_protocol::parse_command(&format!("query {}", raw_query))
         .map_err(|e| anyhow!("Failed to parse query syntax: {}", e))?;
 
-    if let pharos_protocol::Command::Query { selections, returns } = command {
+    if let pharos_protocol::Command::Query {
+        selections,
+        returns,
+    } = command
+    {
         // 2. Fail Fast: Validate all selection fields against RFC 2378 attributes in schema
         let schema_json = include_str!("../../pkd-core/schema/pharos-schema.json");
         let schema: PharosSchema = serde_json::from_str(schema_json)?;
@@ -317,26 +333,41 @@ async fn handle_core_search(query_parts: Vec<String>, env: PharosEnv) -> Result<
 
         println!("{} Executing registry search...", "ℹ".blue());
         println!("{} Environment: {}", "  -".blue(), env.to_string().cyan());
-        println!("{} Cache Path:  {}", "  -".blue(), cache_dir.display().to_string().yellow());
+        println!(
+            "{} Cache Path:  {}",
+            "  -".blue(),
+            cache_dir.display().to_string().yellow()
+        );
         println!("{} Query:       {}", "  -".blue(), raw_query.cyan());
         if !returns.is_empty() {
             println!("{} Returns: {}", "  -".blue(), returns.join(", ").yellow());
         }
-        
+
         // (Actual registry search via API will be implemented in a later sprint)
-        println!("\n{} Search syntax is valid and compliant with RFC 2378.", "✔".green());
+        println!(
+            "\n{} Search syntax is valid and compliant with RFC 2378.",
+            "✔".green()
+        );
     }
 
     Ok(())
 }
 
-fn validate_selections(filter: &pharos_protocol::ast::SelectionFilter, schema: &PharosSchema) -> anyhow::Result<()> {
+fn validate_selections(
+    filter: &pharos_protocol::ast::SelectionFilter,
+    schema: &PharosSchema,
+) -> anyhow::Result<()> {
     use pharos_protocol::ast::SelectionFilter;
     match filter {
         SelectionFilter::Single(field_opt, _) => {
             if let Some(field) = field_opt {
-                let shared_param = schema.parameter_standards.shared_parameters.get(field)
-                    .ok_or_else(|| anyhow!("Field '{}' is not defined in the Pharos schema.", field))?;
+                let shared_param = schema
+                    .parameter_standards
+                    .shared_parameters
+                    .get(field)
+                    .ok_or_else(|| {
+                        anyhow!("Field '{}' is not defined in the Pharos schema.", field)
+                    })?;
 
                 if !shared_param.is_lookup() {
                     return Err(anyhow!(
@@ -366,7 +397,10 @@ async fn handle_core_verify_manifest(path: PathBuf, hash: Option<String>) -> Res
             println!("{} Verifying artifact integrity: {:?}...", "ℹ".blue(), path);
             match pkd_core::security::verify_manifest(&path, &h) {
                 Ok(_) => {
-                    println!("\n{} Verification successful. Artifact is structurally sound.", "✔".green());
+                    println!(
+                        "\n{} Verification successful. Artifact is structurally sound.",
+                        "✔".green()
+                    );
                     Ok(())
                 }
                 Err(e) => {
@@ -377,10 +411,17 @@ async fn handle_core_verify_manifest(path: PathBuf, hash: Option<String>) -> Res
             }
         }
         None => {
-            println!("{} Verifying manifest integrity in {:?}...", "ℹ".blue(), path);
+            println!(
+                "{} Verifying manifest integrity in {:?}...",
+                "ℹ".blue(),
+                path
+            );
             match pkd_core::security::verify_manifest_json(&path) {
                 Ok(_) => {
-                    println!("\n{} Verification successful. All artifacts are structurally sound.", "✔".green());
+                    println!(
+                        "\n{} Verification successful. All artifacts are structurally sound.",
+                        "✔".green()
+                    );
                     Ok(())
                 }
                 Err(e) => {
@@ -394,7 +435,11 @@ async fn handle_core_verify_manifest(path: PathBuf, hash: Option<String>) -> Res
 }
 
 async fn handle_core_generate_manifest(path: PathBuf) -> Result<()> {
-    println!("{} Generating manifest for .wasm artifacts in {:?}...", "ℹ".blue(), path);
+    println!(
+        "{} Generating manifest for .wasm artifacts in {:?}...",
+        "ℹ".blue(),
+        path
+    );
 
     let manifest = pkd_core::security::generate_manifest_from_dir(&path)
         .map_err(|e| anyhow!("Failed to generate manifest: {}", e))?;
@@ -408,14 +453,21 @@ async fn handle_core_generate_manifest(path: PathBuf) -> Result<()> {
 }
 
 async fn handle_core_promote(env: PharosEnv) -> Result<()> {
-    println!("{} Scaffolding promotion to {}...", "ℹ".blue(), env.to_string().cyan());
-    println!("{} Note: Actual Cloudflare R2 upload logic will be implemented in Issue #55.", "⚠".yellow());
+    println!(
+        "{} Scaffolding promotion to {}...",
+        "ℹ".blue(),
+        env.to_string().cyan()
+    );
+    println!(
+        "{} Note: Actual Cloudflare R2 upload logic will be implemented in Issue #55.",
+        "⚠".yellow()
+    );
     Ok(())
 }
 
 async fn handle_self_update() -> Result<()> {
     println!("{} Checking for updates on GitHub...", "ℹ".blue());
-    
+
     let status = self_update::backends::github::Update::configure()
         .repo_owner("iamrichardd")
         .repo_name("pharos-kitchen-design")
@@ -428,7 +480,11 @@ async fn handle_self_update() -> Result<()> {
     if status.updated() {
         println!("{} Updated to version {}!", "✔".green(), status.version());
     } else {
-        println!("{} Already up-to-date (v{}).", "✔".green(), env!("CARGO_PKG_VERSION"));
+        println!(
+            "{} Already up-to-date (v{}).",
+            "✔".green(),
+            env!("CARGO_PKG_VERSION")
+        );
     }
 
     Ok(())
@@ -444,7 +500,7 @@ mod tests {
         // Simulate 'pkd manufacturer=3m'
         let args = vec!["pkd", "manufacturer=3m"];
         let cli = Cli::try_parse_from(args).unwrap();
-        
+
         assert!(cli.command.is_none());
         assert_eq!(cli.query, vec!["manufacturer=3m".to_string()]);
     }
@@ -454,9 +510,11 @@ mod tests {
         // Simulate 'pkd auth login'
         let args = vec!["pkd", "auth", "login"];
         let cli = Cli::try_parse_from(args).unwrap();
-        
+
         match cli.command {
-            Some(Commands::Auth { action: AuthCommands::Login }) => (),
+            Some(Commands::Auth {
+                action: AuthCommands::Login,
+            }) => (),
             _ => panic!("Expected Auth Login subcommand"),
         }
         assert!(cli.query.is_empty());

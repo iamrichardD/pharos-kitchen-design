@@ -85,6 +85,12 @@ pub struct PharosRegistryHandle {
     pub(crate) sku_to_shard: Arc<DashMap<String, String>>,
 }
 
+impl Default for PharosRegistryHandle {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[wasm_bindgen]
 impl PharosRegistryHandle {
     #[wasm_bindgen(constructor)]
@@ -116,8 +122,8 @@ impl PharosRegistryHandle {
         {
             self.cache
                 .iter()
-                .filter(|(k, _)| k.contains(&pattern))
-                .map(|(k, _)| k.clone())
+                .filter(|entry| entry.0.contains(&pattern))
+                .map(|entry| entry.0.clone())
                 .collect()
         }
     }
@@ -172,7 +178,6 @@ pub fn load_registry_wasm(registry_js: JsValue) -> Result<PharosRegistryHandle, 
     let items: DashMap<String, PharosMetadata> = serde_wasm_bindgen::from_value(registry_js)
         .map_err(|e| JsValue::from_str(&format!("Invalid registry format: {}", e)))?;
 
-    #[allow(unused_mut)]
     #[allow(unused_mut)]
     let mut handle = PharosRegistryHandle::new();
     #[cfg(target_arch = "wasm32")]
@@ -295,8 +300,12 @@ fn safe_read_str<'a>(ptr: *const u8, len: usize) -> Result<&'a str, ValidationEr
 /// Hydrates a "Ghost Link" with verified Pharos metadata.
 /// Why: Provides immediate BIM hydration for unmodeled placeholders using a resident registry.
 /// Traceability: Issue #30, #31, #120
+///
+/// # Safety
+/// This function dereferences raw pointers provided by the host. It performs null checks
+/// and bounds checking but relies on the host to provide valid memory ranges.
 #[no_mangle]
-pub extern "C" fn pkd_get_ghost_metadata(
+pub unsafe extern "C" fn pkd_get_ghost_metadata(
     handle: *mut PharosRegistryHandle,
     ptr: *const u8,
     len: usize,
@@ -311,7 +320,7 @@ pub extern "C" fn pkd_get_ghost_metadata(
         });
     }
 
-    let mut handle_safe = AssertUnwindSafe(unsafe { &mut *handle });
+    let mut handle_safe = AssertUnwindSafe(&mut *handle);
     let result = catch_unwind(move || {
         let registry = &mut **handle_safe;
 
@@ -429,8 +438,12 @@ pub extern "C" fn pkd_get_ghost_metadata(
     }
 }
 
+/// Registers a shard fetcher callback for lazy loading.
+///
+/// # Safety
+/// This function dereferences raw pointers and invokes a C-ABI callback.
 #[no_mangle]
-pub extern "C" fn pkd_register_shard_fetcher(
+pub unsafe extern "C" fn pkd_register_shard_fetcher(
     handle: *mut PharosRegistryHandle,
     base_url_ptr: *const u8,
     base_url_len: usize,
@@ -441,7 +454,7 @@ pub extern "C" fn pkd_register_shard_fetcher(
     if handle.is_null() {
         return -1;
     }
-    let mut handle_safe = AssertUnwindSafe(unsafe { &mut *handle });
+    let mut handle_safe = AssertUnwindSafe(&mut *handle);
     let result = catch_unwind(move || {
         let registry = &mut **handle_safe;
 
@@ -481,17 +494,20 @@ pub extern "C" fn pkd_register_shard_fetcher(
         0
     });
 
-    match result {
-        Ok(code) => code,
-        Err(_) => -5,
-    }
+    result.unwrap_or(-5)
 }
 
 /// Loads a PharosRegistry from JSON and returns an opaque handle.
 /// Why: Enables dynamic, data-driven BIM hydration from a verified source of truth.
 /// Safety: Returns null if JSON is invalid, exceeds MAX_JSON_SIZE, or panics.
+///
+/// # Safety
+/// Dereferences the provided raw pointer `ptr`.
 #[no_mangle]
-pub extern "C" fn pkd_load_registry(ptr: *const u8, len: usize) -> *mut PharosRegistryHandle {
+pub unsafe extern "C" fn pkd_load_registry(
+    ptr: *const u8,
+    len: usize,
+) -> *mut PharosRegistryHandle {
     let result = catch_unwind(|| {
         let bytes = match safe_read_bytes(ptr, len) {
             Ok(b) => b,
@@ -503,6 +519,7 @@ pub extern "C" fn pkd_load_registry(ptr: *const u8, len: usize) -> *mut PharosRe
             Err(_) => return std::ptr::null_mut(),
         };
 
+        #[allow(unused_mut)]
         let mut handle = PharosRegistryHandle::new();
         #[cfg(target_arch = "wasm32")]
         {
@@ -527,20 +544,24 @@ pub extern "C" fn pkd_load_registry(ptr: *const u8, len: usize) -> *mut PharosRe
 }
 
 /// Frees the memory associated with a PharosRegistry handle.
+///
+/// # Safety
+/// Reclaims ownership of the raw pointer. The pointer must not be used after this call.
 #[no_mangle]
-pub extern "C" fn pkd_free_registry(handle: *mut PharosRegistryHandle) {
+pub unsafe extern "C" fn pkd_free_registry(handle: *mut PharosRegistryHandle) {
     if !handle.is_null() {
-        unsafe {
-            let _ = Box::from_raw(handle);
-        }
+        let _ = Box::from_raw(handle);
     }
 }
 
 /// Loads a PharosSchema from JSON and returns an opaque handle.
 /// Why: Eliminates redundant schema parsing overhead for high-frequency validation.
 /// Safety: Returns null if JSON is invalid, exceeds MAX_JSON_SIZE, or panics.
+///
+/// # Safety
+/// Dereferences the provided raw pointer `ptr`.
 #[no_mangle]
-pub extern "C" fn pkd_load_schema(ptr: *const u8, len: usize) -> *mut PharosSchema {
+pub unsafe extern "C" fn pkd_load_schema(ptr: *const u8, len: usize) -> *mut PharosSchema {
     let result = catch_unwind(|| {
         let bytes = match safe_read_bytes(ptr, len) {
             Ok(b) => b,
@@ -564,8 +585,11 @@ pub extern "C" fn pkd_load_schema(ptr: *const u8, len: usize) -> *mut PharosSche
 /// Validates metadata JSON against a pre-loaded schema handle.
 /// Why: High-performance validation path for geometry/metadata streams.
 /// Safety: Catches panics to prevent host process (Revit) from crashing.
+///
+/// # Safety
+/// Dereferences raw pointers `handle` and `ptr`.
 #[no_mangle]
-pub extern "C" fn pkd_validate_with_handle(
+pub unsafe extern "C" fn pkd_validate_with_handle(
     handle: *mut PharosSchema,
     ptr: *const u8,
     len: usize,
@@ -581,7 +605,7 @@ pub extern "C" fn pkd_validate_with_handle(
         return serialize_interop_response(&resp);
     }
 
-    let handle_safe = AssertUnwindSafe(unsafe { &*handle });
+    let handle_safe = AssertUnwindSafe(&*handle);
     let result = catch_unwind(move || {
         let schema = &**handle_safe;
         let bytes = match safe_read_bytes(ptr, len) {
@@ -654,17 +678,22 @@ pub extern "C" fn pkd_validate_with_handle(
 
 /// Frees the memory associated with a PharosSchema handle.
 /// Why: Prevents memory leaks by returning ownership to Rust for explicit cleanup.
+///
+/// # Safety
+/// Reclaims ownership of the raw pointer.
 #[no_mangle]
-pub extern "C" fn pkd_free_schema(handle: *mut PharosSchema) {
+pub unsafe extern "C" fn pkd_free_schema(handle: *mut PharosSchema) {
     if !handle.is_null() {
-        unsafe {
-            let _ = Box::from_raw(handle);
-        }
+        let _ = Box::from_raw(handle);
     }
 }
 
+/// Validates metadata JSON against a schema JSON string.
+///
+/// # Safety
+/// Dereferences raw pointers `schema_ptr` and `metadata_ptr`.
 #[no_mangle]
-pub extern "C" fn pkd_validate_metadata_json(
+pub unsafe extern "C" fn pkd_validate_metadata_json(
     schema_ptr: *const u8,
     schema_len: usize,
     metadata_ptr: *const u8,
@@ -690,8 +719,11 @@ pub extern "C" fn pkd_validate_metadata_json(
 /// Verifies the integrity of a file against an expected SHA-256 hash.
 /// Why: High-rigor supply chain security for all Pharos artifact ingestion.
 /// Safety: Returns serialized JSON error if path is invalid, hash mismatches, or file is missing.
+///
+/// # Safety
+/// Dereferences raw pointers `path_ptr` and `hash_ptr`.
 #[no_mangle]
-pub extern "C" fn pkd_verify_manifest(
+pub unsafe extern "C" fn pkd_verify_manifest(
     path_ptr: *const u8,
     path_len: usize,
     hash_ptr: *const u8,
@@ -758,24 +790,32 @@ pub extern "C" fn pkd_verify_manifest(
 /// Why: Prevents panics across FFI boundaries by providing a hardcoded fallback.
 fn serialize_interop_response(resp: &InteropResponse) -> *mut c_char {
     match serde_json::to_string(resp) {
-        Ok(json) => CString::new(json).unwrap_or_else(|_| {
-            CString::new("{\"status\":\"ERROR\",\"errors\":[{\"code\":\"SLICE_VALIDATION_ERROR\",\"details\":\"Null byte in JSON\"}]}").unwrap()
-        }).into_raw(),
-        Err(_) => CString::new("{\"status\":\"ERROR\",\"errors\":[{\"code\":\"SLICE_VALIDATION_ERROR\",\"details\":\"Serialization failed\"}]}").unwrap().into_raw()
+        Ok(json) => CString::new(json)
+            .unwrap_or_else(|_| {
+                CString::new("{\"status\":\"ERROR\",\"errors\":[{\"code\":\"SLICE_VALIDATION_ERROR\",\"details\":\"Null byte in JSON\"}]}").unwrap()
+            })
+            .into_raw(),
+        Err(_) => CString::new("{\"status\":\"ERROR\",\"errors\":[{\"code\":\"SLICE_VALIDATION_ERROR\",\"details\":\"Serialization failed\"}]}").unwrap().into_raw(),
     }
 }
 
+/// Frees a string allocated by the Rust core.
+///
+/// # Safety
+/// Reclaims ownership of the raw pointer.
 #[no_mangle]
-pub extern "C" fn pkd_free_string(s: *mut c_char) {
+pub unsafe extern "C" fn pkd_free_string(s: *mut c_char) {
     if !s.is_null() {
-        unsafe {
-            let _ = CString::from_raw(s);
-        }
+        let _ = CString::from_raw(s);
     }
 }
 
+/// Triggers a panic for testing purposes.
+///
+/// # Safety
+/// This is a test function that intentionally panics.
 #[no_mangle]
-pub extern "C" fn pkd_trigger_panic() -> *mut c_char {
+pub unsafe extern "C" fn pkd_trigger_panic() -> *mut c_char {
     let result = catch_unwind(|| {
         panic!("Manual panic triggered for FFI boundary testing.");
     });
@@ -834,11 +874,11 @@ mod tests {
             }
         }"#;
 
-        let handle = pkd_load_registry(registry_json.as_ptr(), registry_json.len());
+        let handle = unsafe { pkd_load_registry(registry_json.as_ptr(), registry_json.len()) };
         assert!(!handle.is_null());
 
         let id = "PHX-DW-001";
-        let ptr = pkd_get_ghost_metadata(handle, id.as_ptr(), id.len());
+        let ptr = unsafe { pkd_get_ghost_metadata(handle, id.as_ptr(), id.len()) };
 
         let result_cstr = unsafe { std::ffi::CStr::from_ptr(ptr) };
         let result_json = result_cstr.to_str().unwrap();
@@ -851,24 +891,28 @@ mod tests {
         assert_eq!(data["name"], "Registry Dishwasher");
         assert_eq!(data["parameters"]["manufacturer"], "RegistryBrand");
 
-        pkd_free_string(ptr);
-        pkd_free_registry(handle);
+        unsafe {
+            pkd_free_string(ptr);
+            pkd_free_registry(handle);
+        }
     }
 
     #[test]
     fn test_should_return_error_when_id_not_found_in_registry() {
         let registry_json = "{}";
-        let handle = pkd_load_registry(registry_json.as_ptr(), registry_json.len());
+        let handle = unsafe { pkd_load_registry(registry_json.as_ptr(), registry_json.len()) };
 
         let id = "PHX-DW-001";
-        let ptr = pkd_get_ghost_metadata(handle, id.as_ptr(), id.len());
+        let ptr = unsafe { pkd_get_ghost_metadata(handle, id.as_ptr(), id.len()) };
 
         let result_cstr = unsafe { std::ffi::CStr::from_ptr(ptr) };
         let resp: InteropResponse = serde_json::from_str(result_cstr.to_str().unwrap()).unwrap();
         assert_eq!(resp.status, "ERROR");
 
-        pkd_free_string(ptr);
-        pkd_free_registry(handle);
+        unsafe {
+            pkd_free_string(ptr);
+            pkd_free_registry(handle);
+        }
     }
 
     #[test]
@@ -876,12 +920,14 @@ mod tests {
         let schema_json = include_str!("../schema/pharos-schema.json");
         let metadata_json = include_str!("../samples/commercial-dishwasher.json");
 
-        let ptr = pkd_validate_metadata_json(
-            schema_json.as_ptr(),
-            schema_json.len(),
-            metadata_json.as_ptr(),
-            metadata_json.len(),
-        );
+        let ptr = unsafe {
+            pkd_validate_metadata_json(
+                schema_json.as_ptr(),
+                schema_json.len(),
+                metadata_json.as_ptr(),
+                metadata_json.len(),
+            )
+        };
 
         let result_cstr = unsafe { std::ffi::CStr::from_ptr(ptr) };
         let result_str = result_cstr.to_str().unwrap();
@@ -894,13 +940,13 @@ mod tests {
             );
         }
 
-        pkd_free_string(ptr);
+        unsafe { pkd_free_string(ptr) };
     }
 
     #[test]
     fn test_should_reject_payload_when_len_exceeds_max_size_sentinel() {
         let oversized_data = vec![0u8; MAX_JSON_SIZE + 1];
-        let ptr = pkd_load_schema(oversized_data.as_ptr(), oversized_data.len());
+        let ptr = unsafe { pkd_load_schema(oversized_data.as_ptr(), oversized_data.len()) };
 
         assert!(ptr.is_null());
     }
@@ -908,18 +954,21 @@ mod tests {
     #[test]
     fn test_should_return_safe_error_when_invalid_utf8_bytes_provided() {
         let registry_json = "{}";
-        let handle = pkd_load_registry(registry_json.as_ptr(), registry_json.len());
+        let handle = unsafe { pkd_load_registry(registry_json.as_ptr(), registry_json.len()) };
 
         let invalid_utf8 = vec![0 as u8, 159, 146, 150]; // Invalid UTF-8 sequence
-        let ptr = pkd_get_ghost_metadata(handle, invalid_utf8.as_ptr(), invalid_utf8.len());
+        let ptr =
+            unsafe { pkd_get_ghost_metadata(handle, invalid_utf8.as_ptr(), invalid_utf8.len()) };
 
         let result_cstr = unsafe { std::ffi::CStr::from_ptr(ptr) };
         let resp: InteropResponse = serde_json::from_str(result_cstr.to_str().unwrap()).unwrap();
 
         assert_eq!(resp.status, "ERROR");
         assert!(resp.errors[0].to_string().contains("Invalid UTF-8"));
-        pkd_free_string(ptr);
-        pkd_free_registry(handle);
+        unsafe {
+            pkd_free_string(ptr);
+            pkd_free_registry(handle);
+        }
     }
 
     #[test]
@@ -988,7 +1037,7 @@ mod tests {
         let handle_ptr = Box::into_raw(Box::new(handle));
 
         let id = "MISSING-SKU";
-        let ptr = pkd_get_ghost_metadata(handle_ptr, id.as_ptr(), id.len());
+        let ptr = unsafe { pkd_get_ghost_metadata(handle_ptr, id.as_ptr(), id.len()) };
 
         let result_cstr = unsafe { std::ffi::CStr::from_ptr(ptr) };
         let resp: InteropResponse = serde_json::from_str(result_cstr.to_str().unwrap()).unwrap();
@@ -996,8 +1045,8 @@ mod tests {
         assert_eq!(resp.status, "ERROR");
         assert_eq!(resp.errors[0], ValidationError::GhostLinkAuthNotFound);
 
-        pkd_free_string(ptr);
         unsafe {
+            pkd_free_string(ptr);
             let _ = Box::from_raw(handle_ptr);
         }
     }
@@ -1022,7 +1071,7 @@ mod tests {
 
         let handle_ptr = Box::into_raw(Box::new(handle));
         let id = "SKU-JIT";
-        let ptr = pkd_get_ghost_metadata(handle_ptr, id.as_ptr(), id.len());
+        let ptr = unsafe { pkd_get_ghost_metadata(handle_ptr, id.as_ptr(), id.len()) };
 
         let result_cstr = unsafe { std::ffi::CStr::from_ptr(ptr) };
         let resp_json: serde_json::Value =
@@ -1035,8 +1084,8 @@ mod tests {
             10.0
         );
 
-        pkd_free_string(ptr);
         unsafe {
+            pkd_free_string(ptr);
             let _ = Box::from_raw(handle_ptr);
         }
     }

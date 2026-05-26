@@ -4,14 +4,14 @@
  * File: packages/pkd-cli/src/guard.rs
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
- * Purpose: Decoupled role-based access control (RBAC) using the 
+ * Purpose: Decoupled role-based access control (RBAC) using the
  *          Authorizable trait.
  * Traceability: Issue #15 - Guard Refactor
  * ======================================================================== */
 
-use anyhow::{Result, anyhow};
 use crate::auth::AuthManager;
 use crate::models::PharosRole;
+use anyhow::{anyhow, Result};
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -25,8 +25,8 @@ pub enum GuardError {
 }
 
 /// A trait for commands that require specific authorization policies.
-/// 
-/// Why: Shifts the responsibility of defining access control from the 
+///
+/// Why: Shifts the responsibility of defining access control from the
 ///      main dispatcher to the individual command slices (SRP/OCP).
 pub trait Authorizable {
     /// Returns the list of roles permitted to execute this command.
@@ -38,8 +38,8 @@ pub struct Guard;
 
 impl Guard {
     /// Enforces the authorization policy for a given command.
-    /// 
-    /// Fail Fast: Immediately returns a structured error if the session 
+    ///
+    /// Fail Fast: Immediately returns a structured error if the session
     ///            does not meet the command's requirements.
     pub fn enforce<T: Authorizable>(auth: &AuthManager, cmd: &T) -> Result<()> {
         let allowed_roles = cmd.required_roles();
@@ -47,7 +47,8 @@ impl Guard {
             return Ok(());
         }
 
-        let current_role = auth.get_current_role()
+        let current_role = auth
+            .get_current_role()
             .map_err(|e| anyhow!(GuardError::BridgeFailure(e.to_string())))?;
 
         match current_role {

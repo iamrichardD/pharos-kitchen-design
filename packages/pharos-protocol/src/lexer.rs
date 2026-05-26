@@ -11,7 +11,7 @@
 use crate::parser::ProtocolError;
 
 /// Tokenizes an RFC 2378 command line.
-/// 
+///
 /// Handles:
 /// - Whitespace-separated tokens.
 /// - Double-quoted strings for preserving order and whitespace.
@@ -57,7 +57,9 @@ pub fn tokenize(line: &str) -> Result<Vec<String>, ProtocolError> {
     }
 
     if in_quotes {
-        return Err(ProtocolError::SyntaxError("Unclosed double quote".to_string()));
+        return Err(ProtocolError::SyntaxError(
+            "Unclosed double quote".to_string(),
+        ));
     }
 
     if !current.is_empty() {
@@ -104,6 +106,17 @@ mod tests {
     #[test]
     fn test_should_tokenize_structural_grouping() {
         let tokens = tokenize("query (mfr=hobart|mfr=vulcan) voltage=208").unwrap();
-        assert_eq!(tokens, vec!["query", "(", "mfr=hobart", "|", "mfr=vulcan", ")", "voltage=208"]);
+        assert_eq!(
+            tokens,
+            vec![
+                "query",
+                "(",
+                "mfr=hobart",
+                "|",
+                "mfr=vulcan",
+                ")",
+                "voltage=208"
+            ]
+        );
     }
 }
