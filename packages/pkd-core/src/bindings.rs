@@ -5,25 +5,39 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Unified WASM and C-ABI bindings for multi-platform interop.
- * Traceability: Issue #9, #31, ADR-0002, ADR-0025, #111
+ * Traceability: Issue #9, #31, ADR-0002, ADR-0025, #111, #125
  * ======================================================================== */
+
+use std::collections::{BTreeMap, VecDeque};
+use std::ffi::CString;
+use std::future::Future;
+use std::os::raw::c_char;
+use std::panic::{catch_unwind, AssertUnwindSafe};
+use std::path::Path;
+use std::pin::Pin;
+use std::sync::Arc;
+use std::sync::Mutex;
+
+#[cfg(any(test, not(target_arch = "wasm32")))]
+use std::sync::atomic::{AtomicU64, Ordering};
+#[cfg(target_arch = "wasm32")]
+use std::sync::atomic::AtomicU64;
+
+#[cfg(not(target_arch = "wasm32"))]
+use dashmap::DashMap;
+#[cfg(target_arch = "wasm32")]
+use std::collections::HashMap as DashMap;
+
+use serde::{Deserialize, Serialize};
+use wasm_bindgen::prelude::*;
 
 use crate::lazy_loader::{LazyShardLoader, ShardFetcher};
 use crate::models::metadata::PharosMetadata;
 #[cfg(any(test, not(target_arch = "wasm32")))]
 use crate::models::metadata::RegistryShard;
 use crate::models::schema::PharosSchema;
-use crate::validator::{LodValidator, SchemaValidator};
-use dashmap::DashMap;
-use serde_wasm_bindgen;
-use std::collections::VecDeque;
-use std::future::Future;
-use std::os::raw::c_char;
-use std::pin::Pin;
-use std::sync::atomic::{AtomicU64, Ordering};
-use std::sync::Arc;
-use std::sync::Mutex;
-use wasm_bindgen::prelude::*;
+use crate::models::types::ParameterValue;
+use crate::validator::{LodValidator, SchemaValidator, ValidationError};
 
 pub type FfiFetcherCallback = extern "C" fn(
     url_ptr: *const u8,
@@ -67,9 +81,23 @@ impl ShardFetcher for FfiShardFetcher {
 #[wasm_bindgen]
 pub struct PharosRegistryHandle {
     pub(crate) cache: Arc<DashMap<String, PharosMetadata>>,
-    current_size_kb: Arc<AtomicU64>,
-    max_size_kb: u64,
-    loaded_shards: Arc<Mutex<VecDeque<String>>>,
+    pub(crate) loader: Option<Arc<LazyShardLoader>>,
+    #[allow(dead_code)]
+    pub(crate) memory_limit_kb: u64,
+    #[allow(dead_code)]
+    pub(crate) current_size_kb: Arc<AtomicU64>,
+    #[allow(dead_code)]
+    pub(crate) loaded_shards: Arc<Mutex<VecDeque<String>>>,
+    #[allow(dead_code)]
+    pub(crate) shard_to_skus: Arc<DashMap<String, Vec<String>>>,
+    pub(crate) sku_to_shard: Arc<DashMap<String, String>>,
+    pub(crate) tuning_deltas: Arc<DashMap<String, BTreeMap<String, ParameterValue>>>,
+}
+
+impl Default for PharosRegistryHandle {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 #[wasm_bindgen]
@@ -81,6 +109,9 @@ impl PharosRegistryHandle {
             current_size_kb: Arc::new(AtomicU64::new(0)),
             max_size_kb: 512 * 1024, // 512MB Default
             loaded_shards: Arc::new(Mutex::new(VecDeque::new())),
+            shard_to_skus: Arc::new(DashMap::new()),
+            sku_to_shard: Arc::new(DashMap::new()),
+            tuning_deltas: Arc::new(DashMap::new()),
         }
     }
 
@@ -156,8 +187,11 @@ pub fn load_registry_wasm(registry_js: JsValue) -> Result<PharosRegistryHandle, 
     let items: std::collections::HashMap<String, PharosMetadata> = serde_wasm_bindgen::from_value(registry_js)
         .map_err(|e| JsValue::from_str(&format!("Invalid registry format: {}", e)))?;
 
-    #[allow(unused_mut)]
+    #[cfg(target_arch = "wasm32")]
     let mut handle = PharosRegistryHandle::new();
+    #[cfg(not(target_arch = "wasm32"))]
+    let handle = PharosRegistryHandle::new();
+
     #[cfg(target_arch = "wasm32")]
     {
         // For DashMap in WASM, Arc::get_mut is still preferred if possible for batch initialization
@@ -186,7 +220,10 @@ pub fn get_ghost_metadata_wasm(
     id: String,
 ) -> Result<JsValue, JsValue> {
     match handle.cache.get(&id) {
+        #[cfg(target_arch = "wasm32")]
         Some(m) => Ok(serde_wasm_bindgen::to_value(&*m).unwrap()),
+        #[cfg(not(target_arch = "wasm32"))]
+        Some(m) => Ok(JsValue::from_str("Not supported in non-wasm")),
         None => Err(JsValue::from_str(&format!(
             "Metadata ID '{}' not found in registry",
             id
@@ -266,16 +303,488 @@ pub fn pkd_init_jit_wasm(handle: &PharosRegistryHandle, fetcher_ptr: usize) -> R
 // C-ABI / FFI Entry Points (Issue #9, #111)
 // These are for the Revit C# Bridge.
 
+const MAX_JSON_SIZE: usize = 1024 * 1024; // 1MB Limit for Shift-Left Security (ADR-0016)
+
+#[derive(Serialize, Deserialize)]
+pub struct InteropResponse {
+    pub status: String,
+    pub errors: Vec<ValidationError>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub data: Option<serde_json::Value>,
+}
+
+/// Helper to safely obtain a byte slice from raw FFI parameters.
+/// Why: Enforces the MAX_JSON_SIZE sentinel before any memory access.
+///
+/// # Safety
+/// Dereferences the raw pointer `ptr`. Caller must ensure it points to `len` valid bytes.
+unsafe fn safe_read_bytes<'a>(ptr: *const u8, len: usize) -> Result<&'a [u8], ValidationError> {
+    if ptr.is_null() {
+        return Err(ValidationError::SliceError(
+            "Null pointer provided".to_string(),
+        ));
+    }
+    // Shift-Left Security: Enforce size sentinel before memory access
+    if len > MAX_JSON_SIZE {
+        return Err(ValidationError::SliceError(format!(
+            "Payload exceeds 1MB limit ({} bytes)",
+            len
+        )));
+    }
+    Ok(std::slice::from_raw_parts(ptr, len))
+}
+
+/// Syncs transient UI/Revit state to the resident registry.
+/// Why: Enables "Live Tuning" of procedurally generated components without modifying source shards.
+/// Traceability: Issue #125
+///
+/// # Safety
+/// Dereferences raw pointers provided by the host. Caller must ensure pointers are valid.
 #[no_mangle]
-pub extern "C" fn pkd_registry_new() -> *mut PharosRegistryHandle {
-    Box::into_raw(Box::new(PharosRegistryHandle::new()))
+pub unsafe extern "C" fn pkd_sync_state(
+    handle: *mut PharosRegistryHandle,
+    sku_ptr: *const u8,
+    sku_len: usize,
+    delta_json_ptr: *const u8,
+    delta_json_len: usize,
+) -> *mut c_char {
+    if handle.is_null() {
+        return serialize_interop_response(&InteropResponse {
+            status: "ERROR".to_string(),
+            errors: vec![ValidationError::SliceError("Null registry handle provided".to_string())],
+            data: None,
+        });
+    }
+
+    let mut handle_safe = AssertUnwindSafe(&mut *handle);
+    let result = catch_unwind(move || {
+        let registry = &mut **handle_safe;
+
+        let sku_id = match safe_read_str(sku_ptr, sku_len) {
+            Ok(s) => s.to_string(),
+            Err(e) => {
+                return serialize_interop_response(&InteropResponse {
+                    status: "ERROR".to_string(),
+                    errors: vec![e],
+                    data: None,
+                });
+            }
+        };
+
+        let delta_json = match safe_read_str(delta_json_ptr, delta_json_len) {
+            Ok(s) => s,
+            Err(e) => {
+                return serialize_interop_response(&InteropResponse {
+                    status: "ERROR".to_string(),
+                    errors: vec![e],
+                    data: None,
+                });
+            }
+        };
+
+        let deltas: BTreeMap<String, ParameterValue> = match serde_json::from_str(delta_json) {
+            Ok(d) => d,
+            Err(e) => {
+                return serialize_interop_response(&InteropResponse {
+                    status: "ERROR".to_string(),
+                    errors: vec![ValidationError::SliceError(format!("Invalid Delta JSON: {}", e))],
+                    data: None,
+                });
+            }
+        };
+
+        // Shift-Left Security: Enforce numerical sentinels (ADR-0039 Resilience)
+        // Why: Prevents pathological geometry generation from malformed or malicious UI input.
+        for (key, value) in &deltas {
+            if let ParameterValue::Number(n) = value {
+                if *n < 0.0 || *n > 100000.0 { // 100m sentinel for AEC context
+                     return serialize_interop_response(&InteropResponse {
+                        status: "ERROR".to_string(),
+                        errors: vec![ValidationError::SliceError(format!("Parameter {} out of bounds: {}", key, n))],
+                        data: None,
+                    });
+                }
+            }
+        }
+
+        registry.tuning_deltas.insert(sku_id, deltas);
+
+        serialize_interop_response(&InteropResponse {
+            status: "OK".to_string(),
+            errors: Vec::new(),
+            data: None,
+        })
+    });
+
+    match result {
+        Ok(resp) => resp,
+        Err(_) => serialize_interop_response(&InteropResponse {
+            status: "ERROR".to_string(),
+            errors: vec![ValidationError::SliceError("Panic in pkd_sync_state".to_string())],
+            data: None,
+        }),
+    }
+}
+
+/// Helper to safely obtain a UTF-8 string from raw FFI parameters.
+///
+/// # Safety
+/// Dereferences the raw pointer `ptr`.
+unsafe fn safe_read_str<'a>(ptr: *const u8, len: usize) -> Result<&'a str, ValidationError> {
+    let bytes = safe_read_bytes(ptr, len)?;
+    std::str::from_utf8(bytes)
+        .map_err(|e| ValidationError::SliceError(format!("Invalid UTF-8: {}", e)))
+}
+
+/// Hydrates a "Ghost Link" with verified Pharos metadata.
+/// Why: Provides immediate BIM hydration for unmodeled placeholders using a resident registry.
+/// Traceability: Issue #30, #31, #120
+///
+/// # Safety
+/// This function dereferences raw pointers provided by the host. It performs null checks
+/// and bounds checking but relies on the host to provide valid memory ranges.
+#[no_mangle]
+pub unsafe extern "C" fn pkd_get_ghost_metadata(
+    handle: *mut PharosRegistryHandle,
+    ptr: *const u8,
+    len: usize,
+) -> *mut c_char {
+    if handle.is_null() {
+        return serialize_interop_response(&InteropResponse {
+            status: "ERROR".to_string(),
+            errors: vec![ValidationError::SliceError(
+                "Null registry handle provided".to_string(),
+            )],
+            data: None,
+        });
+    }
+
+    let mut handle_safe = AssertUnwindSafe(&mut *handle);
+    let result = catch_unwind(move || {
+        let registry = &mut **handle_safe;
+
+        let id_str = match safe_read_str(ptr, len) {
+            Ok(s) => s,
+            Err(e) => {
+                return serialize_interop_response(&InteropResponse {
+                    status: "ERROR".to_string(),
+                    errors: vec![e],
+                    data: None,
+                });
+            }
+        };
+
+        if let Some(metadata) = registry.cache.get(id_str) {
+            // JIT Baking (Shard #122.2 Remediation)
+            // Why: Ensures the product has valid BIM geometry before FFI delivery.
+            // Performance Note: JIT baking is performant for single-SKU hydration but
+            // will introduce latency if Revit Bridge requests thousands of ghost-links
+            // sequentially. Future Optimization: Implement a "BatchBake" endpoint.
+
+            #[cfg(not(target_arch = "wasm32"))]
+            let metadata = &*metadata; // Deref DashMap Ref
+
+            let mut final_metadata = metadata.clone();
+
+            // Apply Tuning Deltas (Shard #125.1)
+            // Why: Ensures that "Live Tuning" parameters from the UI/Revit state 
+            // are reflected in the hydrated ghost-link metadata and geometry.
+            if let Some(deltas) = registry.tuning_deltas.get(id_str) {
+                for (key, value) in deltas.iter() {
+                    final_metadata.parameters.insert(key.clone(), value.clone());
+                }
+            }
+
+            if final_metadata.performance_metadata.procedural_lod_enabled && final_metadata.geometry_manifest.is_none() {
+                final_metadata.geometry_manifest = crate::geometry::procedural::ProceduralGenerator::generate_manifest(&final_metadata);
+            }
+            let data = serde_json::to_value(&final_metadata).unwrap();
+            return serialize_interop_response(&InteropResponse {
+                status: "OK".to_string(),
+                errors: Vec::new(),
+                data: Some(data),
+            });
+        }
+
+        if let Some(_loader) = &registry.loader {
+            if let Some(_shard_id_ref) = registry.sku_to_shard.get(id_str) {
+                #[cfg(not(target_arch = "wasm32"))]
+                {
+                    let shard_id = _shard_id_ref.clone();
+                    let loader = _loader.clone();
+                    let rt = tokio::runtime::Builder::new_current_thread()
+                        .enable_all()
+                        .build()
+                        .unwrap();
+                    match rt.block_on(loader.load_shard(&shard_id)) {
+                        Ok(shard) => {
+                            registry.add_shard(shard);
+
+                            if let Some(metadata) = registry.cache.get(id_str) {
+                                // JIT Baking (Shard #122.2 Remediation)
+                                #[cfg(not(target_arch = "wasm32"))]
+                                let metadata = &*metadata;
+
+                                let mut final_metadata = metadata.clone();
+
+                                // Apply Tuning Deltas (Shard #125.1)
+                                if let Some(deltas) = registry.tuning_deltas.get(id_str) {
+                                    for (key, value) in deltas.iter() {
+                                        final_metadata.parameters.insert(key.clone(), value.clone());
+                                    }
+                                }
+
+                                if final_metadata.performance_metadata.procedural_lod_enabled && final_metadata.geometry_manifest.is_none() {
+                                    final_metadata.geometry_manifest = crate::geometry::procedural::ProceduralGenerator::generate_manifest(&final_metadata);
+                                }
+                                let data = serde_json::to_value(&final_metadata).unwrap();
+                                return serialize_interop_response(&InteropResponse {
+                                    status: "OK".to_string(),
+                                    errors: Vec::new(),
+                                    data: Some(data),
+                                });
+                            }
+                        }
+                        Err(e) => {
+                            let error_msg = e.to_string();
+                            let validation_error = if error_msg.contains("Integrity check failed") {
+                                ValidationError::GhostLinkIntegrityFailure
+                            } else {
+                                ValidationError::GhostLinkAuthNotFound
+                            };
+                            return serialize_interop_response(&InteropResponse {
+                                status: "ERROR".to_string(),
+                                errors: vec![validation_error],
+                                data: None,
+                            });
+                        }
+                    }
+                }
+            } else {
+                return serialize_interop_response(&InteropResponse {
+                    status: "ERROR".to_string(),
+                    errors: vec![ValidationError::GhostLinkAuthNotFound],
+                    data: None,
+                });
+            }
+        }
+
+        serialize_interop_response(&InteropResponse {
+            status: "ERROR".to_string(),
+            errors: vec![ValidationError::GhostLinkAuthNotFound],
+            data: None,
+        })
+    });
+
+    match result {
+        Ok(ptr) => ptr,
+        Err(_) => serialize_interop_response(&InteropResponse {
+            status: "PANIC".to_string(),
+            errors: vec![ValidationError::SliceError(
+                "Rust core panicked during ghost metadata retrieval".to_string(),
+            )],
+            data: None,
+        }),
+    }
 }
 
 #[no_mangle]
-pub extern "C" fn pkd_registry_free(handle: *mut PharosRegistryHandle) {
+pub unsafe extern "C" fn pkd_register_shard_fetcher(
+    handle: *mut PharosRegistryHandle,
+    base_url_ptr: *const u8,
+    base_url_len: usize,
+    manifest_ptr: *const u8,
+    manifest_len: usize,
+    callback: FfiFetcherCallback,
+) -> i32 {
+    if handle.is_null() {
+        return -1;
+    }
+    let mut handle_safe = AssertUnwindSafe(&mut *handle);
+    let result = catch_unwind(move || {
+        let registry = &mut **handle_safe;
+
+        let base_url = match safe_read_str(base_url_ptr, base_url_len) {
+            Ok(s) => s.to_string(),
+            Err(_) => return -2,
+        };
+
+        let manifest_bytes = match safe_read_bytes(manifest_ptr, manifest_len) {
+            Ok(b) => b,
+            Err(_) => return -3,
+        };
+
+        #[derive(Deserialize)]
+        struct ManifestDto {
+            skus: std::collections::HashMap<String, String>,
+            shards: std::collections::HashMap<String, String>,
+        }
+
+        let manifest_dto: ManifestDto = match serde_json::from_slice(manifest_bytes) {
+            Ok(m) => m,
+            Err(_) => return -4,
+        };
+
+        for (sku, shard_id) in manifest_dto.skus {
+            #[cfg(target_arch = "wasm32")]
+            std::sync::Arc::make_mut(&mut registry.sku_to_shard).insert(sku, shard_id);
+            #[cfg(not(target_arch = "wasm32"))]
+            registry.sku_to_shard.insert(sku, shard_id);
+        }
+
+        let fetcher = Arc::new(FfiShardFetcher { callback });
+        let loader = Arc::new(LazyShardLoader::new(base_url, manifest_dto.shards, fetcher));
+
+        registry.loader = Some(loader);
+
+        0
+    });
+
+    result.unwrap_or(-5)
+}
+
+/// Loads a PharosRegistry from JSON and returns an opaque handle.
+/// Why: Enables dynamic, data-driven BIM hydration from a verified source of truth.
+///
+/// # Safety
+/// Dereferences the provided raw pointer `ptr`.
+#[no_mangle]
+pub unsafe extern "C" fn pkd_load_registry(
+    ptr: *const u8,
+    len: usize,
+) -> *mut PharosRegistryHandle {
+    let result = catch_unwind(|| {
+        let bytes = match safe_read_bytes(ptr, len) {
+            Ok(b) => b,
+            Err(_) => return std::ptr::null_mut(),
+        };
+
+        let items: DashMap<String, PharosMetadata> = match serde_json::from_slice(bytes) {
+            Ok(s) => s,
+            Err(_) => return std::ptr::null_mut(),
+        };
+
+        #[cfg(target_arch = "wasm32")]
+        let mut handle = PharosRegistryHandle::new();
+        #[cfg(not(target_arch = "wasm32"))]
+        let handle = PharosRegistryHandle::new();
+        #[cfg(target_arch = "wasm32")]
+        {
+            let cache = Arc::get_mut(&mut handle.cache).unwrap();
+            for (k, v) in items {
+                cache.insert(k, v);
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            for (k, v) in items {
+                handle.cache.insert(k, v);
+            }
+        }
+        Box::into_raw(Box::new(handle))
+    });
+
+    match result {
+        Ok(ptr) => ptr,
+        Err(_) => std::ptr::null_mut(),
+    }
+}
+
+/// Frees the memory associated with a PharosRegistry handle.
+///
+/// # Safety
+/// Reclaims ownership of the raw pointer. The pointer must not be used after this call.
+#[no_mangle]
+pub unsafe extern "C" fn pkd_free_registry(handle: *mut PharosRegistryHandle) {
     if !handle.is_null() {
-        unsafe {
-            let _ = Box::from_raw(handle);
+        let _ = Box::from_raw(handle);
+    }
+}
+
+/// Loads a PharosSchema from JSON and returns an opaque handle.
+/// Why: Eliminates redundant schema parsing overhead for high-frequency validation.
+///
+/// # Safety
+/// Dereferences the provided raw pointer `ptr`.
+#[no_mangle]
+pub unsafe extern "C" fn pkd_load_schema(ptr: *const u8, len: usize) -> *mut PharosSchema {
+    let result = catch_unwind(|| {
+        let bytes = match safe_read_bytes(ptr, len) {
+            Ok(b) => b,
+            Err(_) => return std::ptr::null_mut(),
+        };
+
+        let schema: PharosSchema = match serde_json::from_slice(bytes) {
+            Ok(s) => s,
+            Err(_) => return std::ptr::null_mut(),
+        };
+
+        Box::into_raw(Box::new(schema))
+    });
+
+    match result {
+        Ok(ptr) => ptr,
+        Err(_) => std::ptr::null_mut(),
+    }
+}
+
+/// Validates metadata JSON against a pre-loaded schema handle.
+/// Why: High-performance validation path for geometry/metadata streams.
+///
+/// # Safety
+/// Dereferences raw pointers `handle` and `ptr`.
+#[no_mangle]
+pub unsafe extern "C" fn pkd_validate_with_handle(
+    handle: *mut PharosSchema,
+    ptr: *const u8,
+    len: usize,
+) -> *mut c_char {
+    if handle.is_null() {
+        let resp = InteropResponse {
+            status: "ERROR".to_string(),
+            errors: vec![ValidationError::SliceError(
+                "Null schema handle provided".to_string(),
+            )],
+            data: None,
+        };
+        return serialize_interop_response(&resp);
+    }
+
+    let handle_safe = AssertUnwindSafe(&*handle);
+    let result = catch_unwind(move || {
+        let schema = &**handle_safe;
+        let bytes = match safe_read_bytes(ptr, len) {
+            Ok(b) => b,
+            Err(e) => {
+                let resp = InteropResponse {
+                    status: "ERROR".to_string(),
+                    errors: vec![e],
+                    data: None,
+                };
+                return serialize_interop_response(&resp);
+            }
+        };
+
+        let metadata: PharosMetadata = match serde_json::from_slice(bytes) {
+            Ok(m) => m,
+            Err(e) => {
+                let resp = InteropResponse {
+                    status: "ERROR".to_string(),
+                    errors: vec![ValidationError::SliceError(format!(
+                        "Invalid metadata JSON: {}",
+                        e
+                    ))],
+                    data: None,
+                };
+                return serialize_interop_response(&resp);
+            }
+        };
+
+        let mut all_errors = Vec::new();
+
+        // 1. Core Schema Validation
+        if let Err(errors) = SchemaValidator::validate_metadata(schema, &metadata) {
+            all_errors.extend(errors);
         }
     }
 }
@@ -294,11 +803,140 @@ pub extern "C" fn pkd_query_ids(
     handle: *const PharosRegistryHandle,
     pattern_ptr: *const c_char,
 ) -> *mut c_char {
-    let handle = unsafe { &*handle };
-    let pattern = unsafe { std::ffi::CStr::from_ptr(pattern_ptr).to_string_lossy().into_owned() };
-    let ids = handle.query_ids_containing(pattern);
-    let json = serde_json::to_string(&ids).unwrap();
-    std::ffi::CString::new(json).unwrap().into_raw()
+    let handle = pkd_load_schema(schema_ptr, schema_len);
+    if handle.is_null() {
+        let resp = InteropResponse {
+            status: "ERROR".to_string(),
+            errors: vec![ValidationError::SliceError(
+                "Failed to load schema (Null or Invalid)".to_string(),
+            )],
+            data: None,
+        };
+        return serialize_interop_response(&resp);
+    }
+
+    let result = pkd_validate_with_handle(handle, metadata_ptr, metadata_len);
+    pkd_free_schema(handle);
+    result
+}
+
+/// Verifies the integrity of a file against an expected SHA-256 hash.
+/// Why: High-rigor supply chain security for all Pharos artifact ingestion.
+///
+/// # Safety
+/// Dereferences raw pointers `path_ptr` and `hash_ptr`.
+#[no_mangle]
+pub unsafe extern "C" fn pkd_verify_manifest(
+    path_ptr: *const u8,
+    path_len: usize,
+    hash_ptr: *const u8,
+    hash_len: usize,
+) -> *mut c_char {
+    let result = catch_unwind(|| {
+        let path_str = match safe_read_str(path_ptr, path_len) {
+            Ok(s) => s,
+            Err(e) => {
+                let resp = InteropResponse {
+                    status: "ERROR".to_string(),
+                    errors: vec![e],
+                    data: None,
+                };
+                return serialize_interop_response(&resp);
+            }
+        };
+
+        let hash_str = match safe_read_str(hash_ptr, hash_len) {
+            Ok(s) => s,
+            Err(e) => {
+                let resp = InteropResponse {
+                    status: "ERROR".to_string(),
+                    errors: vec![e],
+                    data: None,
+                };
+                return serialize_interop_response(&resp);
+            }
+        };
+
+        match crate::security::verify_manifest(Path::new(path_str), hash_str) {
+            Ok(_) => {
+                let resp = InteropResponse {
+                    status: "OK".to_string(),
+                    errors: Vec::new(),
+                    data: None,
+                };
+                serialize_interop_response(&resp)
+            }
+            Err(e) => {
+                let resp = InteropResponse {
+                    status: "ERROR".to_string(),
+                    errors: vec![ValidationError::SliceError(e.to_string())],
+                    data: None,
+                };
+                serialize_interop_response(&resp)
+            }
+        }
+    });
+
+    match result {
+        Ok(ptr) => ptr,
+        Err(_) => serialize_interop_response(&InteropResponse {
+            status: "PANIC".to_string(),
+            errors: vec![ValidationError::SliceError(
+                "Rust core panicked during manifest verification".to_string(),
+            )],
+            data: None,
+        }),
+    }
+}
+
+/// Safely serializes the response for C-ABI consumption.
+/// Why: Prevents panics across FFI boundaries by providing a hardcoded fallback.
+fn serialize_interop_response(resp: &InteropResponse) -> *mut c_char {
+    match serde_json::to_string(resp) {
+        Ok(json) => CString::new(json)
+            .unwrap_or_else(|_| {
+                CString::new("{\"status\":\"ERROR\",\"errors\":[{\"code\":\"SLICE_VALIDATION_ERROR\",\"details\":\"Null byte in JSON\"}]}").unwrap()
+            })
+            .into_raw(),
+        Err(_) => CString::new("{\"status\":\"ERROR\",\"errors\":[{\"code\":\"SLICE_VALIDATION_ERROR\",\"details\":\"Serialization failed\"}]}").unwrap().into_raw(),
+    }
+}
+
+/// Frees a string allocated by the Rust core.
+///
+/// # Safety
+/// Reclaims ownership of the raw pointer.
+#[no_mangle]
+pub unsafe extern "C" fn pkd_free_string(s: *mut c_char) {
+    if !s.is_null() {
+        let _ = CString::from_raw(s);
+    }
+}
+
+/// Triggers a panic for testing purposes.
+///
+/// # Safety
+/// This is a test function that intentionally panics.
+#[no_mangle]
+pub unsafe extern "C" fn pkd_trigger_panic() -> *mut c_char {
+    let result = catch_unwind(|| {
+        panic!("Manual panic triggered for FFI boundary testing.");
+    });
+
+    match result {
+        Ok(_) => serialize_interop_response(&InteropResponse {
+            status: "OK".to_string(),
+            errors: Vec::new(),
+            data: None,
+        }),
+        Err(_) => serialize_interop_response(&InteropResponse {
+            status: "PANIC".to_string(),
+            errors: vec![ValidationError::SliceError(
+                "Rust core panicked (Verified)".to_string(),
+            )],
+            data: None,
+        }),
+    }
 }
 
 #[cfg(test)]
@@ -308,7 +946,177 @@ mod tests {
     use crate::models::types::ParameterValue;
     use std::collections::BTreeMap;
 
-    fn create_mock_metadata(id: &str, size_kb: u64) -> PharosMetadata {
+    #[test]
+    fn test_should_load_registry_and_retrieve_metadata_when_valid_json_provided() {
+        let registry_json = r#"{
+            "PHX-DW-001": {
+                "metadata_id": "PHX-DW-001",
+                "name": "Registry Dishwasher",
+                "schema_version": "1.0.0",
+                "classification": {
+                    "omniclass_table_23": "23-75 50 11 11",
+                    "category": "Warewashing"
+                },
+                "parameters": {
+                    "manufacturer": "RegistryBrand"
+                },
+                "lod_geometry_specs": {
+                    "100": {
+                        "type": "PROCEDURAL_BOX",
+                        "dimensions": {
+                            "width": "3.0",
+                            "depth": "3.0",
+                            "height": "4.0"
+                        },
+                        "description": "Registry LOD 100"
+                    }
+                },
+                "performance_metadata": {
+                    "estimated_rfa_size_kb": 450,
+                    "procedural_lod_enabled": true,
+                    "ghost_link_active": true
+                }
+            }
+        }"#;
+
+        let handle = unsafe { pkd_load_registry(registry_json.as_ptr(), registry_json.len()) };
+        assert!(!handle.is_null());
+
+        let id = "PHX-DW-001";
+        let ptr = unsafe { pkd_get_ghost_metadata(handle, id.as_ptr(), id.len()) };
+
+        let result_cstr = unsafe { std::ffi::CStr::from_ptr(ptr) };
+        let result_json = result_cstr.to_str().unwrap();
+
+        let resp: InteropResponse = serde_json::from_str(result_json).unwrap();
+        assert_eq!(resp.status, "OK");
+        assert!(resp.data.is_some());
+
+        let data = resp.data.unwrap();
+        assert_eq!(data["name"], "Registry Dishwasher");
+        assert_eq!(data["parameters"]["manufacturer"], "RegistryBrand");
+
+        unsafe {
+            pkd_free_string(ptr);
+            pkd_free_registry(handle);
+        }
+    }
+
+    #[test]
+    fn test_should_return_error_when_id_not_found_in_registry() {
+        let registry_json = "{}";
+        let handle = unsafe { pkd_load_registry(registry_json.as_ptr(), registry_json.len()) };
+
+        let id = "PHX-DW-001";
+        let ptr = unsafe { pkd_get_ghost_metadata(handle, id.as_ptr(), id.len()) };
+
+        let result_cstr = unsafe { std::ffi::CStr::from_ptr(ptr) };
+        let resp: InteropResponse = serde_json::from_str(result_cstr.to_str().unwrap()).unwrap();
+        assert_eq!(resp.status, "ERROR");
+
+        unsafe {
+            pkd_free_string(ptr);
+            pkd_free_registry(handle);
+        }
+    }
+
+    #[test]
+    fn test_should_serialize_complex_metadata_when_bridge_invoked_with_byte_slice() {
+        let schema_json = include_str!("../schema/pharos-schema.json");
+        let metadata_json = include_str!("../samples/commercial-dishwasher.json");
+
+        let ptr = unsafe {
+            pkd_validate_metadata_json(
+                schema_json.as_ptr(),
+                schema_json.len(),
+                metadata_json.as_ptr(),
+                metadata_json.len(),
+            )
+        };
+
+        let result_cstr = unsafe { std::ffi::CStr::from_ptr(ptr) };
+        let result_str = result_cstr.to_str().unwrap();
+        let resp: InteropResponse = serde_json::from_str(result_str).unwrap();
+
+        if resp.status != "OK" {
+            panic!(
+                "Validation failed with status: {}, errors: {:?}",
+                resp.status, resp.errors
+            );
+        }
+
+        unsafe { pkd_free_string(ptr) };
+    }
+
+    #[test]
+    fn test_should_reject_payload_when_len_exceeds_max_size_sentinel() {
+        let oversized_data = vec![0u8; MAX_JSON_SIZE + 1];
+        let ptr = unsafe { pkd_load_schema(oversized_data.as_ptr(), oversized_data.len()) };
+
+        assert!(ptr.is_null());
+    }
+
+    #[test]
+    fn test_should_return_safe_error_when_invalid_utf8_bytes_provided() {
+        let registry_json = "{}";
+        let handle = unsafe { pkd_load_registry(registry_json.as_ptr(), registry_json.len()) };
+
+        let invalid_utf8 = [0_u8, 159, 146, 150]; // Invalid UTF-8 sequence
+        let ptr =
+            unsafe { pkd_get_ghost_metadata(handle, invalid_utf8.as_ptr(), invalid_utf8.len()) };
+
+        let result_cstr = unsafe { std::ffi::CStr::from_ptr(ptr) };
+        let resp: InteropResponse = serde_json::from_str(result_cstr.to_str().unwrap()).unwrap();
+
+        assert_eq!(resp.status, "ERROR");
+        assert!(resp.errors[0].to_string().contains("Invalid UTF-8"));
+        unsafe {
+            pkd_free_string(ptr);
+            pkd_free_registry(handle);
+        }
+    }
+
+    #[test]
+    fn test_should_evict_shards_when_memory_limit_exceeded() {
+        let handle = PharosRegistryHandle::new();
+        // Set a very small limit: 10KB
+        unsafe {
+            let h = &mut *(Box::into_raw(Box::new(handle)));
+            h.memory_limit_kb = 10;
+
+            // Shard A: 6KB
+            let shard_a = RegistryShard {
+                shard_id: "shard_a".to_string(),
+                v: "1.0.0".to_string(),
+                records: [("SKU-A".to_string(), create_mock_metadata("SKU-A", 6))]
+                    .into_iter()
+                    .collect(),
+            };
+            h.add_shard(shard_a);
+            assert_eq!(h.current_size_kb.load(Ordering::SeqCst), 6);
+            assert!(h.cache.contains_key("SKU-A"));
+
+            // Shard B: 6KB -> Total 12KB > 10KB. Shard A should be evicted.
+            let shard_b = RegistryShard {
+                shard_id: "shard_b".to_string(),
+                v: "1.0.0".to_string(),
+                records: [("SKU-B".to_string(), create_mock_metadata("SKU-B", 6))]
+                    .into_iter()
+                    .collect(),
+            };
+            h.add_shard(shard_b);
+
+            assert_eq!(h.current_size_kb.load(Ordering::SeqCst), 6);
+            assert!(!h.cache.contains_key("SKU-A"));
+            assert!(h.cache.contains_key("SKU-B"));
+
+            let _ = Box::from_raw(h);
+        }
+    }
+
+    fn create_mock_metadata(id: &str, size_kb: u32) -> PharosMetadata {
+        use crate::models::metadata::{Classification, PerformanceMetadata};
+        use std::collections::BTreeMap;
         PharosMetadata {
             metadata_id: id.to_string(),
             name: format!("Mock {}", id),
@@ -439,5 +1247,86 @@ mod tests {
         let manifest = updated.geometry_manifest.as_ref().unwrap();
         assert_eq!(manifest.operations[0].dimensions.width, 25.0);
         assert_eq!(manifest.operations[0].dimensions.depth, 30.0);
+    }
+
+    #[test]
+    fn test_should_apply_tuning_deltas_when_pkd_sync_state_invoked() {
+        let handle = PharosRegistryHandle::new();
+        let metadata = create_mock_metadata("SKU-TUNED", 10);
+        handle.cache.insert("SKU-TUNED".to_string(), metadata);
+        
+        let handle_ptr = Box::into_raw(Box::new(handle));
+        
+        // 1. Sync state (Width: 50.0, Depth: 20.0, Height: 30.0)
+        let id = "SKU-TUNED";
+        let delta = r#"{"PKD_WIDTH": 50.0, "PKD_DEPTH": 20.0, "PKD_HEIGHT": 30.0}"#;
+        let sync_ptr = unsafe { pkd_sync_state(handle_ptr, id.as_ptr(), id.len(), delta.as_ptr(), delta.len()) };
+        let sync_cstr = unsafe { std::ffi::CStr::from_ptr(sync_ptr) };
+        let sync_resp: InteropResponse = serde_json::from_str(sync_cstr.to_str().unwrap()).unwrap();
+        if sync_resp.status != "OK" {
+            panic!("Sync failed: {:?}", sync_resp.errors);
+        }
+        unsafe { pkd_free_string(sync_ptr) };
+        
+        // 2. Retrieve metadata and verify width
+        let get_ptr = unsafe { pkd_get_ghost_metadata(handle_ptr, id.as_ptr(), id.len()) };
+        let result_cstr = unsafe { std::ffi::CStr::from_ptr(get_ptr) };
+        let result_str = result_cstr.to_str().unwrap();
+        let resp_json: serde_json::Value = serde_json::from_str(result_str).unwrap();
+        
+        if resp_json["status"] != "OK" {
+            panic!("Get metadata failed: {}", result_str);
+        }
+
+        assert_eq!(resp_json["data"]["parameters"]["PKD_WIDTH"].as_f64().unwrap(), 50.0);
+        // Verify JIT baking picked up the tuned width
+        assert_eq!(resp_json["data"]["geometry_manifest"]["operations"][0]["dimensions"]["width"].as_f64().unwrap(), 50.0);
+        
+        unsafe {
+            pkd_free_string(get_ptr);
+            let _ = Box::from_raw(handle_ptr);
+        }
+    }
+
+    #[test]
+    fn test_should_reject_tuning_deltas_when_out_of_bounds() {
+        let handle = PharosRegistryHandle::new();
+        let handle_ptr = Box::into_raw(Box::new(handle));
+        
+        let id = "SKU-BOUNDS";
+        let delta = r#"{"PKD_WIDTH": 200000.0}"#; // Exceeds 100m sentinel
+        let sync_ptr = unsafe { pkd_sync_state(handle_ptr, id.as_ptr(), id.len(), delta.as_ptr(), delta.len()) };
+        
+        let result_cstr = unsafe { std::ffi::CStr::from_ptr(sync_ptr) };
+        let resp: InteropResponse = serde_json::from_str(result_cstr.to_str().unwrap()).unwrap();
+        
+        assert_eq!(resp.status, "ERROR");
+        assert!(resp.errors[0].to_string().contains("out of bounds"));
+        
+        unsafe {
+            pkd_free_string(sync_ptr);
+            let _ = Box::from_raw(handle_ptr);
+        }
+    }
+
+    #[test]
+    fn test_should_reject_invalid_json_in_sync_state() {
+        let handle = PharosRegistryHandle::new();
+        let handle_ptr = Box::into_raw(Box::new(handle));
+        
+        let id = "SKU-INVALID";
+        let delta = r#"{"PKD_WIDTH": "not-a-number", invalid_json }"#;
+        let sync_ptr = unsafe { pkd_sync_state(handle_ptr, id.as_ptr(), id.len(), delta.as_ptr(), delta.len()) };
+        
+        let result_cstr = unsafe { std::ffi::CStr::from_ptr(sync_ptr) };
+        let resp: InteropResponse = serde_json::from_str(result_cstr.to_str().unwrap()).unwrap();
+        
+        assert_eq!(resp.status, "ERROR");
+        assert!(resp.errors[0].to_string().contains("Invalid Delta JSON"));
+        
+        unsafe {
+            pkd_free_string(sync_ptr);
+            let _ = Box::from_raw(handle_ptr);
+        }
     }
 }
