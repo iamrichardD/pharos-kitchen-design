@@ -20,8 +20,8 @@ pub struct SliceDispatcher;
 
 impl SliceDispatcher {
     /// Dispatches validation to category-specific vertical slices.
-    /// 
-    /// Why: Centralizes the routing logic to ensure that "Specialty Equipment" 
+    ///
+    /// Why: Centralizes the routing logic to ensure that "Specialty Equipment"
     /// categories (like Warewashing) receive deep domain validation.
     pub fn dispatch_validation(metadata: &PharosMetadata) -> Result<(), Vec<ValidationError>> {
         let mut errors = Vec::new();
@@ -91,7 +91,7 @@ impl SliceDispatcher {
         if let Err(e) = WarewashingValidator::validate_category(&warewashing) {
             errors.push(e);
         }
-        
+
         if errors.is_empty() {
             Ok(())
         } else {

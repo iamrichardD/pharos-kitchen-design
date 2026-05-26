@@ -8,8 +8,8 @@
  * Traceability: Issue #88, ADR-0026, ADR-0027
  * ======================================================================== */
 
-use serde::{Serialize, Deserialize};
 use crate::validator::ValidationError;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PulseStatus {

@@ -84,6 +84,7 @@
 
 #### 💎 Small Stones: Operational & Debt
 - [x] **Issue #88**: Task 4.22: Implement `pkd core pulse` Command. [ECT: 3]
+- [ ] **Issue #165**: Debt #165: Provision Rust Linter Components in Podman. [ECT: 1]
 - [ ] **Issue #115**: Debt #115: Implement Local Governance Linter (pkd gov lint). [ECT: 3]
 - [ ] **Issue #107**: Debt #107: Audit and Prune pkd-core Dependencies. [ECT: 2]
 - [ ] **Issue #113**: Debt #113: ADR Template Automation with Mandatory Prologue. [ECT: 2]

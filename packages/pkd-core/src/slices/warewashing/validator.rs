@@ -15,8 +15,8 @@ pub struct WarewashingValidator;
 
 impl WarewashingValidator {
     /// Validates that the metadata belongs to the "Dishwashers" category.
-    /// 
-    /// Why: Vertical slice validation ensures that domain-specific constraints 
+    ///
+    /// Why: Vertical slice validation ensures that domain-specific constraints
     /// (like category matching) are enforced before processing.
     pub fn validate_category(metadata: &WarewashingMetadata) -> Result<(), ValidationError> {
         if metadata.parameters.main_category != "Dishwashers" {
@@ -30,7 +30,7 @@ impl WarewashingValidator {
 
     /// Validates that the metadata ID matches the warewashing prefix.
     ///
-    /// Why: Standardization of metadata IDs (e.g., PHX-DW) ensures searchability 
+    /// Why: Standardization of metadata IDs (e.g., PHX-DW) ensures searchability
     /// and logical grouping in the database.
     pub fn validate_id_prefix(metadata: &WarewashingMetadata) -> Result<(), ValidationError> {
         if !metadata.metadata_id.starts_with("PHX-DW") {
@@ -45,8 +45,8 @@ impl WarewashingValidator {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use super::super::models::WarewashingParameters;
+    use super::*;
 
     #[test]
     fn test_should_pass_when_category_is_dishwashers() {
@@ -90,7 +90,7 @@ mod tests {
 
     #[test]
     fn test_should_pass_when_id_prefix_is_correct() {
-         let params = WarewashingParameters {
+        let params = WarewashingParameters {
             manufacturer: "Pharos".to_string(),
             model_number: "PHX-750".to_string(),
             voltage: None,

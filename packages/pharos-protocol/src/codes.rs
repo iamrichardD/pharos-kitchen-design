@@ -37,13 +37,11 @@ impl ResponseCategory {
     }
 }
 
-pub mod codes {
-    pub const OK: u16 = 200;
-    pub const DATABASE_READY_READ_ONLY: u16 = 201;
-    pub const NO_MATCHES: u16 = 501;
-    pub const TOO_MANY_MATCHES: u16 = 502;
-    pub const NOT_AUTHORIZED: u16 = 503;
-    pub const FIELD_DOES_NOT_EXIST: u16 = 507;
-    pub const COMMAND_UNKNOWN: u16 = 598;
-    pub const SYNTAX_ERROR: u16 = 599;
-}
+pub const OK: u16 = 200;
+pub const DATABASE_READY_READ_ONLY: u16 = 201;
+pub const NO_MATCHES: u16 = 501;
+pub const TOO_MANY_MATCHES: u16 = 502;
+pub const NOT_AUTHORIZED: u16 = 503;
+pub const FIELD_DOES_NOT_EXIST: u16 = 507;
+pub const COMMAND_UNKNOWN: u16 = 598;
+pub const SYNTAX_ERROR: u16 = 599;

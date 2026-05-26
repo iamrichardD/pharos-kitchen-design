@@ -8,12 +8,12 @@
  * Traceability: Issue #111, ADR-0036
  * ======================================================================== */
 
+use crate::jit::{JitError, JitResult};
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
+use std::time::Duration;
 use tokio::sync::{mpsc, oneshot};
 use wasmtime::*;
-use std::time::Duration;
-use std::sync::Arc;
-use std::sync::atomic::{AtomicBool, Ordering};
-use crate::jit::{JitError, JitResult};
 
 /// Memory limit for JIT WASM instances (64MB default).
 pub const MAX_WASM_MEMORY: usize = 64 * 1024 * 1024;
@@ -55,13 +55,17 @@ impl JitActor {
         let mut config = Config::new();
         // Fail-Fast: Explicitly limit linear memory at the engine level.
         config.static_memory_maximum_size(MAX_WASM_MEMORY as u64);
-        
+
         // Fail-Fast: Enable Epoch-based interruption for temporal safety.
         config.epoch_interruption(true);
-        
-        let engine = Engine::new(&config)
-            .map_err(|e| JitError::EngineInitialization(format!("Failed to create Wasmtime Engine with memory limits: {}", e)))?;
-            
+
+        let engine = Engine::new(&config).map_err(|e| {
+            JitError::EngineInitialization(format!(
+                "Failed to create Wasmtime Engine with memory limits: {}",
+                e
+            ))
+        })?;
+
         let shutdown_signal = Arc::new(AtomicBool::new(false));
         let shutdown_clone = Arc::clone(&shutdown_signal);
 
@@ -87,11 +91,20 @@ impl JitActor {
     pub async fn run(mut self) {
         while let Some(request) = self.receiver.recv().await {
             match request {
-                JitActorRequest::Load { id, wasm_bytes, respond_to } => {
+                JitActorRequest::Load {
+                    id,
+                    wasm_bytes,
+                    respond_to,
+                } => {
                     let res = self.handle_load(id, wasm_bytes);
                     let _ = respond_to.send(res);
                 }
-                JitActorRequest::Execute { id, function_name, params, respond_to } => {
+                JitActorRequest::Execute {
+                    id,
+                    function_name,
+                    params,
+                    respond_to,
+                } => {
                     let res = self.handle_execute(id, function_name, params);
                     let _ = respond_to.send(res);
                 }
@@ -110,48 +123,56 @@ impl JitActor {
         Ok(())
     }
 
-    fn handle_execute(&self, id: String, function_name: String, params: Vec<Val>) -> JitResult<Vec<Val>> {
+    fn handle_execute(
+        &self,
+        id: String,
+        function_name: String,
+        params: Vec<Val>,
+    ) -> JitResult<Vec<Val>> {
         // Harden: Clone the module out of DashMap to release the sharded lock immediately.
         // This ensures lock-free concurrent lookups while other executions are in progress.
-        let module = self.modules.get(&id)
+        let module = self
+            .modules
+            .get(&id)
             .map(|m| m.clone())
             .ok_or_else(|| JitError::ModuleNotFound(id.clone()))?;
-            
+
         // Enforce strict resource limits via StoreLimits.
         let mut store = Store::new(
-            &self.engine, 
+            &self.engine,
             StoreLimitsBuilder::new()
                 .memory_size(MAX_WASM_MEMORY)
                 .instances(1)
-                .build()
+                .build(),
         );
         store.limiter(|s| s);
-        
+
         // Enforce the Temporal Warden sentinel (100ms timeout).
         // Since heartbeat is 10ms, a deadline of 10 epochs = 100ms.
         store.set_epoch_deadline(10);
-        
+
         let linker = Linker::new(&self.engine);
-        let instance = linker.instantiate(&mut store, &module)
+        let instance = linker
+            .instantiate(&mut store, &module)
             .map_err(|e| JitError::InstantiationFailed(id.clone(), e.to_string()))?;
-            
-        let func = instance.get_func(&mut store, &function_name)
+
+        let func = instance
+            .get_func(&mut store, &function_name)
             .ok_or_else(|| JitError::FunctionNotFound(function_name.clone(), id.clone()))?;
-            
+
         let mut results = vec![Val::I32(0); func.ty(&store).results().len()];
-        func.call(&mut store, &params, &mut results)
-            .map_err(|e| {
-                // Robust detection of Temporal Warden interruption via Epoch deadline.
-                if let Some(trap) = e.downcast_ref::<Trap>() {
-                    if *trap == Trap::Interrupt {
-                        return JitError::ExecutionTimeout(WASM_EXECUTION_TIMEOUT_MS);
-                    }
+        func.call(&mut store, &params, &mut results).map_err(|e| {
+            // Robust detection of Temporal Warden interruption via Epoch deadline.
+            if let Some(trap) = e.downcast_ref::<Trap>() {
+                if *trap == Trap::Interrupt {
+                    return JitError::ExecutionTimeout(WASM_EXECUTION_TIMEOUT_MS);
                 }
-                
-                // Fallback for general execution errors.
-                JitError::ExecutionError(id.clone(), function_name.clone(), e.to_string())
-            })?;
-            
+            }
+
+            // Fallback for general execution errors.
+            JitError::ExecutionError(id.clone(), function_name.clone(), e.to_string())
+        })?;
+
         Ok(results)
     }
 }
@@ -171,22 +192,54 @@ impl JitHandle {
 
     pub async fn load(&self, id: String, wasm_bytes: Vec<u8>) -> JitResult<()> {
         let (respond_to, receiver) = oneshot::channel();
-        self.sender.send(JitActorRequest::Load { id, wasm_bytes, respond_to }).await
-            .map_err(|_| JitError::CommunicationError("Failed to send Load request to JitActor".to_string()))?;
-        receiver.await
-            .map_err(|_| JitError::CommunicationError("JitActor dropped Load response channel".to_string()))?
+        self.sender
+            .send(JitActorRequest::Load {
+                id,
+                wasm_bytes,
+                respond_to,
+            })
+            .await
+            .map_err(|_| {
+                JitError::CommunicationError("Failed to send Load request to JitActor".to_string())
+            })?;
+        receiver.await.map_err(|_| {
+            JitError::CommunicationError("JitActor dropped Load response channel".to_string())
+        })?
     }
 
-    pub async fn execute(&self, id: String, function_name: String, params: Vec<Val>) -> JitResult<Vec<Val>> {
+    pub async fn execute(
+        &self,
+        id: String,
+        function_name: String,
+        params: Vec<Val>,
+    ) -> JitResult<Vec<Val>> {
         let (respond_to, receiver) = oneshot::channel();
-        self.sender.send(JitActorRequest::Execute { id, function_name, params, respond_to }).await
-            .map_err(|_| JitError::CommunicationError("Failed to send Execute request to JitActor".to_string()))?;
-        receiver.await
-            .map_err(|_| JitError::CommunicationError("JitActor dropped Execute response channel".to_string()))?
+        self.sender
+            .send(JitActorRequest::Execute {
+                id,
+                function_name,
+                params,
+                respond_to,
+            })
+            .await
+            .map_err(|_| {
+                JitError::CommunicationError(
+                    "Failed to send Execute request to JitActor".to_string(),
+                )
+            })?;
+        receiver.await.map_err(|_| {
+            JitError::CommunicationError("JitActor dropped Execute response channel".to_string())
+        })?
     }
 
     pub async fn shutdown(&self) -> JitResult<()> {
-        self.sender.send(JitActorRequest::Shutdown).await
-            .map_err(|_| JitError::CommunicationError("Failed to send Shutdown request to JitActor".to_string()))
+        self.sender
+            .send(JitActorRequest::Shutdown)
+            .await
+            .map_err(|_| {
+                JitError::CommunicationError(
+                    "Failed to send Shutdown request to JitActor".to_string(),
+                )
+            })
     }
 }

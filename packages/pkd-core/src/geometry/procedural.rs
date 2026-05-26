@@ -8,23 +8,25 @@
  * Traceability: Issue #122, Audit-Remediation
  * ======================================================================== */
 
-use crate::models::metadata::{PharosMetadata, GeometryManifest, GeometryOperation, OperationDimensions};
+use crate::models::metadata::{
+    GeometryManifest, GeometryOperation, OperationDimensions, PharosMetadata,
+};
 use crate::models::types::ParameterValue;
 
 /// Standard numerical tolerance for BIM geometric operations.
-/// Why: Floating point comparisons in AEC software must be epsilon-guarded 
+/// Why: Floating point comparisons in AEC software must be epsilon-guarded
 /// to ensure stability across Revit/FFI boundaries.
 pub const GEOMETRY_TOLERANCE: f64 = 1e-6;
 
 /// Service for generating procedural BIM geometry from parametric inputs.
-/// 
-/// Why: Encapsulates the logic of "Baking" geometry, adhering to SRP by 
+///
+/// Why: Encapsulates the logic of "Baking" geometry, adhering to SRP by
 /// separating the data model (PharosMetadata) from procedural generation logic.
 pub struct ProceduralGenerator;
 
 impl ProceduralGenerator {
     /// Generates a GeometryManifest based on the provided metadata.
-    /// 
+    ///
     /// This implementation supports 'Extrusion' operations and is extensible
     /// for future 'Sweep' and 'Revolve' variants (Phase 5).
     pub fn generate_manifest(metadata: &PharosMetadata) -> Option<GeometryManifest> {
@@ -39,7 +41,7 @@ impl ProceduralGenerator {
 
         // Fail-Fast: Numerical stability check via epsilon-guarded tolerance.
         if width < GEOMETRY_TOLERANCE || depth < GEOMETRY_TOLERANCE || height < GEOMETRY_TOLERANCE {
-            return None; 
+            return None;
         }
 
         Some(GeometryManifest {
@@ -63,15 +65,17 @@ impl ProceduralGenerator {
     /// Supports both direct Number and sanitized Text (e.g., "24\"").
     fn get_numeric_param(metadata: &PharosMetadata, key: &str) -> Option<f64> {
         let pkd_key = format!("PKD_{}", key);
-        
-        metadata.parameters.get(&pkd_key)
+
+        metadata
+            .parameters
+            .get(&pkd_key)
             .or_else(|| metadata.parameters.get(key))
             .and_then(|val| match val {
                 ParameterValue::Number(n) => Some(*n),
                 ParameterValue::Text(s) => {
                     // Basic AEC-standard dimension sanitization
                     s.replace("\"", "").parse::<f64>().ok()
-                },
+                }
                 _ => None,
             })
     }
@@ -106,12 +110,19 @@ mod tests {
     #[test]
     fn test_should_generate_extrusion_when_dimensions_valid() {
         let mut metadata = create_test_metadata();
-        metadata.parameters.insert("PKD_WIDTH".to_string(), ParameterValue::Number(24.0));
-        metadata.parameters.insert("PKD_DEPTH".to_string(), ParameterValue::Number(24.0));
-        metadata.parameters.insert("PKD_HEIGHT".to_string(), ParameterValue::Number(34.0));
+        metadata
+            .parameters
+            .insert("PKD_WIDTH".to_string(), ParameterValue::Number(24.0));
+        metadata
+            .parameters
+            .insert("PKD_DEPTH".to_string(), ParameterValue::Number(24.0));
+        metadata
+            .parameters
+            .insert("PKD_HEIGHT".to_string(), ParameterValue::Number(34.0));
 
-        let manifest = ProceduralGenerator::generate_manifest(&metadata).expect("Should generate manifest");
-        
+        let manifest =
+            ProceduralGenerator::generate_manifest(&metadata).expect("Should generate manifest");
+
         assert_eq!(manifest.operations.len(), 1);
         assert_eq!(manifest.operations[0].dimensions.width, 24.0);
         assert_eq!(manifest.operations[0].operation_type, "Extrusion");
@@ -120,9 +131,15 @@ mod tests {
     #[test]
     fn test_should_return_none_when_dimensions_below_tolerance() {
         let mut metadata = create_test_metadata();
-        metadata.parameters.insert("PKD_WIDTH".to_string(), ParameterValue::Number(0.0000001));
-        metadata.parameters.insert("PKD_DEPTH".to_string(), ParameterValue::Number(24.0));
-        metadata.parameters.insert("PKD_HEIGHT".to_string(), ParameterValue::Number(34.0));
+        metadata
+            .parameters
+            .insert("PKD_WIDTH".to_string(), ParameterValue::Number(0.0000001));
+        metadata
+            .parameters
+            .insert("PKD_DEPTH".to_string(), ParameterValue::Number(24.0));
+        metadata
+            .parameters
+            .insert("PKD_HEIGHT".to_string(), ParameterValue::Number(34.0));
 
         let manifest = ProceduralGenerator::generate_manifest(&metadata);
         assert!(manifest.is_none());
@@ -132,7 +149,9 @@ mod tests {
     fn test_should_return_none_when_procedural_lod_disabled() {
         let mut metadata = create_test_metadata();
         metadata.performance_metadata.procedural_lod_enabled = false;
-        metadata.parameters.insert("PKD_WIDTH".to_string(), ParameterValue::Number(24.0));
+        metadata
+            .parameters
+            .insert("PKD_WIDTH".to_string(), ParameterValue::Number(24.0));
 
         let manifest = ProceduralGenerator::generate_manifest(&metadata);
         assert!(manifest.is_none());

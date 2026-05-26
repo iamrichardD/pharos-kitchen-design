@@ -8,11 +8,11 @@
  * Traceability: Issue #9, ADR 0002
  * ======================================================================== */
 
-use crate::models::schema::PharosSchema;
 use crate::models::metadata::PharosMetadata;
+use crate::models::schema::PharosSchema;
 use crate::models::types::ParameterValue;
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
-use serde::{Serialize, Deserialize};
 
 #[derive(Error, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "code", content = "details")]
@@ -28,10 +28,10 @@ pub enum ValidationError {
     MissingLodGeometry(String),
     #[error("Invalid parameter type for {parameter}: expected {expected}, found {found}")]
     #[serde(rename = "INVALID_TYPE")]
-    InvalidType { 
-        parameter: String, 
-        expected: String, 
-        found: String 
+    InvalidType {
+        parameter: String,
+        expected: String,
+        found: String,
     },
     #[error("Invalid category: expected {expected}, got {found}")]
     #[serde(rename = "INVALID_CATEGORY")]
@@ -54,20 +54,23 @@ pub enum ValidationError {
 }
 
 /// The Truth Engine's core validator for Pharos Metadata.
-/// 
-/// Purpose: To prevent "BIM Bloat" and ensure interoperability by 
-/// strictly validating metadata against a defined PharosSchema. 
+///
+/// Purpose: To prevent "BIM Bloat" and ensure interoperability by
+/// strictly validating metadata against a defined PharosSchema.
 /// This is the primary gatekeeper for the Project Prism ecosystem.
 pub struct SchemaValidator;
 
 impl SchemaValidator {
     /// Validates a PharosMetadata instance against a PharosSchema.
-    /// 
-    /// Why: In a multi-platform environment (Revit, Web, CLI), we must 
-    /// ensure that the Single Source of Truth remains consistent. This 
-    /// method performs deep validation of shared parameters, ensuring both 
+    ///
+    /// Why: In a multi-platform environment (Revit, Web, CLI), we must
+    /// ensure that the Single Source of Truth remains consistent. This
+    /// method performs deep validation of shared parameters, ensuring both
     /// existence and type-safety.
-    pub fn validate_metadata(schema: &PharosSchema, metadata: &PharosMetadata) -> Result<(), Vec<ValidationError>> {
+    pub fn validate_metadata(
+        schema: &PharosSchema,
+        metadata: &PharosMetadata,
+    ) -> Result<(), Vec<ValidationError>> {
         let mut errors = Vec::new();
 
         // 1. Version Check
@@ -99,9 +102,11 @@ impl SchemaValidator {
 
         // 3. Procedural Geometry Sentinel (Shard #122.1)
         // Why: If the product flags procedural_lod_enabled, the GeometryManifest
-        // is the "Authoritative Seam" for generating BIM geometry. Missing it 
+        // is the "Authoritative Seam" for generating BIM geometry. Missing it
         // would cause a downstream failure in the Revit Bridge Interpreter.
-        if metadata.performance_metadata.procedural_lod_enabled && metadata.geometry_manifest.is_none() {
+        if metadata.performance_metadata.procedural_lod_enabled
+            && metadata.geometry_manifest.is_none()
+        {
             errors.push(ValidationError::MissingProceduralManifest);
         }
 
@@ -113,17 +118,21 @@ impl SchemaValidator {
     }
 
     /// Enforcement logic for parameter type-safety.
-    /// 
-    /// Why: Legacy AEC software often uses loosely-typed XML/ASHH data. 
-    /// Pharos enforces strong semantic typing (TEXT, NUMBER, BOOLEAN) 
-    /// to eliminate the "Hallucination Gap" during automated equipment 
+    ///
+    /// Why: Legacy AEC software often uses loosely-typed XML/ASHH data.
+    /// Pharos enforces strong semantic typing (TEXT, NUMBER, BOOLEAN)
+    /// to eliminate the "Hallucination Gap" during automated equipment
     /// specification and procurement.
     fn is_type_valid(expected: &str, value: &ParameterValue) -> bool {
         match expected {
             "TEXT" => matches!(value, ParameterValue::Text(_)),
-            "NUMBER" | "ELECTRICAL_POTENTIAL" | "ELECTRICAL_WATTAGE" | "HVAC_POWER" | "PIPING_SIZE" => {
-                 // Numbers can be passed as actual numbers or text if they have units
-                 matches!(value, ParameterValue::Number(_) | ParameterValue::Text(_))
+            "NUMBER"
+            | "ELECTRICAL_POTENTIAL"
+            | "ELECTRICAL_WATTAGE"
+            | "HVAC_POWER"
+            | "PIPING_SIZE" => {
+                // Numbers can be passed as actual numbers or text if they have units
+                matches!(value, ParameterValue::Number(_) | ParameterValue::Text(_))
             }
             "BOOLEAN" => matches!(value, ParameterValue::Boolean(_)),
             "URL_ARRAY" | "ENUM_ARRAY" => matches!(value, ParameterValue::Array(_)),
@@ -147,20 +156,26 @@ impl LodValidator {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::collections::BTreeMap;
-    use crate::models::schema::{ParameterStandards, BloatRules, SharedParameter};
     use crate::models::metadata::{Classification, PerformanceMetadata};
+    use crate::models::schema::{BloatRules, ParameterStandards, SharedParameter};
+    use std::collections::BTreeMap;
 
     fn create_mock_schema() -> PharosSchema {
         let mut shared_params = BTreeMap::new();
-        shared_params.insert("PKD_Manufacturer".to_string(), SharedParameter {
-            param_type: "TEXT".to_string(),
-            attributes: vec!["Lookup".to_string()],
-        });
-        shared_params.insert("PKD_Voltage".to_string(), SharedParameter {
-            param_type: "ELECTRICAL_POTENTIAL".to_string(),
-            attributes: vec!["Lookup".to_string()],
-        });
+        shared_params.insert(
+            "PKD_Manufacturer".to_string(),
+            SharedParameter {
+                param_type: "TEXT".to_string(),
+                attributes: vec!["Lookup".to_string()],
+            },
+        );
+        shared_params.insert(
+            "PKD_Voltage".to_string(),
+            SharedParameter {
+                param_type: "ELECTRICAL_POTENTIAL".to_string(),
+                attributes: vec!["Lookup".to_string()],
+            },
+        );
 
         PharosSchema {
             version: "1.0.0".to_string(),
@@ -181,8 +196,14 @@ mod tests {
 
     fn create_mock_metadata() -> PharosMetadata {
         let mut params = BTreeMap::new();
-        params.insert("PKD_Manufacturer".to_string(), ParameterValue::Text("Test".to_string()));
-        params.insert("PKD_Voltage".to_string(), ParameterValue::Text("208V".to_string()));
+        params.insert(
+            "PKD_Manufacturer".to_string(),
+            ParameterValue::Text("Test".to_string()),
+        );
+        params.insert(
+            "PKD_Voltage".to_string(),
+            ParameterValue::Text("208V".to_string()),
+        );
 
         PharosMetadata {
             metadata_id: "ID-1".to_string(),
@@ -215,8 +236,11 @@ mod tests {
         let schema = create_mock_schema();
         let mut metadata = create_mock_metadata();
         // Replace TEXT with a Boolean for a field that expects TEXT
-        metadata.parameters.insert("PKD_Manufacturer".to_string(), ParameterValue::Boolean(true));
-        
+        metadata.parameters.insert(
+            "PKD_Manufacturer".to_string(),
+            ParameterValue::Boolean(true),
+        );
+
         let result = SchemaValidator::validate_metadata(&schema, &metadata);
         assert!(result.is_err());
         let errors = result.unwrap_err();
@@ -227,7 +251,7 @@ mod tests {
     fn test_should_fail_validation_when_procedural_enabled_but_manifest_missing() {
         let schema = create_mock_schema();
         let mut metadata = create_mock_metadata();
-        
+
         // State: Procedural enabled, but manifest is None (default in mock)
         metadata.performance_metadata.procedural_lod_enabled = true;
         metadata.geometry_manifest = None;
@@ -242,7 +266,7 @@ mod tests {
     fn test_should_pass_validation_when_procedural_enabled_and_manifest_present() {
         let schema = create_mock_schema();
         let mut metadata = create_mock_metadata();
-        
+
         metadata.performance_metadata.procedural_lod_enabled = true;
         metadata.geometry_manifest = Some(crate::models::metadata::GeometryManifest {
             lod: 200,

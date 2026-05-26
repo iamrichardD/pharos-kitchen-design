@@ -11,13 +11,13 @@
 pub mod actor;
 pub mod error;
 
-use wasmtime::*;
-use rayon::prelude::*;
-use std::sync::Arc;
 use crate::models::metadata::PharosMetadata;
 use dashmap::DashMap;
+use rayon::prelude::*;
+use std::sync::Arc;
+use wasmtime::*;
 
-pub use actor::{JitActor, JitHandle, JitActorRequest, MAX_WASM_MEMORY};
+pub use actor::{JitActor, JitActorRequest, JitHandle, MAX_WASM_MEMORY};
 pub use error::{JitError, JitResult};
 
 /// Configures and loads WASM modules for JIT execution.
@@ -32,18 +32,18 @@ impl WasmJitLoader {
     /// If no limit is provided, it defaults to the MAX_WASM_MEMORY sentinel (64MB).
     pub fn new(max_memory_bytes: Option<usize>) -> JitResult<Self> {
         let limit = max_memory_bytes.unwrap_or(MAX_WASM_MEMORY);
-        
+
         let mut config = Config::new();
         config.strategy(Strategy::Cranelift);
         config.parallel_compilation(true);
-        
+
         // Fail-Fast: Explicitly limit the maximum size of static linear memory.
         // WASM pages are 64KiB.
         let max_memory_pages = (limit as u64) / (64 * 1024);
         config.static_memory_maximum_size(limit as u64);
 
-        let engine = Engine::new(&config)
-            .map_err(|e| JitError::EngineInitialization(e.to_string()))?;
+        let engine =
+            Engine::new(&config).map_err(|e| JitError::EngineInitialization(e.to_string()))?;
 
         Ok(Self {
             engine,
@@ -94,7 +94,7 @@ impl ParallelQueryDispatcher {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::models::metadata::{PharosMetadata, Classification, PerformanceMetadata};
+    use crate::models::metadata::{Classification, PerformanceMetadata, PharosMetadata};
     use std::collections::BTreeMap;
 
     fn create_mock_metadata(id: String) -> PharosMetadata {
@@ -122,9 +122,10 @@ mod tests {
         // Test with default sentinel (64MB)
         let loader = WasmJitLoader::new(None).expect("Failed to create JIT loader");
         assert_eq!(loader.max_memory_pages(), 1024); // 64 MiB = 1024 pages
-        
+
         // Test with explicit 128MB
-        let loader_128 = WasmJitLoader::new(Some(128 * 1024 * 1024)).expect("Failed to create JIT loader");
+        let loader_128 =
+            WasmJitLoader::new(Some(128 * 1024 * 1024)).expect("Failed to create JIT loader");
         assert_eq!(loader_128.max_memory_pages(), 2048);
     }
 

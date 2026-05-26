@@ -9,8 +9,8 @@
  * ======================================================================== */
 
 use crate::jit::JitHandle;
-use wasmtime::Val;
 use tokio::time::{sleep, Duration};
+use wasmtime::Val;
 
 #[tokio::test]
 async fn test_should_dispatch_parallel_lookups_when_multiple_requests_received() {
@@ -18,23 +18,34 @@ async fn test_should_dispatch_parallel_lookups_when_multiple_requests_received()
     tokio::spawn(async move { actor.run().await });
 
     // Load a module that has a simple function
-    let wasm_bytes = wat::parse_str(r#"
+    let wasm_bytes = wat::parse_str(
+        r#"
         (module
             (func (export "add") (param i32 i32) (result i32)
                 local.get 0
                 local.get 1
                 i32.add)
         )
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 
-    handle.load("adder".to_string(), wasm_bytes).await.expect("Failed to load");
+    handle
+        .load("adder".to_string(), wasm_bytes)
+        .await
+        .expect("Failed to load");
 
     // Spawn multiple concurrent execution requests
     let mut futures = Vec::new();
     for i in 0..10 {
         let h = handle.clone();
         futures.push(tokio::spawn(async move {
-            h.execute("adder".to_string(), "add".to_string(), vec![Val::I32(i), Val::I32(1)]).await
+            h.execute(
+                "adder".to_string(),
+                "add".to_string(),
+                vec![Val::I32(i), Val::I32(1)],
+            )
+            .await
         }));
     }
 
@@ -49,9 +60,14 @@ async fn test_should_fail_fast_when_module_not_found() {
     let (handle, actor) = JitHandle::new();
     tokio::spawn(async move { actor.run().await });
 
-    let res = handle.execute("non_existent".to_string(), "any".to_string(), vec![]).await;
+    let res = handle
+        .execute("non_existent".to_string(), "any".to_string(), vec![])
+        .await;
     assert!(res.is_err());
-    assert!(res.unwrap_err().to_string().contains("WASM module 'non_existent' not found in registry"));
+    assert!(res
+        .unwrap_err()
+        .to_string()
+        .contains("WASM module 'non_existent' not found in registry"));
 }
 
 #[tokio::test]
@@ -70,12 +86,24 @@ async fn test_should_terminate_execution_when_wasm_infinite_loop_detected() {
         )
     "#;
     let wasm_bytes = wat::parse_str(wat).unwrap();
-    handle.load("timeout_module".to_string(), wasm_bytes).await.expect("Failed to load module");
+    handle
+        .load("timeout_module".to_string(), wasm_bytes)
+        .await
+        .expect("Failed to load module");
 
-    let res = handle.execute("timeout_module".to_string(), "infinite_loop".to_string(), vec![]).await;
-    
+    let res = handle
+        .execute(
+            "timeout_module".to_string(),
+            "infinite_loop".to_string(),
+            vec![],
+        )
+        .await;
+
     assert!(res.is_err(), "Expected execution to fail due to timeout");
-    assert!(res.unwrap_err().to_string().contains("timed out"), "Error message should mention timeout");
+    assert!(
+        res.unwrap_err().to_string().contains("timed out"),
+        "Error message should mention timeout"
+    );
 }
 
 #[tokio::test]
@@ -91,16 +119,25 @@ async fn test_should_fail_when_wasm_exceeds_memory_limit() {
         )
     "#;
     let wasm_bytes = wat::parse_str(wat).unwrap();
-    handle.load("bloated_module".to_string(), wasm_bytes).await.expect("Failed to load module");
+    handle
+        .load("bloated_module".to_string(), wasm_bytes)
+        .await
+        .expect("Failed to load module");
 
     // Instantiation should fail because the initial memory request exceeds MAX_WASM_MEMORY.
-    let res = handle.execute("bloated_module".to_string(), "any".to_string(), vec![]).await;
-    
+    let res = handle
+        .execute("bloated_module".to_string(), "any".to_string(), vec![])
+        .await;
+
     match res {
         Err(e) => {
             let err_msg = e.to_string();
-            assert!(err_msg.contains("Instantiation failed"), "Expected 'Instantiation failed', got: '{}'", err_msg);
-        },
+            assert!(
+                err_msg.contains("Instantiation failed"),
+                "Expected 'Instantiation failed', got: '{}'",
+                err_msg
+            );
+        }
         Ok(_) => panic!("Execution should have failed due to memory limits"),
     }
 }
@@ -112,16 +149,18 @@ async fn test_should_handle_actor_termination_gracefully() {
 
     // Drop the actor task (simulating a crash or termination)
     join_handle.abort();
-    
+
     // Wait a bit for the task to be aborted
     sleep(Duration::from_millis(10)).await;
 
     let wasm_bytes = wat::parse_str("(module)").unwrap();
     let res = handle.load("test".to_string(), wasm_bytes).await;
-    
+
     assert!(res.is_err(), "Expected error when actor is terminated");
     let err_msg = res.unwrap_err().to_string();
-    assert!(err_msg.contains("Failed to send Load request") || err_msg.contains("JitActor dropped"));
+    assert!(
+        err_msg.contains("Failed to send Load request") || err_msg.contains("JitActor dropped")
+    );
 }
 
 #[tokio::test]
@@ -131,13 +170,20 @@ async fn test_should_shutdown_gracefully_when_shutdown_signal_received() {
 
     // Ensure it's running
     let wasm_bytes = wat::parse_str("(module)").unwrap();
-    handle.load("test".to_string(), wasm_bytes).await.expect("Failed to load");
+    handle
+        .load("test".to_string(), wasm_bytes)
+        .await
+        .expect("Failed to load");
 
     // Send shutdown signal
-    handle.shutdown().await.expect("Failed to send shutdown signal");
+    handle
+        .shutdown()
+        .await
+        .expect("Failed to send shutdown signal");
 
     // Wait for actor to finish
-    tokio::time::timeout(Duration::from_millis(500), join_handle).await
+    tokio::time::timeout(Duration::from_millis(500), join_handle)
+        .await
         .expect("Actor did not shutdown within timeout")
         .expect("Actor task panicked or failed");
 

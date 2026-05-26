@@ -8,9 +8,11 @@
  * Traceability: Issue #9, ADR 0002, Issue #124
  * ======================================================================== */
 
+pub use pharos_protocol::metadata::{
+    GeometryManifest, GeometryOperation, OperationDimensions, ParameterValue,
+};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
-pub use pharos_protocol::metadata::{ParameterValue, GeometryManifest, GeometryOperation, OperationDimensions};
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct PharosMetadata {

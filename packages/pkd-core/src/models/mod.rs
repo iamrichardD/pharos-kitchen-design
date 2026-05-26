@@ -8,6 +8,6 @@
  * Traceability: Issue #9, ADR 0002
  * ======================================================================== */
 
-pub mod schema;
 pub mod metadata;
+pub mod schema;
 pub mod types;
