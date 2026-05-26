@@ -13,6 +13,7 @@ using Autodesk.Revit.UI;
 using Autodesk.Revit.Attributes;
 using System.Reflection;
 using System;
+using System.IO;
 
 namespace Pkd.RevitBridge
 {
@@ -63,6 +64,15 @@ namespace Pkd.RevitBridge
 
                 panel.AddItem(placeDraftBtnData);
 
+                // 5. Initialize Ghost Tuning Listener (Issue #125)
+                // Why: Enables real-time synchronization of equipment "tuning" from the Web UI.
+                string syncPath = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "pharos",
+                    "ghost_sync.json"
+                );
+                GhostTuningManager.Initialize(syncPath);
+
                 return Result.Succeeded;
             }
             catch (Exception ex)
@@ -75,6 +85,7 @@ namespace Pkd.RevitBridge
 
         public Result OnShutdown(UIControlledApplication application)
         {
+            GhostTuningManager.Shutdown();
             return Result.Succeeded;
         }
     }

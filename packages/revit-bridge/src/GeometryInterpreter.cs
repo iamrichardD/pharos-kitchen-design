@@ -149,11 +149,18 @@ namespace Pkd.RevitBridge
             {
                 try 
                 {
-                    if (op.Type == "Extrusion" && op.Profile == "Rectangle")
+                    List<GeometryObject> solids = GenerateSolids(op);
+                    if (solids.Count > 0)
                     {
-                        CreateExtrusionRectangle(doc, op, applicationId);
+                        // Using FoodServiceEquipment category for Ghost Links
+                        ElementId categoryId = new ElementId(BuiltInCategory.OST_FoodServiceEquipment);
+                        
+                        DirectShape ds = DirectShape.CreateElement(doc, categoryId);
+                        ds.ApplicationId = applicationId;
+                        ds.ApplicationDataId = op.Id;
+                        ds.SetShape(solids);
+                        ds.Name = $"Pharos: {op.Id}";
                     }
-                    // Future expansion: Support for Cylinders, Revolves, etc.
                 }
                 catch (Exception ex)
                 {
@@ -164,7 +171,23 @@ namespace Pkd.RevitBridge
             }
         }
 
-        private void CreateExtrusionRectangle(Document doc, GeometryOperation op, string applicationId)
+        /// <summary>
+        /// Generates a list of GeometryObjects (Solids) for a single operation.
+        /// Why: Enables reuse for both initial placement and subsequent "Ghost Tuning" updates.
+        /// </summary>
+        public List<GeometryObject> GenerateSolids(GeometryOperation op)
+        {
+            List<GeometryObject> results = new List<GeometryObject>();
+
+            if (op.Type == "Extrusion" && op.Profile == "Rectangle")
+            {
+                results.Add(CreateExtrusionRectangleSolid(op));
+            }
+
+            return results;
+        }
+
+        private Solid CreateExtrusionRectangleSolid(GeometryOperation op)
         {
             // BIM Integrity: No defaulting allowed. Use direct values from reconciled struct.
             double width = op.Dimensions.Width;
@@ -180,20 +203,11 @@ namespace Pkd.RevitBridge
             profile.Add(Line.CreateBound(origin + new XYZ(0, depth, 0), origin));
 
             CurveLoop curveLoop = CurveLoop.Create(profile);
-            Solid box = GeometryCreationUtilities.CreateExtrusionGeometry(
+            return GeometryCreationUtilities.CreateExtrusionGeometry(
                 new List<CurveLoop> { curveLoop }, 
                 XYZ.BasisZ, 
                 height
             );
-
-            // Using FoodServiceEquipment category for Ghost Links
-            ElementId categoryId = new ElementId(BuiltInCategory.OST_FoodServiceEquipment);
-            
-            DirectShape ds = DirectShape.CreateElement(doc, categoryId);
-            ds.ApplicationId = applicationId;
-            ds.ApplicationDataId = op.Id;
-            ds.SetShape(new List<GeometryObject> { box });
-            ds.Name = $"Pharos: {op.Id}";
         }
 #endif
     }
