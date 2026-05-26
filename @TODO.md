@@ -208,6 +208,7 @@
 - [x] **Issue #159**: Implement Shard-Based Logging (RET-01). [AUDITED: PHAROS GREEN]
 - [x] **Issue #160**: Implement Mid-Sprint Rigor Gate (RET-03). [AUDITED: PHAROS GREEN]
 - [x] **Issue #161**: Implement CI Pulse Watchdog (RET-04). [AUDITED: PHAROS GREEN]
+- [ ] **Issue #162**: Windows Installation Utility: Remediate Unnecessary `curl` Dependency. [ECT: 1]
 - [ ] **Issue #124**: Task 5.2: JIT Sharded Registry Scaling. [ECT: 4]
 - [ ] **Issue #125**: Task 5.3: Bidirectional Web-to-Revit 'Ghost Tuning'. [ECT: 5]
 - [ ] **Issue #126**: Task 5.4: CLI Registry Management Subcommands. [ECT: 3]

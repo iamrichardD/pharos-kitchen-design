@@ -382,3 +382,9 @@
 - **Developed** the `rigor-verify.sh` (RET-03) git-hook and `setup-hooks.sh` installation logic to enforce manual rigor checks for high-complexity tasks.
 - **Updated** `install.sh` to automatically provision these rigor gates for local developers.
 - **Audited** via Senior PM (Result: 🟢 PHAROS GREEN).
+
+#### [2026-05-25] - Issue #162: Windows Installation Dependency Gap
+- **Identified** a redundant dependency on `curl` in the Windows `install.ps1` script during automated GHA validation.
+- **Investigated** the logic and confirmed that the script uses native PowerShell `Invoke-WebRequest`, making the `curl` check obsolete.
+- **Logged** Issue #162 for future remediation to improve Windows installation reliability.
+- **DORA Metrics**: N/A (Documentation/Backlog only).
