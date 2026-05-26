@@ -16,6 +16,9 @@ edition = "2021"
 description = "High-density TOON format parser for the Pharos ecosystem."
 license = "FSL-1.1"
 
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = false
+
 [lib]
 crate-type = ["cdylib", "rlib"]
 

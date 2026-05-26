@@ -26,4 +26,8 @@ describe('Demo App Monorepo Integrity', () => {
   it('should expose the WASM validation entry point', () => {
     expect(pkdCore.validate_metadata_wasm).toBeDefined();
   });
+
+  it('should expose the WASM state synchronization entry point', () => {
+    expect(pkdCore.sync_state_wasm).toBeDefined();
+  });
 });
