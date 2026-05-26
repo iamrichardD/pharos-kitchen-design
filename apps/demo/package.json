@@ -17,12 +17,17 @@
     "@astrojs/react": "^4.2.1",
     "@astrojs/tailwind": "^6.0.0",
     "@pkd/core": "*",
+    "@pkd/protocol": "*",
+    "@react-three/drei": "^10.0.0",
+    "@react-three/fiber": "^9.0.0",
     "astro": "^5.18.1",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "three": "^0.174.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.2",
+    "@types/three": "^0.174.0",
     "@vitest/ui": "^4.1.4",
     "typescript": "^5.7.3",
     "vitest": "^4.1.4"

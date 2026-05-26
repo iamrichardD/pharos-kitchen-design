@@ -4,29 +4,38 @@
  * File: InteropSandbox.tsx
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
- * Purpose: Interactive WASM-powered metadata verification sandbox.
- * Traceability: Issue #120
+ * Purpose: Interactive WASM-powered metadata verification sandbox with tuning.
+ * Traceability: Issue #120, #125, Shard #125.3
  * ======================================================================== */
 
-import React, { useState, useEffect } from 'react';
-import init, { load_registry_wasm, get_ghost_metadata_wasm } from '@pkd/core';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import init, { load_registry_wasm, get_ghost_metadata_wasm, sync_state_wasm, type PharosRegistryHandle } from '@pkd/core';
+import { ThreeJsInterpreter } from './ThreeJsInterpreter';
 
 export const InteropSandbox: React.FC = () => {
     const [status, setStatus] = useState('Initializing WASM Core...');
     const [metadata, setMetadata] = useState<any>(null);
     const [error, setError] = useState<string | null>(null);
+    const [handle, setHandle] = useState<PharosRegistryHandle | null>(null);
+    
+    // Tuning State
+    const [dimensions, setDimensions] = useState({
+        width: 24.0,
+        depth: 24.0,
+        height: 34.0
+    });
 
     useEffect(() => {
         async function setup() {
             try {
-                // Initialize WASM binary (Mandatory for --target web)
+                // Initialize WASM binary
                 await init();
 
-                // Hybrid Handle Demo Registry (Issue #120)
+                // Hybrid Handle Demo Registry (Issue #120, #125)
                 const mockRegistry = {
                     "PHX-DW-001": {
                         "metadata_id": "PHX-DW-001",
-                        "name": "Hobart LXeR Dishwasher (WASM Demo)",
+                        "name": "Hobart LXeR Dishwasher (Tuning Demo)",
                         "schema_version": "1.0.0",
                         "classification": {
                             "omniclass_table_23": "23-75 50 11 11",
@@ -35,8 +44,9 @@ export const InteropSandbox: React.FC = () => {
                         "parameters": {
                             "manufacturer": "Hobart",
                             "model": "LXeR",
-                            "voltage": "208V",
-                            "phase": 1.0
+                            "PKD_WIDTH": 24.0,
+                            "PKD_DEPTH": 24.0,
+                            "PKD_HEIGHT": 34.0
                         },
                         "lod_geometry_specs": {
                             "100": {
@@ -57,10 +67,10 @@ export const InteropSandbox: React.FC = () => {
                     }
                 };
 
-                // WASM Handshake (Issue #120)
-                const handle = load_registry_wasm(mockRegistry);
-                const data = get_ghost_metadata_wasm(handle, "PHX-DW-001");
+                const h = load_registry_wasm(mockRegistry);
+                setHandle(h);
                 
+                const data = get_ghost_metadata_wasm(h, "PHX-DW-001");
                 setMetadata(data);
                 setStatus('PHAROS CORE READY [HYBRID HANDLE ACTIVE]');
             } catch (e: any) {
@@ -72,50 +82,135 @@ export const InteropSandbox: React.FC = () => {
         setup();
     }, []);
 
+    // High-Rigor Dispatch: Debounced WASM Sync
+    // Why: Prevents event-loop saturation during slider movement while ensuring 
+    // the WASM core remains the authoritative source of truth.
+    const syncTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    
+    const dispatchSync = useCallback((newDims: typeof dimensions) => {
+        if (!handle) return;
+
+        if (syncTimeoutRef.current) {
+            clearTimeout(syncTimeoutRef.current);
+        }
+
+        syncTimeoutRef.current = setTimeout(() => {
+            try {
+                const updated = sync_state_wasm(handle, "PHX-DW-001", {
+                    "PKD_WIDTH": newDims.width,
+                    "PKD_DEPTH": newDims.depth,
+                    "PKD_HEIGHT": newDims.height
+                });
+                setMetadata(updated);
+            } catch (e: any) {
+                setError(`Sync Error: ${e}`);
+            }
+        }, 50); // 50ms Debounce for smooth interaction
+    }, [handle]);
+
+    const handleSliderChange = (key: keyof typeof dimensions, value: number) => {
+        const nextDims = { ...dimensions, [key]: value };
+        setDimensions(nextDims);
+        dispatchSync(nextDims);
+    };
+
     return (
         <div style={{ 
             marginTop: '2rem', 
             padding: '1.5rem', 
-            border: '1px solid var(--ph-blue)', 
+            border: '1px solid #0070f3', 
             background: 'rgba(0, 112, 243, 0.05)', 
             width: '100%', 
-            maxWidth: '800px',
-            fontFamily: 'sans-serif'
+            maxWidth: '1000px',
+            fontFamily: 'sans-serif',
+            borderRadius: '8px',
+            color: '#333'
         }}>
-            <h3 style={{ color: 'var(--ph-blue)', marginTop: 0, fontSize: '1.2rem' }}>
-                {status}
-            </h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                <h3 style={{ color: '#0070f3', margin: 0, fontSize: '1.2rem' }}>
+                    {status}
+                </h3>
+                <div style={{ fontSize: '0.8rem', opacity: 0.6, fontFamily: 'monospace' }}>
+                    Issue #125.3: Ghost Tuning
+                </div>
+            </div>
             
             {error && (
-                <div style={{ color: '#ff4d4f', background: 'rgba(255, 77, 79, 0.1)', padding: '1rem', borderRadius: '4px' }}>
+                <div style={{ color: '#ff4d4f', background: 'rgba(255, 77, 79, 0.1)', padding: '1rem', borderRadius: '4px', marginBottom: '1rem' }}>
                     <strong>Verification Error:</strong> {error}
                 </div>
             )}
             
-            {metadata && (
-                <div style={{ marginTop: '1.5rem', textAlign: 'left', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                    <div>
-                        <h4 style={{ marginBottom: '0.5rem', borderBottom: '1px solid #ddd' }}>Identity</h4>
-                        <p><strong>ID:</strong> {metadata.metadata_id}</p>
-                        <p><strong>Name:</strong> {metadata.name}</p>
-                        <p><strong>Category:</strong> {metadata.classification.category}</p>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                {/* Left Column: Controls & Info */}
+                <div>
+                    <div style={{ marginBottom: '2rem', background: 'white', padding: '1rem', borderRadius: '8px', border: '1px solid #ddd' }}>
+                        <h4 style={{ marginTop: 0, marginBottom: '1rem', borderBottom: '1px solid #eee', paddingBottom: '0.5rem' }}>
+                            Tuning Sliders
+                        </h4>
                         
-                        <h4 style={{ margin: '1rem 0 0.5rem 0', borderBottom: '1px solid #ddd' }}>Attributes</h4>
-                        <p><strong>Manufacturer:</strong> {metadata.parameters.manufacturer}</p>
-                        <p><strong>Model:</strong> {metadata.parameters.model}</p>
-                    </div>
-                    
-                    <div>
-                        <h4 style={{ marginBottom: '0.5rem', borderBottom: '1px solid #ddd' }}>Geometry (LOD 100)</h4>
-                        <p><strong>Type:</strong> {metadata.lod_geometry_specs["100"].type}</p>
-                        <p><strong>Width:</strong> {metadata.lod_geometry_specs["100"].dimensions.width}m</p>
-                        <p><strong>Depth:</strong> {metadata.lod_geometry_specs["100"].dimensions.depth}m</p>
-                        <p><strong>Height:</strong> {metadata.lod_geometry_specs["100"].dimensions.height}m</p>
-                        
-                        <h4 style={{ margin: '1rem 0 0.5rem 0', borderBottom: '1px solid #ddd' }}>Performance</h4>
-                        <p><strong>Ghost Link:</strong> {metadata.performance_metadata.ghost_link_active ? 'ACTIVE' : 'INACTIVE'}</p>
+                        {(['width', 'depth', 'height'] as const).map(dim => (
+                            <div key={dim} style={{ marginBottom: '1rem' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                                    <label style={{ textTransform: 'capitalize', fontWeight: 'bold', fontSize: '0.9rem' }}>{dim}</label>
+                                    <span style={{ fontFamily: 'monospace', color: '#0070f3' }}>{dimensions[dim].toFixed(2)}"</span>
+                                </div>
+                                <input 
+                                    type="range" 
+                                    min="12" 
+                                    max="72" 
+                                    step="0.5"
+                                    value={dimensions[dim]} 
+                                    onChange={(e) => handleSliderChange(dim, parseFloat(e.target.value))}
+                                    style={{ width: '100%', cursor: 'pointer' }}
+                                />
+                            </div>
+                        ))}
                     </div>
 
+                    {metadata && (
+                        <div style={{ textAlign: 'left' }}>
+                            <h4 style={{ marginBottom: '0.5rem', borderBottom: '1px solid #ddd' }}>Identity</h4>
+                            <p style={{ margin: '0.25rem 0' }}><strong>ID:</strong> {metadata.metadata_id}</p>
+                            <p style={{ margin: '0.25rem 0' }}><strong>Name:</strong> {metadata.name}</p>
+                            
+                            <h4 style={{ margin: '1rem 0 0.5rem 0', borderBottom: '1px solid #ddd' }}>Current State (WASM-Synced)</h4>
+                            <p style={{ margin: '0.25rem 0' }}><strong>W:</strong> {metadata.parameters.PKD_WIDTH}"</p>
+                            <p style={{ margin: '0.25rem 0' }}><strong>D:</strong> {metadata.parameters.PKD_DEPTH}"</p>
+                            <p style={{ margin: '0.25rem 0' }}><strong>H:</strong> {metadata.parameters.PKD_HEIGHT}"</p>
+                        </div>
+                    )}
+                </div>
+
+                {/* Right Column: 3D Preview */}
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <h4 style={{ marginTop: 0, marginBottom: '0.5rem' }}>Authoritative 3D Preview</h4>
+                    {metadata?.geometry_manifest ? (
+                        <ThreeJsInterpreter manifest={metadata.geometry_manifest} height="400px" />
+                    ) : (
+                        <div style={{ 
+                            height: '400px', 
+                            background: '#000', 
+                            borderRadius: '8px', 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center',
+                            color: '#666'
+                        }}>
+                            Waiting for WASM Geometry...
+                        </div>
+                    )}
+                    
+                    <div style={{ marginTop: '1rem' }}>
+                        <h4 style={{ marginBottom: '0.5rem', fontSize: '0.9rem' }}>Bake Protocol</h4>
+                        <div style={{ fontSize: '0.8rem', opacity: 0.8, lineHeight: '1.4' }}>
+                            Changes are dispatched to the resident Rust core. The <code>ProceduralGenerator</code> re-bakes the <code>GeometryManifest</code>, which is then re-rendered by Three.js.
+                        </div>
+                    </div>
+                </div>
+
+                {/* Bottom Row: Raw Data */}
+                {metadata && (
                     <div style={{ gridColumn: 'span 2', marginTop: '1rem' }}>
                         <h4 style={{ marginBottom: '0.5rem' }}>Raw Verifiable Metadata (JSON)</h4>
                         <pre style={{ 
@@ -125,13 +220,13 @@ export const InteropSandbox: React.FC = () => {
                             fontSize: '0.85rem', 
                             overflowX: 'auto',
                             borderRadius: '4px',
-                            maxHeight: '300px'
+                            maxHeight: '200px'
                         }}>
                             {JSON.stringify(metadata, null, 2)}
                         </pre>
                     </div>
-                </div>
-            )}
+                )}
+            </div>
         </div>
     );
 };
