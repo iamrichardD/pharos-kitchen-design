@@ -35,6 +35,13 @@ jobs:
         with:
           fetch-depth: 0 # Required for TDD traceability checks
 
+      - name: Free Disk Space
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf "/usr/local/share/boost"
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+
       - name: Set up Podman
         run: |
           sudo apt-get update
