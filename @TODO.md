@@ -85,13 +85,14 @@
 #### 💎 Small Stones: Operational & Debt
 - [x] **Issue #88**: Task 4.22: Implement `pkd core pulse` Command. [ECT: 3]
 - [x] **Issue #165**: Debt #165: Provision Rust Linter Components in Podman. [ECT: 1]
+- [x] **Issue #166**: Hotfix #166: Resolve NPM Lockfile Mismatch for Astro. [ECT: 1]
 - [ ] **Issue #167**: Debt #167: Supply Chain Audit - Remediate Deprecated prebuild-install. [ECT: 2]
-- [ ] **Issue #115**: Debt #115: Implement Local Governance Linter (pkd gov lint). [ECT: 3]
-- [ ] **Issue #107**: Debt #107: Audit and Prune pkd-core Dependencies. [ECT: 2]
-- [ ] **Issue #113**: Debt #113: ADR Template Automation with Mandatory Prologue. [ECT: 2]
-- [ ] **Issue #114**: Debt #114: SDLC Update: Mandatory Regression Surface Mapping. [ECT: 1]
-- [ ] **Issue #117**: Debt #117: Refactor Containerfile.pulse for Dedicated Verification Stage. [ECT: 2]
-- [ ] **Issue #118**: Debt #118: Implement High-Rigor Manifest Failure Tests in Truth Engine. [ECT: 2]
+- [x] **Issue #115**: Debt #115: Implement Local Governance Linter (pkd gov lint). [ECT: 3]
+- [x] **Issue #107**: Debt #107: Audit and Prune pkd-core Dependencies. [ECT: 2]
+- [x] **Issue #113**: Debt #113: ADR Template Automation with Mandatory Prologue. [ECT: 2]
+- [x] **Issue #114**: Debt #114: SDLC Update: Mandatory Regression Surface Mapping. [ECT: 1]
+- [x] **Issue #117**: Debt #117: Refactor Containerfile.pulse for Dedicated Verification Stage. [ECT: 2]
+- [x] **Issue #118**: Debt #118: Implement High-Rigor Manifest Failure Tests in Truth Engine. [ECT: 2]
 - **Total Capacity**: 28 Tiers (Aggressive Scale)
 
 ### Phase 3: The CLI Bridge (Admin Control Plane)
@@ -163,7 +164,7 @@
 - [x] **Issue #146**: Task 4.36: Refactor JIT error handling to use a dedicated `JitError` enum. [AUDITED: PHAROS GREEN] (2026-05-19)
 - [x] **Issue #147**: Task 4.37: Implement CI check for strict dependency isolation (`wasm32` vs `native`). [AUDITED: PHAROS GREEN] (2026-05-19)
 - [ ] **Issue #144**: Task 4.34: IKD Empowerment & Visibility Maturation. [ECT: 3] [Created: 2026-05-15]
-- [ ] **Issue #145**: Task 4.35: Implement "Project Genesis" Manifesto Post. [ECT: 2] [Created: 2026-05-15]
+- [x] **Issue #145**: Task 4.35: Implement "Project Genesis" Manifesto Post. [ECT: 2] [Created: 2026-05-15]
 
 ### Sprint 4.3: Registry Distribution & Pulse Protocol (#51-54, #65) - 🔄 In Progress
 - [x] **Issue #53**: Implement `pkd core bake` engine for sharded JSON and binary indexes (Task 4.12).
@@ -211,7 +212,7 @@
 - [x] **Issue #160**: Implement Mid-Sprint Rigor Gate (RET-03). [AUDITED: PHAROS GREEN]
 - [x] **Issue #161**: Implement CI Pulse Watchdog (RET-04). [AUDITED: PHAROS GREEN]
 - [ ] **Issue #162**: Windows Installation Utility: Remediate Unnecessary `curl` Dependency. [ECT: 1]
-- [ ] **Issue #124**: Task 5.2: JIT Sharded Registry Scaling. [ECT: 4]
+- [x] **Issue #124**: Task 5.2: JIT Sharded Registry Scaling. [ECT: 4]
 - [x] **Issue #125**: Task 5.3: Bidirectional Web-to-Revit 'Ghost Tuning'. [ECT: 5]
 - [ ] **Issue #126**: Task 5.4: CLI Registry Management Subcommands. [ECT: 3]
 - [ ] **Issue #123**: Debt 5.5: .NET 8.0 Zero-Allocation Marshalling. [ECT: 4]
