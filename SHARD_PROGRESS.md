@@ -20,11 +20,13 @@ Implement the Revit listener and state-reconciliation logic for bidirectional "G
 - [x] **Refactoring**: Updated `GeometryInterpreter.cs` to expose `GenerateSolids` for reusable geometry updates.
 - [x] **Lifecycle**: Integrated `GhostTuningManager` into `PharosApp.cs` (OnStartup/OnShutdown).
 - [x] **Verification**: Added `GhostTuningTests.cs` and verified 16/16 tests pass in Podman (`scripts/test-bridge.sh`).
+- [x] **Rebase & Alignment**: Rebased onto `main` and aligned with high-rigor FFI safety patterns.
+- [x] **Performance**: Optimized `GhostTuningEventHandler` for zero-allocation 'slop' (element caching, interpreter reuse, change-only parameter updates).
 
 ## 🛡️ Security Audit
 - **Thread Safety**: Used `ConcurrentQueue` and `ExternalEvent` to ensure Revit API interactions only occur on the UI thread.
 - **Fail Fast**: Added explicit checks for file existence, JSON validity, and manifest sanity bounds.
-- **Memory Safety**: Continued usage of `SafeHandle` for FFI boundaries.
+- **Memory Safety**: Continued usage of `SafeHandle` for FFI boundaries and aligned with Core binding patterns.
 
 ## 🚀 Next Steps
-- [ ] Final handoff for Phase 4 (Crucible Audit).
+- [x] Final handoff for Phase 4 (Crucible Audit).
