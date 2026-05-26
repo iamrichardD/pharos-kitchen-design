@@ -1072,7 +1072,7 @@ mod tests {
         let registry_json = "{}";
         let handle = unsafe { pkd_load_registry(registry_json.as_ptr(), registry_json.len()) };
 
-        let invalid_utf8 = vec![0 as u8, 159, 146, 150]; // Invalid UTF-8 sequence
+        let invalid_utf8 = [0_u8, 159, 146, 150]; // Invalid UTF-8 sequence
         let ptr =
             unsafe { pkd_get_ghost_metadata(handle, invalid_utf8.as_ptr(), invalid_utf8.len()) };
 
