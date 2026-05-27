@@ -33,7 +33,7 @@ FROM mcr.microsoft.com/playwright:v1.59.1-noble
 # Force Node 24 installation
 RUN apt-get update && apt-get install -y curl && \
     curl -fsSL https://deb.nodesource.com/setup_24.x | bash - && \
-    apt-get install -y nodejs python3 make g++ && \
+    apt-get install -y nodejs && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /work
@@ -48,8 +48,7 @@ COPY --from=builder /build/packages/dialects/pkd-dialect-true/target/wasm32-unkn
 
 # CRITICAL: Clean host node_modules and perform a fresh install
 RUN rm -rf node_modules apps/marketing/node_modules apps/demo/node_modules packages/*/node_modules && \
-    npm install && \
-    npm rebuild better-sqlite3
+    npm install
 
 # Ensure local binaries are in the path
 ENV PATH="/work/node_modules/.bin:$PATH"

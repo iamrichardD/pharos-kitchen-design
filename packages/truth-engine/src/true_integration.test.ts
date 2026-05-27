@@ -10,7 +10,7 @@
 
 import { describe, it, expect, beforeEach } from 'vitest';
 import { TruthEngine } from './engine.js';
-import Database from 'better-sqlite3';
+import { DatabaseSync } from 'node:sqlite';
 import { join } from 'node:path';
 import { WasmDialectLoader } from './loader.js';
 
@@ -18,10 +18,10 @@ const WASM_PATH = '/work/dist/dialects/pkd_dialect_true.wasm';
 
 describe('TruthEngine WASM Integration (True Mfg)', () => {
     let engine: TruthEngine;
-    let db: Database.Database;
+    let db: DatabaseSync;
 
     beforeEach(async () => {
-        db = new Database(':memory:');
+        db = new DatabaseSync(':memory:');
         engine = new TruthEngine(db);
         await engine.init();
 

@@ -7,7 +7,7 @@
  * Purpose: Event-driven state machine for manufacturer data synchronization.
  * Traceability: Issue #46, Issue #47, Issue #50, ADR-0017, Issue #124
  * ======================================================================== */
-import Database from 'better-sqlite3';
+import { DatabaseSync } from 'node:sqlite';
 import { chromium } from '@playwright/test';
 import { ForensicNormalizer, NormalizationResult } from './normalizer.js';
 import { WasmDialectLoader } from './loader.js';
@@ -34,14 +34,14 @@ export interface Resource {
 
 export class TruthEngine {
     private _dbPath: string;
-    private _db!: Database.Database;
+    private _db!: DatabaseSync;
     private normalizer!: ForensicNormalizer;
     private wasmPlugins: Map<number, Plugin> = new Map();
     private validator = new PharosValidator();
     private _initialized = false;
 
-    constructor(dbOrPath?: Database.Database | string) {
-        if (dbOrPath instanceof Database) {
+    constructor(dbOrPath?: DatabaseSync | string) {
+        if (dbOrPath instanceof DatabaseSync) {
             this._db = dbOrPath;
             this._dbPath = ':memory:'; // Placeholder for instance-based DB
         } else {
@@ -66,8 +66,10 @@ export class TruthEngine {
             }
             
             if (!this._db) {
-                this._db = new Database(this._dbPath);
+                this._db = new DatabaseSync(this._dbPath);
             }
+        } else if (!this._db) {
+             this._db = new DatabaseSync(':memory:');
         }
 
         // 2. Component Initialization
@@ -180,7 +182,8 @@ export class TruthEngine {
             // No-Masking Principle: If SKU is missing, fail fast to forensic queue
             if (sku) {
                 // Atomic Transaction: Registry Promotion (The "Bake" Preparation)
-                const transaction = this._db.transaction(() => {
+                this._db.exec('BEGIN');
+                try {
                     this._db.prepare(`
                         INSERT OR REPLACE INTO equipment_registry (
                             mfr_id, resource_id, sku, name, category, voltage, btu, metadata
@@ -197,8 +200,11 @@ export class TruthEngine {
                     );
 
                     this.updateState(resourceId, 'HEALTHY');
-                });
-                transaction();
+                    this._db.exec('COMMIT');
+                } catch (error) {
+                    this._db.exec('ROLLBACK');
+                    throw error;
+                }
                 return result;
             } else {
                 result.status = 'UNVERIFIED_RAW_DATA';
@@ -210,7 +216,8 @@ export class TruthEngine {
             const hash = createHash('sha256').update(rawInput).digest('hex');
             
             // Atomic Transaction: Forensic Deferral
-            const transaction = this._db.transaction(() => {
+            this._db.exec('BEGIN');
+            try {
                 // Log the investigation
                 this._db.prepare(`
                     INSERT OR IGNORE INTO forensic_investigations (
@@ -226,9 +233,11 @@ export class TruthEngine {
 
                 // Move state machine to DIVE_REQUIRED
                 this.updateState(resourceId, 'DIVE_REQUIRED');
-            });
-
-            transaction();
+                this._db.exec('COMMIT');
+            } catch (error) {
+                this._db.exec('ROLLBACK');
+                throw error;
+            }
         }
 
         return result;
@@ -246,11 +255,21 @@ export class TruthEngine {
         this.ensureInitialized();
 
         // 1. Path Integrity Sentinel: Prevent arbitrary deletion (Shift-Left Security)
+        // We resolve allowed paths relative to the current working directory.
         const absoluteStaging = resolve(stagingDir) + sep;
         const allowedBase = resolve(".artifacts") + sep;
         const allowedData = resolve("data") + sep;
 
-        if (!absoluteStaging.startsWith(allowedBase) && !absoluteStaging.startsWith(allowedData)) {
+        // Monorepo Resilience: If CWD is root, we also allow package-specific paths
+        const pkgArtifacts = resolve("packages", "truth-engine", ".artifacts") + sep;
+        const pkgData = resolve("packages", "truth-engine", "data") + sep;
+
+        const isAllowed = absoluteStaging.startsWith(allowedBase) || 
+                         absoluteStaging.startsWith(allowedData) ||
+                         absoluteStaging.startsWith(pkgArtifacts) ||
+                         absoluteStaging.startsWith(pkgData);
+
+        if (!isAllowed) {
             throw new Error(`[Security] Bake aborted: stagingDir '${stagingDir}' is outside of allowed paths (.artifacts/ or data/).`);
         }
 

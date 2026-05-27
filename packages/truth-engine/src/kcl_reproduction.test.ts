@@ -10,15 +10,15 @@
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { TruthEngine } from './engine.js';
-import Database from 'better-sqlite3';
+import { DatabaseSync } from 'node:sqlite';
 import { rmSync, existsSync } from 'node:fs';
 
 describe('TruthEngine KCL Integration', () => {
     let engine: TruthEngine;
-    let db: Database.Database;
+    let db: DatabaseSync;
 
     beforeEach(async () => {
-        db = new Database(':memory:');
+        db = new DatabaseSync(':memory:');
         engine = new TruthEngine(db);
         await engine.init();
 
