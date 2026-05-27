@@ -55,20 +55,47 @@ The following subcommands will constitute the `pkd registry` namespace:
 ### 3.5 `pkd registry status` (New)
 - **Intent**: Provides a developer-friendly diagnostic output showing current registry version, local cache path (XDG), selected environment realm, and time since last sync.
 
-## 4. UX Flow: The OEM Content Lifecycle
+## 4. TDD Strategy: Atomic Verification (Phase 1 Gate)
+To ensure high-rigor implementation, the following atomic test cases will be developed *before* implementation:
+
+- `test_should_reject_push_when_jwt_organization_mismatch`: Verify that an OEM user with `custom:organization: FRYMASTER` cannot push to `shard-id: VULCAN`.
+- `test_should_fail_fast_when_bake_source_contains_invalid_json`: Ensure the bake engine terminates immediately if any shard violates the Pharos Schema.
+- `test_should_return_integrity_failure_when_archive_hash_mismatch`: Verify that `registry verify` detects tampered `.tar.zst` files.
+- `test_should_isolate_cache_by_environment`: Ensure that `registry pulse --env dev` does not overwrite the `prod` cache directory.
+- `test_should_emit_deprecation_warning_on_legacy_core_pulse`: Verify that the transition logic correctly guides users to the new namespace.
+
+## 5. Regression Surface Map (ADR-0040)
+The following areas are identified as high-risk for regressions during the namespace migration:
+
+| Area | Risk | Mitigation |
+| :--- | :--- | :--- |
+| **`pkd core search`** | Accidental breakage of positional search fallback. | Mandatory smoke test for `pkd manufacturer=3m`. |
+| **CI/CD `pulse.yml`** | CI failure due to renamed `core pulse` command. | Synchronized update of all GHA workflows. |
+| **Documentation** | Stale instructions in `CLI_REFERENCE.md`. | Complete IA pass by `PHAROS_IA_CORE`. |
+| **Auth Lifecycle** | Token retrieval failure for registry push. | Use existing `AuthManager` with verified `keyring` integration. |
+
+## 6. Local Security Architecture: JWT Management
+To protect designer and OEM credentials, the `pkd` CLI will adhere to the following security standards:
+
+- **Storage**: Authentication tokens (JWTs) will be stored in the **System Keyring** (GNOME Keyring, macOS Keychain, Windows Credential Manager) using the `keyring-rs` crate.
+- **Service Scoping**: Tokens will be stored under the service name `pharos-registry-auth` to prevent collision with other applications.
+- **In-Memory Hygiene**: Sensitive tokens will be handled as `SecretString` or wiped from memory after use to prevent exposure in core dumps.
+- **Transport Security**: All registry operations (`push`, `pulse`) will enforce TLS 1.3 for communication with the Pharos Identity Bridge and Cloudflare R2.
+
+## 7. UX Flow: The OEM Content Lifecycle
 1. **Extraction**: OEM utilizes transformation logic to produce Pharos-compliant JSON shards locally.
 2. **Baking**: OEM executes `pkd registry bake --source ./shards --output ./dist --shard-id frymaster-v1`.
 3. **Verification**: OEM executes `pkd registry verify --path ./dist` to validate integrity.
 4. **Promotion**: OEM executes `pkd registry push --source ./dist --env stage --shard-id frymaster-v1`. The CLI authenticates the user, verifies the `custom:organization` claim, and uploads the verified payload to Cloudflare R2 via `aws-sdk-s3`.
 5. **Synchronization**: Downstream CLI clients run `pkd registry pulse --env stage` to detect and download the new shard.
 
-## 5. Migration Strategy (Architectural Debt Remediation)
+## 8. Migration Strategy (Architectural Debt Remediation)
 Migrating from `core` to `registry` introduces breaking changes to existing documentation and pipelines:
 1. **Update CI/CD Pipelines**: Modify `pulse.yml` and related workflows to invoke `pkd registry pulse` instead of `pkd core pulse`.
 2. **Update CLI Reference**: Revise `docs/CLI_REFERENCE.md` and user guides to reflect the new taxonomy.
 3. **Deprecation Notice**: Temporarily alias `pkd core pulse` to emit a deprecation warning guiding users to the `registry` namespace, followed by eventual removal.
 
-## 6. Security Analysis (Shift-Left)
+## 9. Security Analysis (Shift-Left)
 - **Identity Bridge Authentication**: Every `registry push` must be accompanied by a valid JWT from the Pharos Identity Bridge.
 - **Organization-Based Scoping**: The CLI must verify that the `custom:organization` claim in the JWT matches the `shard-id` being pushed.
 - **Bucket-Level Isolation**: Staging and Production buckets on Cloudflare R2 must have strict IAM/Bucket policies allowing only the Pharos Bridge (or signed CLI requests) to write to specific prefixes.
