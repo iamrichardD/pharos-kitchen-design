@@ -9,10 +9,12 @@
  * ======================================================================== */
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import init, { load_registry_wasm, get_ghost_metadata_wasm, sync_state_wasm, type PharosRegistryHandle } from '@pkd/core';
+import { load_registry_wasm, get_ghost_metadata_wasm, sync_state_wasm, type PharosRegistryHandle } from '@pkd/core';
 import { ThreeJsInterpreter } from './ThreeJsInterpreter';
+import { useWasm } from './WasmContext';
 
 export const InteropSandbox: React.FC = () => {
+    const { status: wasmStatus, error: wasmError } = useWasm();
     const [status, setStatus] = useState('Initializing WASM Core...');
     const [metadata, setMetadata] = useState<any>(null);
     const [error, setError] = useState<string | null>(null);
@@ -26,11 +28,18 @@ export const InteropSandbox: React.FC = () => {
     });
 
     useEffect(() => {
-        async function setup() {
-            try {
-                // Initialize WASM binary
-                await init();
+        if (wasmStatus === 'ERROR') {
+            setError(wasmError || 'Unknown WASM Initialization Error');
+            setStatus('FFI_LOAD_ERROR');
+            return;
+        }
 
+        if (wasmStatus !== 'READY') return;
+
+        async function setup() {
+            if (handle) return; // Already setup
+
+            try {
                 // Hybrid Handle Demo Registry (Issue #120, #125)
                 const mockRegistry = {
                     "PHX-DW-001": {
@@ -80,7 +89,7 @@ export const InteropSandbox: React.FC = () => {
             }
         }
         setup();
-    }, []);
+    }, [wasmStatus, wasmError, handle]);
 
     // High-Rigor Dispatch: Debounced WASM Sync
     // Why: Prevents event-loop saturation during slider movement while ensuring 
