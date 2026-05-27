@@ -10,7 +10,7 @@
 # Hash Update: 2026-05-05 (Upstream Umami script update)
 # ========================================================================
 
-EXPECTED_HASH="KvnqiR9t+UqqcEcCY14nvZZK2JXQQoNNm3sOWblKyR/ALwgvMvE6xNC+xDWa1G8Y"
+EXPECTED_HASH="XIoKniD4y5+iahq2/CkYT+GAABKWaS/0hQl+1HKPL0Y9tRFxG5Z8BWQul4tL07IW"
 URL="https://cloud.umami.is/script.js"
 
 echo "Checking script integrity for $URL..."
