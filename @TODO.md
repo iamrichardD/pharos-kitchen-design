@@ -86,7 +86,7 @@
 - [x] **Issue #88**: Task 4.22: Implement `pkd core pulse` Command. [ECT: 3]
 - [x] **Issue #165**: Debt #165: Provision Rust Linter Components in Podman. [ECT: 1]
 - [x] **Issue #166**: Hotfix #166: Resolve NPM Lockfile Mismatch for Astro. [ECT: 1]
-- [ ] **Issue #167**: Debt #167: Supply Chain Audit - Remediate Deprecated prebuild-install. [ECT: 2]
+- [x] **Issue #167**: Debt #167: Supply Chain Audit - Remediate Deprecated prebuild-install. [ECT: 2]
 - [ ] **Issue #168**: Debt #168: Automated Boundary Enforcement (ADR-0044). [ECT: 2]
 - [ ] **Issue #169**: Debt #169: Supply Chain Watchdog (Pre-Engineering Dependency Audit). [ECT: 1]
 - [x] **Issue #170**: Debt #170: Boundary Marshaling Protocol. [ECT: 1]
