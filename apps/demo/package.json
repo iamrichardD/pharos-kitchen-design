@@ -21,14 +21,17 @@
     "@react-three/drei": "^10.0.0",
     "@react-three/fiber": "^9.0.0",
     "astro": "^5.18.1",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
     "three": "^0.174.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.2",
+    "@testing-library/react": "^16.1.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
     "@types/three": "^0.174.0",
+    "@vitejs/plugin-react": "^4.3.4",
     "@vitest/ui": "^4.1.4",
+    "happy-dom": "^15.11.0",
     "typescript": "^5.7.3",
     "vitest": "^4.1.4"
   }
