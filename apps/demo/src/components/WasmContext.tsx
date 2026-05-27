@@ -8,11 +8,9 @@
  * Traceability: Issue #137
  * ======================================================================== */
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import init from '@pkd/core';
-
-
-export type WasmStatus = 'INIT' | 'LOADING' | 'READY' | 'ERROR';
+import React, { createContext, useContext, useEffect, ReactNode, useState } from 'react';
+import { useStore } from '@nanostores/react';
+import { $wasmStore, initializeWasm, type WasmStatus } from '../utils/wasmStore';
 
 interface WasmContextState {
     status: WasmStatus;
@@ -22,43 +20,17 @@ interface WasmContextState {
 const WasmContext = createContext<WasmContextState | undefined>(undefined);
 
 export const WasmProvider = ({ children }: { children: ReactNode }) => {
-    const [status, setStatus] = useState<WasmStatus>('INIT');
-    const [error, setError] = useState<string | null>(null);
+    const wasmState = useStore($wasmStore);
 
     useEffect(() => {
-        let mounted = true;
-
-        async function initialize() {
-            if (status !== 'INIT') return;
-            
-            setStatus('LOADING');
-            try {
-                // Why: Consolidates WASM initialization to a single provider
-                // to reduce network overhead and memory footprint.
-                await init();
-                
-                if (mounted) {
-                    setStatus('READY');
-                    console.log('🟢 Pharos WASM Core Initialized (Shared Context)');
-                }
-            } catch (e: any) {
-                console.error('🔴 Pharos WASM Initialization Failed:', e);
-                if (mounted) {
-                    setError(e.toString());
-                    setStatus('ERROR');
-                }
-            }
-        }
-
-        initialize();
-
-        return () => {
-            mounted = false;
-        };
+        // Why: Singleton initialization avoids race conditions and multiple loads
+        initializeWasm().catch(() => {
+            // Error is handled in the store
+        });
     }, []);
 
     return (
-        <WasmContext.Provider value={{ status, error }}>
+        <WasmContext.Provider value={wasmState}>
             {children}
         </WasmContext.Provider>
     );

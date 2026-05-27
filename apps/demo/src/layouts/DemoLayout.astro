@@ -13,8 +13,6 @@ interface Props {
 	title: string;
 }
 
-import { WasmProvider } from '../components/WasmContext';
-
 const { title } = Astro.props;
 ---
 
@@ -42,8 +40,6 @@ const { title } = Astro.props;
 		</style>
 	</head>
 	<body>
-		<WasmProvider client:load>
-			<slot />
-		</WasmProvider>
+		<slot />
 	</body>
 </html>
