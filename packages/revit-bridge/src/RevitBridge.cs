@@ -151,6 +151,19 @@ namespace Pkd.RevitBridge
         private static extern PkdBuffer pkd_trigger_panic();
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
+        private static extern unsafe PkdBuffer pkd_sync_state(
+            PharosRegistryHandle handle, 
+            byte* skuPtr, nuint skuLen, 
+            byte* deltaPtr, nuint deltaLen);
+
+        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
+        private static extern unsafe int pkd_register_shard_fetcher(
+            PharosRegistryHandle handle,
+            byte* baseUrlPtr, nuint baseUrlLen,
+            byte* manifestPtr, nuint manifestLen,
+            IntPtr callback);
+
+        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern unsafe PharosRegistryHandle pkd_load_registry(byte* ptr, nuint length);
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
@@ -175,6 +188,53 @@ namespace Pkd.RevitBridge
                     {
                         return ProcessRawResponse(result);
                     }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Synchronizes the state of a specific equipment item in the registry with local deltas.
+        /// Why: Enables "Ghost Tuning" (live updates) of equipment parameters across the FFI boundary.
+        /// Traceability: Issue #170, #165
+        /// </summary>
+        public ValidationResponse SyncState(PharosRegistryHandle handle, string sku, string deltaJson)
+        {
+            if (handle == null || handle.IsInvalid)
+                throw new ArgumentException("Invalid registry handle");
+
+            byte[] skuBytes = Encoding.UTF8.GetBytes(sku);
+            byte[] deltaBytes = Encoding.UTF8.GetBytes(deltaJson);
+            unsafe
+            {
+                fixed (byte* sPtr = skuBytes)
+                fixed (byte* dPtr = deltaBytes)
+                {
+                    using (var result = SafePkdBufferHandle.FromBuffer(pkd_sync_state(handle, sPtr, (nuint)skuBytes.Length, dPtr, (nuint)deltaBytes.Length)))
+                    {
+                        return ProcessRawResponse(result);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Registers a callback for lazy-loading shards from a remote source.
+        /// Why: Optimizes memory usage by loading equipment metadata only when requested.
+        /// Traceability: Issue #111
+        /// </summary>
+        public int RegisterShardFetcher(PharosRegistryHandle handle, string baseUrl, string manifestJson, IntPtr callback)
+        {
+            if (handle == null || handle.IsInvalid)
+                throw new ArgumentException("Invalid registry handle");
+
+            byte[] urlBytes = Encoding.UTF8.GetBytes(baseUrl);
+            byte[] manifestBytes = Encoding.UTF8.GetBytes(manifestJson);
+            unsafe
+            {
+                fixed (byte* uPtr = urlBytes)
+                fixed (byte* mPtr = manifestBytes)
+                {
+                    return pkd_register_shard_fetcher(handle, uPtr, (nuint)urlBytes.Length, mPtr, (nuint)manifestBytes.Length, callback);
                 }
             }
         }

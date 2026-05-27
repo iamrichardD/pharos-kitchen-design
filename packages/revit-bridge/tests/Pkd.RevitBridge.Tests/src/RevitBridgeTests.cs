@@ -204,5 +204,42 @@ namespace Pkd.RevitBridge.Tests
                 Assert.Equal("LXeR", model.GetString());
             }
         }
+        [Fact]
+        public void TestShould_ApplyDeltas_When_SyncStateInvoked()
+        {
+            using (var registry = _bridge.LoadRegistry(LoadMockRegistry()))
+            {
+                string id = "PHX-DW-001";
+                string deltaJson = "{\"PKD_WIDTH\": 55.0}";
+
+                // 1. Verify base state
+                ValidationResponse baseMeta = _bridge.GetGhostMetadata(registry, id);
+                Assert.False(baseMeta.Data.Value.GetProperty("parameters").TryGetProperty("PKD_WIDTH", out _));
+
+                // 2. Apply Sync (Ghost Tuning)
+                ValidationResponse syncResult = _bridge.SyncState(registry, id, deltaJson);
+                Assert.True(syncResult.IsValid);
+
+                // 3. Verify applied delta
+                ValidationResponse updatedMeta = _bridge.GetGhostMetadata(registry, id);
+                Assert.True(updatedMeta.Data.Value.GetProperty("parameters").TryGetProperty("PKD_WIDTH", out JsonElement width));
+                Assert.Equal(55.0, width.GetDouble());
+            }
+        }
+
+        [Fact]
+        public void TestShould_ReturnSuccess_When_RegisterShardFetcherInvoked()
+        {
+            using (var registry = _bridge.LoadRegistry(LoadMockRegistry()))
+            {
+                string baseUrl = "https://cdn.iamrichardd.com/pharos/shards/";
+                string manifestJson = "{\"skus\": {}, \"shards\": {}}";
+                
+                // For the purpose of this integration test, we use a null callback
+                // as we aren't testing the actual fetch loop, just the registration logic.
+                int result = _bridge.RegisterShardFetcher(registry, baseUrl, manifestJson, IntPtr.Zero);
+                Assert.Equal(0, result);
+            }
+        }
     }
 }

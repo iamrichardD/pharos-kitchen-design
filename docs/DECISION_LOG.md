@@ -45,6 +45,7 @@ This log provides an index of the technical and architectural decisions made for
 | **[ADR-0039]** | 2026-05-20 | Approved | [Agentic Resilience & Asynchronous Recovery](docs/adr/0039-agentic-resilience-asynchronous-recovery.md) |
 | **[ADR-0040]** | 2026-05-21 | Approved | [Mandatory Regression Surface Mapping](docs/adr/0040-mandatory-regression-surface-mapping.md) |
 | **[ADR-0041]** | 2026-05-21 | Approved | [Multi-Agent Rigor & Gate Enforcement](docs/adr/0041-multi-agent-rigor-gate-enforcement.md) |
+| **[ADR-0044]** | 2026-05-27 | Proposed | [Automated Boundary Enforcement (The Single Boundary Mandate)](docs/adr/0044-automated-boundary-enforcement.md) |
 
 ---
 *To add a new decision, create a new file in `docs/adr/` following the established template and append it to this index.*
