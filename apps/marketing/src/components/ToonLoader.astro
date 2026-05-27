@@ -17,15 +17,15 @@ interface Props {
 const { content } = Astro.props;
 ---
 
-<div class="toon-container bg-gray-950 border border-emerald-500/30 rounded-lg p-6 font-mono text-sm text-emerald-400 shadow-2xl" data-toon={content}>
+<div class="toon-container bg-gray-950 border border-ph-pulse/30 rounded-lg p-6 font-mono text-sm text-ph-pulse-glow shadow-2xl" data-toon={content}>
   <div class="toon-status flex items-center gap-2 mb-4">
-    <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+    <div class="w-2 h-2 rounded-full bg-ph-pulse animate-pulse"></div>
     <span class="text-xs uppercase tracking-tighter">Initializing Pharos WASM Runtime...</span>
   </div>
   
   <div class="toon-output hidden">
-    <div class="toon-header mb-6 border-b border-emerald-500/20 pb-4"></div>
-    <div class="toon-body prose prose-invert prose-emerald max-w-none text-emerald-100/90 leading-relaxed mb-8"></div>
+    <div class="toon-header mb-6 border-b border-ph-pulse/20 pb-4"></div>
+    <div class="toon-body prose prose-invert prose-emerald max-w-none text-ph-pulse-glow/90 leading-relaxed mb-8"></div>
     <div class="toon-lists mt-8 space-y-10"></div>
   </div>
 
@@ -85,14 +85,14 @@ const { content } = Astro.props;
             header.innerHTML = `
               <div class="flex justify-between items-start mb-2">
                 <h1 class="text-2xl font-bold text-white tracking-tight">${doc.metadata.title || 'Pharos Update'}</h1>
-                <span class="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/30 text-[10px] uppercase text-emerald-400 rounded">
+                <span class="px-2 py-0.5 bg-ph-pulse/10 border border-ph-pulse/30 text-[10px] uppercase text-ph-pulse-glow rounded">
                   Verified Log
                 </span>
               </div>
               <div class="flex gap-4 text-[10px] uppercase tracking-wider opacity-60">
                 <span>By: ${doc.metadata.author || 'PMA'}</span>
                 <span>Ref: ${doc.metadata.date || '2026-XX-XX'}</span>
-                <span class="text-emerald-500">Stream: ${doc.metadata.stream || 'Engineering'}</span>
+                <span class="text-ph-pulse">Stream: ${doc.metadata.stream || 'Engineering'}</span>
               </div>
             `;
           }
@@ -116,21 +116,21 @@ const { content } = Astro.props;
               listEl.className = "group animate-in fade-in slide-in-from-bottom-2 duration-700";
               listEl.innerHTML = `
                 <div class="flex items-center gap-2 mb-3">
-                   <div class="h-[1px] flex-grow bg-emerald-500/20"></div>
-                   <h3 class="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-500/60">${name}</h3>
-                   <div class="h-[1px] w-8 bg-emerald-500/20"></div>
+                   <div class="h-[1px] flex-grow bg-ph-pulse/20"></div>
+                   <h3 class="text-[10px] font-bold uppercase tracking-[0.2em] text-ph-pulse/60">${name}</h3>
+                   <div class="h-[1px] w-8 bg-ph-pulse/20"></div>
                 </div>
-                <div class="overflow-hidden border border-emerald-500/10 rounded-sm bg-black/20">
+                <div class="overflow-hidden border border-ph-pulse/10 rounded-sm bg-black/20">
                   <table class="w-full text-left border-collapse text-[11px]">
                     <thead>
-                      <tr class="bg-emerald-500/5">
-                        ${list.schema.map((s: string) => `<th class="py-2.5 px-4 uppercase opacity-40 font-bold border-r border-emerald-500/10 last:border-0">${s}</th>`).join('')}
+                      <tr class="bg-ph-pulse/5">
+                        ${list.schema.map((s: string) => `<th class="py-2.5 px-4 uppercase opacity-40 font-bold border-r border-ph-pulse/10 last:border-0">${s}</th>`).join('')}
                       </tr>
                     </thead>
                     <tbody>
                       ${list.items.map((row: string[]) => `
-                        <tr class="border-t border-emerald-500/5 hover:bg-emerald-500/5 transition-colors group/row">
-                          ${row.map(cell => `<td class="py-2 px-4 border-r border-emerald-500/5 last:border-0 group-hover/row:text-white transition-colors">${cell}</td>`).join('')}
+                        <tr class="border-t border-ph-pulse/5 hover:bg-ph-pulse/5 transition-colors group/row">
+                          ${row.map(cell => `<td class="py-2 px-4 border-r border-ph-pulse/5 last:border-0 group-hover/row:text-white transition-colors">${cell}</td>`).join('')}
                         </tr>
                       `).join('')}
                     </tbody>

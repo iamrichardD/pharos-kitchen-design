@@ -17,6 +17,7 @@
     --ph-charcoal: 26, 26, 26;
     --ph-orange: 255, 107, 0;
     --ph-blue: 0, 95, 184;
+    --ph-emerald: 16, 185, 129; /* emerald-500 */
 
     /* Theme Tokens (Default: Dark Mode) */
     --bg-base: var(--ph-charcoal);
@@ -26,6 +27,11 @@
     --grid-opacity: 0.05;
     --border-blueprint: 0, 95, 184;
     --border-opacity: 0.3;
+
+    /* Pulse Aesthetic (ADR 0015, Issue #140) */
+    --ph-pulse: var(--ph-emerald);
+    --ph-pulse-glow: 52, 211, 153; /* emerald-400 */
+    --ph-pulse-muted: 6, 78, 59; /* emerald-900 */
   }
 
   @media (prefers-color-scheme: light) {
@@ -38,6 +44,11 @@
       --grid-opacity: 0.1;
       --border-blueprint: 0, 95, 184;
       --border-opacity: 0.5;
+
+      /* Pulse Aesthetic (Architectural Vellum) */
+      --ph-pulse: 5, 150, 105; /* emerald-600 */
+      --ph-pulse-glow: 16, 185, 129; /* emerald-500 */
+      --ph-pulse-muted: 209, 250, 229; /* emerald-100 */
     }
   }
 
