@@ -153,7 +153,7 @@
 - [x] **Issue #133**: Task 4.31: [HACKATHON] Extended Forensic Audit (Phases 2 & 3). [ECT: 3] [Created: 2026-05-15]
 - [x] **Issue #142**: Bug: GHA Build Failure - Unresolved @pkd/toon Import. [ECT: 2] [Created: 2026-05-15]
 
-- [ ] **Issue #137**: Debt #137: Implement Shared WASM Context for Astro UI. [ECT: 2] [Created: 2026-05-15]
+- [x] **Issue #137**: Debt #137: Implement Shared WASM Context for Astro UI. [ECT: 2] [Created: 2026-05-15]
 - [ ] **Issue #138**: Task 4.32: Implement Full RFC-2378 Query Logic in WASM Core. [ECT: 3] [Created: 2026-05-15]
 
 ### Sprint 4.10: Performance & Scale - #111

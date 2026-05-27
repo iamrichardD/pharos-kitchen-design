@@ -383,6 +383,16 @@
 - **Updated** `install.sh` to automatically provision these rigor gates for local developers.
 - **Audited** via Senior PM (Result: 🟢 PHAROS GREEN).
 
+#### [2026-05-27] - Shared WASM Context for Astro UI (#137)
+- **Implemented** a framework-agnostic Nano Store (`wasmStore.ts`) to manage WASM initialization.
+- **Resolved** the "Hydration Trap" by decoupling the WASM provider from the global Astro layout, preserving zero-JS-by-default performance.
+- **Restored** dependency isolation with leaf-node `react` declarations.
+- **Verified** "Pharos Green" status with 7/7 tests passing in Podman.
+- **DORA Metrics (Issue #137)**:
+    - **Lead Time**: 3 Hours (Multiple Re-audits).
+    - **Change Failure Rate**: 66% (2 Rejections before Pharos Green).
+- **Audited** via Pharos Crucible (Result: 🟢 PHAROS GREEN).
+
 #### [2026-05-27] - Supply Chain Audit (#167)
 - **Remediated** the deprecated `prebuild-install` dependency by migrating the Truth Engine to the native `node:sqlite` module.
 - **Hardened** the Supply Chain by removing native build toolchains (`python3`, `make`, `g++`) from all Node.js container images.
