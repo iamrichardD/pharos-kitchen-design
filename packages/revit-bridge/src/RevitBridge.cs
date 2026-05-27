@@ -86,26 +86,44 @@ namespace Pkd.RevitBridge
         }
     }
 
-    /// <summary>
-    /// SafeHandle for strings allocated by the Rust core.
-    /// Why: Automates string memory cleanup via pkd_free_string.
-    /// </summary>
-    public class SafeStringHandle : SafeHandleZeroOrMinusOneIsInvalid
+    [StructLayout(LayoutKind.Sequential)]
+    public struct PkdBuffer
     {
-        private SafeStringHandle() : base(true) { }
+        public IntPtr Ptr;
+        public nuint Len;
+    }
+
+    /// <summary>
+    /// SafeHandle for buffers allocated by the Rust core.
+    /// Why: Automates buffer memory cleanup via pkd_free_buffer.
+    /// </summary>
+    public class SafePkdBufferHandle : SafeHandleZeroOrMinusOneIsInvalid
+    {
+        private nuint _len;
+
+        private SafePkdBufferHandle() : base(true) { }
 
         [DllImport("pkd_core", CallingConvention = CallingConvention.Cdecl)]
-        private static extern void pkd_free_string(IntPtr ptr);
+        private static extern void pkd_free_buffer(PkdBuffer buffer);
+
+        public static SafePkdBufferHandle FromBuffer(PkdBuffer buffer)
+        {
+            var h = new SafePkdBufferHandle();
+            h.SetHandle(buffer.Ptr);
+            h._len = buffer.Len;
+            return h;
+        }
 
         protected override bool ReleaseHandle()
         {
-            pkd_free_string(handle);
+            pkd_free_buffer(new PkdBuffer { Ptr = handle, Len = _len });
             return true;
         }
 
         public string? GetString()
         {
-            return IsInvalid ? null : Marshal.PtrToStringUTF8(handle);
+            if (IsInvalid || _len == 0) return null;
+            return Marshal.PtrToStringUTF8(handle, (int)_len);
         }
     }
 
@@ -117,26 +135,26 @@ namespace Pkd.RevitBridge
         private static extern unsafe PharosSchemaHandle pkd_load_schema(byte* ptr, nuint length);
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern unsafe SafeStringHandle pkd_validate_with_handle(PharosSchemaHandle handle, byte* ptr, nuint length);
+        private static extern unsafe PkdBuffer pkd_validate_with_handle(PharosSchemaHandle handle, byte* ptr, nuint length);
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern unsafe SafeStringHandle pkd_validate_metadata_json(
+        private static extern unsafe PkdBuffer pkd_validate_metadata_json(
             byte* schemaPtr, nuint schemaLen, 
             byte* metadataPtr, nuint metadataLen);
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern unsafe SafeStringHandle pkd_verify_manifest(
+        private static extern unsafe PkdBuffer pkd_verify_manifest(
             byte* pathPtr, nuint pathLen, 
             byte* hashPtr, nuint hashLen);
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern SafeStringHandle pkd_trigger_panic();
+        private static extern PkdBuffer pkd_trigger_panic();
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
         private static extern unsafe PharosRegistryHandle pkd_load_registry(byte* ptr, nuint length);
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        private static extern unsafe SafeStringHandle pkd_get_ghost_metadata(PharosRegistryHandle handle, byte* ptr, nuint length);
+        private static extern unsafe PkdBuffer pkd_get_ghost_metadata(PharosRegistryHandle handle, byte* ptr, nuint length);
 
         /// <summary>
         /// Retrieves verified metadata for a "Ghost Link" prototype using a registry handle.
@@ -153,7 +171,7 @@ namespace Pkd.RevitBridge
             {
                 fixed (byte* ptr = idBytes)
                 {
-                    using (var result = pkd_get_ghost_metadata(handle, ptr, (nuint)idBytes.Length))
+                    using (var result = SafePkdBufferHandle.FromBuffer(pkd_get_ghost_metadata(handle, ptr, (nuint)idBytes.Length)))
                     {
                         return ProcessRawResponse(result);
                     }
@@ -184,7 +202,7 @@ namespace Pkd.RevitBridge
 
         public ValidationResponse TriggerPanic()
         {
-            using (var result = pkd_trigger_panic())
+            using (var result = SafePkdBufferHandle.FromBuffer(pkd_trigger_panic()))
             {
                 return ProcessRawResponse(result);
             }
@@ -226,7 +244,7 @@ namespace Pkd.RevitBridge
             {
                 fixed (byte* ptr = bytes)
                 {
-                    using (var result = pkd_validate_with_handle(handle, ptr, (nuint)bytes.Length))
+                    using (var result = SafePkdBufferHandle.FromBuffer(pkd_validate_with_handle(handle, ptr, (nuint)bytes.Length)))
                     {
                         return ProcessRawResponse(result);
                     }
@@ -246,7 +264,7 @@ namespace Pkd.RevitBridge
                 fixed (byte* sPtr = schemaJson)
                 fixed (byte* mPtr = metadataJson)
                 {
-                    using (var result = pkd_validate_metadata_json(sPtr, (nuint)schemaJson.Length, mPtr, (nuint)metadataJson.Length))
+                    using (var result = SafePkdBufferHandle.FromBuffer(pkd_validate_metadata_json(sPtr, (nuint)schemaJson.Length, mPtr, (nuint)metadataJson.Length)))
                     {
                         return ProcessRawResponse(result);
                     }
@@ -270,7 +288,7 @@ namespace Pkd.RevitBridge
                 fixed (byte* pPtr = filePath)
                 fixed (byte* hPtr = expectedHash)
                 {
-                    using (var result = pkd_verify_manifest(pPtr, (nuint)filePath.Length, hPtr, (nuint)expectedHash.Length))
+                    using (var result = SafePkdBufferHandle.FromBuffer(pkd_verify_manifest(pPtr, (nuint)filePath.Length, hPtr, (nuint)expectedHash.Length)))
                     {
                         return ProcessRawResponse(result);
                     }
@@ -278,7 +296,7 @@ namespace Pkd.RevitBridge
             }
         }
 
-        private ValidationResponse ProcessRawResponse(SafeStringHandle handle)
+        private ValidationResponse ProcessRawResponse(SafePkdBufferHandle handle)
         {
             if (handle.IsInvalid) 
                 return CreateErrorResponse("Null pointer or invalid handle returned from core");

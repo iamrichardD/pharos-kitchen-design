@@ -19,7 +19,6 @@ use dashmap::DashMap;
 use serde::{Deserialize, Serialize};
 use serde_wasm_bindgen;
 use std::collections::{BTreeMap, HashMap, VecDeque};
-use std::ffi::{c_char, CString};
 use std::future::Future;
 use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::path::Path;
@@ -36,6 +35,12 @@ pub struct InteropResponse {
     pub errors: Vec<ValidationError>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub data: Option<serde_json::Value>,
+}
+
+#[repr(C)]
+pub struct PkdBuffer {
+    pub ptr: *mut u8,
+    pub len: usize,
 }
 
 pub type FfiFetcherCallback = extern "C" fn(
@@ -296,7 +301,7 @@ pub unsafe extern "C" fn pkd_sync_state(
     sku_len: usize,
     delta_ptr: *const u8,
     delta_len: usize,
-) -> *mut c_char {
+) -> PkdBuffer {
     if handle.is_null() {
         return serialize_interop_response(&InteropResponse {
             status: "ERROR".to_string(),
@@ -325,7 +330,7 @@ pub unsafe extern "C" fn pkd_sync_state(
         }
 
         registry.tuning_deltas.insert(id.to_string(), deltas);
-        Ok::<*mut c_char, ValidationError>(serialize_interop_response(&InteropResponse {
+        Ok::<PkdBuffer, ValidationError>(serialize_interop_response(&InteropResponse {
             status: "OK".to_string(),
             errors: Vec::new(),
             data: None,
@@ -356,7 +361,7 @@ pub unsafe extern "C" fn pkd_get_ghost_metadata(
     handle: *mut PharosRegistryHandle,
     ptr: *const u8,
     len: usize,
-) -> *mut c_char {
+) -> PkdBuffer {
     if handle.is_null() {
         return serialize_interop_response(&InteropResponse {
             status: "ERROR".to_string(),
@@ -386,7 +391,7 @@ pub unsafe extern "C" fn pkd_get_ghost_metadata(
                     );
             }
             let data = serde_json::to_value(&final_metadata).unwrap();
-            return Ok::<*mut c_char, ValidationError>(serialize_interop_response(
+            return Ok::<PkdBuffer, ValidationError>(serialize_interop_response(
                 &InteropResponse {
                     status: "OK".to_string(),
                     errors: Vec::new(),
@@ -513,7 +518,7 @@ pub unsafe extern "C" fn pkd_validate_with_handle(
     handle: *mut PharosSchema,
     ptr: *const u8,
     len: usize,
-) -> *mut c_char {
+) -> PkdBuffer {
     if handle.is_null() {
         return serialize_interop_response(&InteropResponse {
             status: "ERROR".to_string(),
@@ -549,7 +554,7 @@ pub unsafe extern "C" fn pkd_validate_with_handle(
                 data: None,
             }
         };
-        Ok::<*mut c_char, ValidationError>(serialize_interop_response(&resp))
+        Ok::<PkdBuffer, ValidationError>(serialize_interop_response(&resp))
     });
     match result {
         Ok(Ok(resp)) => resp,
@@ -583,7 +588,7 @@ pub unsafe extern "C" fn pkd_validate_metadata_json(
     schema_len: usize,
     metadata_ptr: *const u8,
     metadata_len: usize,
-) -> *mut c_char {
+) -> PkdBuffer {
     let handle = pkd_load_schema(schema_ptr, schema_len);
     if handle.is_null() {
         return serialize_interop_response(&InteropResponse {
@@ -607,13 +612,13 @@ pub unsafe extern "C" fn pkd_verify_manifest(
     path_len: usize,
     hash_ptr: *const u8,
     hash_len: usize,
-) -> *mut c_char {
+) -> PkdBuffer {
     let result = catch_unwind(|| {
         let path_str = safe_read_str(path_ptr, path_len)?;
         let hash_str = safe_read_str(hash_ptr, hash_len)?;
         match crate::security::verify_manifest(Path::new(path_str), hash_str) {
             Ok(_) => {
-                Ok::<*mut c_char, ValidationError>(serialize_interop_response(&InteropResponse {
+                Ok::<PkdBuffer, ValidationError>(serialize_interop_response(&InteropResponse {
                     status: "OK".to_string(),
                     errors: Vec::new(),
                     data: None,
@@ -637,26 +642,27 @@ pub unsafe extern "C" fn pkd_verify_manifest(
     }
 }
 
-fn serialize_interop_response(resp: &InteropResponse) -> *mut c_char {
-    match serde_json::to_string(resp) {
-        Ok(json) => CString::new(json).unwrap().into_raw(),
-        Err(_) => CString::new("{\"status\":\"ERROR\"}").unwrap().into_raw(),
-    }
+fn serialize_interop_response(resp: &InteropResponse) -> PkdBuffer {
+    let json = serde_json::to_string(resp).unwrap_or_else(|_| "{\"status\":\"ERROR\"}".to_string());
+    let bytes = json.into_bytes().into_boxed_slice();
+    let len = bytes.len();
+    let ptr = Box::into_raw(bytes) as *mut u8;
+    PkdBuffer { ptr, len }
 }
 
 /// # Safety
-/// Frees string memory.
+/// Frees buffer memory.
 #[no_mangle]
-pub unsafe extern "C" fn pkd_free_string(s: *mut c_char) {
-    if !s.is_null() {
-        let _ = CString::from_raw(s);
+pub unsafe extern "C" fn pkd_free_buffer(buffer: PkdBuffer) {
+    if !buffer.ptr.is_null() {
+        let _ = Box::from_raw(std::ptr::slice_from_raw_parts_mut(buffer.ptr, buffer.len));
     }
 }
 
 /// # Safety
 /// Intentionally panics.
 #[no_mangle]
-pub unsafe extern "C" fn pkd_trigger_panic() -> *mut c_char {
+pub unsafe extern "C" fn pkd_trigger_panic() -> PkdBuffer {
     let _result = catch_unwind(|| {
         panic!("FFI Panic test");
     });
@@ -703,17 +709,19 @@ mod tests {
         let id = "SKU-TUNED";
         let delta = r#"{"PKD_WIDTH": 50.0}"#;
         unsafe {
-            let sync_ptr = pkd_sync_state(
+            let sync_buffer = pkd_sync_state(
                 handle_ptr,
                 id.as_ptr(),
                 id.len(),
                 delta.as_ptr(),
                 delta.len(),
             );
-            pkd_free_string(sync_ptr);
-            let get_ptr = pkd_get_ghost_metadata(handle_ptr, id.as_ptr(), id.len());
+            pkd_free_buffer(sync_buffer);
+            let get_buffer = pkd_get_ghost_metadata(handle_ptr, id.as_ptr(), id.len());
             let res_json: serde_json::Value =
-                serde_json::from_str(CString::from_raw(get_ptr).to_str().unwrap()).unwrap();
+                serde_json::from_slice(std::slice::from_raw_parts(get_buffer.ptr, get_buffer.len))
+                    .unwrap();
+            pkd_free_buffer(get_buffer);
             assert_eq!(
                 res_json["data"]["parameters"]["PKD_WIDTH"]
                     .as_f64()
