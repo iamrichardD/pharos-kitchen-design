@@ -95,7 +95,8 @@ Every non-trivial task completion MUST follow the **Multi-Agent Handover & Cruci
 - **Brutal Self-Critique:** Before finalizing, perform a "Brutally Honest" gap and security analysis to identify technical debt or edge cases.
 - **The Mandatory PR Gate:** The Builder MUST create a high-rigor Pull Request BEFORE the Audit phase begins. This PR serves as the "Long-Term Memory" of the task.
 - **Mid-Sprint Rigor Gate (ECT 4+):** For any task with an ECT of 4 or higher, the Builder MUST pause at the 50% implementation mark (or Turn 5) to request a **Strategic SPM Check-in**. This prevents architectural drift in high-complexity "Big Rocks."
-- **Shard-Based Logging (Conflict Mitigation):** Parallel agents MUST NOT edit the root `@PROGRESS.md` directly. Instead, write all progress to `SHARD_PROGRESS.md` in your sibling root. The SPM will aggregate these into the master log during the final integration merge.
+- **Shard-Based Logging (Conflict Mitigation):** Parallel agents MUST NOT edit a shared log file. Instead, write all progress to a dedicated task-specific file in the current sprint directory: \`.project/shards/sprint-4.10/issue-X.toon\`. The SPM will aggregate these into the master log during final integration.
+- **Mandatory Pre-Audit Rebase:** Following implementation and BEFORE signaling "Ready for Audit", the Builder MUST rebase their branch against the latest \`main\` and re-verify **🟢 PHAROS GREEN** in Podman. This prevents protocol rollbacks and complex merge conflicts.
 - **PR-Centric Mentorship (Hybrid Model):** Provide inline peer review comments within the GitHub PR (not the source code) that act as teaching tools.
     - **No Meta-Labels:** Prohibited from using "The Why/How," "Teachable Moment," or other prompt-leaking labels.
     - **Integrated Mentorship:** Weave the technical rationale, safety implications, and alternative patterns directly into the PR review.
