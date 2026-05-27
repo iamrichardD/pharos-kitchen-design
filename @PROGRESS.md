@@ -383,6 +383,18 @@
 - **Updated** `install.sh` to automatically provision these rigor gates for local developers.
 - **Audited** via Senior PM (Result: 🟢 PHAROS GREEN).
 
+#### [2026-05-27] - Automated Boundary Enforcement (#168)
+- **Codified** ADR-0044 (The Single Boundary Mandate) to enforce FFI synchronization and security sentinels.
+- **Implemented** a build-time Python sentinel (`verify-boundary-sync.py`) to detect architectural drift between Rust and C#.
+- **Verified** "Pharos Green" status with 18 integration tests and automated fail-fast validation.
+- **Audited** via Pharos Crucible (Result: 🟢 PHAROS GREEN).
+
+#### [2026-05-27] - CLI Registry Management Research (#126)
+- **Proposed** Option A (Dedicated `registry` namespace) to decouple local engine logic from network-bound distribution.
+- **Formalized** the `pkd registry` taxonomy (`bake`, `push`, `verify`, `pulse`, `status`) and security model (JWT organization claims).
+- **Mapped** the regression surface for the upcoming Phase 5.4 migration.
+- **Audited** via Pharos Crucible (Result: 🟢 PHAROS GREEN).
+
 #### [2026-05-27] - Shared WASM Context for Astro UI (#137)
 - **Implemented** a framework-agnostic Nano Store (`wasmStore.ts`) to manage WASM initialization.
 - **Resolved** the "Hydration Trap" by decoupling the WASM provider from the global Astro layout, preserving zero-JS-by-default performance.

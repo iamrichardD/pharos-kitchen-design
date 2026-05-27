@@ -218,7 +218,7 @@
 - [ ] **Issue #162**: Windows Installation Utility: Remediate Unnecessary `curl` Dependency. [ECT: 1]
 - [x] **Issue #124**: Task 5.2: JIT Sharded Registry Scaling. [ECT: 4]
 - [x] **Issue #125**: Task 5.3: Bidirectional Web-to-Revit 'Ghost Tuning'. [ECT: 5]
-- [ ] **Issue #126**: Task 5.4: CLI Registry Management Subcommands. [ECT: 3]
+- [x] **Issue #126**: Task 5.4: CLI Registry Management Subcommands. [ECT: 3]
 - [ ] **Issue #123**: Debt 5.5: .NET 8.0 Zero-Allocation Marshalling. [ECT: 4]
 - [ ] **Issue #148**: Debt: Implement `PharosMetadata::builder()` pattern. [ECT: 2]
 
