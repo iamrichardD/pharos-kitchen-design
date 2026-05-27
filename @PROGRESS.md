@@ -383,6 +383,26 @@
 - **Updated** `install.sh` to automatically provision these rigor gates for local developers.
 - **Audited** via Senior PM (Result: 🟢 PHAROS GREEN).
 
+#### [2026-05-27] - Supply Chain Audit (#167)
+- **Remediated** the deprecated `prebuild-install` dependency by migrating the Truth Engine to the native `node:sqlite` module.
+- **Hardened** the Supply Chain by removing native build toolchains (`python3`, `make`, `g++`) from all Node.js container images.
+- **Restored** strict Path Integrity Sentinels in the `TruthEngine` to prevent sandbox traversal attacks.
+- **Verified** "Pharos Green" status with 27 unit and integration tests passing in Podman.
+- **DORA Metrics (Issue #167)**:
+    - **Lead Time**: 2 Hours.
+    - **Change Failure Rate**: 0% (Post-Remediation).
+- **Audited** via Pharos Crucible (Result: 🟢 PHAROS GREEN).
+
+#### [2026-05-27] - Boundary Marshaling Protocol Refactor (#170)
+- **Refactored** the FFI output boundary in `pkd-core` to use the unified length-prefixed slice pattern (`PkdBuffer`).
+- **Eliminated** legacy `*mut c_char` return types and `CString` helpers, significantly reducing buffer overrun risks.
+- **Implemented** matching `PkdBuffer` struct and `SafePkdBufferHandle` in the Revit Bridge (.NET 8).
+- **Verified** "Pharos Green" status with 16 integration tests and Rust TDD suite.
+- **DORA Metrics (Issue #170)**:
+    - **Lead Time**: 30 Minutes (Surgical Strike).
+    - **Change Failure Rate**: 0%.
+- **Audited** via Pharos Crucible (Result: 🟢 PHAROS GREEN).
+
 #### [2026-05-26] - Phase 5.3: Bidirectional Ghost Tuning (#125)
 - **Implemented** `pkd_sync_state` FFI boundary and `tuning_deltas` resident state store in `pkd-core`.
 - **Integrated** real-time parametric synchronization between the Astro Web Sandbox and the Revit Bridge.

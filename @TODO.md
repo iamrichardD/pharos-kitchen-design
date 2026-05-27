@@ -89,7 +89,7 @@
 - [ ] **Issue #167**: Debt #167: Supply Chain Audit - Remediate Deprecated prebuild-install. [ECT: 2]
 - [ ] **Issue #168**: Debt #168: Automated Boundary Enforcement (ADR-0044). [ECT: 2]
 - [ ] **Issue #169**: Debt #169: Supply Chain Watchdog (Pre-Engineering Dependency Audit). [ECT: 1]
-- [ ] **Issue #170**: Debt #170: Boundary Marshaling Protocol. [ECT: 1]
+- [x] **Issue #170**: Debt #170: Boundary Marshaling Protocol. [ECT: 1]
 - [x] **Issue #115**: Debt #115: Implement Local Governance Linter (pkd gov lint). [ECT: 3]
 - [x] **Issue #107**: Debt #107: Audit and Prune pkd-core Dependencies. [ECT: 2]
 - [x] **Issue #113**: Debt #113: ADR Template Automation with Mandatory Prologue. [ECT: 2]
@@ -162,7 +162,7 @@
 - [x] Task 4.25.3: Implement `Parallel Query Dispatcher` via Rayon.
 - [x] Task 4.25.4: Implement `JitActor` for dynamic dialect execution.
 - [ ] **Issue #139**: Debt #139: Enhanced TOON Diagnostics (Column & Snippet). [ECT: 2] [Created: 2026-05-15]
-- [ ] **Issue #140**: Debt #140: Marketing Site Theme Alignment (Pulse Blog). [ECT: 1] [Created: 2026-05-15]
+- [x] **Issue #140**: Debt #140: Marketing Site Theme Alignment (Pulse Blog). [ECT: 1] [Created: 2026-05-15]
 - [ ] **Issue #141**: Task 4.33: Recursive Tabular Indentation for TOON Parser. [ECT: 3] [Created: 2026-05-15]
 - [x] **Issue #146**: Task 4.36: Refactor JIT error handling to use a dedicated `JitError` enum. [AUDITED: PHAROS GREEN] (2026-05-19)
 - [x] **Issue #147**: Task 4.37: Implement CI check for strict dependency isolation (`wasm32` vs `native`). [AUDITED: PHAROS GREEN] (2026-05-19)
