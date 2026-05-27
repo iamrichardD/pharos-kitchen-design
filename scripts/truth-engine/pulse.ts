@@ -9,13 +9,13 @@
  * ======================================================================== */
 
 import { TruthEngine } from '../../packages/truth-engine/src/engine.js';
-import Database from 'better-sqlite3';
+import { DatabaseSync } from 'node:sqlite';
 
 async function main() {
     console.log('🚀 Pharos Truth Engine: Starting Pulse Cycle');
     
     const engine = new TruthEngine('data/truth_engine.db');
-    const db = new Database('data/truth_engine.db');
+    const db = new DatabaseSync('data/truth_engine.db');
 
     // 1. Seed Manufacturer if missing (Development)
     const mfrSeed = db.prepare(`

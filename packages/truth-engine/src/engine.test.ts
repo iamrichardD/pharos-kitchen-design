@@ -10,6 +10,7 @@
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { TruthEngine } from './engine.js';
+import { DatabaseSync } from 'node:sqlite';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { rm, mkdir, readFile } from 'node:fs/promises';
@@ -28,7 +29,7 @@ describe('TruthEngine: Bake & Promotion', () => {
         engine = new TruthEngine(TEST_DB);
         await engine.init();
         
-        const db = (engine as any)._db;
+        const db = (engine as any)._db as DatabaseSync;
         db.prepare("INSERT INTO manufacturers (name, host) VALUES ('Frymaster', 'www.frymaster.com')").run();
     });
 
@@ -39,7 +40,7 @@ describe('TruthEngine: Bake & Promotion', () => {
     });
 
     it('test_should_promote_to_registry_when_normalization_succeeds', async () => {
-        const db = (engine as any)._db;
+        const db = (engine as any)._db as DatabaseSync;
         db.prepare("INSERT INTO resources (mfr_id, resource_type, uri, sync_state) VALUES (1, 'PDF', 'https://www.frymaster.com/manual.pdf', 'STALE')").run();
         
         const rawInput = "Model: FPRE217, Voltage: 208V, Category: Fryers";
@@ -65,7 +66,7 @@ describe('TruthEngine: Bake & Promotion', () => {
     });
 
     it('test_should_replace_existing_sku_when_updated_data_arrives', async () => {
-        const db = (engine as any)._db;
+        const db = (engine as any)._db as DatabaseSync;
         db.prepare("INSERT INTO resources (mfr_id, resource_type, uri, sync_state) VALUES (1, 'PDF', 'https://www.frymaster.com/manual.pdf', 'STALE')").run();
         
         const firstPromotion = {
@@ -92,7 +93,7 @@ describe('TruthEngine: Bake & Promotion', () => {
     });
 
     it('test_should_bake_sharded_json_when_registry_is_populated', async () => {
-        const db = (engine as any)._db;
+        const db = (engine as any)._db as DatabaseSync;
         db.prepare("INSERT INTO resources (mfr_id, resource_type, uri, sync_state) VALUES (1, 'PDF', 'https://www.frymaster.com/manual.pdf', 'STALE')").run();
         
         const metadata = {

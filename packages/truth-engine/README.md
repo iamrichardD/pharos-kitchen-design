@@ -42,7 +42,7 @@ To prevent Server-Side Request Forgery, the engine enforces a strict **Domain Ro
 
 ## 🚀 Execution (Zero-Host)
 
-In accordance with the Pharos mandate, this package **MUST** be executed and validated inside a Podman container to ensure binary compatibility for `better-sqlite3` and Playwright.
+In accordance with the Pharos mandate, this package **MUST** be executed and validated inside a Podman container to ensure consistency and isolation for Playwright and built-in SQLite services.
 
 ### Run tests:
 ```bash

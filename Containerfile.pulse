@@ -51,7 +51,11 @@ COPY --from=rust-builder /work/packages/pkd-core/pkg /work/packages/pkd-core/pkg
 COPY --from=rust-builder /work/target/$BUILD_MODE/pkd /usr/local/bin/pkd
 RUN chmod +x /usr/local/bin/pkd
 COPY --from=manifest-verifier /work/dist/dialects/manifest.json /work/manifest-verified-marker
-RUN npm ci &&     npm rebuild better-sqlite3 &&     (npm audit --workspaces || echo \"⚠️ Warning: Audit found known issues, proceeding per SECURITY_LOG.md\") &&     npm test &&     npm cache clean --force &&     rm -rf /root/.npm/_cacache
+RUN npm ci && \
+    (npm audit --workspaces || echo \"⚠️ Warning: Audit found known issues, proceeding per SECURITY_LOG.md\") && \
+    npm test && \
+    npm cache clean --force && \
+    rm -rf /root/.npm/_cacache
 
 # Stage 7: .NET SDK (Integrated \"Pulse\" Handshake)
 FROM mcr.microsoft.com/dotnet/sdk@sha256:3e7b0cefe1b00a350ffb0e06b4e1271a4e791df6b8ac4239be05f1ae2736fcff AS pulse-final
