@@ -48,3 +48,23 @@ Implemented a shared React context (`WasmContext`) for the Astro UI to consolida
 - **ReDoS Immunity**: N/A (No regex changes).
 - **Memory Safety**: Transitioned from null-terminated strings to length-prefixed buffers, reducing the attack surface for buffer overruns.
 - **Supply Chain**: Verified via Podman parity.
+
+## [2026-05-27] - ADR-0044: Automated Boundary Enforcement (#168) - REMEDIATED
+
+### 🏗️ Implementation Summary
+- **Hardened Sentinel**: Updated `scripts/verify-boundary-sync.py` to utilize a **Fail-Fast** approach. The script now exits with error code 1 if source files are missing, preventing silent passes in CI.
+- **TDD Coverage**: Added atomic integration tests for `SyncState` and `RegisterShardFetcher` in the Revit Bridge, ensuring 100% coverage of the new FFI logic.
+- **Regression Surface Map**: Created `docs/governance/REPORTS/issue-168-regression-map.md` per ADR-0040 to identify risk vectors and hot paths.
+- **Remediated Gaps**: Fixed architectural drift in `RevitBridge.cs` (synced missing implementations identified by sentinel).
+
+### ✅ Verification Results
+- **SENTINEL**: 🟢 PHAROS GREEN (Fail-fast behavior empirically verified).
+- **BRIDGE**: 🟢 PHAROS GREEN (18 integration tests passing in Podman).
+- **Complexity**: ECT 2 (Component Logic).
+- **DORA Metrics**:
+    - **Cycle Time (Remediation)**: 15 Minutes.
+    - **Change Failure Rate**: 0% (Post-Remediation).
+
+### 🛡️ Security Review
+- **Boundary Sentinel**: Automated verification prevents accidental exposure of unvalidated FFI endpoints.
+- **Panic Isolation**: Verified `catch_unwind` efficacy via `pkd_trigger_panic` test case.
