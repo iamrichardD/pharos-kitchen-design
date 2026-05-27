@@ -255,9 +255,19 @@ export class TruthEngine {
         this.ensureInitialized();
 
         // 1. Path Integrity Sentinel: Prevent arbitrary deletion (Shift-Left Security)
+        // We resolve allowed paths relative to the current working directory.
         const absoluteStaging = resolve(stagingDir) + sep;
-        const isAllowed = absoluteStaging.includes(`${sep}.artifacts${sep}`) || 
-                         absoluteStaging.includes(`${sep}data${sep}`);
+        const allowedBase = resolve(".artifacts") + sep;
+        const allowedData = resolve("data") + sep;
+
+        // Monorepo Resilience: If CWD is root, we also allow package-specific paths
+        const pkgArtifacts = resolve("packages", "truth-engine", ".artifacts") + sep;
+        const pkgData = resolve("packages", "truth-engine", "data") + sep;
+
+        const isAllowed = absoluteStaging.startsWith(allowedBase) || 
+                         absoluteStaging.startsWith(allowedData) ||
+                         absoluteStaging.startsWith(pkgArtifacts) ||
+                         absoluteStaging.startsWith(pkgData);
 
         if (!isAllowed) {
             throw new Error(`[Security] Bake aborted: stagingDir '${stagingDir}' is outside of allowed paths (.artifacts/ or data/).`);
