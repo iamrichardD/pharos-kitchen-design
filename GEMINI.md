@@ -118,7 +118,7 @@ To ensure the integrity of the Pharos "Three-Option Crucible" (ADR-0017), all **
 2.  **Feature Branch Sovereignty**: All work MUST occur on a feature branch (`feat/issue-X`) within your assigned Sibling worktree.
 3.  **Handoff Finality**: Your session is complete when your code is committed to your feature branch and verified 🟢 PHAROS GREEN in Podman. You then notify the **SPM/Orchestrator** that you are "Ready for Audit."
 4.  **No Self-Audit**: You are strictly PROHIBITED from auditing your own code or creating your own audit log.
-
+5.  **Remote Synchronization Gate**: Following a successful Crucible Audit, the Builder/SPM MUST request explicit user authorization before pushing to the remote repository or merging the PR via GitHub CLI. You are strictly prohibited from concluding a task with a "Local-Only" merge.
 
 ## DevSecOps & Workflow
 
