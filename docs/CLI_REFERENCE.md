@@ -65,9 +65,17 @@ Administrative tools for user orchestration (Requires `ADMIN` or `AUDITOR` role)
 - **`users impersonate --email <EMAIL>`**: Sets the `X-Pharos-Impersonate` context for local API testing.
 
 ### `pkd core`
-Metadata and registry operations.
+Metadata and engine operations.
 - **`validate --path <PATH>`**: Validates a local metadata JSON file against the official PKD Schema.
-- **`search <QUERY>`**: Executes an RFC 2378 compliant search against the equipment registry.
+- **`search <QUERY>`**: Executes an RFC 2378 compliant search against the local equipment registry.
+
+### `pkd registry`
+Registry and distribution operations.
+- **`bake --source <DIR> --output <DIR>`**: Transforms raw JSON shards into a compressed search index and archive.
+- **`verify-manifest --path <PATH> [--hash <HASH>]`**: Performs integrity checks and SHA-256 verification on artifacts or manifest directories.
+- **`generate-manifest --path <DIR>`**: Generates a `manifest.json` for all `.wasm` artifacts in a directory.
+- **`pulse`**: Performs a high-rigor 'Pulse' check on the system state and integrity.
+- **`promote`**: Scaffolds the promotion of local artifacts to remote environments.
 
 
 ### `pkd gov` 

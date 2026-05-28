@@ -168,7 +168,7 @@
 - [x] **Issue #146**: Task 4.36: Refactor JIT error handling to use a dedicated `JitError` enum. [AUDITED: PHAROS GREEN] (2026-05-19)
 - [x] **Issue #147**: Task 4.37: Implement CI check for strict dependency isolation (`wasm32` vs `native`). [AUDITED: PHAROS GREEN] (2026-05-19)
 - [ ] **Issue #144**: Task 4.34: IKD Empowerment & Visibility Maturation. [ECT: 3] [Created: 2026-05-15]
-- [x] **Issue #145**: Task 4.35: Implement "Project Genesis" Manifesto Post. [ECT: 2] [Created: 2026-05-15]
+- [x] **Issue #145**: IA Sync & "Project Genesis" Manifesto Post. [ECT: 2] [Created: 2026-05-15]
 
 ### Sprint 4.3: Registry Distribution & Pulse Protocol (#51-54, #65) - 🔄 In Progress
 - [x] **Issue #53**: Implement `pkd core bake` engine for sharded JSON and binary indexes (Task 4.12).

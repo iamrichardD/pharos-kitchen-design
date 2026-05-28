@@ -93,7 +93,7 @@ cargo build --package pkd --release
 PKD_BIN="target/release/pkd"
 
 # Fail Fast: Ensure the manifest is generated correctly
-if ! $PKD_BIN core generate-manifest "$STAGING_DIR"; then
+if ! $PKD_BIN registry generate-manifest "$STAGING_DIR"; then
     echo "❌ Error: Failed to generate SHA-256 manifest."
     exit 1
 fi

@@ -65,6 +65,11 @@ enum Commands {
         #[command(subcommand)]
         action: CoreCommands,
     },
+    /// Registry and distribution operations
+    Registry {
+        #[command(subcommand)]
+        action: RegistryCommands,
+    },
     /// Local governance and standard enforcement
     Gov {
         #[command(subcommand)]
@@ -72,6 +77,35 @@ enum Commands {
     },
     /// Update the pkd binary to the latest version
     SelfUpdate,
+}
+
+#[derive(Subcommand)]
+enum RegistryCommands {
+    /// Bake the raw registry into a searchable binary archive
+    Bake {
+        /// Source directory containing sharded JSON files
+        #[arg(short, long)]
+        source: PathBuf,
+        /// Output directory for the Tantivy index and archive
+        #[arg(short, long)]
+        output: PathBuf,
+    },
+    /// Verify the integrity of artifacts (File + Hash OR Directory + manifest.json)
+    VerifyManifest {
+        /// The path to the file or directory
+        path: PathBuf,
+        /// The expected SHA-256 hash (optional for directory verification)
+        hash: Option<String>,
+    },
+    /// Generate a manifest.json for all .wasm artifacts in a directory
+    GenerateManifest {
+        /// The directory containing .wasm artifacts
+        path: PathBuf,
+    },
+    /// Perform a high-rigor 'Pulse' check on the system state
+    Pulse,
+    /// Promote local artifacts to the production CDN (Cloudflare R2)
+    Promote,
 }
 
 #[derive(Subcommand)]
@@ -138,31 +172,6 @@ enum CoreCommands {
         /// The query string (e.g., 'manufacturer=3m return name')
         query: Vec<String>,
     },
-    /// Bake the raw registry into a searchable binary archive
-    Bake {
-        /// Source directory containing sharded JSON files
-        #[arg(short, long)]
-        source: PathBuf,
-        /// Output directory for the Tantivy index and archive
-        #[arg(short, long)]
-        output: PathBuf,
-    },
-    /// Verify the integrity of artifacts (File + Hash OR Directory + manifest.json)
-    VerifyManifest {
-        /// The path to the file or directory
-        path: PathBuf,
-        /// The expected SHA-256 hash (optional for directory verification)
-        hash: Option<String>,
-    },
-    /// Generate a manifest.json for all .wasm artifacts in a directory
-    GenerateManifest {
-        /// The directory containing .wasm artifacts
-        path: PathBuf,
-    },
-    /// Perform a high-rigor 'Pulse' check on the system state
-    Pulse,
-    /// Promote local artifacts to the production CDN (Cloudflare R2)
-    Promote,
 }
 
 #[tokio::main]
@@ -213,19 +222,21 @@ async fn main() -> Result<()> {
                 CoreCommands::Search { query } => {
                     handle_core_search(query, cli.env).await?;
                 }
-                CoreCommands::Bake { source, output } => {
+            },
+            Commands::Registry { action } => match action {
+                RegistryCommands::Bake { source, output } => {
                     handle_core_bake(source, output).await?;
                 }
-                CoreCommands::VerifyManifest { path, hash } => {
+                RegistryCommands::VerifyManifest { path, hash } => {
                     handle_core_verify_manifest(path, hash).await?;
                 }
-                CoreCommands::GenerateManifest { path } => {
+                RegistryCommands::GenerateManifest { path } => {
                     handle_core_generate_manifest(path).await?;
                 }
-                CoreCommands::Pulse => {
+                RegistryCommands::Pulse => {
                     handle_core_pulse().await?;
                 }
-                CoreCommands::Promote => {
+                RegistryCommands::Promote => {
                     handle_core_promote(cli.env).await?;
                 }
             },
