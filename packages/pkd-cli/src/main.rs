@@ -16,12 +16,14 @@ mod config;
 mod gov;
 mod guard;
 mod models;
+mod registry;
 
 use crate::admin::AdminManager;
 use crate::auth::AuthManager;
 use crate::config::PathResolver;
 use crate::guard::{Authorizable, Guard};
 use crate::models::{PharosEnv, PharosRole};
+use crate::registry::{RegistryArgs, RegistryManager};
 use anyhow::{anyhow, Result};
 use clap::{Parser, Subcommand};
 use colored::*;
@@ -65,11 +67,8 @@ enum Commands {
         #[command(subcommand)]
         action: CoreCommands,
     },
-    /// Registry and distribution operations
-    Registry {
-        #[command(subcommand)]
-        action: RegistryCommands,
-    },
+    /// Distribution lifecycle management for the Pharos Registry
+    Registry(RegistryArgs),
     /// Local governance and standard enforcement
     Gov {
         #[command(subcommand)]
@@ -77,35 +76,6 @@ enum Commands {
     },
     /// Update the pkd binary to the latest version
     SelfUpdate,
-}
-
-#[derive(Subcommand)]
-enum RegistryCommands {
-    /// Bake the raw registry into a searchable binary archive
-    Bake {
-        /// Source directory containing sharded JSON files
-        #[arg(short, long)]
-        source: PathBuf,
-        /// Output directory for the Tantivy index and archive
-        #[arg(short, long)]
-        output: PathBuf,
-    },
-    /// Verify the integrity of artifacts (File + Hash OR Directory + manifest.json)
-    VerifyManifest {
-        /// The path to the file or directory
-        path: PathBuf,
-        /// The expected SHA-256 hash (optional for directory verification)
-        hash: Option<String>,
-    },
-    /// Generate a manifest.json for all .wasm artifacts in a directory
-    GenerateManifest {
-        /// The directory containing .wasm artifacts
-        path: PathBuf,
-    },
-    /// Perform a high-rigor 'Pulse' check on the system state
-    Pulse,
-    /// Promote local artifacts to the production CDN (Cloudflare R2)
-    Promote,
 }
 
 #[derive(Subcommand)]
@@ -172,6 +142,21 @@ enum CoreCommands {
         /// The query string (e.g., 'manufacturer=3m return name')
         query: Vec<String>,
     },
+    /// (Deprecated) Please use `pkd registry bake`
+    Bake {
+        #[arg(short, long)]
+        source: PathBuf,
+        #[arg(short, long)]
+        output: PathBuf,
+    },
+    /// (Deprecated) Please use `pkd registry verify`
+    VerifyManifest { path: PathBuf, hash: Option<String> },
+    /// (Deprecated)
+    GenerateManifest { path: PathBuf },
+    /// (Deprecated) Please use `pkd registry pulse`
+    Pulse,
+    /// (Deprecated) Please use `pkd registry push`
+    Promote,
 }
 
 #[tokio::main]
@@ -182,6 +167,7 @@ async fn main() -> Result<()> {
     let auth_url = PathResolver::resolve_auth_url(cli.env, cli.auth_url);
     let auth_mgr = AuthManager::new(&auth_url, cli.env);
     let admin_mgr = AdminManager::new(&auth_url, auth_mgr.clone(), cli.env);
+    let registry_mgr = RegistryManager::new(auth_mgr.clone(), cli.env);
 
     match cli.command {
         Some(command) => match command {
@@ -222,24 +208,28 @@ async fn main() -> Result<()> {
                 CoreCommands::Search { query } => {
                     handle_core_search(query, cli.env).await?;
                 }
-            },
-            Commands::Registry { action } => match action {
-                RegistryCommands::Bake { source, output } => {
+                CoreCommands::Bake { source, output } => {
+                    emit_deprecation_warning("pkd core bake", "pkd registry bake");
                     handle_core_bake(source, output).await?;
                 }
-                RegistryCommands::VerifyManifest { path, hash } => {
+                CoreCommands::VerifyManifest { path, hash } => {
                     handle_core_verify_manifest(path, hash).await?;
                 }
-                RegistryCommands::GenerateManifest { path } => {
+                CoreCommands::GenerateManifest { path } => {
                     handle_core_generate_manifest(path).await?;
                 }
-                RegistryCommands::Pulse => {
+                CoreCommands::Pulse => {
+                    emit_deprecation_warning("pkd core pulse", "pkd registry pulse");
                     handle_core_pulse().await?;
                 }
-                RegistryCommands::Promote => {
+                CoreCommands::Promote => {
+                    emit_deprecation_warning("pkd core promote", "pkd registry push");
                     handle_core_promote(cli.env).await?;
                 }
             },
+            Commands::Registry(args) => {
+                registry_mgr.handle(args.action).await?;
+            }
             Commands::Gov { action } => match action {
                 GovCommands::Lint => {
                     gov::handle_gov_lint().await?;
@@ -263,6 +253,15 @@ async fn main() -> Result<()> {
     }
 
     Ok(())
+}
+
+fn emit_deprecation_warning(old_cmd: &str, new_cmd: &str) {
+    eprintln!(
+        "{} Warning: '{}' is deprecated. Please use '{}' instead.",
+        "⚠".yellow(),
+        old_cmd.bold(),
+        new_cmd.bold()
+    );
 }
 
 async fn handle_core_pulse() -> Result<()> {

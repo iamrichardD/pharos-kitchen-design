@@ -218,16 +218,14 @@ mod tests {
     #[tokio::test]
     async fn test_should_list_users_when_admin_authenticated() {
         let mock_server = MockServer::start().await;
-        let auth_mgr = AuthManager::new(&mock_server.uri(), PharosEnv::Dev);
+        let auth_mgr = AuthManager::new(&mock_server.uri(), PharosEnv::Dev)
+            .with_mock_token("access_token", "mock_access_admin_list")
+            .with_mock_token("id_token", &format_mock_token("ADMIN"));
         let temp_context = NamedTempFile::new().unwrap();
-
-        // Mock token retrieval
-        std::env::set_var("CI", "true"); // Keyring bypass
-        std::env::set_var("PHAROS_TEST_TOKEN", "mock_access_admin");
 
         Mock::given(method("GET"))
             .and(path("/admin/users"))
-            .and(header("Authorization", "Bearer mock_access_admin"))
+            .and(header("Authorization", "Bearer mock_access_admin_list"))
             .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
                 "users": [
                     {
@@ -253,15 +251,14 @@ mod tests {
     #[tokio::test]
     async fn test_should_update_user_when_admin_authenticated() {
         let mock_server = MockServer::start().await;
-        let auth_mgr = AuthManager::new(&mock_server.uri(), PharosEnv::Dev);
+        let auth_mgr = AuthManager::new(&mock_server.uri(), PharosEnv::Dev)
+            .with_mock_token("access_token", "mock_access_admin_update")
+            .with_mock_token("id_token", &format_mock_token("ADMIN"));
         let temp_context = NamedTempFile::new().unwrap();
-
-        std::env::set_var("CI", "true");
-        std::env::set_var("PHAROS_TEST_TOKEN", "mock_access_admin");
 
         Mock::given(method("POST"))
             .and(path("/admin/users/update"))
-            .and(header("Authorization", "Bearer mock_access_admin"))
+            .and(header("Authorization", "Bearer mock_access_admin_update"))
             .and(body_json(serde_json::json!({
                 "email": "test@example.com",
                 "role": "ADMIN"
@@ -278,21 +275,24 @@ mod tests {
         let result = admin_mgr
             .update_user("test@example.com", PharosRole::Admin)
             .await;
+
         assert!(result.is_ok());
     }
 
     #[tokio::test]
     async fn test_should_include_impersonation_header_when_context_is_set() {
         let mock_server = MockServer::start().await;
-        let auth_mgr = AuthManager::new(&mock_server.uri(), PharosEnv::Dev);
+        let auth_mgr = AuthManager::new(&mock_server.uri(), PharosEnv::Dev)
+            .with_mock_token("access_token", "mock_access_admin_impersonate")
+            .with_mock_token("id_token", &format_mock_token("ADMIN"));
         let temp_context = NamedTempFile::new().unwrap();
-
-        std::env::set_var("CI", "true");
-        std::env::set_var("PHAROS_TEST_TOKEN", "mock_access_admin");
 
         Mock::given(method("GET"))
             .and(path("/admin/users"))
-            .and(header("Authorization", "Bearer mock_access_admin"))
+            .and(header(
+                "Authorization",
+                "Bearer mock_access_admin_impersonate",
+            ))
             .and(header("X-Pharos-Impersonate", "target@example.com"))
             .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
                 "users": []
@@ -307,5 +307,18 @@ mod tests {
 
         let result = admin_mgr.list_users().await;
         assert!(result.is_ok());
+    }
+
+    fn format_mock_token(role: &str) -> String {
+        let claims = serde_json::json!({
+            "sub": "123",
+            "email": "test@example.com",
+            "custom:role": role,
+            "exp": 9999999999u64
+        });
+        use base64::{engine::general_purpose, Engine as _};
+        let payload =
+            general_purpose::URL_SAFE_NO_PAD.encode(serde_json::to_string(&claims).unwrap());
+        format!("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.{}.signature", payload)
     }
 }

@@ -56,6 +56,15 @@ impl BakeEngine {
     }
 
     pub async fn run(&self, source: &Path, output: &Path) -> Result<()> {
+        self.run_incremental(source, output, None).await
+    }
+
+    pub async fn run_incremental(
+        &self,
+        source: &Path,
+        output: &Path,
+        target_shard_id: Option<String>,
+    ) -> Result<()> {
         println!(
             "{} Starting Bake Engine (Incremental Shard Logic)...",
             "ℹ".blue()
@@ -71,6 +80,13 @@ impl BakeEngine {
 
                 // Try to parse as a Shard first
                 if let Ok(shard) = serde_json::from_str::<RegistryShard>(&content) {
+                    // Incremental Filtering (Issue #126)
+                    if let Some(ref target_id) = target_shard_id {
+                        if shard.shard_id != *target_id {
+                            continue;
+                        }
+                    }
+
                     println!("{} Processing shard: {}", "ℹ".blue(), shard.shard_id);
                     for (_, metadata) in shard.records {
                         // Validation Hard Gate (ADR-0023)
