@@ -97,8 +97,8 @@ run_core() {
     podman run --rm --security-opt seccomp=unconfined pkd-core-builder \
         sh -c "echo 'Integrity-Test' > /tmp/good.txt && \
         GOOD_HASH=\$(sha256sum /tmp/good.txt | cut -d' ' -f1) && \
-        /work/target/$BUILD_MODE/pkd core verify-manifest /tmp/good.txt \$GOOD_HASH && \
-        if /work/target/$BUILD_MODE/pkd core verify-manifest /tmp/good.txt 'wrong-hash' > /dev/null 2>&1; then exit 1; fi"
+        /work/target/$BUILD_MODE/pkd registry verify-manifest /tmp/good.txt \$GOOD_HASH && \
+        if /work/target/$BUILD_MODE/pkd registry verify-manifest /tmp/good.txt 'wrong-hash' > /dev/null 2>&1; then exit 1; fi"
 
     # 8. Branch Naming & PR Markers
     CURRENT_BRANCH=${GITHUB_HEAD_REF:-$(git rev-parse --abbrev-ref HEAD)}

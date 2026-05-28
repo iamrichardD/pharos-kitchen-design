@@ -415,16 +415,6 @@
     - **Change Failure Rate**: 0% (Post-Remediation).
 - **Audited** via Pharos Crucible (Result: 🟢 PHAROS GREEN).
 
-#### [2026-05-27] - Boundary Marshaling Protocol Refactor (#170)
-- **Refactored** the FFI output boundary in `pkd-core` to use the unified length-prefixed slice pattern (`PkdBuffer`).
-- **Eliminated** legacy `*mut c_char` return types and `CString` helpers, significantly reducing buffer overrun risks.
-- **Implemented** matching `PkdBuffer` struct and `SafePkdBufferHandle` in the Revit Bridge (.NET 8).
-- **Verified** "Pharos Green" status with 16 integration tests and Rust TDD suite.
-- **DORA Metrics (Issue #170)**:
-    - **Lead Time**: 30 Minutes (Surgical Strike).
-    - **Change Failure Rate**: 0%.
-- **Audited** via Pharos Crucible (Result: 🟢 PHAROS GREEN).
-
 #### [2026-05-26] - Phase 5.3: Bidirectional Ghost Tuning (#125)
 - **Implemented** `pkd_sync_state` FFI boundary and `tuning_deltas` resident state store in `pkd-core`.
 - **Integrated** real-time parametric synchronization between the Astro Web Sandbox and the Revit Bridge.
@@ -438,3 +428,23 @@
     - **Lead Time (Avg)**: 4 Hours (High-Rigor Integration).
     - **Change Failure Rate**: 12% (Remediated via integrated integration recovery).
 - **Audited** via Senior Program Manager (Result: 🟢 PHAROS GREEN).
+
+#### [2026-05-27] - Boundary Marshaling Protocol Refactor (#170)
+- **Refactored** the FFI output boundary in `pkd-core` to use the unified length-prefixed slice pattern (`PkdBuffer`).
+- **Eliminated** legacy `*mut c_char` return types and `CString` helpers, significantly reducing buffer overrun risks.
+- **Implemented** matching `PkdBuffer` struct and `SafePkdBufferHandle` in the Revit Bridge (.NET 8).
+- **Verified** "Pharos Green" status with 16 integration tests and Rust TDD suite.
+- **DORA Metrics (Issue #170)**:
+    - **Lead Time**: 30 Minutes (Surgical Strike).
+    - **Change Failure Rate**: 0%.
+- **Audited** via Pharos Crucible (Result: 🟢 PHAROS GREEN).
+
+#### [2026-05-28] - IA Sync & Project Genesis Manifesto (#145)
+- **Synchronized** `docs/CLI_REFERENCE.md` with the new `registry` namespace taxonomy, migrating distribution commands from `core`.
+- **Finalized** the "Project Genesis" Manifesto in `apps/marketing`, enriching the vision with "Truth Engine" and "Agentic BIM" narratives.
+- **Verified** "Pharos Green" status for the marketing build and governance standards via sharded `pulse.sh` slices.
+- **DORA Metrics (Issue #145)**:
+    - **Lead Time**: 1 Hour (Surgical Strike).
+    - **Change Failure Rate**: 0%.
+- **Status**: 🚀 In Progress (Pending Final Crucible Audit)
+

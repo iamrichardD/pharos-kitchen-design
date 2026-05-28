@@ -1,0 +1,37 @@
+/* ========================================================================
+ * Project: Pharos Kitchen Design (Project Prism)
+ * Component: Marketing / Blog (Manifesto)
+ * File: apps/marketing/src/content/updates/project-genesis.toon
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * License: FSL-1.1 (See LICENSE file for details)
+ * Purpose: The foundational story and vision of the Pharos project.
+ * Traceability: Issue #145
+ * ======================================================================== */
+
+title: Project Genesis: Ending the Hallucination Gap
+type: manifesto
+date: 2026-05-28
+createdAt: 2026-05-15T07:00:00Z
+releaseAt: 2026-05-28T15:00:00Z
+author: Richard D.
+stream: universal
+tags: vision, manifesto, ikd-enablement
+
+# The Founding Narrative
+body[1]{content}:
+  "Pharos began with a single realization: the commercial kitchen design industry is running on 'Opaque Truth.' For decades, Independent Kitchen Designers (IKDs) have been forced to hunt through bloated PDF catalogs and proprietary XML handlers, resulting in a 'Hallucination Gap' where the data in the model doesn't match the reality of the factory floor. Pharos exists to close that gap. By moving to a Metadata-First Standard driven by Rust and WASM, we are returning data sovereignty to the designer, ensuring that every piece of equipment is a verifiable digital twin, not just a geometric placeholder."
+
+# The Truth Engine
+vision[3]{pillar, description}:
+  Authoritative, "Data that is verified against the manufacturer source of truth every 30 days via the Pharos Truth Engine."
+  Deterministic, "Zero-host builds and memory-safe WASM execution ensures bit-perfect consistency across Revit, Web, and Mobile."
+  Empowered, "IKDs gain high-leverage tools that automate the manual spec-hunting grind, allowing them to focus on culinary flow rather than data entry."
+
+# The Standard
+standard[1]{id, title, status}:
+  v1.0, The Pharos Metadata Specification, Active
+  v1.1, Agentic BIM Interoperability, Draft
+
+# The Call to Action
+body[2]{content}:
+  "We are not just building another library; we are building the infrastructure for the next generation of AEC design. Whether you are an IKD looking for faster workflows or a manufacturer seeking better representation, Pharos is your bridge to a transparent, metadata-driven future. Join us in ending the hallucination gap."
