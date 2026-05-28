@@ -67,16 +67,18 @@ Administrative tools for user orchestration (Requires `ADMIN` or `AUDITOR` role)
 ### `pkd core`
 Metadata and engine operations.
 - **`validate --path <PATH>`**: Validates a local metadata JSON file against the official PKD Schema.
-- **`search <QUERY>`**: Executes an RFC 2378 compliant search against the local equipment registry.
+- **`search <QUERY>`**: Executes an RFC 2378 compliant search against the equipment registry.
+- **`bake` (Deprecated)**: Please use `pkd registry bake`.
+- **`pulse` (Deprecated)**: Please use `pkd registry pulse`.
+- **`promote` (Deprecated)**: Please use `pkd registry push`.
 
 ### `pkd registry`
-Registry and distribution operations.
-- **`bake --source <DIR> --output <DIR>`**: Transforms raw JSON shards into a compressed search index and archive.
-- **`verify-manifest --path <PATH> [--hash <HASH>]`**: Performs integrity checks and SHA-256 verification on artifacts or manifest directories.
-- **`generate-manifest --path <DIR>`**: Generates a `manifest.json` for all `.wasm` artifacts in a directory.
-- **`pulse`**: Performs a high-rigor 'Pulse' check on the system state and integrity.
-- **`promote`**: Scaffolds the promotion of local artifacts to remote environments.
-
+Distribution lifecycle management for the Pharos Registry (Requires `OEM` or `ADMIN` role for mutation).
+- **`bake --source <PATH> --output <PATH> [--shard-id <ID>]`**: Transforms raw JSON shards into a compressed Zstd archive and Tantivy index.
+- **`verify --path <PATH> [--remote] [--hash <HASH>]`**: Performs deep integrity checks on local or remote registry artifacts.
+- **`push --source <PATH> --shard-id <ID>`**: Promotes baked artifacts to the authoritative CDN (R2). Enforces the **Organization Sentinel** to ensure OEMs only push to their assigned shards.
+- **`pulse [--env <REALM>]`**: High-rigor system health and synchronization check. Ensures local cache parity with remote truth.
+- **`status`**: Diagnostic output showing current environment, organization context, and local cache paths.
 
 ### `pkd gov` 
 Governance and SDLC compliance tools. 
@@ -91,6 +93,14 @@ Governance and SDLC compliance tools.
 - **GOV-006 (SPM Mandate)**: The `GEMINI.md` file MUST contain a definition for the `Senior Program Manager (SPM)` role. 
 
 > **Lean Shard Exception**: Runtime data shards (JSON files starting with `shard_` or located in `samples/`) are exempt from header requirements (GOV-001 through GOV-003) to maintain payload efficiency.
+---
+
+## 🔒 Organization-Based Authority (ADR-0027)
+The Pharos Registry utilizes **Organization-Based Scoping** to protect manufacturer data. 
+- **Ownership**: Every `RegistryShard` is tied to a specific `shard-id`.
+- **Enforcement**: When performing a `pkd registry push`, the CLI verifies the `custom:organization` claim in your JWT against the target shard. 
+- **Resolution**: Shards starting with your organization name (e.g., `FRYMASTER-V1`) are permitted. Cross-manufacturer modifications are strictly prohibited and will trigger a "Fail Fast" security violation.
+
 ---
 
 ## 🔍 RFC 2378 Search Syntax
