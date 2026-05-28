@@ -142,6 +142,21 @@ enum CoreCommands {
         /// The query string (e.g., 'manufacturer=3m return name')
         query: Vec<String>,
     },
+    /// (Deprecated) Please use `pkd registry bake`
+    Bake {
+        #[arg(short, long)]
+        source: PathBuf,
+        #[arg(short, long)]
+        output: PathBuf,
+    },
+    /// (Deprecated) Please use `pkd registry verify`
+    VerifyManifest { path: PathBuf, hash: Option<String> },
+    /// (Deprecated)
+    GenerateManifest { path: PathBuf },
+    /// (Deprecated) Please use `pkd registry pulse`
+    Pulse,
+    /// (Deprecated) Please use `pkd registry push`
+    Promote,
 }
 
 #[tokio::main]

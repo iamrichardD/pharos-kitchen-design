@@ -47,6 +47,11 @@ pub enum RegistryCommands {
         #[arg(long)]
         hash: Option<String>,
     },
+    /// Generate a manifest.json for all .wasm artifacts in a directory
+    GenerateManifest {
+        /// The directory containing .wasm artifacts
+        path: PathBuf,
+    },
     /// Promote baked artifacts to a remote realm (Dev, Stage, Prod)
     Push {
         /// The directory containing the baked archive
@@ -85,6 +90,9 @@ impl RegistryManager {
             } => self.bake(source, output, shard_id).await,
             RegistryCommands::Verify { path, remote, hash } => {
                 self.verify(path, remote, hash).await
+            }
+            RegistryCommands::GenerateManifest { path } => {
+                crate::handle_core_generate_manifest(path).await
             }
             RegistryCommands::Push { source, shard_id } => self.push(source, shard_id).await,
             RegistryCommands::Pulse { env } => self.pulse(env.unwrap_or(self.env)).await,

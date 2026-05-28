@@ -309,7 +309,7 @@ impl AuthManager {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use wiremock::matchers::{body_json, method, path};
+    use wiremock::matchers::{method, path};
     use wiremock::MockServer;
     use wiremock::{Mock, ResponseTemplate};
 
