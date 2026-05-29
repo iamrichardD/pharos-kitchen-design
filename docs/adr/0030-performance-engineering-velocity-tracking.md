@@ -30,9 +30,11 @@ We will adopt a dual-stream metrics framework to track and improve team velocity
 2.  **Complexity-Adjusted Velocity**: We will utilize a 5-Tier Complexity Assessment (codified in `GEMINI.md`) to weight our throughput:
     *   **Tiers 1-5**: Used to normalize "Tasks Completed" into "High-Rigor Units" (HRUs).
 
-3.  **Mandatory Retrospectives**: Every non-trivial issue (#109, #110, etc.) MUST conclude with a DORA audit and an assessment of the "Actual vs. Estimated" complexity.
+3.  **Zero-Allocation FFI Mandate**: To maintain Revit viewport fluidity, all new cross-language interop boundaries (Rust ↔ .NET/TS) MUST utilize zero-allocation marshalling (e.g., .NET \`ReadOnlySpan<byte>\`) to minimize GC pressure.
 
-4.  **Public Tracking**: DORA metrics and retrospective insights MUST be documented in `@PROGRESS.md` to maintain radical transparency.
+4.  **Mandatory Retrospectives**: Every non-trivial issue (#109, #110, etc.) MUST conclude with a DORA audit and an assessment of the "Actual vs. Estimated" complexity.
+
+5.  **Public Tracking**: DORA metrics and retrospective insights MUST be documented in \`@PROGRESS.md\` to maintain radical transparency.
 
 ## Rationale
 - **Objectivity**: DORA metrics provide non-subjective data on pipeline health and team efficiency.

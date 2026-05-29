@@ -1,7 +1,7 @@
 /* ========================================================================
  * Project: Pharos Kitchen Design (Project Prism)
  * Component: Marketing / Blog (Manifesto)
- * File: apps/marketing/src/content/updates/project-genesis.toon
+ * File: apps/marketing/src/content/updates/2026-05-28-project-genesis.toon
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: The foundational story and vision of the Pharos project.
@@ -28,10 +28,10 @@ vision[3]{pillar, description}:
   Empowered, "IKDs gain high-leverage tools that automate the manual spec-hunting grind, allowing them to focus on culinary flow rather than data entry."
 
 # The Standard
-standard[1]{id, title, status}:
+standard[2]{id, title, status}:
   v1.0, The Pharos Metadata Specification, Active
   v1.1, Agentic BIM Interoperability, Draft
 
 # The Call to Action
-body[2]{content}:
+closing[1]{content}:
   "We are not just building another library; we are building the infrastructure for the next generation of AEC design. Whether you are an IKD looking for faster workflows or a manufacturer seeking better representation, Pharos is your bridge to a transparent, metadata-driven future. Join us in ending the hallucination gap."

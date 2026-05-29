@@ -49,9 +49,13 @@ fi
 
 echo "🦀 Building PKD WASM Core..."
 wasm-pack build packages/pkd-core --target web
+# Fix package name for @pkd scope
+sed -i 's/"name": "pkd-core"/"name": "@pkd\/core"/' packages/pkd-core/pkg/package.json
 
 echo "🏷️ Building PKD TOON Parser (WASM)..."
 wasm-pack build packages/pkd-toon --target web
+# Fix package name for @pkd scope
+sed -i 's/"name": "pkd-toon"/"name": "@pkd\/toon"/' packages/pkd-toon/pkg/package.json
 
 echo "🍳 Building and Staging Manufacturer Dialects..."
 STAGING_DIR="dist/dialects"

@@ -240,4 +240,11 @@ tasks[2]{id, title, status}:
         assert_eq!(doc.lists.get("logs").unwrap().items.len(), 100000);
         println!("Parsed 100k entries in {:?}", duration);
     }
+
+    #[test]
+    fn test_should_parse_manifesto_from_filesystem() {
+        let content = std::fs::read_to_string("../../apps/marketing/src/content/updates/2026-05-28-manifesto.toon").unwrap();
+        let result = ToonParser::parse(&content);
+        assert!(result.is_ok(), "Manifesto Parse Error: {:?}", result.err());
+    }
 }

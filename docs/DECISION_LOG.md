@@ -45,8 +45,12 @@ This log provides an index of the technical and architectural decisions made for
 | **[ADR-0039]** | 2026-05-20 | Approved | [Agentic Resilience & Asynchronous Recovery](docs/adr/0039-agentic-resilience-asynchronous-recovery.md) |
 | **[ADR-0040]** | 2026-05-21 | Approved | [Mandatory Regression Surface Mapping](docs/adr/0040-mandatory-regression-surface-mapping.md) |
 | **[ADR-0041]** | 2026-05-21 | Approved | [Multi-Agent Rigor & Gate Enforcement](docs/adr/0041-multi-agent-rigor-gate-enforcement.md) |
+| **[ADR-0042]** | 2026-05-29 | Approved | [Zero-Allocation FFI Interop Mandate](docs/adr/0042-zero-allocation-ffi-interop-mandate.md) |
+| **[ADR-0043]** | 2026-05-25 | Approved | [Federated Governance & Mandatory PR Gate](docs/adr/0043-federated-governance-and-pr-gate.md) |
 | **[ADR-0044]** | 2026-05-27 | Approved | [Automated Boundary Enforcement (The Single Boundary Mandate)](docs/adr/0044-automated-boundary-enforcement.md) |
+| **[ADR-0045]** | 2026-05-29 | Approved | [Continuous Supply Chain Verification](docs/adr/0045-continuous-supply-chain-verification.md) |
 | **[ADR-0046]** | 2026-05-27 | Approved | [High-Rigor Shard Logging & Conflict Prevention](docs/adr/0046-task-specific-shard-logging.md) |
+| **[ADR-0047]** | 2026-05-29 | Approved | [Immutable Content Metadata Standard](docs/adr/0047-immutable-content-metadata-standard.md) |
 
 ---
 *To add a new decision, create a new file in `docs/adr/` following the established template and append it to this index.*

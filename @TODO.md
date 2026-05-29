@@ -17,9 +17,23 @@
  * 5. ATOMICITY: Focus on one Phase/Task at a time. Do not "scatter" progress across unrelated silos.
  -->
 
-# @TODO: Pharos Kitchen Design (Project Prism)
+### Sprint 5.01: Core Parser & Remediation (2026-06-01) - 🚀 PLANNED
+- [ ] **Issue #141**: Task 4.33: Recursive Tabular Indentation for TOON Parser. [ECT: 3]
+- [ ] **Issue #138**: Task 4.32: Implement Full RFC-2378 Query Logic in WASM Core. [ECT: 3]
+- [ ] **Issue #148**: Debt: Implement \`PharosMetadata::builder()\` pattern. [ECT: 2]
+- [ ] **Issue #187**: [DEBT] Investigate and Resolve CI Build Warnings. [ECT: 2]
+- [ ] **Issue #139**: Debt #139: Enhanced TOON Diagnostics (Blocked by #141). [ECT: 2]
+
+---
 
 ## ✅ Completed (Verified)
+
+### Sprint 4.11: Supply Chain & Performance Hardening (2026-05-29)
+- [x] **Issue #169**: Supply Chain Watchdog.
+- [x] **Issue #123**: Zero-Allocation Marshalling.
+- [x] **Issue #175**: Design System Alignment.
+- [x] **Issue #168**: Automated Boundary Enforcement.
+- [x] **Issue #170**: Boundary Marshaling Protocol.
 
 ### Phase 1: Marketing & Foundation
 - [x] Initial ADR scaffolding (0001-0013).
@@ -87,10 +101,12 @@
 - [x] **Issue #165**: Debt #165: Provision Rust Linter Components in Podman. [ECT: 1]
 - [x] **Issue #166**: Hotfix #166: Resolve NPM Lockfile Mismatch for Astro. [ECT: 1]
 - [x] **Issue #167**: Debt #167: Supply Chain Audit - Remediate Deprecated prebuild-install. [ECT: 2]
-- [ ] **Issue #168**: Debt #168: Automated Boundary Enforcement (ADR-0044). [ECT: 2]
-- [ ] **Issue #169**: Debt #169: Supply Chain Watchdog (Pre-Engineering Dependency Audit). [ECT: 1]
+- [x] **Issue #168**: Debt #168: Automated Boundary Enforcement (ADR-0044). [ECT: 2]
+- [x] **Issue #169**: Debt #169: Supply Chain Watchdog (Pre-Engineering Dependency Audit). [ECT: 1]
 - [x] **Issue #170**: Debt #170: Boundary Marshaling Protocol. [ECT: 1]
 - [x] **Issue #175**: Debt #175: Remove legacy prose-emerald class from ToonLoader.astro. [ECT: 1]
+- [ ] **Issue #185**: [PERF] Implement True Zero-Allocation JSON Parsing (Source Gen). [ECT: 5]
+- [ ] **Issue #187**: [DEBT] Investigate and Resolve CI Build Warnings. [ECT: 2]
 - [x] **Issue #115**: Debt #115: Implement Local Governance Linter (pkd gov lint). [ECT: 3]
 - [x] **Issue #107**: Debt #107: Audit and Prune pkd-core Dependencies. [ECT: 2]
 - [x] **Issue #113**: Debt #113: ADR Template Automation with Mandatory Prologue. [ECT: 2]
