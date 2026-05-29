@@ -11,7 +11,7 @@ FROM public.ecr.aws/docker/library/rust@sha256:70aebe351faa35667ef36508deb19fe23
 RUN apt-get update && apt-get install -y pkg-config libssl-dev curl && \
     curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh && \
     rm -rf /var/lib/apt/lists/*
-RUN rustup component add rustfmt clippy
+RUN rustup component add rustfmt clippy && rustup target add wasm32-unknown-unknown
 RUN cargo install cargo-chef
 WORKDIR /work
 
@@ -33,8 +33,10 @@ COPY --from=cacher /work/target target
 COPY --from=cacher /usr/local/cargo /usr/local/cargo
 COPY . .
 RUN if [ "$BUILD_MODE" = "release" ]; then MODE_FLAG="--release"; else MODE_FLAG=""; fi && \
-    cd packages/pkd-core && cargo test && cargo build $MODE_FLAG && cargo audit && \
-    cd ../pkd-cli && cargo test && cargo build $MODE_FLAG && \
+    cd packages/pkd-core && \
+    cargo fmt --check && cargo clippy -- -D warnings && cargo test && cargo build $MODE_FLAG && cargo audit && \
+    cd ../pkd-cli && \
+    cargo fmt --check && cargo clippy -- -D warnings && cargo test && cargo build $MODE_FLAG && \
     cd ../.. && bash scripts/build-wasm.sh
 
 # Stage 5: Manifest Verifier (Supply Chain Gate)
