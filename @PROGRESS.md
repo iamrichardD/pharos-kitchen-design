@@ -446,5 +446,16 @@
 - **DORA Metrics (Issue #145)**:
     - **Lead Time**: 1 Hour (Surgical Strike).
     - **Change Failure Rate**: 0%.
-- **Status**: 🚀 In Progress (Pending Final Crucible Audit)
+- **Audited** via Pharos Crucible (Result: 🟢 PHAROS GREEN).
+
+#### [2026-05-28] - Registry Management & Organization Sentinel (#126)
+- **Transitioned** the CLI distribution lifecycle to a dedicated `pkd registry` namespace.
+- **Implemented** the **Organization Sentinel** (ADR-0027) in `pkd registry push`, enforcing local authorization for OEM shards.
+- **Refactored** `AuthManager` to use instance-based mock token injection, permanently resolving parallel test flakiness.
+- **Synchronized** `docs/CLI_REFERENCE.md` and `scripts/pulse.sh` with the new registry taxonomy.
+- **Verified** "Pharos Green" status via Rust TDD suite (20 tests) and sharded `pulse.sh` verification in Podman.
+- **DORA Metrics (Issue #126)**:
+    - **Lead Time**: 3 Hours (ECT 3).
+    - **Change Failure Rate**: 0%.
+- **Audited** via Pharos Crucible (Result: 🟢 PHAROS GREEN).
 
