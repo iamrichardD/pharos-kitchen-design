@@ -33,7 +33,7 @@ RUN wasm-pack build packages/pkd-core --target web
 RUN wasm-pack build packages/pkd-toon --target web
 
 # Stage 2: Base Node Environment
-FROM public.ecr.aws/docker/library/node:24-slim AS base
+FROM public.ecr.aws/docker/library/node:24-slim@sha256:242549cd46785b480c832479a730f4f2a20865d61ea2e404fdb2a5c3d3b73ecf AS base
 ARG BUILD_MODE=debug
 RUN apt-get update && apt-get install -y \
     curl openssl && \

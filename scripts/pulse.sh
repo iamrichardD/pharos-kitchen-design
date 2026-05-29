@@ -94,6 +94,8 @@ run_core() {
 
     # 7. Supply Chain Verification
     echo "   [Process] Verifying Supply Chain Security Logic..."
+    bash scripts/supply-chain-watchdog.sh
+    
     podman run --rm --security-opt seccomp=unconfined pkd-core-builder \
         sh -c "echo 'Integrity-Test' > /tmp/good.txt && \
         GOOD_HASH=\$(sha256sum /tmp/good.txt | cut -d' ' -f1) && \

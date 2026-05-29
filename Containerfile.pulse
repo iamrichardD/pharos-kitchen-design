@@ -42,7 +42,7 @@ ARG BUILD_MODE=debug
 RUN /work/target/$BUILD_MODE/pkd core verify-manifest /work/dist/dialects
 
 # Stage 6: Node.js (TypeScript & Security Audit)
-FROM public.ecr.aws/docker/library/node:24-bookworm AS ts-auditor
+FROM public.ecr.aws/docker/library/node:24-bookworm@sha256:8530f76a96d88820d288761f022e318970dda93d01536919fbc16076b7983e63 AS ts-auditor
 ARG BUILD_MODE=debug
 WORKDIR /work
 COPY . .

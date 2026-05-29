@@ -9,7 +9,7 @@
 # ========================================================================
 
 # Using GHCR as an enterprise-grade public registry (ADR-0014)
-FROM ghcr.io/opentofu/opentofu:1.8.1
+FROM ghcr.io/opentofu/opentofu:1.8.1@sha256:d8acc3a784fc6f0ada326f6f1753f6d06e1c83c7901a3671359965fbde286074
 
 # Set the working directory to the infrastructure slice
 WORKDIR /infra
