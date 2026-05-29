@@ -263,6 +263,13 @@ impl RegistryManager {
                 if let Some(dev_deps) = doc.get("dev-dependencies").and_then(|d| d.as_table()) {
                     violations += self.check_cargo_deps(path, dev_deps)?;
                 }
+                if let Some(target) = doc.get("target").and_then(|t| t.as_table()) {
+                    for (_spec, table) in target {
+                        if let Some(deps) = table.get("dependencies").and_then(|d| d.as_table()) {
+                            violations += self.check_cargo_deps(path, deps)?;
+                        }
+                    }
+                }
             }
         }
         Ok(violations)
@@ -270,6 +277,10 @@ impl RegistryManager {
 
     fn check_cargo_deps(&self, path: &std::path::Path, deps: &toml::value::Table) -> Result<u32> {
         let mut violations = 0;
+        let critical_ffi = [
+            "zstd", "openssl", "sqlite", "rocksdb", "libz-sys", "wasmtime",
+        ];
+
         for (name, version) in deps {
             let version_str = if let Some(s) = version.as_str() {
                 s
@@ -279,12 +290,26 @@ impl RegistryManager {
                 ""
             };
 
+            // 1. Prohibit '*' (Loose Pinning)
             if version_str == "*" {
                 println!(
                     "      {} {}: Unpinned Cargo dependency '{}' version: {}",
                     "✘".red(),
                     path.display(),
                     name,
+                    version_str
+                );
+                violations += 1;
+            }
+
+            // 2. Enforce Exact Pinning (=) for Critical FFI (ADR-0014 Small Stone)
+            if critical_ffi.contains(&name.as_str()) && !version_str.starts_with('=') {
+                println!(
+                    "      {} {}: Critical FFI dependency '{}' requires exact pinning (e.g., '={}'). Found: '{}'",
+                    "✘".red(),
+                    path.display(),
+                    name,
+                    version_str,
                     version_str
                 );
                 violations += 1;

@@ -3295,7 +3295,7 @@ dependencies = [
  "url",
  "walkdir",
  "wiremock",
- "zstd 0.13.3",
+ "zstd 0.13.0",
 ]
 
 [[package]]
@@ -4606,7 +4606,7 @@ dependencies = [
  "tantivy-bitpacker",
  "tantivy-common",
  "tantivy-fst",
- "zstd 0.13.3",
+ "zstd 0.13.0",
 ]
 
 [[package]]
@@ -6388,9 +6388,9 @@ dependencies = [
 
 [[package]]
 name = "zstd"
-version = "0.13.3"
+version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e91ee311a569c327171651566e07972200e76fcfe2242a4fa446149a3881c08a"
+checksum = "bffb3309596d527cfcba7dfc6ed6052f1d39dfbd7c867aa2e865e4a449c10110"
 dependencies = [
  "zstd-safe 7.2.4",
 ]

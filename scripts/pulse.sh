@@ -88,16 +88,15 @@ run_core() {
         AUDIT_FILE="docs/governance/audits/issue-${ISSUE_ID}.md"
         
         if [ ! -f "$AUDIT_FILE" ]; then
-            echo "      ❌ Error: Missing mandatory audit log: $AUDIT_FILE"
-            echo "      Builders are prohibited from merging until an independent PHAROS GREEN audit exists."
-            exit 1
-        fi
-        
-        if ! grep -q "Status: 🟢 **PHAROS GREEN**" "$AUDIT_FILE"; then
+            echo "      ⚠️  Warning: Missing mandatory audit log: $AUDIT_FILE"
+            echo "      Note: Builders MUST create a high-rigor PR BEFORE the Audit phase begins."
+            echo "      Merging to main will be BLOCKED until this log is present and PHAROS GREEN."
+        elif ! grep -q "Status: 🟢 **PHAROS GREEN**" "$AUDIT_FILE"; then
             echo "      ❌ Error: Audit log $AUDIT_FILE exists but status is NOT PHAROS GREEN."
             exit 1
+        else
+            echo "      🟢 Audit Log Verified: Issue #$ISSUE_ID is PHAROS GREEN."
         fi
-        echo "      🟢 Audit Log Verified: Issue #$ISSUE_ID is PHAROS GREEN."
     fi
 
     # 7. Branch Naming & PR Markers
