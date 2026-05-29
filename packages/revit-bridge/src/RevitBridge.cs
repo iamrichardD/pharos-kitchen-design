@@ -5,7 +5,7 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Initial bridge component for Revit-to-Web interoperability.
- * Traceability: Priority 3, Issue #28
+ * Traceability: Priority 3, Issue #28, Issue #123 (Zero-Allocation Marshalling)
  * ======================================================================== */
 
 using System.Runtime.InteropServices;
@@ -118,6 +118,13 @@ namespace Pkd.RevitBridge
         {
             pkd_free_buffer(new PkdBuffer { Ptr = handle, Len = _len });
             return true;
+        }
+
+        public unsafe ReadOnlySpan<byte> AsSpan()
+        {
+            if (IsInvalid || _len == 0) return ReadOnlySpan<byte>.Empty;
+            // Why: Direct pointer access to the Rust-allocated buffer avoids intermediate string allocations.
+            return new ReadOnlySpan<byte>(handle.ToPointer(), (int)_len);
         }
 
         public string? GetString()
@@ -363,8 +370,9 @@ namespace Pkd.RevitBridge
 
             try
             {
-                string json = handle.GetString() ?? string.Empty;
-                return JsonSerializer.Deserialize<ValidationResponse>(json) ?? CreateErrorResponse("Failed to deserialize core response");
+                // Why: Direct deserialization from Span<byte> (UTF-8) is zero-allocation (for the JSON source).
+                // Traceability: Issue #123
+                return JsonSerializer.Deserialize<ValidationResponse>(handle.AsSpan()) ?? CreateErrorResponse("Failed to deserialize core response");
             }
             catch (JsonException ex)
             {
