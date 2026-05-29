@@ -90,7 +90,7 @@
 - [ ] **Issue #168**: Debt #168: Automated Boundary Enforcement (ADR-0044). [ECT: 2]
 - [ ] **Issue #169**: Debt #169: Supply Chain Watchdog (Pre-Engineering Dependency Audit). [ECT: 1]
 - [x] **Issue #170**: Debt #170: Boundary Marshaling Protocol. [ECT: 1]
-- [ ] **Issue #175**: Debt #175: Remove legacy prose-emerald class from ToonLoader.astro. [ECT: 1]
+- [x] **Issue #175**: Debt #175: Remove legacy prose-emerald class from ToonLoader.astro. [ECT: 1]
 - [x] **Issue #115**: Debt #115: Implement Local Governance Linter (pkd gov lint). [ECT: 3]
 - [x] **Issue #107**: Debt #107: Audit and Prune pkd-core Dependencies. [ECT: 2]
 - [x] **Issue #113**: Debt #113: ADR Template Automation with Mandatory Prologue. [ECT: 2]

@@ -36,7 +36,7 @@ EVERY source file (JSON, RS, ASTRO) MUST begin with:
  * File: [filename with extension]
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
- * Purpose: [The "Why" - 1-2 sentences]
+ * Purpose: [The "Why" - 1-2 sentences. For debt/cleanup tasks, explicitly state the strategic alignment (e.g., "Design System Alignment" or "Security Hardening").]
  * Traceability: [Link to PRD or GitHub Issue]
  * ======================================================================== */
 

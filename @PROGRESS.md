@@ -103,6 +103,12 @@
 - [x] **Issue #43 (Process)**: Implement Pharos Synchronization Protocol (Task 4.1).
 - [x] **Verification**: Cross-language handshake verified green in a single multi-stage Podman transaction.
 
+### Sprint 4.11: UI Integrity & Design System (2026-05-29) - ✅ COMPLETED
+- [x] **Issue #175**: Debt #175: Remove legacy `prose-emerald` class from `ToonLoader.astro`.
+    - Removed hardcoded Tailwind class to ensure typographic consistency with the Pharos Design System.
+    - Updated file prologue to match high-rigor standards (Issue #175 traceability).
+- **Verification**: Pharos Green status confirmed via sharded `pulse.sh --slice marketing` in Podman.
+
 ---
 
 ## 🏗️ Active Development

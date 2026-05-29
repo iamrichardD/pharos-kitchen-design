@@ -2,12 +2,11 @@
 /* ========================================================================
  * Project: Pharos Kitchen Design (Project Prism)
  * Component: Marketing / Blog
- * License: FSL-1.1 (See LICENSE file for details)
  * File: apps/marketing/src/components/ToonLoader.astro
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
- * Purpose: Client-side WASM loader for TOON-encoded blog posts.
- * Traceability: Issue #129
+ * Purpose: Client-side WASM loader for TOON-encoded blog posts. Updated for Design System Alignment.
+ * Traceability: Issue #175
  * ======================================================================== */
 
 interface Props {
@@ -25,7 +24,7 @@ const { content } = Astro.props;
   
   <div class="toon-output hidden">
     <div class="toon-header mb-6 border-b border-ph-pulse/20 pb-4"></div>
-    <div class="toon-body prose prose-invert prose-emerald max-w-none text-ph-pulse-glow/90 leading-relaxed mb-8"></div>
+    <div class="toon-body prose prose-invert max-w-none text-ph-pulse-glow/90 leading-relaxed mb-8"></div>
     <div class="toon-lists mt-8 space-y-10"></div>
   </div>
 
