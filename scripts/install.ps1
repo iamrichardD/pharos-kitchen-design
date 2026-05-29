@@ -22,7 +22,7 @@
   File: scripts/install.ps1
   Author: Richard D. (https://github.com/iamrichardd)
   License: FSL-1.1 (See LICENSE file for details)
-  Traceability: Issue #94, ADR-0006, ADR-0017
+  Traceability: Issue #94, Issue #162, ADR-0006, ADR-0017
 #>
 
 # ========================================================================
@@ -33,7 +33,7 @@
 # Author: Richard D. (https://github.com/iamrichardd)
 # License: FSL-1.1 (See LICENSE file for details)
 # Purpose: Windows-native installer with high-rigor integrity checks.
-# Traceability: Issue #94
+# Traceability: Issue #94, Issue #162
 # ========================================================================
 
 param(
@@ -252,20 +252,6 @@ function Audit-Environment {
             exit 1
         }
         Log-Warn "Bypassing writability check due to -Force flag."
-    }
-
-    $missing = @()
-
-    if (-not (Get-Command "curl" -ErrorAction SilentlyContinue)) {
-        $missing += "curl"
-    }
-
-    if ($missing.Count -gt 0) {
-        Log-Error "Missing dependencies: $($missing -join ', ')"
-        if (-not $Force) {
-            exit 1
-        }
-        Log-Warn "Bypassing audit due to -Force flag."
     }
 
     Log-Info "Environment audit passed."
