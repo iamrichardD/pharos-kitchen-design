@@ -477,4 +477,9 @@ function Main {
     }
 }
 
-Main -Version:$Version -Uninstall:$Uninstall -Purge:$Purge -Force:$Force
+# Execution Gate
+# Why: Prevents the script from executing its Main loop when dot-sourced 
+#      for validation (Issue #94) or integration testing.
+if ($MyInvocation.InvocationName -ne '.') {
+    Main -Version:$Version -Uninstall:$Uninstall -Purge:$Purge -Force:$Force
+}

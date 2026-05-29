@@ -13,6 +13,7 @@ use crate::models::{PharosEnv, PharosRole};
 use anyhow::{anyhow, Result};
 use clap::{Args, Subcommand};
 use colored::*;
+use regex::Regex;
 use std::path::PathBuf;
 
 #[derive(Args, Debug)]
@@ -67,6 +68,8 @@ pub enum RegistryCommands {
         #[arg(short, long)]
         env: Option<PharosEnv>,
     },
+    /// Perform a supply chain security audit of the monorepo
+    Audit,
     /// Diagnostic output of the current registry state
     Status,
 }
@@ -96,8 +99,223 @@ impl RegistryManager {
             }
             RegistryCommands::Push { source, shard_id } => self.push(source, shard_id).await,
             RegistryCommands::Pulse { env } => self.pulse(env.unwrap_or(self.env)).await,
+            RegistryCommands::Audit => self.audit().await,
             RegistryCommands::Status => self.status().await,
         }
+    }
+
+    async fn audit(&self) -> Result<()> {
+        println!(
+            "{} Registry Audit: Starting supply chain watchdog...",
+            "ℹ".blue()
+        );
+        let mut violations = 0;
+
+        // 1. Audit Containerfiles for unpinned images
+        violations += self.audit_containerfiles().await?;
+
+        // 2. Audit package.json for prebuild-install and unpinned deps
+        violations += self.audit_npm_dependencies().await?;
+
+        // 3. Audit Cargo.toml for unpinned deps
+        violations += self.audit_cargo_dependencies().await?;
+
+        if violations > 0 {
+            println!(
+                "\n{} Supply chain audit failed with {} violations.",
+                "✘".red(),
+                violations
+            );
+            Err(anyhow!("Supply chain security standards not met."))
+        } else {
+            println!(
+                "\n{} Supply chain audit passed. Monorepo is secure.",
+                "✔".green()
+            );
+            Ok(())
+        }
+    }
+
+    async fn audit_containerfiles(&self) -> Result<u32> {
+        println!("   [Audit] Verifying Containerfile image pinning (@sha256)...");
+        let mut violations = 0;
+        let from_regex = Regex::new(r"(?i)^FROM\s+([^\s]+)").unwrap();
+
+        let paths = std::fs::read_dir(".")?;
+        for entry in paths {
+            let entry = entry?;
+            let path = entry.path();
+            let file_name = path.file_name().and_then(|s| s.to_str()).unwrap_or("");
+
+            if file_name.starts_with("Containerfile") {
+                let content = std::fs::read_to_string(&path)?;
+                for line in content.lines() {
+                    if let Some(caps) = from_regex.captures(line) {
+                        let image = &caps[1];
+                        // Ignore local build stages (aliases)
+                        if image.contains('/') && !image.contains("@sha256:") {
+                            println!(
+                                "      {} {}: Unpinned image '{}' (Missing @sha256)",
+                                "✘".red(),
+                                file_name,
+                                image
+                            );
+                            violations += 1;
+                        }
+                    }
+                }
+            }
+        }
+        Ok(violations)
+    }
+
+    async fn audit_npm_dependencies(&self) -> Result<u32> {
+        println!("   [Audit] Verifying package.json (prebuild-install & pinning)...");
+        let mut violations = 0;
+
+        // Find all package.json files
+        let walker = ignore::WalkBuilder::new(".")
+            .hidden(false)
+            .git_ignore(true)
+            .build();
+
+        for entry in walker {
+            let entry = entry?;
+            let path = entry.path();
+            if path.file_name().and_then(|s| s.to_str()) == Some("package.json") {
+                if path.to_string_lossy().contains("node_modules") {
+                    continue;
+                }
+
+                let content = std::fs::read_to_string(path)?;
+                let v: serde_json::Value = serde_json::from_str(&content)?;
+
+                if let Some(deps) = v.get("dependencies").and_then(|d| d.as_object()) {
+                    violations += self.check_deps(path, deps, "dependency")?;
+                }
+                if let Some(dev_deps) = v.get("devDependencies").and_then(|d| d.as_object()) {
+                    violations += self.check_deps(path, dev_deps, "devDependency")?;
+                }
+            }
+        }
+        Ok(violations)
+    }
+
+    fn check_deps(
+        &self,
+        path: &std::path::Path,
+        deps: &serde_json::Map<String, serde_json::Value>,
+        _type: &str,
+    ) -> Result<u32> {
+        let mut violations = 0;
+        for (name, version) in deps {
+            let version_str = version.as_str().unwrap_or("");
+
+            // Prohibited: prebuild-install (Issue #167)
+            if name == "prebuild-install" {
+                println!(
+                    "      {} {}: Deprecated 'prebuild-install' detected (Security Risk)",
+                    "✘".red(),
+                    path.display()
+                );
+                violations += 1;
+            }
+
+            // Pinning check: No '*' or 'latest'
+            if version_str == "*" || version_str == "latest" {
+                // Workspace Exception: Internal @pkd packages use '*' for linkage
+                if name.starts_with("@pkd/") && version_str == "*" {
+                    continue;
+                }
+                println!(
+                    "      {} {}: Unpinned {} '{}' version: {}",
+                    "✘".red(),
+                    path.display(),
+                    _type,
+                    name,
+                    version_str
+                );
+                violations += 1;
+            }
+        }
+        Ok(violations)
+    }
+
+    async fn audit_cargo_dependencies(&self) -> Result<u32> {
+        println!("   [Audit] Verifying Cargo.toml pinning...");
+        let mut violations = 0;
+
+        let walker = ignore::WalkBuilder::new(".")
+            .hidden(false)
+            .git_ignore(true)
+            .build();
+
+        for entry in walker {
+            let entry = entry?;
+            let path = entry.path();
+            if path.file_name().and_then(|s| s.to_str()) == Some("Cargo.toml") {
+                let content = std::fs::read_to_string(path)?;
+                let doc = content.parse::<toml::Value>()?;
+
+                if let Some(deps) = doc.get("dependencies").and_then(|d| d.as_table()) {
+                    violations += self.check_cargo_deps(path, deps)?;
+                }
+                if let Some(dev_deps) = doc.get("dev-dependencies").and_then(|d| d.as_table()) {
+                    violations += self.check_cargo_deps(path, dev_deps)?;
+                }
+                if let Some(target) = doc.get("target").and_then(|t| t.as_table()) {
+                    for (_spec, table) in target {
+                        if let Some(deps) = table.get("dependencies").and_then(|d| d.as_table()) {
+                            violations += self.check_cargo_deps(path, deps)?;
+                        }
+                    }
+                }
+            }
+        }
+        Ok(violations)
+    }
+
+    fn check_cargo_deps(&self, path: &std::path::Path, deps: &toml::value::Table) -> Result<u32> {
+        let mut violations = 0;
+        let critical_ffi = [
+            "zstd", "openssl", "sqlite", "rocksdb", "libz-sys", "wasmtime",
+        ];
+
+        for (name, version) in deps {
+            let version_str = if let Some(s) = version.as_str() {
+                s
+            } else if let Some(t) = version.as_table() {
+                t.get("version").and_then(|v| v.as_str()).unwrap_or("")
+            } else {
+                ""
+            };
+
+            // 1. Prohibit '*' (Loose Pinning)
+            if version_str == "*" {
+                println!(
+                    "      {} {}: Unpinned Cargo dependency '{}' version: {}",
+                    "✘".red(),
+                    path.display(),
+                    name,
+                    version_str
+                );
+                violations += 1;
+            }
+
+            // 2. Enforce Exact Pinning (=) for Critical FFI (ADR-0014 Small Stone)
+            if critical_ffi.contains(&name.as_str()) && !version_str.starts_with('=') {
+                println!(
+                    "      {} {}: Critical FFI dependency '{}' requires exact pinning (e.g., '={}'). Found: '{}'",
+                    "✘".red(),
+                    path.display(),
+                    name,
+                    version_str,
+                    version_str
+                );
+                violations += 1;
+            }
+        }
+        Ok(violations)
     }
 
     async fn bake(&self, source: PathBuf, output: PathBuf, shard_id: Option<String>) -> Result<()> {

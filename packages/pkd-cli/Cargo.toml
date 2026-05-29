@@ -48,11 +48,12 @@ pharos-protocol = { version = "0.1.0", path = "../pharos-protocol" }
 # Binary Indexing & Distribution
 tantivy = "0.22.0"
 tar = "0.4.40"
-zstd = "0.13.0"
+zstd = "=0.13.0"
 walkdir = "2.5.0"
 serde_yaml = "0.9.34"
 ignore = "0.4.25"
 regex = "1.12.3"
+toml = "0.8.12"
 
 [dev-dependencies]
 mockall = "0.12.1"

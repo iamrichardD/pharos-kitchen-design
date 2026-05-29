@@ -12,7 +12,7 @@
 # Traceability: RET-04, Issue #161
 # ========================================================================
 
-THRESHOLD_MIN=20
+THRESHOLD_MIN=40
 THRESHOLD_SEC=$((THRESHOLD_MIN * 60))
 START_TIME=$(date +%s)
 
