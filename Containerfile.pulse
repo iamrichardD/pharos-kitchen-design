@@ -32,9 +32,10 @@ RUN curl -LsSf https://github.com/rustsec/rustsec/releases/download/cargo-audit%
 COPY --from=cacher /work/target target
 COPY --from=cacher /usr/local/cargo /usr/local/cargo
 COPY . .
-RUN cd packages/pkd-core && cargo test &&     if [ "$BUILD_MODE" = "release" ]; then cargo build --release; else cargo build; fi &&     cargo audit
-RUN cd packages/pkd-cli && cargo test &&     if [ "$BUILD_MODE" = "release" ]; then cargo build --release; else cargo build; fi
-RUN bash scripts/build-wasm.sh
+RUN if [ "$BUILD_MODE" = "release" ]; then MODE_FLAG="--release"; else MODE_FLAG=""; fi && \
+    cd packages/pkd-core && cargo test && cargo build $MODE_FLAG && cargo audit && \
+    cd ../pkd-cli && cargo test && cargo build $MODE_FLAG && \
+    cd ../.. && bash scripts/build-wasm.sh
 
 # Stage 5: Manifest Verifier (Supply Chain Gate)
 FROM rust-builder AS manifest-verifier
