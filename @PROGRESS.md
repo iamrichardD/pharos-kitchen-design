@@ -30,18 +30,18 @@
 - **Verification**: 🟢 PHAROS GREEN confirmed across all monorepo slices.
 
 ### Sprint 5.01: Core Parser & Remediation (2026-06-01) - 🚀 ACTIVE
-- [x] **Issue #141**: Implemented Relational Handle Mapping for the TOON Parser (Option C).
+- [x] **Issue #141**: Implemented Relational Handle Mapping for the TOON Parser (Option C). [ECT: 3 | ACT: 2]
     - Maintained O(n) linear parsing velocity by shifting resolution to consumers.
     - Added TDD coverage for namespaced handles and metadata cross-references.
     - Verified 🟢 PHAROS GREEN in Podman.
-- [x] **Issue #138**: Implemented full RFC-2378 Query Logic and Wildcard Engine (Option B).
+- [x] **Issue #138**: Implemented full RFC-2378 Query Logic and Wildcard Engine (Option B). [ECT: 3 | ACT: 3]
     - Support for Ph-standard word-by-word matching and advanced wildcards (*, +, ?, []).
     - Implemented `return` clauses for field projection and reduced data egress.
     - Enforced **Temporal Warden** (100ms sentinel) for ReDoS immunity.
     - Verified 🟢 PHAROS GREEN with 33 integration tests in Podman.
-- [ ] **Issue #148**: Debt: Implement `PharosMetadata::builder()` pattern.
-- [ ] **Issue #187**: [DEBT] Investigate and Resolve CI Build Warnings.
-- [ ] **Issue #139**: Debt #139: Enhanced TOON Diagnostics (Blocked by #141).
+- [ ] **Issue #148**: Debt: Implement `PharosMetadata::builder()` pattern. [ECT: 2]
+- [ ] **Issue #187**: [DEBT] Investigate and Resolve CI Build Warnings. [ECT: 2]
+- [ ] **Issue #139**: Debt #139: Enhanced TOON Diagnostics (Blocked by #141). [ECT: 2]
 
 ---
 

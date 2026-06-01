@@ -18,8 +18,8 @@
  -->
 
 ### Sprint 5.01: Core Parser & Remediation (2026-06-01) - 🚀 ACTIVE
-- [x] **Issue #141**: Task 4.33: Recursive Tabular Indentation for TOON Parser. (Implemented as Relational Handle Mapping)
-- [x] **Issue #138**: Task 4.32: Implement Full RFC-2378 Query Logic in WASM Core.
+- [x] **Issue #141**: Task 4.33: Recursive Tabular Indentation for TOON Parser. (Implemented as Relational Handle Mapping) [ECT: 3 | ACT: 2]
+- [x] **Issue #138**: Task 4.32: Implement Full RFC-2378 Query Logic in WASM Core. [ECT: 3 | ACT: 3]
 - [ ] **Issue #148**: Debt: Implement \`PharosMetadata::builder()\` pattern. [ECT: 2]
 - [ ] **Issue #187**: [DEBT] Investigate and Resolve CI Build Warnings. [ECT: 2]
 - [ ] **Issue #139**: Debt #139: Enhanced TOON Diagnostics (Blocked by #141). [ECT: 2]
