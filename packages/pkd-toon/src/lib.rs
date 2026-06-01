@@ -45,9 +45,21 @@ pub enum ToonError {
 
 #[wasm_bindgen]
 pub fn parse_toon(input: &str) -> Result<JsValue, JsError> {
-    let doc = ToonParser::parse(input).map_err(|e| JsError::new(&e.to_string()))?;
-    let serializer = serde_wasm_bindgen::Serializer::new().serialize_maps_as_objects(true);
-    Ok(doc.serialize(&serializer)?)
+    // Rationale: See PR #188 (Relational Handle Mapping)
+    use std::panic::catch_unwind;
+    let input_safe = input.to_string();
+    let result = catch_unwind(move || {
+        ToonParser::parse(&input_safe)
+    });
+
+    match result {
+        Ok(Ok(doc)) => {
+            let serializer = serde_wasm_bindgen::Serializer::new().serialize_maps_as_objects(true);
+            Ok(doc.serialize(&serializer)?)
+        }
+        Ok(Err(e)) => Err(JsError::new(&e.to_string())),
+        Err(_) => Err(JsError::new("Panic in pkd-toon parser (Isolation Sentinel triggered)")),
+    }
 }
 
 struct ToonParser;

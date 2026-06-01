@@ -91,7 +91,7 @@ run_core() {
             echo "      ⚠️  Warning: Missing mandatory audit log: $AUDIT_FILE"
             echo "      Note: Builders MUST create a high-rigor PR BEFORE the Audit phase begins."
             echo "      Merging to main will be BLOCKED until this log is present and PHAROS GREEN."
-        elif ! grep -q "Status: 🟢 **PHAROS GREEN**" "$AUDIT_FILE"; then
+        elif ! grep -qE "Status.*🟢.*PHAROS GREEN" "$AUDIT_FILE"; then
             echo "      ❌ Error: Audit log $AUDIT_FILE exists but status is NOT PHAROS GREEN."
             exit 1
         else

@@ -60,6 +60,7 @@ pub struct RegistryShard {
 impl PharosMetadata {
     /// Rationale: Provides a fluent API for constructing complex metadata objects
     /// while ensuring all mandatory fields are present.
+    /// See PR #190 (PharosMetadata Builder Pattern)
     pub fn builder() -> PharosMetadataBuilder {
         PharosMetadataBuilder::default()
     }
