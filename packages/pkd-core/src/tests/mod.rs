@@ -9,6 +9,7 @@
  * ======================================================================== */
 
 pub mod deserialization;
+pub mod query_integration;
 
 #[cfg(not(target_arch = "wasm32"))]
 pub mod jit_actor;
