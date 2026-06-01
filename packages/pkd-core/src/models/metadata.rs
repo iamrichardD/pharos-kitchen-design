@@ -131,11 +131,19 @@ impl PharosMetadataBuilder {
     /// Rationale: Validates that all mandatory fields are set before instantiating PharosMetadata.
     /// This prevents "failing slowly" by detecting missing configuration at the seam.
     pub fn build(self) -> Result<PharosMetadata, String> {
-        let metadata_id = self.metadata_id.ok_or_else(|| "metadata_id is required".to_string())?;
+        let metadata_id = self
+            .metadata_id
+            .ok_or_else(|| "metadata_id is required".to_string())?;
         let name = self.name.ok_or_else(|| "name is required".to_string())?;
-        let schema_version = self.schema_version.ok_or_else(|| "schema_version is required".to_string())?;
-        let classification = self.classification.ok_or_else(|| "classification is required".to_string())?;
-        let performance_metadata = self.performance_metadata.ok_or_else(|| "performance_metadata is required".to_string())?;
+        let schema_version = self
+            .schema_version
+            .ok_or_else(|| "schema_version is required".to_string())?;
+        let classification = self
+            .classification
+            .ok_or_else(|| "classification is required".to_string())?;
+        let performance_metadata = self
+            .performance_metadata
+            .ok_or_else(|| "performance_metadata is required".to_string())?;
 
         Ok(PharosMetadata {
             metadata_id,
