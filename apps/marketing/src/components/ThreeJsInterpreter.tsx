@@ -48,7 +48,7 @@ const OperationMesh: React.FC<{ op: GeometryOperation }> = ({ op }) => {
             position={position}
         >
             <boxGeometry args={[width, height, depth]} />
-            <meshStandardMaterial {...materialParams} />
+            <meshStandardMaterial {...(materialParams as any)} />
             <Edges 
                 scale={1.0}
                 threshold={15}
@@ -85,7 +85,7 @@ export const ThreeJsInterpreter: React.FC<Props> = ({ manifest, height = '400px'
                 <div style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>⚠️</div>
                 <div style={{ fontWeight: 'bold' }}>[ INVALID_GEOMETRY_MANIFEST ]</div>
                 <div style={{ fontSize: '10px', marginTop: '0.5rem', opacity: 0.7 }}>
-                    {validationResult.error.errors[0].message} at {validationResult.error.errors[0].path.join('.')}
+                    {validationResult.error.errors[0]?.message} at {validationResult.error.errors[0]?.path.join('.')}
                 </div>
             </div>
         );
@@ -135,7 +135,7 @@ export const ThreeJsInterpreter: React.FC<Props> = ({ manifest, height = '400px'
                     >
                         <Bounds fit observe margin={1.2}>
                             <group>
-                                {validatedManifest.operations.map(op => (
+                                {validatedManifest.operations.map((op: GeometryOperation) => (
                                     <OperationMesh key={op.id} op={op} />
                                 ))}
                             </group>

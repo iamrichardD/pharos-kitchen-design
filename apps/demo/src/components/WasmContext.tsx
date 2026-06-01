@@ -8,7 +8,7 @@
  * Traceability: Issue #137
  * ======================================================================== */
 
-import React, { createContext, useContext, useEffect, ReactNode, useState } from 'react';
+import React, { createContext, useContext, useEffect, type ReactNode } from 'react';
 import { useStore } from '@nanostores/react';
 import { $wasmStore, initializeWasm, type WasmStatus } from '../utils/wasmStore';
 

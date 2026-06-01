@@ -18,6 +18,7 @@
     <RootNamespace>Pkd.RevitBridge</RootNamespace>
     <AssemblyName>Pkd.RevitBridge</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net8.0-windows'">

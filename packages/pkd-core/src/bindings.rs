@@ -25,7 +25,9 @@ use std::future::Future;
 use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::path::Path;
 use std::pin::Pin;
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::atomic::AtomicU64;
+#[cfg(any(test, not(target_arch = "wasm32")))]
+use std::sync::atomic::Ordering;
 use std::sync::{Arc, Mutex};
 use wasm_bindgen::prelude::*;
 
