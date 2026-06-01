@@ -6,4 +6,9 @@ export default defineConfig({
   integrations: [react()],
   base: '/pharos-kitchen-design/demo',
   output: 'static',
+  vite: {
+    build: {
+      chunkSizeWarningLimit: 1000,
+    },
+  },
 });

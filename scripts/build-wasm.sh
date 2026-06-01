@@ -48,12 +48,12 @@ if ! command -v wasm-pack &> /dev/null; then
 fi
 
 echo "🦀 Building PKD WASM Core..."
-wasm-pack build packages/pkd-core --target web
+RUSTFLAGS="-D warnings" wasm-pack build packages/pkd-core --target web
 # Fix package name for @pkd scope
 sed -i 's/"name": "pkd-core"/"name": "@pkd\/core"/' packages/pkd-core/pkg/package.json
 
 echo "🏷️ Building PKD TOON Parser (WASM)..."
-wasm-pack build packages/pkd-toon --target web
+RUSTFLAGS="-D warnings" wasm-pack build packages/pkd-toon --target web
 # Fix package name for @pkd scope
 sed -i 's/"name": "pkd-toon"/"name": "@pkd\/toon"/' packages/pkd-toon/pkg/package.json
 
@@ -71,7 +71,7 @@ for dialect in packages/dialects/*; do
         
         # We use cargo build --target wasm32-unknown-unknown --release
         # as these are Extism plugins, not standard wasm-pack packages.
-        (cd "$dialect" && cargo build --target wasm32-unknown-unknown --release)
+        (cd "$dialect" && RUSTFLAGS="-D warnings" cargo build --target wasm32-unknown-unknown --release)
         
         # Stage the artifact
         # Handle both workspace (target at root) and independent (target in dialect)

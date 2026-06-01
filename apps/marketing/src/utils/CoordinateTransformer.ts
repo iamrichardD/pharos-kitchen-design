@@ -9,7 +9,7 @@
  * Traceability: Issue #122, ADR 0025 (Chirality & Origin)
  * ======================================================================== */
 
-import { Coordinate } from '@pkd/protocol';
+import type { Coordinate } from '@pkd/protocol';
 
 /**
  * CoordinateTransformer handles the mapping of 3D points between systems.

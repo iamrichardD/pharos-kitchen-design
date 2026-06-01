@@ -259,6 +259,7 @@ namespace Pkd.RevitBridge.Tests
 
                 // 1. Verify base state
                 ValidationResponse baseMeta = _bridge.GetGhostMetadata(registry, id);
+                Assert.True(baseMeta.Data.HasValue, "Base metadata should have data");
                 Assert.False(baseMeta.Data.Value.GetProperty("parameters").TryGetProperty("PKD_WIDTH", out _));
 
                 // 2. Apply Sync (Ghost Tuning)
@@ -267,6 +268,7 @@ namespace Pkd.RevitBridge.Tests
 
                 // 3. Verify applied delta
                 ValidationResponse updatedMeta = _bridge.GetGhostMetadata(registry, id);
+                Assert.True(updatedMeta.Data.HasValue, "Updated metadata should have data");
                 Assert.True(updatedMeta.Data.Value.GetProperty("parameters").TryGetProperty("PKD_WIDTH", out JsonElement width));
                 Assert.Equal(55.0, width.GetDouble());
             }

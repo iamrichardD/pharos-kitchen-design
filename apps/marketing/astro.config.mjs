@@ -19,4 +19,9 @@ export default defineConfig({
   publicDir: './public',
   output: 'static',
   integrations: [tailwind(), react()],
+  vite: {
+    build: {
+      chunkSizeWarningLimit: 1000,
+    },
+  },
 });

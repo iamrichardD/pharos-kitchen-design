@@ -242,13 +242,20 @@ tasks[2]{id, title, status}:
     }
 
     #[test]
-    fn test_should_parse_manifesto_from_filesystem() {
-        let content = std::fs::read_to_string(
-            "../../apps/marketing/src/content/updates/2026-05-28-project-genesis.toon",
-        )
-        .unwrap();
-        let result = ToonParser::parse(&content);
-        assert!(result.is_ok(), "Manifesto Parse Error: {:?}", result.err());
+    fn test_should_parse_toon_content_when_valid_fixture_provided() {
+        let content = r#"
+# Project: Pharos Kitchen Design (Test Fixture)
+# Purpose: Atomic verification of the TOON parser.
+
+tasks[0]{id, title, status}:
+- task_001 | Implement Atomic Tests | COMPLETED
+- task_002 | Decouple Production Data | IN_PROGRESS
+"#;
+        let result = ToonParser::parse(content);
+        assert!(result.is_ok(), "TOON Parse Error: {:?}", result.err());
+        let updates = result.unwrap();
+        assert_eq!(updates.len(), 2, "Should have parsed 2 tasks from fixture");
+        assert_eq!(updates[0].id, "task_001");
     }
 
     #[test]
