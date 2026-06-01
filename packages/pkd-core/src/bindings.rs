@@ -12,13 +12,13 @@ use crate::lazy_loader::{LazyShardLoader, ShardFetcher};
 use crate::models::metadata::PharosMetadata;
 #[cfg(any(test, not(target_arch = "wasm32")))]
 use crate::models::metadata::RegistryShard;
+use crate::models::query::{filter_metadata, results_to_toon_json, QueryEvaluator};
 use crate::models::schema::PharosSchema;
 use crate::models::types::ParameterValue;
 use crate::validator::{LodValidator, SchemaValidator, ValidationError};
 use dashmap::DashMap;
-use serde::{Deserialize, Serialize};
-use crate::models::query::{filter_metadata, results_to_toon_json, QueryEvaluator};
 use pharos_protocol::Command;
+use serde::{Deserialize, Serialize};
 use serde_wasm_bindgen;
 use std::collections::{BTreeMap, HashMap, VecDeque};
 use std::future::Future;

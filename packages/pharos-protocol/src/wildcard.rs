@@ -87,8 +87,14 @@ pub fn wildcard_match(text: &str, pattern: &str) -> Result<bool, WardenError> {
 /// Ph delimiters: space, tab, newline, comma, semicolon, and colon.
 pub fn ph_match(text: &str, pattern: &str) -> Result<bool, WardenError> {
     let delimiters = [' ', '\t', '\n', '\r', ',', ';', ':'];
-    let text_words: Vec<&str> = text.split(|c| delimiters.contains(&c)).filter(|s| !s.is_empty()).collect();
-    let pattern_words: Vec<&str> = pattern.split(|c| delimiters.contains(&c)).filter(|s| !s.is_empty()).collect();
+    let text_words: Vec<&str> = text
+        .split(|c| delimiters.contains(&c))
+        .filter(|s| !s.is_empty())
+        .collect();
+    let pattern_words: Vec<&str> = pattern
+        .split(|c| delimiters.contains(&c))
+        .filter(|s| !s.is_empty())
+        .collect();
 
     if pattern_words.is_empty() {
         return Ok(true);

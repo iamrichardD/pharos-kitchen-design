@@ -26,8 +26,14 @@ impl QueryEvaluator for SelectionFilter {
                     let value = match field.as_str() {
                         "name" => Some(metadata.name.clone()),
                         "id" | "metadata_id" => Some(metadata.metadata_id.clone()),
-                        "manufacturer" => metadata.parameters.get("PKD_Manufacturer").map(|v| v.to_string()),
-                        "model" => metadata.parameters.get("PKD_ModelNumber").map(|v| v.to_string()),
+                        "manufacturer" => metadata
+                            .parameters
+                            .get("PKD_Manufacturer")
+                            .map(|v| v.to_string()),
+                        "model" => metadata
+                            .parameters
+                            .get("PKD_ModelNumber")
+                            .map(|v| v.to_string()),
                         "category" => Some(metadata.classification.category.clone()),
                         _ => metadata.parameters.get(field).map(|v| v.to_string()),
                     };
@@ -40,11 +46,19 @@ impl QueryEvaluator for SelectionFilter {
                 } else {
                     // Attribute-less search: match against common fields
                     // RFC 2378 doesn't strictly define this, but Pharos defaults to name/mfr/model
-                    let fields_to_check = vec![
+                    let fields_to_check = [
                         metadata.name.clone(),
                         metadata.metadata_id.clone(),
-                        metadata.parameters.get("PKD_Manufacturer").map(|v| v.to_string()).unwrap_or_default(),
-                        metadata.parameters.get("PKD_ModelNumber").map(|v| v.to_string()).unwrap_or_default(),
+                        metadata
+                            .parameters
+                            .get("PKD_Manufacturer")
+                            .map(|v| v.to_string())
+                            .unwrap_or_default(),
+                        metadata
+                            .parameters
+                            .get("PKD_ModelNumber")
+                            .map(|v| v.to_string())
+                            .unwrap_or_default(),
                     ];
 
                     fields_to_check.iter().any(|val| {
@@ -52,12 +66,8 @@ impl QueryEvaluator for SelectionFilter {
                     })
                 }
             }
-            SelectionFilter::And(filters) => {
-                filters.iter().all(|f| f.matches(metadata))
-            }
-            SelectionFilter::Or(filters) => {
-                filters.iter().any(|f| f.matches(metadata))
-            }
+            SelectionFilter::And(filters) => filters.iter().all(|f| f.matches(metadata)),
+            SelectionFilter::Or(filters) => filters.iter().any(|f| f.matches(metadata)),
         }
     }
 }
@@ -66,7 +76,13 @@ impl QueryEvaluator for SelectionFilter {
 /// Why: Reduces data egress for UI-only previews and enforces schema-based selection.
 pub fn filter_metadata(metadata: &PharosMetadata, returns: &[String]) -> serde_json::Value {
     let effective_returns = if returns.is_empty() {
-        vec!["metadata_id".to_string(), "name".to_string(), "manufacturer".to_string(), "model".to_string(), "category".to_string()]
+        vec![
+            "metadata_id".to_string(),
+            "name".to_string(),
+            "manufacturer".to_string(),
+            "model".to_string(),
+            "category".to_string(),
+        ]
     } else {
         returns.to_vec()
     };
@@ -76,20 +92,24 @@ pub fn filter_metadata(metadata: &PharosMetadata, returns: &[String]) -> serde_j
         let value = match field.as_str() {
             "name" => Some(serde_json::Value::String(metadata.name.clone())),
             "id" | "metadata_id" => Some(serde_json::Value::String(metadata.metadata_id.clone())),
-            "category" => Some(serde_json::Value::String(metadata.classification.category.clone())),
-            "manufacturer" => metadata.parameters.get("PKD_Manufacturer").map(|v| {
-                match v {
+            "category" => Some(serde_json::Value::String(
+                metadata.classification.category.clone(),
+            )),
+            "manufacturer" => metadata
+                .parameters
+                .get("PKD_Manufacturer")
+                .map(|v| match v {
                     ParameterValue::Text(s) => serde_json::Value::String(s.clone()),
                     _ => serde_json::to_value(v).unwrap(),
-                }
+                }),
+            "model" => metadata.parameters.get("PKD_ModelNumber").map(|v| match v {
+                ParameterValue::Text(s) => serde_json::Value::String(s.clone()),
+                _ => serde_json::to_value(v).unwrap(),
             }),
-            "model" => metadata.parameters.get("PKD_ModelNumber").map(|v| {
-                match v {
-                    ParameterValue::Text(s) => serde_json::Value::String(s.clone()),
-                    _ => serde_json::to_value(v).unwrap(),
-                }
-            }),
-            _ => metadata.parameters.get(&field).map(|v| serde_json::to_value(v).unwrap()),
+            _ => metadata
+                .parameters
+                .get(&field)
+                .map(|v| serde_json::to_value(v).unwrap()),
         };
 
         if let Some(val) = value {
@@ -102,12 +122,21 @@ pub fn filter_metadata(metadata: &PharosMetadata, returns: &[String]) -> serde_j
 
 /// Formats search results as a ToonDoc-compatible JSON structure.
 /// Why: Enables seamless integration with the TOON parser and UI loader.
-pub fn results_to_toon_json(results: Vec<serde_json::Value>, returns: &[String]) -> serde_json::Value {
+pub fn results_to_toon_json(
+    results: Vec<serde_json::Value>,
+    returns: &[String],
+) -> serde_json::Value {
     let mut lists = serde_json::Map::new();
 
     let schema = if returns.is_empty() {
         // Default schema if none provided
-        vec!["metadata_id".to_string(), "name".to_string(), "manufacturer".to_string(), "model".to_string(), "category".to_string()]
+        vec![
+            "metadata_id".to_string(),
+            "name".to_string(),
+            "manufacturer".to_string(),
+            "model".to_string(),
+            "category".to_string(),
+        ]
     } else {
         returns.to_vec()
     };
@@ -117,7 +146,10 @@ pub fn results_to_toon_json(results: Vec<serde_json::Value>, returns: &[String])
         let mut row = Vec::new();
         if let serde_json::Value::Object(map) = res {
             for field in &schema {
-                let val = map.get(field).cloned().unwrap_or(serde_json::Value::String("".to_string()));
+                let val = map
+                    .get(field)
+                    .cloned()
+                    .unwrap_or(serde_json::Value::String("".to_string()));
                 // TOON expects raw strings in its items lists
                 let val_str = match val {
                     serde_json::Value::String(s) => s,
@@ -133,10 +165,16 @@ pub fn results_to_toon_json(results: Vec<serde_json::Value>, returns: &[String])
     results_list.insert("schema".to_string(), serde_json::to_value(&schema).unwrap());
     results_list.insert("items".to_string(), serde_json::to_value(&items).unwrap());
 
-    lists.insert("results".to_string(), serde_json::Value::Object(results_list));
+    lists.insert(
+        "results".to_string(),
+        serde_json::Value::Object(results_list),
+    );
 
     let mut doc = serde_json::Map::new();
-    doc.insert("metadata".to_string(), serde_json::Value::Object(serde_json::Map::new()));
+    doc.insert(
+        "metadata".to_string(),
+        serde_json::Value::Object(serde_json::Map::new()),
+    );
     doc.insert("lists".to_string(), serde_json::Value::Object(lists));
 
     serde_json::Value::Object(doc)
