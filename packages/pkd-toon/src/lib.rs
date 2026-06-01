@@ -243,7 +243,10 @@ tasks[2]{id, title, status}:
 
     #[test]
     fn test_should_parse_manifesto_from_filesystem() {
-        let content = std::fs::read_to_string("../../apps/marketing/src/content/updates/2026-05-28-project-genesis.toon").unwrap();
+        let content = std::fs::read_to_string(
+            "../../apps/marketing/src/content/updates/2026-05-28-project-genesis.toon",
+        )
+        .unwrap();
         let result = ToonParser::parse(&content);
         assert!(result.is_ok(), "Manifesto Parse Error: {:?}", result.err());
     }

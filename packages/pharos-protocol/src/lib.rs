@@ -20,4 +20,4 @@ pub use ast::Command;
 pub use lexer::tokenize;
 pub use metadata::{ParameterValue, PharosMetadataBuffer};
 pub use parser::{parse_command, ProtocolError};
-pub use wildcard::wildcard_match;
+pub use wildcard::{ph_match, wildcard_match};

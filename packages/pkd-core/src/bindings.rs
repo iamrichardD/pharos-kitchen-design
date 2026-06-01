@@ -12,10 +12,12 @@ use crate::lazy_loader::{LazyShardLoader, ShardFetcher};
 use crate::models::metadata::PharosMetadata;
 #[cfg(any(test, not(target_arch = "wasm32")))]
 use crate::models::metadata::RegistryShard;
+use crate::models::query::{filter_metadata, results_to_toon_json, QueryEvaluator};
 use crate::models::schema::PharosSchema;
 use crate::models::types::ParameterValue;
 use crate::validator::{LodValidator, SchemaValidator, ValidationError};
 use dashmap::DashMap;
+use pharos_protocol::Command;
 use serde::{Deserialize, Serialize};
 use serde_wasm_bindgen;
 use std::collections::{BTreeMap, HashMap, VecDeque};
@@ -126,6 +128,38 @@ impl PharosRegistryHandle {
             .filter(|entry| entry.key().contains(&pattern))
             .map(|entry| entry.key().clone())
             .collect()
+    }
+
+    /// Executes an RFC 2378 query against the registry.
+    /// Why: Centralizes the search logic in the WASM core for cross-platform parity.
+    pub fn query_wasm(&self, query_string: String) -> Result<JsValue, JsValue> {
+        match self.query_internal(query_string) {
+            Ok(json) => Ok(serde_wasm_bindgen::to_value(&json).unwrap()),
+            Err(e) => Err(JsValue::from_str(&e)),
+        }
+    }
+}
+
+impl PharosRegistryHandle {
+    pub fn query_internal(&self, query_string: String) -> Result<serde_json::Value, String> {
+        let cmd = pharos_protocol::parse_command(&query_string).map_err(|e| e.to_string())?;
+
+        if let Command::Query {
+            selections,
+            returns,
+        } = cmd
+        {
+            let results: Vec<serde_json::Value> = self
+                .cache
+                .iter()
+                .filter(|entry| selections.matches(entry.value()))
+                .map(|entry| filter_metadata(entry.value(), &returns))
+                .collect();
+
+            Ok(results_to_toon_json(results, &returns))
+        } else {
+            Err("Only 'query' commands are supported".to_string())
+        }
     }
 
     #[cfg(any(test, not(target_arch = "wasm32")))]

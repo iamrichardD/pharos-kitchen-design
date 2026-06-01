@@ -81,6 +81,42 @@ pub fn wildcard_match(text: &str, pattern: &str) -> Result<bool, WardenError> {
     match_internal(&text_chars, &pattern_chars, &mut warden)
 }
 
+/// Matches a string against a pattern using RFC 2378 word-by-word matching.
+///
+/// Both the text and the pattern are broken into words using the standard
+/// Ph delimiters: space, tab, newline, comma, semicolon, and colon.
+pub fn ph_match(text: &str, pattern: &str) -> Result<bool, WardenError> {
+    let delimiters = [' ', '\t', '\n', '\r', ',', ';', ':'];
+    let text_words: Vec<&str> = text
+        .split(|c| delimiters.contains(&c))
+        .filter(|s| !s.is_empty())
+        .collect();
+    let pattern_words: Vec<&str> = pattern
+        .split(|c| delimiters.contains(&c))
+        .filter(|s| !s.is_empty())
+        .collect();
+
+    if pattern_words.is_empty() {
+        return Ok(true);
+    }
+
+    // Every word in the pattern must match at least one word in the text.
+    for p_word in pattern_words {
+        let mut matched = false;
+        for t_word in &text_words {
+            if wildcard_match(t_word, p_word)? {
+                matched = true;
+                break;
+            }
+        }
+        if !matched {
+            return Ok(false);
+        }
+    }
+
+    Ok(true)
+}
+
 fn match_internal(
     text: &[char],
     pattern: &[char],
@@ -174,6 +210,15 @@ mod tests {
         assert!(wildcard_match("tank", "t[ao]nk").unwrap());
         assert!(wildcard_match("tonk", "t[ao]nk").unwrap());
         assert!(!wildcard_match("tenk", "t[ao]nk").unwrap());
+    }
+
+    #[test]
+    fn test_should_match_word_by_word_ph_style() {
+        assert!(ph_match("Hobart Vulcan", "Hobart").unwrap());
+        assert!(ph_match("Hobart Vulcan", "Vulcan").unwrap());
+        assert!(ph_match("Hobart Vulcan", "Ho*").unwrap());
+        assert!(ph_match("Hobart Vulcan", "Hobart Vulcan").unwrap());
+        assert!(!ph_match("Hobart Vulcan", "Hobart dishwasher").unwrap());
     }
 
     #[test]
