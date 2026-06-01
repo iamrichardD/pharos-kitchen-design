@@ -17,8 +17,8 @@
  * 5. ATOMICITY: Focus on one Phase/Task at a time. Do not "scatter" progress across unrelated silos.
  -->
 
-### Sprint 5.01: Core Parser & Remediation (2026-06-01) - 🚀 PLANNED
-- [ ] **Issue #141**: Task 4.33: Recursive Tabular Indentation for TOON Parser. [ECT: 3]
+### Sprint 5.01: Core Parser & Remediation (2026-06-01) - 🚀 ACTIVE
+- [x] **Issue #141**: Task 4.33: Recursive Tabular Indentation for TOON Parser. (Implemented as Relational Handle Mapping)
 - [ ] **Issue #138**: Task 4.32: Implement Full RFC-2378 Query Logic in WASM Core. [ECT: 3]
 - [ ] **Issue #148**: Debt: Implement \`PharosMetadata::builder()\` pattern. [ECT: 2]
 - [ ] **Issue #187**: [DEBT] Investigate and Resolve CI Build Warnings. [ECT: 2]

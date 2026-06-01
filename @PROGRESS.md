@@ -29,6 +29,16 @@
 - [x] **Issue #168**: Implemented Automated Boundary Enforcement (ADR-0044) and drift detection.
 - **Verification**: 🟢 PHAROS GREEN confirmed across all monorepo slices.
 
+### Sprint 5.01: Core Parser & Remediation (2026-06-01) - 🚀 ACTIVE
+- [x] **Issue #141**: Implemented Relational Handle Mapping for the TOON Parser (Option C).
+    - Maintained O(n) linear parsing velocity by shifting resolution to consumers.
+    - Added TDD coverage for namespaced handles and metadata cross-references.
+    - Verified 🟢 PHAROS GREEN in Podman.
+- [ ] **Issue #138**: Task 4.32: Implement Full RFC-2378 Query Logic in WASM Core. [Strategy Phase]
+- [ ] **Issue #148**: Debt: Implement `PharosMetadata::builder()` pattern.
+- [ ] **Issue #187**: [DEBT] Investigate and Resolve CI Build Warnings.
+- [ ] **Issue #139**: Debt #139: Enhanced TOON Diagnostics (Blocked by #141).
+
 ---
 
 ## ✅ Completed Sprints
