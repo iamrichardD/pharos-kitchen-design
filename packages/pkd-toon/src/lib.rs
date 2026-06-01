@@ -243,8 +243,56 @@ tasks[2]{id, title, status}:
 
     #[test]
     fn test_should_parse_manifesto_from_filesystem() {
-        let content = std::fs::read_to_string("../../apps/marketing/src/content/updates/2026-05-28-manifesto.toon").unwrap();
+        let content = std::fs::read_to_string("../../apps/marketing/src/content/updates/2026-05-28-project-genesis.toon").unwrap();
         let result = ToonParser::parse(&content);
         assert!(result.is_ok(), "Manifesto Parse Error: {:?}", result.err());
+    }
+
+    #[test]
+    fn test_should_support_relational_handles_when_given_linked_lists() {
+        let input = r#"
+# Parent List
+parent[1]{id, name}:
+  @p1, Parent One
+
+# Child List linking to parent via handle
+child[2]{id, parent_handle, note}:
+  c1, @p1, First child
+  c2, @p1, Second child
+"#;
+        let doc = ToonParser::parse(input).expect("Failed to parse linked lists");
+        
+        let parent = doc.lists.get("parent").unwrap();
+        assert_eq!(parent.items[0][0], "@p1");
+
+        let child = doc.lists.get("child").unwrap();
+        assert_eq!(child.items[0][1], "@p1");
+        assert_eq!(child.items[1][1], "@p1");
+    }
+
+    #[test]
+    fn test_should_support_complex_handle_syntax_when_given_namespaced_links() {
+        let input = r#"
+components[1]{id, type}:
+  @comp:fryer_01, Fryer
+
+sensors[1]{id, target}:
+  @sens:temp_01, @comp:fryer_01
+"#;
+        let doc = ToonParser::parse(input).expect("Failed to parse complex handles");
+        
+        let components = doc.lists.get("components").unwrap();
+        assert_eq!(components.items[0][0], "@comp:fryer_01");
+
+        let sensors = doc.lists.get("sensors").unwrap();
+        assert_eq!(sensors.items[0][1], "@comp:fryer_01");
+    }
+
+    #[test]
+    fn test_should_support_handles_in_metadata_when_given_namespaced_values() {
+        let input = "master_link: @system:root\nsub_link: @comp:fryer_01";
+        let doc = ToonParser::parse(input).expect("Failed to parse metadata handles");
+        assert_eq!(doc.metadata.get("master_link").unwrap(), "@system:root");
+        assert_eq!(doc.metadata.get("sub_link").unwrap(), "@comp:fryer_01");
     }
 }
