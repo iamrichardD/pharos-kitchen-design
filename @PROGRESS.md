@@ -34,7 +34,11 @@
     - Maintained O(n) linear parsing velocity by shifting resolution to consumers.
     - Added TDD coverage for namespaced handles and metadata cross-references.
     - Verified 🟢 PHAROS GREEN in Podman.
-- [ ] **Issue #138**: Task 4.32: Implement Full RFC-2378 Query Logic in WASM Core. [Strategy Phase]
+- [x] **Issue #138**: Implemented full RFC-2378 Query Logic and Wildcard Engine (Option B).
+    - Support for Ph-standard word-by-word matching and advanced wildcards (*, +, ?, []).
+    - Implemented `return` clauses for field projection and reduced data egress.
+    - Enforced **Temporal Warden** (100ms sentinel) for ReDoS immunity.
+    - Verified 🟢 PHAROS GREEN with 33 integration tests in Podman.
 - [ ] **Issue #148**: Debt: Implement `PharosMetadata::builder()` pattern.
 - [ ] **Issue #187**: [DEBT] Investigate and Resolve CI Build Warnings.
 - [ ] **Issue #139**: Debt #139: Enhanced TOON Diagnostics (Blocked by #141).
