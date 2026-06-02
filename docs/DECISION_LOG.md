@@ -52,6 +52,9 @@ This log provides an index of the technical and architectural decisions made for
 | **[ADR-0046]** | 2026-05-27 | Approved | [High-Rigor Shard Logging & Conflict Prevention](docs/adr/0046-task-specific-shard-logging.md) |
 | **[ADR-0047]** | 2026-05-29 | Approved | [Immutable Content Metadata Standard](docs/adr/0047-immutable-content-metadata-standard.md) |
 | **[ADR-0048]** | 2026-06-02 | Approved | [Human-Centric Communication Standard](docs/adr/0048-human-centric-communication-standard.md) |
+| **[ADR-0049]** | 2026-06-02 | Approved | [Sovereign Identity Migration (D1-First)](docs/adr/0049-sovereign-identity-migration.md) |
+| **[ADR-0050]** | 2026-06-02 | Approved | [Passkey-First Authentication Strategy](docs/adr/0050-passkey-first-authentication-strategy.md) |
+| **[ADR-0051]** | 2026-06-02 | Approved | [Authoritative Map Synchronization](docs/adr/0051-authoritative-map-synchronization.md) |
 
 ---
 *To add a new decision, create a new file in `docs/adr/` following the established template and append it to this index.*
