@@ -51,6 +51,7 @@ This log provides an index of the technical and architectural decisions made for
 | **[ADR-0045]** | 2026-05-29 | Approved | [Continuous Supply Chain Verification](docs/adr/0045-continuous-supply-chain-verification.md) |
 | **[ADR-0046]** | 2026-05-27 | Approved | [High-Rigor Shard Logging & Conflict Prevention](docs/adr/0046-task-specific-shard-logging.md) |
 | **[ADR-0047]** | 2026-05-29 | Approved | [Immutable Content Metadata Standard](docs/adr/0047-immutable-content-metadata-standard.md) |
+| **[ADR-0048]** | 2026-06-02 | Approved | [Human-Centric Communication Standard](docs/adr/0048-human-centric-communication-standard.md) |
 
 ---
 *To add a new decision, create a new file in `docs/adr/` following the established template and append it to this index.*
