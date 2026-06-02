@@ -12,39 +12,44 @@
 # ADR 0027: Organization-Based Authority Scopes
 
 ## Context
-As Pharos Kitchen Design (Project Prism) transitions from a flat role-based access control (RBAC) model to a high-rigor distribution platform, we must address the complex relationships between Manufacturers (OEMs), Manufacturers' Representatives, and Independent Kitchen Designers (IKDs). 
+As Pharos Kitchen Design (Project Prism) transitions from a flat role-based access control (RBAC) model to a high-rigor distribution platform, we must address the complex relationships between Manufacturers (OEMs), Representatives, and Independent Kitchen Designers (IKDs). 
 
-Legacy systems suffer from "All or Nothing" access or fragmented portals. Pharos requires a unified identity layer that supports "Organization-Based" authority, ensuring that specific metadata, maintenance tools, and "Dialects" (WASM) are only delivered to verified stakeholders without compromising the platform's openness for IKD search.
+Legacy systems usually give you "everything or nothing." This doesn't work for us. Pharos needs a unified identity layer that understands "Organization-Based" authority. We need to know who owns what, who can update a Hobart dishwasher's metadata, and how we deliver proprietary diagnostic tools (Dialects) without leaking them to the whole world.
 
 ## Decision
-We will implement an Organization-centric security model within the AWS Cognito Identity Bridge, utilizing custom claims to scope authority.
+We're implementing an Organization-centric security model within the AWS Cognito Identity Bridge. We'll use custom JWT claims to scope authority and define "Logical Authority" over registry shards.
 
 1.  **Identity Attribution (Cognito Custom Claims)**:
-    - **`custom:organization`**: The canonical identifier for the stakeholder entity (e.g., `FRYMASTER`, `VULCAN`, `S_AND_S_REPS`).
-    - **`custom:scope`**: A comma-separated list of authorized namespaces or manufacturers (e.g., `frymaster.*, oem.maintenance`).
-    - **`custom:role`**: Remains the primary RBAC gate (IKD, OEM, ADMIN, etc.).
+    - **`custom:organization`**: The unique ID for the entity (e.g., `HOBART`, `VULCAN`, `S_AND_S_REPS`).
+    - **`custom:scope`**: A list of authorized namespaces or manufacturers (e.g., `hobart.*, oem.maintenance`).
+    - **`custom:role`**: The primary gate (IKD, OEM, ADMIN).
 
-2.  **The "Claim & Delegate" Strategy**:
-    - **Claim**: A Manufacturer verifies ownership of a domain (e.g., `@welbilt.com`) to automatically map users to their Organization.
-    - **Delegate**: Organizations can grant specific `custom:scope` entitlements to external users (e.g., a Rep Agency) through the Pharos Admin Control Plane.
+2.  **The "Logical Authority" for Registry Shards**:
+    - Every equipment shard in the Pharos Registry (e.g., `registry/hobart/lxih.json`) is bound to an organization.
+    - **Write Access**: To push an update to a Hobart shard, the user's `custom:organization` MUST match `HOBART`, or their `custom:scope` must explicitly allow `hobart.write`.
+    - **IKD Sanctuary**: IKDs have read-access to all public shards but cannot modify manufacturer-certified data. They can, however, "fork" data into their own organizational namespace for private project variations.
 
-3.  **Domain-to-Org Mapping Logic**:
-    - The Auth Bridge will maintain a mapping table (Cloudflare D1) between email domains and Organizations.
-    - Post-authentication, the Bridge triggers a Cognito Lambda to inject the `custom:organization` claim based on this mapping.
+3.  **The "Claim & Delegate" Strategy**:
+    - **Claim**: A Manufacturer verifies their domain (e.g., `@itwfoodequipment.com`) to automatically map users to their Organization.
+    - **Delegate**: Manufacturers can grant specific `custom:scope` entitlements to external partners (like a Rep Agency) through the Pharos Admin Control Plane. This allows a Rep to update data on behalf of the manufacturer without needing a corporate email address.
 
-4.  **Authority Hierarchy (Scoping)**:
-    - **`OWNER`**: Administrative control over the Organization's metadata and delegated scopes.
+4.  **Domain-to-Org Mapping Logic**:
+    - The Auth Bridge manages a mapping table in Cloudflare D1.
+    - When you log in, a Cognito Lambda trigger checks your email domain and injects the `custom:organization` claim.
+
+5.  **Authority Hierarchy (Scoping)**:
+    - **`OWNER`**: Total control over the Org's metadata, delegated scopes, and registry shards.
     - **`STAFF`**: Internal access to pre-release dialects and forensic data.
-    - **`PARTNER`**: External access to specific maintenance sidecars (Pulse-delivered).
+    - **`PARTNER`**: External access to specific maintenance sidecars or limited write scopes.
 
-5.  **Pulse Protocol Integration**:
-    - The `pkd core pulse` command will inspect the JWT's `custom:scope` and `custom:organization` claims.
-    - Only binaries and WASM dialects matching these scopes will be synchronized to the user's local XDG cache.
+6.  **Pulse Protocol Integration**:
+    - The `pkd core pulse` command checks your JWT. It only downloads binaries and WASM dialects that match your `custom:scope` or `custom:organization`. This keeps the "Maintenance Dialects" secure and focused.
 
 ## Rationale
-- **IP Protection**: Maintenance tools often contain proprietary diagnostic logic. Organization-based scoping ensures these "Sidecars" are never leaked to the general public registry.
-- **Administrative Sharding**: Reduces the "Global Admin" burden by allowing manufacturers to manage their own delegates and partner scopes.
-- **Zero-Trust Distribution**: Every module delivered by the Pulse protocol is validated against a cryptographic claim in the user's identity token.
+- **IP Protection**: Maintenance tools are sensitive. We shouldn't leak them. Scoping ensures they stay where they belong.
+- **Data Integrity**: We can't have random users updating Hobart's official specs. "Logical Authority" creates a clear chain of custody.
+- **Administrative Sharding**: Hobart should manage Hobart's people. We shouldn't have to play "Global Admin" for every manufacturer.
+- **Zero-Trust Distribution**: Everything delivered via `pulse` is verified against your identity. No claim, no download.
 
 ## Impact
 - **Infrastructure**: Update AWS Cognito schema and Cloudflare D1 mapping table.
@@ -53,6 +58,7 @@ We will implement an Organization-centric security model within the AWS Cognito 
 - **Security**: Hardened "Shift-Left" logic for module delivery.
 
 ## Verification
-- Identity Bridge unit tests for domain-to-org mapping.
-- Integration test: `auth login` as a verified OEM user and verify `custom:organization` in the resulting JWT.
-- Pulse sync test: Verify that unauthorized users cannot fetch "Admin Sidecar" artifacts even if the URL is known.
+- **Unit Tests**: Verify the domain-to-org mapping logic in the Auth Bridge.
+- **Integration Test**: Log in as a verified OEM user and confirm the `custom:organization` and `custom:scope` claims are present.
+- **Registry Gate Test**: Attempt to push a Hobart update with a Vulcan token and verify it fails fast.
+- **Pulse Sync Test**: Ensure unauthorized users can't fetch "Admin Sidecar" artifacts.

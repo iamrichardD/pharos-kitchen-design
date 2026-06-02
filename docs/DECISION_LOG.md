@@ -30,7 +30,7 @@ This log provides an index of the technical and architectural decisions made for
 | **[ADR-0024]** | 2026-04-13 | Active   | [Shared RFC 2378 Protocol Library Extraction](docs/adr/0024-rfc2378-library-extraction.md) |
 | **[ADR-0025]** | 2026-04-13 | Active   | [Modern-Only Interop Mandate (.NET 8.0+)](docs/adr/0025-modern-only-interop-mandate.md) |
 | **[ADR-0026]** | 2026-04-20 | Active   | [Four-Realm Registry & Pulse Protocol](docs/adr/0026-four-realm-registry-pulse-protocol.md) |
-| **[ADR-0027]** | 2026-05-07 | Proposed | [Organization-Based Authority Scopes](docs/adr/0027-organization-based-authority-scopes.md) |
+| **[ADR-0027]** | 2026-06-02 | Approved | [Organization-Based Authority Scopes](docs/adr/0027-organization-based-authority-scopes.md) |
 | **[ADR-0028]** | 2026-05-07 | Proposed | [Senior Program Manager (SPM) Role Definition](docs/adr/0028-senior-program-manager-role-definition.md) |
 | **[ADR-0029]** | 2026-05-12 | Approved | [Immutable WASM Promotion](docs/adr/0029-immutable-wasm-promotion.md) |
 | **[ADR-0030]** | 2026-05-12 | Approved | [Performance Engineering & Velocity Tracking](docs/adr/0030-performance-engineering-velocity-tracking.md) |
