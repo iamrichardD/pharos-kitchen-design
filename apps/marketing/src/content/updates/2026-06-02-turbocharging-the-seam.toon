@@ -1,0 +1,32 @@
+/* ========================================================================
+ * Project: Pharos Kitchen Design (Project Prism)
+ * Component: Marketing / Blog (Engineering Update)
+ * File: apps/marketing/src/content/updates/2026-06-02-turbocharging-the-seam.toon
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * License: FSL-1.1 (See LICENSE file for details)
+ * Purpose: Engineering update on Rust 1.96 and Astro 6.4 performance/security.
+ * Traceability: Issue #195, Issue #196
+ * ======================================================================== */
+
+title: Turbocharging the Seam: Rust 1.96 and Astro 6.4
+type: update
+date: 2026-06-02
+createdAt: 2026-06-02T16:00:00Z
+releaseAt: 2026-06-02T18:00:00Z
+author: Richard D.
+stream: technical
+tags: performance, security, rust, astro, satteri
+
+# The Engineering Leap
+body[1]{content}:
+  "We're on Day 2 of Sprint 5.1, and honestly, the system is flying. We just wrapped up a major 'Betterment' phase, moving everything over to Rust 1.96.0 and Astro 6.4. The biggest win? We swapped out our old Markdown parser for Astro's experimental Sätteri engine (which is built in Rust). Our local build times for the docs and blog dropped by over 70%. It used to take around 17 seconds to see a change; now it's closer to 5. When you're trying to move fast and refine the Revit interop, getting that feedback loop down to single digits is a game changer."
+
+# Under the Hood
+details[3]{focus, description}:
+  Structural Integrity, "We also spent some time fixing up the TOON parser. The data mapping is a lot cleaner now, which means our equipment hierarchies stay perfectly structured. No more 'ghost logic' hiding in the tests."
+  Edge Performance, "Astro 6.4 brought some really nice improvements to Cloudflare's Edge runtime helpers. The result? Our interactive BIM previews and Ghost Links are loading faster and feeling way more responsive in the browser."
+  Security Hardening, "On the DevSecOps side, we locked everything down. The entire monorepo—every container and build script—is now pinned to an immutable Rust 1.96.0 SHA-256 digest. We also hardened the WASM isolation, so even if a manufacturer dialect misbehaves, it can't crash the host environment."
+
+# Finality
+closing[1]{content}:
+  "It's a really solid update. The seam between Revit and the web is tighter, the data moves faster, and the whole foundation is more secure. We're building a professional-grade tool here, and these under-the-hood upgrades are what make it possible. Back to work on Phase 5."
