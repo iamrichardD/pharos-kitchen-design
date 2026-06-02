@@ -69,6 +69,7 @@
     - Verified 🟢 PHAROS GREEN in Podman.
 - [ ] **Issue #206**: Task 5.7: Re-platforming Identity Bridge to Cloudflare D1 (Cognito Removal). [ECT: 4]
 - [ ] **Issue #207**: Task 5.8: Lossless Authoritative Log Restructure. [ECT: 3]
+- [ ] **Issue #208**: Task 5.9: Implement Automated Roadmap Synchronization (The Sync Engine). [ECT: 3] (Blocked by #207)
 - [ ] **Issue #204**: Task 5.5: Implement Multi-Org Pulse Filtering & Delegate Enforcement. [ECT: 4]
 - [ ] **Issue #205**: Task 5.6: Research Spike - Edge-Sovereign Passkey Prototype. [ECT: 4] (Blocked by #206)
 - **Verification**: 🟢 PHAROS GREEN confirmed across all monorepo slices.
