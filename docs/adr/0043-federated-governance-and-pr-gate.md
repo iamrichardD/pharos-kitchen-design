@@ -1,4 +1,4 @@
-/* ========================================================================
+<!-- ========================================================================
  * Project: Pharos Kitchen Design (Project Prism)
  * Component: Documentation / ADR
  * File: 0043-federated-governance-and-pr-gate.md
@@ -6,7 +6,9 @@
  * Status: Accepted
  * Date: 2026-05-25
  * License: FSL-1.1 (See LICENSE file for details)
- * ======================================================================== */
+ * Traceability: ADR-0048
+ * Last Updated: 2026-06-02
+ * ======================================================================== -->
 
 # ADR-0043: Federated Governance & Mandatory PR-Centric Mentorship
 
@@ -20,10 +22,12 @@ We will enforce a "Mandatory PR Gate" and a "PR-Centric Mentorship" model for al
 A Builder's task is considered "Incomplete" even if all tests pass. The task is only complete once a **High-Rigor Pull Request** is created. This PR serves as the "Long-Term Memory" of the feature.
 - The PR body must include: **Strategic Intent**, **Internal Crucible Rationale**, **Verification Evidence**, and **Regression Surface**.
 - The Phase 4 Crucible Audit is **PROHIBITED** from starting until the PR is created.
+- All PR text MUST follow the **Human-Centric Communication Standard** (ADR-0048).
 
 ### 2. PR-Centric Mentorship (Hybrid Model)
 To maintain a lean and readable codebase while preserving deep technical mentorship:
 - **In-PR Feedback:** All peer review comments, technical rationale, and instructive guidance MUST be recorded within the GitHub PR review history.
+- **Human Voice:** Mentorship comments MUST use the natural, first-person voice mandated by **ADR-0048**. 
 - **In-Code References:** The source code will remain lean. For high-impact or non-obvious logic, a single-line reference is required: `// Rationale: See PR #X (Feature Name)`.
 - **No Meta-Labels:** Prohibited from using "The Why," "Teachable Moment," or other labels that signal "AI Slop."
 
@@ -39,3 +43,4 @@ Granular DORA and ECT metrics will be moved from a monolithic `WEEKLY_VELOCITY_L
 - **Supersedes:** Informal practices in ADR-0037.
 - **Enforcement:** `GEMINI.md` (Section 5).
 - **Execution:** Issue #122 (Phase 5 Kickoff).
+- **Voice Standard**: ADR-0048.
