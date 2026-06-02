@@ -10,6 +10,7 @@
 import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
 import react from '@astrojs/react';
+import { satteri } from '@astrojs/markdown-satteri';
 
 // https://astro.build/config
 export default defineConfig({
@@ -18,6 +19,13 @@ export default defineConfig({
   outDir: './dist',
   publicDir: './public',
   output: 'static',
+  markdown: {
+    processor: satteri({
+      features: {
+        directive: true,
+      },
+    }),
+  },
   integrations: [tailwind(), react()],
   vite: {
     build: {

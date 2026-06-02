@@ -16,7 +16,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import React from 'react';
 import { render, screen, waitFor, cleanup } from '@testing-library/react';
 import { WasmProvider, useWasm } from './WasmContext';
-import { $wasmStore, resetWasmSingleton } from '../utils/wasmStore';
+import { resetWasmSingleton } from '../utils/wasmStore';
 import init from '@pkd/core';
 
 // Mock @pkd/core
