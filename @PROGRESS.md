@@ -51,6 +51,7 @@
     - Verified compatibility with Rust 1.96.0 toolchain.
     - Documented Cloudflare Helper research.
     - Verified 🟢 PHAROS GREEN in Podman.
+- [ ] **Issue #199**: Governance: Implement ADR-0048 Human-Centric Communication Standard. [ECT: 3]
 - [ ] **Issue #139**: Debt #139: Enhanced TOON Diagnostics (Blocked by #141). [ECT: 2]
 - **Verification**: 🟢 PHAROS GREEN confirmed across all monorepo slices.
 
