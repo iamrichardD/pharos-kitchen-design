@@ -42,8 +42,11 @@
     - Established mandatory shard logging infrastructure.
     - Implemented WASM panic isolation (catch_unwind).
     - Restored PR traceability in core source code.
-- [ ] **Issue #195**: Upgrade to Rust 1.96.0 (Security & Linker Safety). [ECT: 2]
-- [ ] **Issue #196**: Upgrade to Astro 6.4 (Sätteri Rust-Markdown PoC). [ECT: 3]
+- [x] **Issue #195**: Upgrade to Rust 1.96.0 (Security & Linker Safety). [ACT: 2]
+    - Verified Universal Toolchain Parity across 7 Containerfiles and build scripts.
+    - Remediated `pkd-toon` test regressions.
+    - Verified 🟢 PHAROS GREEN in Podman.
+- [ ] **Issue #196**: Upgrade to Astro 6.4 (Sätteri & CF Helpers). [ECT: 3]
 - [ ] **Issue #139**: Debt #139: Enhanced TOON Diagnostics (Blocked by #141). [ECT: 2]
 - **Verification**: 🟢 PHAROS GREEN confirmed across all monorepo slices.
 
