@@ -259,15 +259,16 @@ tasks[2]{id, title, status}:
 # Project: Pharos Kitchen Design (Test Fixture)
 # Purpose: Atomic verification of the TOON parser.
 
-tasks[0]{id, title, status}:
-- task_001 | Implement Atomic Tests | COMPLETED
-- task_002 | Decouple Production Data | IN_PROGRESS
+tasks[2]{id, title, status}:
+  task_001, Implement Atomic Tests, COMPLETED
+  task_002, Decouple Production Data, IN_PROGRESS
 "#;
         let result = ToonParser::parse(content);
         assert!(result.is_ok(), "TOON Parse Error: {:?}", result.err());
-        let updates = result.unwrap();
-        assert_eq!(updates.len(), 2, "Should have parsed 2 tasks from fixture");
-        assert_eq!(updates[0].id, "task_001");
+        let doc = result.unwrap();
+        let tasks = doc.lists.get("tasks").unwrap();
+        assert_eq!(tasks.items.len(), 2, "Should have parsed 2 tasks from fixture");
+        assert_eq!(tasks.items[0][0], "task_001");
     }
 
     #[test]
