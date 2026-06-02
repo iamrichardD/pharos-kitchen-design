@@ -6,6 +6,7 @@
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Defining the Senior Program Manager (SPM) role and mandates.
  * Traceability: Issue #100, ADR-0048
+ * Last Updated: 2026-06-02
  * Status: Approved
  * ======================================================================== -->
 

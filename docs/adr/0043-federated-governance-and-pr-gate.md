@@ -1,4 +1,4 @@
-/* ========================================================================
+<!-- ========================================================================
  * Project: Pharos Kitchen Design (Project Prism)
  * Component: Documentation / ADR
  * File: 0043-federated-governance-and-pr-gate.md
@@ -7,7 +7,8 @@
  * Date: 2026-05-25
  * License: FSL-1.1 (See LICENSE file for details)
  * Traceability: ADR-0048
- * ======================================================================== */
+ * Last Updated: 2026-06-02
+ * ======================================================================== -->
 
 # ADR-0043: Federated Governance & Mandatory PR-Centric Mentorship
 

@@ -1,4 +1,4 @@
-/* ========================================================================
+<!-- ========================================================================
  * Project: Pharos Kitchen Design (Project Prism)
  * Component: Documentation / ADR
  * File: docs/adr/0037-multi-agent-handover-protocol.md
@@ -6,7 +6,8 @@
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Formalize the handover process for AI Agent peer review.
  * Traceability: Phase 4 Crucible Audit, ADR-0035, ADR-0048
- * ======================================================================== */
+ * Last Updated: 2026-06-02
+ * ======================================================================== -->
 
 # ADR-0037: Multi-Agent Handover & Crucible Protocol
 

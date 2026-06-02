@@ -30,17 +30,37 @@ To ensure cross-platform parity (Linux Dev -> Multi-OS Revit Targets), all logic
 ## Engineering Standards & Quality Assurance
 
 ### 1. Standardized File Prologue (Living Documentation)
-EVERY source file (JSON, RS, ASTRO) and Markdown document MUST begin with:
-/* ========================================================================
+EVERY source file and Markdown document MUST begin with a prologue using the **native comment syntax** of the file type. This ensures the document remains a "Living Truth" with clear metadata and traceability.
+
+**Example (Markdown/HTML):**
+<!-- ========================================================================
  * Project: Pharos Kitchen Design (Project Prism)
- * Component: [e.g., Bridge-Spoofer, Core-Schema]
- * File: [filename with extension]
+ * Component: [Component Name]
+ * File: [filename.md]
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: [The \"Why\" - 1-2 sentences.]
  * Traceability: [Link to PRD or GitHub Issue]
  * Last Updated: [YYYY-MM-DD]
+ * ======================================================================== -->
+
+**Example (Rust/C#/C-Style):**
+/* ========================================================================
+ * Project: Pharos Kitchen Design (Project Prism)
+ * ... (fields as above)
+ * Last Updated: [YYYY-MM-DD]
  * ======================================================================== */
+
+**Example (JSON - Top-level pkd_prologue key):**
+{
+  "pkd_prologue": {
+    "project": "Pharos Kitchen Design (Project Prism)",
+    "component": "[Component Name]",
+    "last_updated": "[YYYY-MM-DD]"
+    ...
+  },
+  ...
+}
 
 ### 2. Vertical Slice Architecture (VSA) & Clean Code
 - **Fail Fast Engineering (Immediate & Visible)**: Every component MUST implement "Fail Fast" practices (Shore, 2004) to detect defects immediately at the source.
