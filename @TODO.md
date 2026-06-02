@@ -27,6 +27,9 @@
 - [x] **Issue #196**: Task: Evaluate and upgrade to Astro 6.4 (Sätteri & CF Helpers). [ACT: 3]
 - [x] **Issue #199**: Governance: Implement ADR-0048 Human-Centric Communication Standard. [ACT: 3]
 - [x] **Issue #139**: Debt #139: Enhanced TOON Diagnostics (Blocked by #141). [ACT: 2]
+- [ ] **Issue #206**: Task 5.7: Re-platforming Identity Bridge to Cloudflare D1 (Cognito Removal). [ECT: 4]
+- [ ] **Issue #204**: Task 5.5: Implement Multi-Org Pulse Filtering & Delegate Enforcement. [ECT: 4]
+- [ ] **Issue #205**: Task 5.6: Research Spike - Edge-Sovereign Passkey Prototype. [ECT: 4] (Blocked by #206)
 
 ---
 
@@ -246,7 +249,10 @@
 - [x] **Issue #159**: Implement Shard-Based Logging (RET-01). [AUDITED: PHAROS GREEN]
 - [x] **Issue #160**: Implement Mid-Sprint Rigor Gate (RET-03). [AUDITED: PHAROS GREEN]
 - [x] **Issue #161**: Implement CI Pulse Watchdog (RET-04). [AUDITED: PHAROS GREEN]
-- [x] **Issue #162**: Windows Installation Utility: Remediate Unnecessary `curl` Dependency. [ECT: 1]
+- [x] **Issue #162**: Windows Installation Utility: Remediate Unnecessary `curl` Dependency. [ACT: 1]
+- [ ] **Issue #206**: Task 5.7: Re-platforming Identity Bridge to Cloudflare D1 (Cognito Removal). [ECT: 4]
+- [ ] **Issue #204**: Task 5.5: Implement Multi-Org Pulse Filtering & Delegate Enforcement. [ECT: 4]
+- [ ] **Issue #205**: Task 5.6: Research Spike - Edge-Sovereign Passkey Prototype. [ECT: 4] (Blocked by #206)
 - [x] **Issue #124**: Task 5.2: JIT Sharded Registry Scaling. [ECT: 4]
 - [x] **Issue #125**: Task 5.3: Bidirectional Web-to-Revit 'Ghost Tuning'. [ECT: 5]
 - [x] **Issue #126**: Task 5.4: CLI Registry Management Subcommands. [ECT: 3]
