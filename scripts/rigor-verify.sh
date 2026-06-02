@@ -22,8 +22,8 @@ if [ ! -f "$CONTEXT_FILE" ]; then
     exit 0
 fi
 
-# Extract ECT value
-ECT=$(grep -i "ECT:" "$CONTEXT_FILE" | awk '{print $NF}' | tr -d ' \r\n')
+# Extract ECT value (look for ECT followed by optional markdown stars and a colon)
+ECT=$(grep -i "ECT" "$CONTEXT_FILE" | grep -v "Project:" | grep -oE "[0-9]+" | head -n 1)
 
 if [[ -z "$ECT" ]]; then
     echo "🛡️  [RIGOR] ECT not defined in context. Proceeding."
