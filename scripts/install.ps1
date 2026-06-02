@@ -139,21 +139,25 @@ function Get-LatestVersionTag {
     $url = "$RepoUrl/releases/latest"
     
     try {
-        $request = [System.Net.WebRequest]::Create($url)
-        $request.Method = "HEAD"
-        $request.AllowAutoRedirect = $false
-        $response = $request.GetResponse()
-        $location = $response.Headers["Location"]
-        $response.Close()
-        
+        # Using Invoke-WebRequest (PowerShell Native) to identify the latest version.
+        # We disable auto-redirection to capture the 'Location' header.
+        $response = Invoke-WebRequest -Uri $url -Method Head -MaximumRedirection 0 -ErrorAction Stop -UseBasicParsing
+    } catch {
+        # PS 5.1 throws for 302 with MaximumRedirection 0. The exception contains the response.
+        if ($_.Exception.Response) {
+            $response = $_.Exception.Response
+        }
+    }
+
+    if ($response -and $response.Headers['Location']) {
+        $location = $response.Headers['Location']
         # Security [SEC-92-001]: Validate redirect location.
         if ($location -match "github\.com/.+/releases/tag/(.+)") {
             return $matches[1].Trim().Replace("`r", "")
         }
-    } catch {
-        # Fallback for older PowerShell versions
-        Log-Warn "Could not determine remote version via HEAD request."
     }
+    
+    Log-Warn "Could not determine remote version via HEAD request."
     return "unknown"
 }
 
