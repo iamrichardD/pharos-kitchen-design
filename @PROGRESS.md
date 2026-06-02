@@ -57,7 +57,16 @@
     - Enforced language-native comment syntax (HTML for Markdown).
     - Refactored core governance ADRs (0028, 0037, 0043).
     - Verified 🟢 PHAROS GREEN in Podman.
-- [ ] **Issue #139**: Debt #139: Enhanced TOON Diagnostics (Blocked by #141). [ECT: 2]
+- [x] **Issue #139**: Enhanced TOON Diagnostics (Blocked by #141). [ACT: 2]
+    - Implemented line/column character tracking in lexer.
+    - Refactored `ToonError` to struct-variants for rich metadata.
+    - Added snippet extraction and high-signal failure dashboard in Astro.
+    - Verified 🟢 PHAROS GREEN in Podman.
+- [x] **Issue #162**: Windows Installation Utility: Remediate Unnecessary `curl` Dependency. [ACT: 1]
+    - Refactored install.ps1 to use native PowerShell Invoke-WebRequest.
+    - Removed vestigial curl dependency and environment audit check.
+    - Verified syntax and functional integrity in PowerShell container.
+    - Verified 🟢 PHAROS GREEN in Podman.
 - **Verification**: 🟢 PHAROS GREEN confirmed across all monorepo slices.
 
 ---
@@ -219,7 +228,11 @@
 ### Sprint 4.5: Infrastructure & Identity Governance (#84-87) - 📋 Backlog
 - [ ] **Issue #84**: Configure Dual-Stream Release Pipeline (Task 3.15).
 - [ ] **Issue #85**: Initialize Homebrew Tap (Official) (Task 3.16).
-- [ ] **Issue #86**: ADR-0027: Organization-Based Authority Scopes.
+- [x] **Issue #86**: ADR-0027: Organization-Based Authority Scopes. [ACT: 1]
+    - Formalized the organization-centric security model for equipment shards.
+    - Updated Decision Log and verified governance standards in Podman.
+    - Remediated rigor-verify.sh regex bug for ECT extraction.
+    - Verified 🟢 PHAROS GREEN in Podman.
 - [ ] **Issue #87**: Implement Domain-to-Org Mapping (Task 4.21).
 
 ### Sprint 4.6: The Pulse Evolution (#88-89) - 📋 Backlog

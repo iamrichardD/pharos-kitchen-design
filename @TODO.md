@@ -26,13 +26,14 @@
 - [x] **Issue #195**: Task: Upgrade to Rust 1.96.0 and implement feature betterments. [ACT: 2]
 - [x] **Issue #196**: Task: Evaluate and upgrade to Astro 6.4 (Sätteri & CF Helpers). [ACT: 3]
 - [x] **Issue #199**: Governance: Implement ADR-0048 Human-Centric Communication Standard. [ACT: 3]
-- [ ] **Issue #139**: Debt #139: Enhanced TOON Diagnostics (Blocked by #141). [ECT: 2]
+- [x] **Issue #139**: Debt #139: Enhanced TOON Diagnostics (Blocked by #141). [ACT: 2]
 
 ---
 
 ## ✅ Completed (Verified)
 
 ### Sprint 5.01: Core Parser & Remediation (2026-06-01)
+- [x] **Issue #139**: Enhanced TOON Diagnostics (Pinpoint Accuracy).
 - [x] **Issue #199**: Human-Centric Voice & Living Docs (ADR-0048).
 - [x] **Issue #196**: Upgrade to Astro 6.4 & Sätteri (Verified Pharos Green).
 - [x] **Issue #195**: Upgrade to Rust 1.96.0 (Verified Pharos Green).
@@ -229,7 +230,7 @@
 - [x] **Issue #100**: Formalize SPM Role and Harden SDLC Governance (Verified Pharos Green).
 - [ ] **Issue #84**: Task 3.15: Configure Dual-Stream Release Pipeline. [ECT: 4]
 - [ ] **Issue #85**: Task 3.16: Initialize Homebrew Tap (Official). [ECT: 2]
-- [ ] **Issue #86**: Debt #86: ADR-0027: Organization-Based Authority Scopes. [ECT: 1]
+- [x] **Issue #86**: Debt #86: ADR-0027: Organization-Based Authority Scopes. [ACT: 1]
 - [ ] **Issue #87**: Task 4.21: Implement Domain-to-Org Mapping. [ECT: 3]
 
 ### Sprint 4.6: The Pulse Evolution (#88-89) - 📋 Backlog
