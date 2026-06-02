@@ -30,18 +30,22 @@
 - **Verification**: 🟢 PHAROS GREEN confirmed across all monorepo slices.
 
 ### Sprint 5.01: Core Parser & Remediation (2026-06-01) - 🚀 ACTIVE
-- [x] **Issue #141**: Implemented Relational Handle Mapping for the TOON Parser (Option C). [ECT: 3 | ACT: 2]
+- [x] **Issue #141**: Implemented Relational Handle Mapping for the TOON Parser (Option C). [ACT: 2]
     - Maintained O(n) linear parsing velocity by shifting resolution to consumers.
-    - Added TDD coverage for namespaced handles and metadata cross-references.
     - Verified 🟢 PHAROS GREEN in Podman.
-- [x] **Issue #138**: Implemented full RFC-2378 Query Logic and Wildcard Engine (Option B). [ECT: 3 | ACT: 3]
+- [x] **Issue #138**: Implemented full RFC-2378 Query Logic and Wildcard Engine (Option B). [ACT: 3]
     - Support for Ph-standard word-by-word matching and advanced wildcards (*, +, ?, []).
-    - Implemented `return` clauses for field projection and reduced data egress.
-    - Enforced **Temporal Warden** (100ms sentinel) for ReDoS immunity.
     - Verified 🟢 PHAROS GREEN with 33 integration tests in Podman.
-- [ ] **Issue #148**: Debt: Implement `PharosMetadata::builder()` pattern. [ECT: 2]
-- [ ] **Issue #187**: [DEBT] Investigate and Resolve CI Build Warnings. [ECT: 2]
+- [x] **Issue #148**: Implemented PharosMetadata Builder Pattern with Fail-Fast Sentinels. [ACT: 2]
+- [x] **Issue #187**: Resolved CI build warnings and hardened zero-warning sentinels. [ACT: 2]
+- [x] **Issue #194**: Remediated ADR-0043, ADR-0044, and ADR-0046 governance drift. [ACT: 1]
+    - Established mandatory shard logging infrastructure.
+    - Implemented WASM panic isolation (catch_unwind).
+    - Restored PR traceability in core source code.
+- [ ] **Issue #195**: Upgrade to Rust 1.96.0 (Security & Linker Safety). [ECT: 2]
+- [ ] **Issue #196**: Upgrade to Astro 6.4 (Sätteri Rust-Markdown PoC). [ECT: 3]
 - [ ] **Issue #139**: Debt #139: Enhanced TOON Diagnostics (Blocked by #141). [ECT: 2]
+- **Verification**: 🟢 PHAROS GREEN confirmed across all monorepo slices.
 
 ---
 

@@ -18,15 +18,25 @@
  -->
 
 ### Sprint 5.01: Core Parser & Remediation (2026-06-01) - 🚀 ACTIVE
-- [x] **Issue #141**: Task 4.33: Recursive Tabular Indentation for TOON Parser. (Implemented as Relational Handle Mapping) [ECT: 3 | ACT: 2]
-- [x] **Issue #138**: Task 4.32: Implement Full RFC-2378 Query Logic in WASM Core. [ECT: 3 | ACT: 3]
-- [ ] **Issue #148**: Debt: Implement \`PharosMetadata::builder()\` pattern. [ECT: 2]
-- [ ] **Issue #187**: [DEBT] Investigate and Resolve CI Build Warnings. [ECT: 2]
+- [x] **Issue #141**: Task 4.33: Recursive Tabular Indentation for TOON Parser. [ACT: 2]
+- [x] **Issue #138**: Task 4.32: Implement Full RFC-2378 Query Logic in WASM Core. [ACT: 3]
+- [x] **Issue #148**: Debt: Implement `PharosMetadata::builder()` pattern. [ACT: 2]
+- [x] **Issue #187**: [DEBT] Investigate and Resolve CI Build Warnings. [ACT: 2]
+- [x] **Issue #194**: Debt: Remediate ADR-0043, ADR-0044, and ADR-0046 Drift. [ACT: 1]
+- [ ] **Issue #195**: Task: Upgrade to Rust 1.96.0 and implement feature betterments. [ECT: 2]
+- [ ] **Issue #196**: Task: Evaluate and upgrade to Astro 6.4 (Sätteri & CF Helpers). [ECT: 3]
 - [ ] **Issue #139**: Debt #139: Enhanced TOON Diagnostics (Blocked by #141). [ECT: 2]
 
 ---
 
 ## ✅ Completed (Verified)
+
+### Sprint 5.01: Core Parser & Remediation (2026-06-01)
+- [x] **Issue #141**: Relational Handle Mapping (Option C).
+- [x] **Issue #138**: RFC-2378 Query Logic (Option B).
+- [x] **Issue #148**: Metadata Builder Pattern.
+- [x] **Issue #187**: CI Build Warning Remediation.
+- [x] **Issue #194**: Monorepo Governance Remediation.
 
 ### Sprint 4.11: Supply Chain & Performance Hardening (2026-05-29)
 - [x] **Issue #169**: Supply Chain Watchdog.
@@ -235,7 +245,6 @@
 - [x] **Issue #124**: Task 5.2: JIT Sharded Registry Scaling. [ECT: 4]
 - [x] **Issue #125**: Task 5.3: Bidirectional Web-to-Revit 'Ghost Tuning'. [ECT: 5]
 - [x] **Issue #126**: Task 5.4: CLI Registry Management Subcommands. [ECT: 3]
-- [ ] **Issue #123**: Debt 5.5: .NET 8.0 Zero-Allocation Marshalling. [ECT: 4]
 - [ ] **Issue #148**: Debt: Implement `PharosMetadata::builder()` pattern. [ECT: 2]
 
 ---
