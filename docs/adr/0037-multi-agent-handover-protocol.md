@@ -5,7 +5,7 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Formalize the handover process for AI Agent peer review.
- * Traceability: Phase 4 Crucible Audit, ADR-0035
+ * Traceability: Phase 4 Crucible Audit, ADR-0035, ADR-0048
  * ======================================================================== */
 
 # ADR-0037: Multi-Agent Handover & Crucible Protocol
@@ -40,13 +40,14 @@ Before a "Builder" session concludes, it MUST:
    - [ ] Code Review (SOLID, VSA, Clean Code)
    - [ ] Security Audit (Memory safety, Sentinels, Attack vectors)
    - [ ] Gap Analysis (Edge cases, technical debt)
-4. Provide inline comments in the PR/Branch.
+4. Provide inline comments in the PR/Branch using the **Human-Centric Voice** (ADR-0048).
 5. Provide a "Brutally Honest" evaluation before promotion to main.
 ```
 
 ### 3. The Auditor Persona (Auditor Side)
 - **Zero Memory**: The Auditor MUST be a fresh session with no history of the Builder's internal reasoning.
 - **Standardized Heuristics**: The Auditor MUST strictly follow `.github/CRUCIBLE_HEURISTICS.md`.
+- **Mentorship Voice**: Review comments and feedback MUST follow the **Human-Centric Communication Standard** (ADR-0048). Feedback should be instructive and professional, avoiding clinical labels or "AI slop."
 
 ## Rationale
 This protocol ensures architectural integrity and security without relying on a single agent's internal state. It treats the Hub as the "Single Source of Truth" and the Sibling worktrees as "Disposable Engineering Pods."
@@ -59,3 +60,4 @@ This protocol ensures architectural integrity and security without relying on a 
 ## Traceability
 - **Skill**: `pharos-crucible`
 - **Pattern**: ADR-0035 (Hub/Sibling)
+- **Voice**: ADR-0048 (Human-Centric)
