@@ -29,16 +29,17 @@ To ensure cross-platform parity (Linux Dev -> Multi-OS Revit Targets), all logic
 
 ## Engineering Standards & Quality Assurance
 
-### 1. Standardized File Prologue
-EVERY source file (JSON, RS, ASTRO) MUST begin with:
+### 1. Standardized File Prologue (Living Documentation)
+EVERY source file (JSON, RS, ASTRO) and Markdown document MUST begin with:
 /* ========================================================================
  * Project: Pharos Kitchen Design (Project Prism)
  * Component: [e.g., Bridge-Spoofer, Core-Schema]
  * File: [filename with extension]
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
- * Purpose: [The "Why" - 1-2 sentences. For debt/cleanup tasks, explicitly state the strategic alignment (e.g., "Design System Alignment" or "Security Hardening").]
+ * Purpose: [The \"Why\" - 1-2 sentences.]
  * Traceability: [Link to PRD or GitHub Issue]
+ * Last Updated: [YYYY-MM-DD]
  * ======================================================================== */
 
 ### 2. Vertical Slice Architecture (VSA) & Clean Code
@@ -77,7 +78,7 @@ Before moving from **Research** to **Strategy/Execution**, you MUST explicitly c
 - [ ] **Triviality Gate:** Explicitly state if the task is **Trivial** (Surgical Strike) or **Non-Trivial** (ADR-0017 Three-Option Rule).
 - [ ] **Complexity Assessment:** Assign an **Estimated Complexity Tier (ECT)** (1-5) to inform team velocity tracking.
 - [ ] **Shift-Left Security:** Document potential attack vectors identified during research.
-- [ ] **Fix Summary Readiness:** Prepare a "Brutally Honest" summary of the resolution and its impact.
+- [ ] **Fix Summary Readiness:** Prepare a \"Brutally Honest\" summary of the resolution and its impact.
 - [ ] **TDD Strategy:** Define the atomic test cases that will be implemented *before* the code changes.
 
 #### Complexity Tier Definitions:
@@ -93,14 +94,14 @@ Before moving from **Research** to **Strategy/Execution**, you MUST explicitly c
 
 ### 5. Pharos Handover & Mentorship Protocol
 Every non-trivial task completion MUST follow the **Multi-Agent Handover & Crucible Protocol (ADR-0037)** and the **Mandatory PR Gate (ADR-0043)**:
-- **Brutal Self-Critique:** Before finalizing, perform a "Brutally Honest" gap and security analysis to identify technical debt or edge cases.
-- **The Mandatory PR Gate:** The Builder MUST create a high-rigor Pull Request BEFORE the Audit phase begins. This PR serves as the "Long-Term Memory" of the task.
+- **Brutal Self-Critique:** Before finalizing, perform a \"Brutally Honest\" gap and security analysis to identify technical debt or edge cases.
+- **The Mandatory PR Gate:** The Builder MUST create a high-rigor Pull Request BEFORE the Audit phase begins. This PR serves as the \"Long-Term Memory\" of the task.
 - **Voice Standard (ADR-0048):** All PRs, comments, and documentation MUST use the **Human-Centric Voice**. 
-- **Mid-Sprint Rigor Gate (ECT 4+):** For any task with an ECT of 4 or higher, the Builder MUST pause at the 50% implementation mark (or Turn 5) to request a **Strategic SPM Check-in**. This prevents architectural drift in high-complexity "Big Rocks."
+- **Mid-Sprint Rigor Gate (ECT 4+):** For any task with an ECT of 4 or higher, the Builder MUST pause at the 50% implementation mark (or Turn 5) to request a **Strategic SPM Check-in**. This prevents architectural drift in high-complexity \"Big Rocks.\"
 - **Shard-Based Logging (Conflict Mitigation):** Parallel agents MUST NOT edit a shared log file. Instead, write all progress to a dedicated task-specific file in the current sprint directory: \`.project/shards/sprint-4.10/issue-X.toon\`. The SPM will aggregate these into the master log during final integration.
-- **Mandatory Pre-Audit Rebase:** Following implementation and BEFORE signaling "Ready for Audit", the Builder MUST rebase their branch against the latest \`main\` and re-verify **🟢 PHAROS GREEN** in Podman. This prevents protocol rollbacks and complex merge conflicts.
+- **Mandatory Pre-Audit Rebase:** Following implementation and BEFORE signaling \"Ready for Audit\", the Builder MUST rebase their branch against the latest \`main\` and re-verify **🟢 PHAROS GREEN** in Podman. This prevents protocol rollbacks and complex merge conflicts.
 - **PR-Centric Mentorship (Hybrid Model):** Provide inline peer review comments within the GitHub PR (not the source code) that act as teaching tools.
-    - **No Meta-Labels:** Prohibited from using "The Why/How," "Teachable Moment," or other prompt-leaking labels.
+    - **No Meta-Labels:** Prohibited from using \"The Why/How,\" \"Teachable Moment,\" or other prompt-leaking labels.
     - **Integrated Mentorship:** Weave the technical rationale, safety implications, and alternative patterns directly into the PR review using the natural, first-person voice mandated by **ADR-0048**.
 - **Codebase Leaness:** Source code should remain lean. For non-trivial logic, include a single-line reference: `// Rationale: See PR #X (Feature Name)`.
 - **IA Clarity Pass (MANDATORY):** Any changes to collaborator-facing documentation or the Marketing Site MUST be reviewed by **`PHAROS_IA_CORE`**.
@@ -116,12 +117,12 @@ To ensure context efficiency and architectural consistency across sessions, use 
 | **`PHAROS_DEV_CORE`** | **Implementation Team** | **Senior Engineer** (Lead Developer/Rust), **Senior DevSecOps Engineer** (CI/CD/Supply Chain), **Senior DX Engineer** (Loader/UX/Ergonomics). *Mandate: TDD implementation, Crucible evaluation, and Fail-Fast engineering.* |
 
 #### **Builder Persona Constraints (SDLC Protection):**
-To ensure the integrity of the Pharos "Three-Option Crucible" (ADR-0017), all **Builders** (Implementation Agents) MUST adhere to the following hard constraints:
+To ensure the integrity of the Pharos \"Three-Option Crucible\" (ADR-0017), all **Builders** (Implementation Agents) MUST adhere to the following hard constraints:
 1.  **PROHIBITED from Main**: You MUST NOT commit or push directly to the `main` branch. 
 2.  **Feature Branch Sovereignty**: All work MUST occur on a feature branch (`feat/issue-X`) within your assigned Sibling worktree.
-3.  **Handoff Finality**: Your session is complete when your code is committed to your feature branch and verified 🟢 PHAROS GREEN in Podman. You then notify the **SPM/Orchestrator** that you are "Ready for Audit."
+3.  **Handoff Finality**: Your session is complete when your code is committed to your feature branch and verified 🟢 PHAROS GREEN in Podman. You then notify the **SPM/Orchestrator** that you are \"Ready for Audit.\"
 4.  **No Self-Audit**: You are strictly PROHIBITED from auditing your own code or creating your own audit log.
-5.  **Remote Synchronization Gate**: Following a successful Crucible Audit, the Builder/SPM MUST request explicit user authorization before pushing to the remote repository or merging the PR via GitHub CLI. You are strictly prohibited from concluding a task with a "Local-Only" merge.
+5.  **Remote Synchronization Gate**: Following a successful Crucible Audit, the Builder/SPM MUST request explicit user authorization before pushing to the remote repository or merging the PR via GitHub CLI. You are strictly prohibited from concluding a task with a \"Local-Only\" merge.
 
 ## DevSecOps & Workflow
 
@@ -130,22 +131,22 @@ Every task MUST progress through the following four phases. Failure to complete 
 
 1.  **Phase 1: Research & Issue Authority:**
     *   **Gate:** Create a GitHub Issue (The Logical Authority).
-    *   **Security:** Perform "Shift-Left" security analysis to identify attack vectors.
+    *   **Security:** Perform \"Shift-Left\" security analysis to identify attack vectors.
     *   **TDD:** Define atomic test cases *before* any implementation begins.
 2.  **Phase 2: Strategy & The Three-Option Crucible:**
     *   **Gate:** For non-trivial tasks (ADR-0017), develop exactly three implementation options.
-    *   **Evaluation:** Provide a "Brutally Honest" assessment of the options before promotion.
+    *   **Evaluation:** Provide a \"Brutally Honest\" assessment of the options before promotion.
 3.  **Phase 3: Execution (Surgical Implementation):**
     *   **Gate:** Implement logic and tests in isolated `git worktree` environments.
     *   *Validation:** Verify behavioral correctness in a Podman container via `scripts/pulse.sh`.
 4.  **Phase 4: The Crucible Audit (The Hard Gate):**
-    *   **Gate:** Transition from "Builder" to "Auditor" persona.
-    *   **Review:** Perform a "Brutally Honest" gap analysis using **[.github/CRUCIBLE_HEURISTICS.md](.github/CRUCIBLE_HEURISTICS.md)**.
+    *   **Gate:** Transition from \"Builder\" to \"Auditor\" persona.
+    *   **Review:** Perform a \"Brutally Honest\" gap analysis using **[.github/CRUCIBLE_HEURISTICS.md](.github/CRUCIBLE_HEURISTICS.md)**.
     *   **Mentorship:** Provide instructive peer review comments in the GitHub PR.
-    *   **Finality:** Merge only after HitL approval and "Pharos Green" verification.
+    *   **Finality:** Merge only after HitL approval and \"Pharos Green\" verification.
 
 ### 2. Sub-Agent Delegation Matrix (The Context Reset)
-To prevent "Persona Schizophrenia" and ensure objective verification, the **Builder** and the **Auditor** MUST be separate, isolated sub-agent instances.
+To prevent \"Persona Schizophrenia\" and ensure objective verification, the **Builder** and the **Auditor** MUST be separate, isolated sub-agent instances.
 
 | Role | Responsibility | Tool / Mandate |
 | :--- | :--- | :--- |
@@ -163,11 +164,11 @@ To prevent "Persona Schizophrenia" and ensure objective verification, the **Buil
 - **CI/CD:** Utilize GitHub Actions for cross-compiling the Tauri binary and deploying the Astro site.
 
 ### 4. Multi-Agent Worktree Protocol (Hub/Sibling)
-To ensure isolation and prevent "Search/Artifact Pollution" during parallel engineering (ADR-0035):
+To ensure isolation and prevent \"Search/Artifact Pollution\" during parallel engineering (ADR-0035):
 - **Architecture**: All work occurs in **Sibling** directories checked out from a central **Bare Hub** (`<project>-hub/`).
 - **Mandatory Isolation**: AI agents are restricted to their assigned Sibling directory. They MUST NOT search or read files from other Siblings.
 - **Mount Integrity**: Each Sibling MUST be mounted independently into Podman. Path-based assumptions (e.g., `../package.json`) are prohibited unless verified within the Sibling context.
-- **Cleanup**: Sibling directories MUST be removed (`git worktree remove`) immediately after the branch is merged into `main` to prevent "Ghost Worktrees."
+- **Cleanup**: Sibling directories MUST be removed (`git worktree remove`) immediately after the branch is merged into `main` to prevent \"Ghost Worktrees.\"
 - **Resilience Protocol (ADR-0039)**:
     - **Session Context**: Every Sibling MUST contain a `SESSION_CONTEXT.md` defining the current goal, strategy (Crucible Result), and verification plan.
     - **Handshake**: Sub-agents MUST read `SESSION_CONTEXT.md` as their first action.
