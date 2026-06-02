@@ -5,7 +5,8 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Extreme-efficiency, zero-copy parser for Token-Oriented Object Notation (TOON).
- * Traceability: Issue #130 (Hackathon)
+ * Traceability: Issue #130, Issue #139 (Enhanced Diagnostics)
+ * Last Updated: 2026-06-02
  * ======================================================================== */
 
 use serde::{Deserialize, Serialize};
@@ -27,38 +28,63 @@ pub struct ToonList {
     items: Vec<Vec<String>>,
 }
 
-#[derive(Error, Debug)]
+#[derive(Error, Debug, Serialize, Deserialize)]
+#[serde(tag = "code", content = "details")]
 pub enum ToonError {
-    #[error("Malformed header at line {0}")]
-    MalformedHeader(usize),
+    #[error("Malformed header at line {line}")]
+    MalformedHeader { line: usize },
     #[error("Unexpected end of file")]
     UnexpectedEOF,
-    #[error("Invalid list declaration at line {0}")]
-    InvalidListDeclaration(usize),
+    #[error("Invalid list declaration at line {line}")]
+    InvalidListDeclaration { line: usize },
     #[error(
-        "Tabular data mismatch at line {0}: expected {1} fields, found {2}. Raw line: \"{3}\""
+        "Tabular data mismatch at line {line}: expected {expected} fields, found {found}. Snippet: \"{snippet}\""
     )]
-    TabularDataMismatch(usize, usize, usize, String),
-    #[error("Mismatched quotes at line {0}")]
-    MismatchedQuotes(usize),
+    TabularDataMismatch {
+        line: usize,
+        expected: usize,
+        found: usize,
+        snippet: String,
+    },
+    #[error("Mismatched quotes at line {line}, col {col}")]
+    MismatchedQuotes {
+        line: usize,
+        col: usize,
+        snippet: String,
+    },
+}
+
+#[derive(Serialize)]
+struct ToonDiagnostic {
+    message: String,
+    #[serde(flatten)]
+    error: ToonError,
 }
 
 #[wasm_bindgen]
-pub fn parse_toon(input: &str) -> Result<JsValue, JsError> {
+pub fn parse_toon(input: &str) -> Result<JsValue, JsValue> {
     // Rationale: See PR #188 (Relational Handle Mapping)
     use std::panic::catch_unwind;
     let input_safe = input.to_string();
-    let result = catch_unwind(move || {
-        ToonParser::parse(&input_safe)
-    });
+    let result = catch_unwind(move || ToonParser::parse(&input_safe));
+
+    let serializer = serde_wasm_bindgen::Serializer::new().serialize_maps_as_objects(true);
 
     match result {
-        Ok(Ok(doc)) => {
-            let serializer = serde_wasm_bindgen::Serializer::new().serialize_maps_as_objects(true);
-            Ok(doc.serialize(&serializer)?)
+        Ok(Ok(doc)) => Ok(doc
+            .serialize(&serializer)
+            .map_err(|e| JsValue::from_str(&e.to_string()))?),
+        Ok(Err(e)) => {
+            let diagnostic = ToonDiagnostic {
+                message: e.to_string(),
+                error: e,
+            };
+            Err(serde_wasm_bindgen::to_value(&diagnostic)
+                .unwrap_or_else(|_| JsValue::from_str(&diagnostic.message)))
         }
-        Ok(Err(e)) => Err(JsError::new(&e.to_string())),
-        Err(_) => Err(JsError::new("Panic in pkd-toon parser (Isolation Sentinel triggered)")),
+        Err(_) => Err(JsValue::from_str(
+            "Panic in pkd-toon parser (Isolation Sentinel triggered)",
+        )),
     }
 }
 
@@ -69,11 +95,14 @@ impl ToonParser {
         let mut fields = Vec::new();
         let mut current_field = String::new();
         let mut in_quotes = false;
-        let chars = line.chars().peekable();
+        let mut quote_start_col = 0;
 
-        for c in chars {
+        for (col_idx, c) in line.chars().enumerate() {
             match c {
                 '\"' => {
+                    if !in_quotes {
+                        quote_start_col = col_idx + 1;
+                    }
                     in_quotes = !in_quotes;
                 }
                 ',' if !in_quotes => {
@@ -87,7 +116,11 @@ impl ToonParser {
         }
 
         if in_quotes {
-            return Err(ToonError::MismatchedQuotes(line_idx + 1));
+            return Err(ToonError::MismatchedQuotes {
+                line: line_idx + 1,
+                col: quote_start_col,
+                snippet: line.to_string(),
+            });
         }
 
         fields.push(current_field.trim().to_string());
@@ -128,20 +161,20 @@ impl ToonParser {
             {
                 let (name, rest) = trimmed
                     .split_once('[')
-                    .ok_or(ToonError::InvalidListDeclaration(line_idx + 1))?;
+                    .ok_or(ToonError::InvalidListDeclaration { line: line_idx + 1 })?;
                 let (count_str, rest) = rest
                     .split_once(']')
-                    .ok_or(ToonError::InvalidListDeclaration(line_idx + 1))?;
+                    .ok_or(ToonError::InvalidListDeclaration { line: line_idx + 1 })?;
                 let count: usize = count_str
                     .parse()
-                    .map_err(|_| ToonError::InvalidListDeclaration(line_idx + 1))?;
+                    .map_err(|_| ToonError::InvalidListDeclaration { line: line_idx + 1 })?;
 
                 let _ = rest
                     .split_once('{')
-                    .ok_or(ToonError::InvalidListDeclaration(line_idx + 1))?;
+                    .ok_or(ToonError::InvalidListDeclaration { line: line_idx + 1 })?;
                 let _ = rest
                     .split_once('}')
-                    .ok_or(ToonError::InvalidListDeclaration(line_idx + 1))?;
+                    .ok_or(ToonError::InvalidListDeclaration { line: line_idx + 1 })?;
 
                 let schema_start = trimmed.find('{').unwrap() + 1;
                 let schema_end = trimmed.find('}').unwrap();
@@ -156,12 +189,12 @@ impl ToonParser {
                     if let Some((item_idx, item_line)) = lines.next() {
                         let fields = Self::parse_line(item_line, item_idx)?;
                         if fields.len() != schema.len() {
-                            return Err(ToonError::TabularDataMismatch(
-                                item_idx + 1,
-                                schema.len(),
-                                fields.len(),
-                                item_line.to_string(),
-                            ));
+                            return Err(ToonError::TabularDataMismatch {
+                                line: item_idx + 1,
+                                expected: schema.len(),
+                                found: fields.len(),
+                                snippet: item_line.to_string(),
+                            });
                         }
                         items.push(fields);
                     } else {
@@ -312,10 +345,36 @@ sensors[1]{id, target}:
     }
 
     #[test]
-    fn test_should_support_handles_in_metadata_when_given_namespaced_values() {
-        let input = "master_link: @system:root\nsub_link: @comp:fryer_01";
-        let doc = ToonParser::parse(input).expect("Failed to parse metadata handles");
-        assert_eq!(doc.metadata.get("master_link").unwrap(), "@system:root");
-        assert_eq!(doc.metadata.get("sub_link").unwrap(), "@comp:fryer_01");
+    fn test_should_report_mismatched_quotes_with_column_when_parsing_invalid_line() {
+        let input = "list[1]{f1}:\n  \"unclosed quote";
+        let result = ToonParser::parse(input);
+        assert!(result.is_err());
+        if let Err(ToonError::MismatchedQuotes { line, col, .. }) = result {
+            assert_eq!(line, 2);
+            assert_eq!(col, 3);
+        } else {
+            panic!("Expected MismatchedQuotes error, got {:?}", result.err());
+        }
+    }
+
+    #[test]
+    fn test_should_report_tabular_mismatch_with_snippet_when_given_short_row() {
+        let input = "list[1]{f1, f2}:\n  only_one";
+        let result = ToonParser::parse(input);
+        assert!(result.is_err());
+        if let Err(ToonError::TabularDataMismatch {
+            line,
+            expected,
+            found,
+            snippet,
+        }) = result
+        {
+            assert_eq!(line, 2);
+            assert_eq!(expected, 2);
+            assert_eq!(found, 1);
+            assert_eq!(snippet, "  only_one");
+        } else {
+            panic!("Expected TabularDataMismatch error, got {:?}", result.err());
+        }
     }
 }

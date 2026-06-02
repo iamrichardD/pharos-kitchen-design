@@ -5,8 +5,9 @@
  * File: apps/marketing/src/components/ToonLoader.astro
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
- * Purpose: Client-side WASM loader for TOON-encoded blog posts. Updated for Design System Alignment.
- * Traceability: Issue #175
+ * Purpose: Client-side WASM loader for TOON-encoded blog posts. Updated for Enhanced Diagnostics.
+ * Traceability: Issue #175, Issue #139
+ * Last Updated: 2026-06-02
  * ======================================================================== */
 
 interface Props {
@@ -160,10 +161,23 @@ const { content } = Astro.props;
         } catch (innerError) {
           console.error("Individual TOON Parse Error:", innerError);
           const errorMsg = container.querySelector('.toon-error-msg');
-          if (errorMsg && innerError instanceof Error) {
-            const rawToon = (container as HTMLElement).dataset.toon || '';
-            const snippet = rawToon.substring(0, 100).replace(/\n/g, ' ');
-            errorMsg.textContent = `Verification Error: ${innerError.message} | Payload: ${snippet}...`;
+          if (errorMsg) {
+            const err = innerError as any;
+            const message = err.message || String(innerError);
+            const details = err.details;
+
+            if (details && details.line) {
+              errorMsg.innerHTML = `
+                <div class="font-bold mb-1 text-red-500 uppercase tracking-tighter">Verification Failure (L${details.line}${details.col ? ':C' + details.col : ''})</div>
+                <div class="opacity-80 mb-3">${message}</div>
+                ${details.snippet ? `<pre class="bg-black/40 p-3 rounded text-[10px] text-left overflow-x-auto border border-red-500/20 text-red-400 font-mono leading-tight">${details.snippet}</pre>` : ''}
+              `;
+              errorMsg.classList.remove('max-w-xs', 'mx-auto'); // Allow more space for snippets
+            } else {
+              const rawToon = (container as HTMLElement).dataset.toon || '';
+              const snippet = rawToon.substring(0, 100).replace(/\n/g, ' ');
+              errorMsg.textContent = `Verification Error: ${message} | Payload: ${snippet}...`;
+            }
           }
           if (status) status.classList.add('hidden');
           if (fallback) fallback.classList.remove('hidden');
