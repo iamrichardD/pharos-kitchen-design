@@ -1,0 +1,56 @@
+# ========================================================================
+# Project: Pharos Kitchen Design (Project Prism)
+# Component: CI/CD / Auth-Bridge Deployment
+# File: deploy-auth.yml
+# Author: Richard D. (https://github.com/iamrichardd)
+# License: FSL-1.1 (See LICENSE file for details)
+# Purpose: Deploys the Auth-Bridge Worker and manages encrypted secrets.
+# Traceability: Issue #206, ADR 0049, ADR 0016
+# Last Updated: 2026-06-03
+# ========================================================================
+
+name: "🔐 Deploy Auth Bridge"
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'packages/auth-bridge/**'
+      - '.github/workflows/deploy-auth.yml'
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  deploy:
+    name: "🚀 Deploy Worker"
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+      - name: "🛒 Checkout Code"
+        uses: actions/checkout@v4
+
+      - name: "🏗️ Setup Node.js"
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: "📦 Install Dependencies"
+        run: npm ci
+        working-directory: packages/auth-bridge
+
+      - name: "🚀 Deploy to Cloudflare"
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: 'packages/auth-bridge'
+          command: |
+            # 1. Inject the JWT_SECRET as an encrypted Cloudflare Secret
+            echo "${{ secrets.JWT_SECRET }}" | npx wrangler secret put JWT_SECRET
+            
+            # 2. Deploy the Worker logic
+            npx wrangler deploy
