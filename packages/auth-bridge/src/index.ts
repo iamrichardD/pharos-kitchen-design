@@ -13,7 +13,7 @@ import { nanoid } from 'nanoid';
 import { jwtVerify, SignJWT } from 'jose';
 import { Buffer } from 'node:buffer';
 import { AuthRepository, IAuthRepository } from './db';
-import { PasskeyService } from './service';
+import { PasskeyService, WebAuthnRegistrationDTO, WebAuthnAuthenticationDTO } from './service';
 
 interface Env {
   DB: D1Database;
@@ -36,10 +36,17 @@ const router = Router<PharosRequest, [Env, any]>();
 
 // --- Utilities ---
 
+/**
+ * Validates the core configuration and fails fast if missing.
+ */
+function assertConfig(env: Env) {
+    if (!env.JWT_SECRET && env.DEBUG !== 'true') {
+        throw new Error('SEC_ERR: JWT_SECRET is missing. Fail-fast sentinel triggered.');
+    }
+}
+
 async function verifyLocalToken(token: string, env: Env) {
-  if (!env.JWT_SECRET && env.DEBUG !== 'true') {
-    throw new Error('SEC_ERR: JWT_SECRET is missing. Fail-fast sentinel triggered.');
-  }
+  assertConfig(env);
   const secret = new TextEncoder().encode(env.JWT_SECRET || 'fallback_secret_for_dev_only');
   try {
     const { payload } = await jwtVerify(token, secret);
@@ -50,9 +57,7 @@ async function verifyLocalToken(token: string, env: Env) {
 }
 
 async function signLocalToken(payload: any, env: Env, expiresIn: string = '1h') {
-  if (!env.JWT_SECRET && env.DEBUG !== 'true') {
-    throw new Error('SEC_ERR: JWT_SECRET is missing. Fail-fast sentinel triggered.');
-  }
+  assertConfig(env);
   const secret = new TextEncoder().encode(env.JWT_SECRET || 'fallback_secret_for_dev_only');
   return await new SignJWT(payload)
     .setProtectedHeader({ alg: 'HS256' })
@@ -116,15 +121,15 @@ router.post('/auth/register/options', withRepo, async (request, env: Env) => {
   user = { id: nanoid(), username, role: 'IKD', created_at: Date.now() };
   await request.repo.createUser(user);
 
-  const options = await request.passkey.generateRegistrationOptions(user.id, user.username);
+  const { options, pkd_metadata } = await request.passkey.generateRegistrationOptions(user.id, user.username);
 
   const challengeToken = await signLocalToken({ challenge: options.challenge, userId: user.id }, env, '5m');
 
-  return new Response(JSON.stringify({ options, challengeToken }), { headers: { 'Content-Type': 'application/json' } });
+  return new Response(JSON.stringify({ options, challengeToken, pkd_metadata }), { headers: { 'Content-Type': 'application/json' } });
 });
 
 router.post('/auth/register/verify', withRepo, async (request, env: Env) => {
-  const { response, challengeToken } = await request.json() as any;
+  const { response, challengeToken } = await request.json() as { response: WebAuthnRegistrationDTO, challengeToken: string };
 
   try {
     const { challenge, userId } = await verifyLocalToken(challengeToken, env) as any;
@@ -149,15 +154,15 @@ router.post('/auth/login/options', withRepo, async (request, env: Env) => {
   const user = await request.repo.getUserByUsername(username);
   if (!user) return new Response(JSON.stringify({ error: 'user_not_found' }), { status: 400 });
 
-  const options = await request.passkey.generateAuthenticationOptions(user.id);
+  const { options, pkd_metadata } = await request.passkey.generateAuthenticationOptions(user.id);
 
   const challengeToken = await signLocalToken({ challenge: options.challenge, userId: user.id }, env, '5m');
 
-  return new Response(JSON.stringify({ options, challengeToken }), { headers: { 'Content-Type': 'application/json' } });
+  return new Response(JSON.stringify({ options, challengeToken, pkd_metadata }), { headers: { 'Content-Type': 'application/json' } });
 });
 
 router.post('/auth/login/verify', withRepo, async (request, env: Env) => {
-  const { response, challengeToken } = await request.json() as any;
+  const { response, challengeToken } = await request.json() as { response: WebAuthnAuthenticationDTO, challengeToken: string };
 
   try {
     const { challenge, userId } = await verifyLocalToken(challengeToken, env) as any;
@@ -219,7 +224,7 @@ router.post('/auth/token', withRepo, async (request, env: Env) => {
 });
 
 router.post('/auth/confirm', withRepo, async (request, env: Env) => {
-  const { user_code, access_token } = await request.json() as any;
+  const { user_code, access_token } = await request.json() as { user_code: string, access_token: string };
   try {
     const payload = await verifyLocalToken(access_token, env) as any;
     const sub = payload.sub;

@@ -5,9 +5,8 @@
  * License: FSL-1.1 (See LICENSE file for details)
  * File: src/pages/verify.astro
  * Author: Richard D. (https://github.com/iamrichardd)
- * License: FSL-1.1 (See LICENSE file for details)
- * Purpose: Device Authorization Handshake (RFC 8628) Verification Page.
- * Traceability: ADR 0018, ADR 0021, Issue #7, Issue #81
+ * Purpose: Device Authorization Handshake (RFC 8628) Verification Page with Passkeys.
+ * Traceability: ADR 0018, ADR 0021, Issue #7, Issue #206
  * ======================================================================== */
 
 import BaseLayout from "../layouts/BaseLayout.astro";
@@ -24,9 +23,15 @@ import BaseLayout from "../layouts/BaseLayout.astro";
         <h1 class="text-4xl font-bold mb-4 font-mono tracking-tighter italic uppercase text-text-base">
           VERIFY_DEVICE
         </h1>
-        <p class="text-text-muted mb-10 text-sm leading-relaxed font-mono">
+        <p class="text-text-muted mb-6 text-sm leading-relaxed font-mono">
           Enter the code displayed on your device and authenticate to link your identity.
         </p>
+
+        <!-- Kathy Sierra UX Hook: Empowering Context -->
+        <div id="ux-hook-container" class="hidden mb-6 text-left border-l-2 border-ph-blue pl-4 py-2 bg-ph-blue/5">
+            <h3 id="ux-hook-title" class="text-ph-blue font-bold text-sm tracking-widest uppercase mb-1">Secure Identity</h3>
+            <p id="ux-hook-text" class="text-text-muted text-xs font-mono leading-relaxed"></p>
+        </div>
 
         <form id="verify-form" class="space-y-6">
           <div class="space-y-2 text-left">
@@ -44,16 +49,9 @@ import BaseLayout from "../layouts/BaseLayout.astro";
             />
           </div>
 
-          <!-- Added Email/Password fields for direct SRP login -->
-          <div class="space-y-4 text-left">
-            <div class="space-y-2">
-                <label for="email" class="block text-[10px] font-mono text-ph-blue uppercase tracking-widest">[IDENTITY_EMAIL]</label>
-                <input type="email" id="email" name="email" required class="w-full bg-bg-base/60 border border-border-blueprint/20 px-3 py-2 font-mono text-text-base text-sm focus:outline-none focus:border-ph-orange" />
-            </div>
-            <div class="space-y-2">
-                <label for="password" class="block text-[10px] font-mono text-ph-blue uppercase tracking-widest">[IDENTITY_SECRET]</label>
-                <input type="password" id="password" name="password" required class="w-full bg-bg-base/60 border border-border-blueprint/20 px-3 py-2 font-mono text-text-base text-sm focus:outline-none focus:border-ph-orange" />
-            </div>
+          <div class="space-y-2 text-left">
+            <label for="username" class="block text-[10px] font-mono text-ph-blue uppercase tracking-widest">[AUTHORITY_HANDLE]</label>
+            <input type="text" id="username" name="username" placeholder="designer@studio.com" required class="w-full bg-bg-base/60 border border-border-blueprint/20 px-3 py-2 font-mono text-text-base text-sm focus:outline-none focus:border-ph-orange" />
           </div>
 
           <div id="status-container" class="hidden text-xs font-mono py-2 px-4 border-l-2 border-ph-orange bg-ph-orange/10 text-ph-orange text-left mb-6">
@@ -65,7 +63,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
             id="submit-btn"
             class="w-full bg-ph-blue text-ph-charcoal font-bold py-4 hover:bg-white transition-colors uppercase tracking-widest text-sm"
           >
-            Authorize Device
+            Initiate Secure Handshake
           </button>
         </form>
 
@@ -73,7 +71,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
             <div class="text-ph-pulse text-6xl mb-4">✓</div>
             <h2 class="text-2xl font-bold text-text-base uppercase tracking-tighter">Device Authorized</h2>
             <p class="text-text-muted text-sm leading-relaxed font-mono">
-              The cryptographic handshake is complete. You can now return to your device.
+              The cryptographic hardware handshake is complete. You can now return to your Revit workstation.
             </p>
             <a href="/pharos-kitchen-design/roadmap" class="inline-block mt-8 text-ph-blue hover:text-white transition-colors font-mono text-xs uppercase tracking-widest">
                 Return to Matrix >>
@@ -85,23 +83,18 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 </BaseLayout>
 
 <script>
-  import { Amplify } from 'aws-amplify';
-  import { signIn, fetchAuthSession } from 'aws-amplify/auth';
+  import { startAuthentication, startRegistration } from '@simplewebauthn/browser';
 
-  // Configure Amplify from env variables (Astro handles these)
-  Amplify.configure({
-    Auth: {
-      Cognito: {
-        userPoolId: import.meta.env.PUBLIC_COGNITO_USER_POOL_ID,
-        userPoolClientId: import.meta.env.PUBLIC_COGNITO_CLIENT_ID,
-      }
-    }
-  });
-  
+  const AUTH_URL = 'http://localhost:8787'; // Dev fallback, should be environment driven
+
   const form = document.getElementById('verify-form') as HTMLFormElement;
   const statusContainer = document.getElementById('status-container');
   const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
   const successContainer = document.getElementById('success-container');
+  
+  const uxHookContainer = document.getElementById('ux-hook-container');
+  const uxHookTitle = document.getElementById('ux-hook-title');
+  const uxHookText = document.getElementById('ux-hook-text');
 
   const showStatus = (msg: string, isError = false) => {
     if (!statusContainer) return;
@@ -111,61 +104,101 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     statusContainer.style.color = isError ? '#ef4444' : '#f97316';
   };
 
+  const showUXHook = (title: string, text: string) => {
+      if (uxHookContainer && uxHookTitle && uxHookText) {
+          uxHookTitle.innerText = title;
+          uxHookText.innerText = text;
+          uxHookContainer.classList.remove('hidden');
+      }
+  }
+
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const formData = new FormData(form);
     const user_code = formData.get('user_code') as string;
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
+    const username = formData.get('username') as string;
 
     submitBtn.disabled = true;
     submitBtn.innerText = "AUTHORIZING...";
-    showStatus("Initiating Cognito SRP Handshake...");
+    showStatus("Locating identity shards...");
 
     try {
-        // 1. Authenticate with Cognito
-        const { isSignedIn, nextStep } = await signIn({ username: email, password });
-        
-        if (!isSignedIn) {
-            throw new Error(`Authentication incomplete: ${nextStep.signInStep}`);
+        // 1. Fetch Auth Options
+        const optionsRes = await fetch(`${AUTH_URL}/auth/login/options`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username })
+        });
+
+        if (!optionsRes.ok) {
+            const errData = await optionsRes.json() as any;
+            if (errData.error === 'user_not_found') {
+                showStatus("Identity not found. To register a new Passkey, please use the CLI directly.");
+                throw new Error("Identity not found.");
+            }
+            throw new Error("Failed to initialize security challenge.");
         }
 
-        showStatus("Persona Verified. Retrieving Cryptographic Proof...");
+        const { options, challengeToken, pkd_metadata } = await optionsRes.json() as any;
         
-        // 2. Get the current session tokens
-        const session = await fetchAuthSession();
-        const idToken = session.tokens?.idToken?.toString();
-        const accessToken = session.tokens?.accessToken?.toString();
-        const refreshToken = session.tokens?.accessToken?.toString(); // Cognito Refresh is handled differently but we pass it for the bridge
-        const sub = session.userSub;
+        // Kathy Sierra UX Hook: Show empowering message before hardware prompt
+        if (pkd_metadata) {
+            showUXHook(pkd_metadata.title, pkd_metadata.hook);
+        }
+
+        showStatus("Awaiting hardware confirmation...");
+
+        // 2. Browser Passkey Prompt
+        let asseResp;
+        try {
+            asseResp = await startAuthentication({ optionsJSON: options });
+        } catch (error: any) {
+            throw new Error(`Hardware verification cancelled or failed: ${error.message}`);
+        }
+
+        showStatus("Verifying cryptographic proof...");
+
+        // 3. Verify Authentication
+        const verifyRes = await fetch(`${AUTH_URL}/auth/login/verify`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                response: asseResp,
+                challengeToken
+            })
+        });
+
+        if (!verifyRes.ok) {
+            throw new Error("Failed to verify hardware identity.");
+        }
+
+        const { access_token } = await verifyRes.json() as any;
 
         showStatus("Linking Edge Bridge...");
         
-        // 3. Call the Auth Bridge (Worker) to approve the device code
-        const response = await fetch('https://auth.iamrichardd.com/auth/confirm', {
+        // 4. Call the Auth Bridge (Worker) to approve the device code
+        const confirmRes = await fetch(`${AUTH_URL}/auth/confirm`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 user_code: user_code.replace('-', '').toUpperCase(),
-                sub,
-                access_token: accessToken,
-                id_token: idToken,
-                refresh_token: refreshToken
+                access_token
             })
         });
 
-        if (!response.ok) {
-            const err = await response.json() as any;
+        if (!confirmRes.ok) {
+            const err = await confirmRes.json() as any;
             throw new Error(err.error || "Bridge handshake failed");
         }
 
         form.classList.add('hidden');
+        uxHookContainer?.classList.add('hidden');
         successContainer?.classList.remove('hidden');
 
     } catch (err: any) {
         showStatus(err.message, true);
         submitBtn.disabled = false;
-        submitBtn.innerText = "Authorize Device";
+        submitBtn.innerText = "Initiate Secure Handshake";
     }
   });
 
@@ -179,7 +212,3 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     input.value = value;
   });
 </script>
-
-<style>
-  /* Local overrides removed in favor of global blueprint utilities */
-</style>

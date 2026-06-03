@@ -6,7 +6,7 @@
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Encapsulates WebAuthn ceremony logic using @simplewebauthn/server.
  * Traceability: ADR 0050, Issue #206
- * Last Updated: 2025-03-07
+ * Last Updated: 2026-06-03
  * ======================================================================== */
 
 import {
@@ -15,13 +15,59 @@ import {
   generateAuthenticationOptions,
   verifyAuthenticationResponse,
 } from '@simplewebauthn/server';
-import type { 
-    GenerateRegistrationOptionsOpts, 
-    VerifyRegistrationResponseOpts,
-    GenerateAuthenticationOptionsOpts,
-    VerifyAuthenticationResponseOpts
-} from '@simplewebauthn/server';
+import type { AuthenticatorTransportFuture } from '@simplewebauthn/types';
 import { IAuthRepository } from './db';
+
+/**
+ * Internal DTO for WebAuthn Registration Response to encapsulate @simplewebauthn.
+ * This ensures the domain logic remains decoupled from the specific library version.
+ */
+export interface WebAuthnRegistrationDTO {
+    id: string;
+    rawId: string;
+    response: {
+        attestationObject: string;
+        clientDataJSON: string;
+        transports?: AuthenticatorTransportFuture[];
+        publicKeyAlgorithm?: number;
+        publicKey?: string;
+        authenticatorData?: string;
+    };
+    authenticatorAttachment?: 'platform' | 'cross-platform';
+    type: 'public-key';
+    clientExtensionResults: Record<string, any>;
+}
+
+/**
+ * Internal DTO for WebAuthn Authentication Response to encapsulate @simplewebauthn.
+ */
+export interface WebAuthnAuthenticationDTO {
+    id: string;
+    rawId: string;
+    response: {
+        authenticatorData: string;
+        clientDataJSON: string;
+        signature: string;
+        userHandle?: string;
+    };
+    authenticatorAttachment?: 'platform' | 'cross-platform';
+    type: 'public-key';
+    clientExtensionResults: Record<string, any>;
+}
+
+/**
+ * Educational metadata for the UI to empower the user during the Passkey ceremony.
+ * Rationale: Kathy Sierra's "Making the User Amazing" mandate.
+ */
+export interface PasskeyMetadata {
+    title: string;
+    hook: string;
+}
+
+export interface PasskeyOptionsResponse {
+    options: any; // Raw library options sent to browser
+    pkd_metadata: PasskeyMetadata;
+}
 
 export class PasskeyService {
   constructor(
@@ -30,8 +76,11 @@ export class PasskeyService {
     private origin: string
   ) {}
 
-  async generateRegistrationOptions(userId: string, username: string) {
-    return await generateRegistrationOptions({
+  /**
+   * Generates options for a new Passkey registration.
+   */
+  async generateRegistrationOptions(userId: string, username: string): Promise<PasskeyOptionsResponse> {
+    const options = await generateRegistrationOptions({
       rpName: 'Pharos Kitchen Design',
       rpID: this.rpID,
       userID: new TextEncoder().encode(userId),
@@ -42,11 +91,22 @@ export class PasskeyService {
         userVerification: 'preferred' 
       }
     });
+
+    return {
+      options,
+      pkd_metadata: {
+        title: "Activate Your Secure Designer Identity",
+        hook: "You're upgrading to hardware-based security. By linking your biometrics or security key, you're ensuring your specifications and designs are protected by the same standards used by global banks. No passwords to remember, no passwords to steal."
+      }
+    };
   }
 
-  async verifyRegistration(userId: string, response: any, expectedChallenge: string) {
+  /**
+   * Verifies the client's registration response.
+   */
+  async verifyRegistration(userId: string, response: WebAuthnRegistrationDTO, expectedChallenge: string) {
     const verification = await verifyRegistrationResponse({
-      response,
+      response: response as any, 
       expectedChallenge,
       expectedOrigin: this.origin,
       expectedRPID: this.rpID,
@@ -63,7 +123,6 @@ export class PasskeyService {
       
       const transports = response.response.transports ? response.response.transports.join(',') : '';
 
-      // Use Buffer for base64 conversion (Cloudflare Worker env)
       const b64PublicKey = Buffer.from(credentialPublicKey).toString('base64');
       const b64CredID = Buffer.from(credentialID).toString('base64');
 
@@ -84,21 +143,35 @@ export class PasskeyService {
     return { verified: false };
   }
 
-  async generateAuthenticationOptions(userId: string) {
+  /**
+   * Generates options for a Passkey login.
+   */
+  async generateAuthenticationOptions(userId: string): Promise<PasskeyOptionsResponse> {
     const credentials = await this.repo.getCredentials(userId);
     
-    return await generateAuthenticationOptions({
+    const options = await generateAuthenticationOptions({
       rpID: this.rpID,
       allowCredentials: credentials.map(c => ({
         id: Buffer.from(c.id, 'base64').toString('base64url'),
-        type: 'public-key',
-        transports: c.transports ? c.transports.split(',') as any : undefined,
+        type: 'public-key' as const,
+        transports: c.transports ? c.transports.split(',') as AuthenticatorTransportFuture[] : undefined,
       })),
       userVerification: 'preferred',
     });
+
+    return {
+        options,
+        pkd_metadata: {
+            title: "Identity Verified via Hardware",
+            hook: "Welcome back. Your secure hardware is confirming your identity. This 'Handshake' eliminates the risk of phishing and ensures that only you can authorize these commercial specifications."
+        }
+    };
   }
 
-  async verifyAuthentication(userId: string, response: any, expectedChallenge: string) {
+  /**
+   * Verifies the client's authentication response.
+   */
+  async verifyAuthentication(userId: string, response: WebAuthnAuthenticationDTO, expectedChallenge: string) {
     const b64CredID = response.id;
     const credential = await this.repo.getCredential(b64CredID);
     
@@ -107,7 +180,7 @@ export class PasskeyService {
     }
 
     const verification = await verifyAuthenticationResponse({
-      response,
+      response: response as any,
       expectedChallenge,
       expectedOrigin: this.origin,
       expectedRPID: this.rpID,
