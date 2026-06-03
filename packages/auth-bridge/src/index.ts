@@ -65,7 +65,7 @@ async function verifyLocalToken(token: string, secretString: string): Promise<Ph
 
 async function signLocalToken(payload: PharosJwtPayload, secretString: string, expiresIn: string = '1h') {
   const secret = new TextEncoder().encode(secretString);
-  return await new SignJWT(payload as any)
+  return await new SignJWT(payload)
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime(expiresIn)
