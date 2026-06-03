@@ -74,7 +74,7 @@
     - Verified 🟢 PHAROS GREEN in Podman with 12 integration tests.
     - **DORA Metrics (Production Audit)**:
         - Lead Time: 4.5 Hours.
-        - Operational CFR: 80% (Pipeline permission and configuration remediation required 4 iterations).
+        - Change Failure Rate (CFR): 80% (Pipeline permission and configuration remediation required 4 iterations).
 - [ ] **Issue #207**: Task 5.8: Lossless Authoritative Log Restructure. [ECT: 3]
 - [ ] **Issue #208**: Task 5.9: Implement Automated Roadmap Synchronization (The Sync Engine). [ECT: 3] (Blocked by #207)
 - [ ] **Issue #204**: Task 5.5: Implement Multi-Org Pulse Filtering & Delegate Enforcement. [ECT: 4]
