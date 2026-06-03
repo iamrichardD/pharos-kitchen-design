@@ -43,14 +43,10 @@ jobs:
         working-directory: packages/auth-bridge
 
       - name: "🚀 Deploy to Cloudflare"
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: 'packages/auth-bridge'
-          command: |
-            # 1. Inject the JWT_SECRET as an encrypted Cloudflare Secret
-            echo "${{ secrets.JWT_SECRET }}" | npx wrangler secret put JWT_SECRET
-            
-            # 2. Deploy the Worker logic
-            npx wrangler deploy
+        run: |
+          echo "${{ secrets.JWT_SECRET }}" | npx wrangler secret put JWT_SECRET
+          npx wrangler deploy
+        working-directory: packages/auth-bridge
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
