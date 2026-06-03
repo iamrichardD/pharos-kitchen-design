@@ -5,7 +5,6 @@ compatibility_flags = ["nodejs_compat"]
 
 [vars]
 VERIFICATION_URI = "https://iamrichardd.com/pharos-kitchen-design/verify"
-JWT_SECRET = "REPLACE_WITH_SECURE_SECRET"
 RP_ID = "iamrichardd.com"
 EXPECTED_ORIGIN = "https://iamrichardd.com"
 

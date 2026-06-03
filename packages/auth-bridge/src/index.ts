@@ -25,14 +25,21 @@ interface Env {
   REPO?: IAuthRepository; // Optional injection for testing
 }
 
+export interface PharosJwtPayload {
+  sub?: string;
+  userId?: string;
+  role?: string;
+  challenge?: string;
+}
+
 interface PharosRequest extends IRequest {
-  user?: any;
+  user?: PharosJwtPayload;
   impersonatedUser?: string;
   repo: IAuthRepository;
   passkey: PasskeyService;
 }
 
-const router = Router<PharosRequest, [Env, any]>();
+const router = Router<PharosRequest, [Env, unknown]>();
 
 // --- Utilities ---
 
@@ -40,27 +47,25 @@ const router = Router<PharosRequest, [Env, any]>();
  * Validates the core configuration and fails fast if missing.
  */
 function assertConfig(env: Env) {
-    if (!env.JWT_SECRET && env.DEBUG !== 'true') {
-        throw new Error('SEC_ERR: JWT_SECRET is missing. Fail-fast sentinel triggered.');
+    if ((!env.JWT_SECRET || env.JWT_SECRET === 'REPLACE_WITH_SECURE_SECRET') && env.DEBUG !== 'true') {
+        throw new Error('SEC_ERR: JWT_SECRET is missing or using placeholder. Fail-fast sentinel triggered.');
     }
 }
 
-async function verifyLocalToken(token: string, env: Env): Promise<{ challenge?: string, userId?: string, sub?: string, role?: string }> {
-  assertConfig(env);
-  const secret = new TextEncoder().encode(env.JWT_SECRET || 'fallback_secret_for_dev_only');
+async function verifyLocalToken(token: string, secretString: string): Promise<PharosJwtPayload> {
+  const secret = new TextEncoder().encode(secretString);
   try {
     const { payload } = await jwtVerify(token, secret);
-    return payload as { challenge?: string, userId?: string, sub?: string, role?: string };
+    return payload as PharosJwtPayload;
   } catch (e: unknown) {
     const err = e as Error;
     throw new Error(`Authentication failed: ${err.message}`);
   }
 }
 
-async function signLocalToken(payload: any, env: Env, expiresIn: string = '1h') {
-  assertConfig(env);
-  const secret = new TextEncoder().encode(env.JWT_SECRET || 'fallback_secret_for_dev_only');
-  return await new SignJWT(payload)
+async function signLocalToken(payload: PharosJwtPayload, secretString: string, expiresIn: string = '1h') {
+  const secret = new TextEncoder().encode(secretString);
+  return await new SignJWT(payload as any)
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime(expiresIn)
@@ -70,6 +75,7 @@ async function signLocalToken(payload: any, env: Env, expiresIn: string = '1h') 
 // --- Middlewares ---
 
 const withRepo = (request: PharosRequest, env: Env) => {
+  assertConfig(env);
   request.repo = env.REPO || new AuthRepository(env.DB);
   request.passkey = new PasskeyService(
     request.repo, 
@@ -79,6 +85,7 @@ const withRepo = (request: PharosRequest, env: Env) => {
 };
 
 const withAuth = async (request: PharosRequest, env: Env) => {
+  assertConfig(env);
   const authHeader = request.headers.get('Authorization');
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return new Response(JSON.stringify({ error: 'unauthorized' }), { status: 401 });
@@ -86,19 +93,20 @@ const withAuth = async (request: PharosRequest, env: Env) => {
 
   const token = authHeader.split(' ')[1];
   try {
-    const payload = await verifyLocalToken(token, env);
+    const payload = await verifyLocalToken(token, env.JWT_SECRET);
     request.user = payload;
 
     const impersonateHeader = request.headers.get('X-Pharos-Impersonate');
     if (impersonateHeader) {
-      if (payload['role'] === 'ADMIN') {
+      if (payload.role === 'ADMIN') {
         request.impersonatedUser = impersonateHeader;
       } else {
         return new Response(JSON.stringify({ error: 'forbidden' }), { status: 403 });
       }
     }
-  } catch (e: any) {
-    return new Response(JSON.stringify({ error: 'unauthorized', message: e.message }), { status: 401 });
+  } catch (e: unknown) {
+    const err = e as Error;
+    return new Response(JSON.stringify({ error: 'unauthorized', message: err.message }), { status: 401 });
   }
 };
 
@@ -124,7 +132,7 @@ router.post('/auth/register/options', withRepo, async (request, env: Env) => {
 
   const { options, pkd_metadata } = await request.passkey.generateRegistrationOptions(user.id, user.username);
 
-  const challengeToken = await signLocalToken({ challenge: options.challenge, userId: user.id }, env, '5m');
+  const challengeToken = await signLocalToken({ challenge: options.challenge, userId: user.id }, env.JWT_SECRET, '5m');
 
   return new Response(JSON.stringify({ options, challengeToken, pkd_metadata }), { headers: { 'Content-Type': 'application/json' } });
 });
@@ -135,7 +143,7 @@ router.post('/auth/register/verify', withRepo, async (request, env: Env) => {
   const challengeToken = payload.challengeToken;
 
   try {
-    const tokenPayload = await verifyLocalToken(challengeToken, env);
+    const tokenPayload = await verifyLocalToken(challengeToken, env.JWT_SECRET);
     const challenge = tokenPayload.challenge as string;
     const userId = tokenPayload.userId as string;
 
@@ -143,7 +151,7 @@ router.post('/auth/register/verify', withRepo, async (request, env: Env) => {
 
     if (verification.verified) {
       const user = await request.repo.getUserById(userId);
-      const access_token = await signLocalToken({ sub: userId, role: user?.role }, env, '1h');
+      const access_token = await signLocalToken({ sub: userId, role: user?.role }, env.JWT_SECRET, '1h');
 
       return new Response(JSON.stringify({ verified: true, access_token }), { headers: { 'Content-Type': 'application/json' } });
     }
@@ -163,7 +171,7 @@ router.post('/auth/login/options', withRepo, async (request, env: Env) => {
 
   const { options, pkd_metadata } = await request.passkey.generateAuthenticationOptions(user.id);
 
-  const challengeToken = await signLocalToken({ challenge: options.challenge, userId: user.id }, env, '5m');
+  const challengeToken = await signLocalToken({ challenge: options.challenge, userId: user.id }, env.JWT_SECRET, '5m');
 
   return new Response(JSON.stringify({ options, challengeToken, pkd_metadata }), { headers: { 'Content-Type': 'application/json' } });
 });
@@ -174,7 +182,7 @@ router.post('/auth/login/verify', withRepo, async (request, env: Env) => {
   const challengeToken = payload.challengeToken;
 
   try {
-    const tokenPayload = await verifyLocalToken(challengeToken, env);
+    const tokenPayload = await verifyLocalToken(challengeToken, env.JWT_SECRET);
     const challenge = tokenPayload.challenge as string;
     const userId = tokenPayload.userId as string;
     
@@ -182,7 +190,7 @@ router.post('/auth/login/verify', withRepo, async (request, env: Env) => {
 
     if (verification.verified) {
       const user = await request.repo.getUserById(userId);
-      const access_token = await signLocalToken({ sub: userId, role: user?.role }, env, '1h');
+      const access_token = await signLocalToken({ sub: userId, role: user?.role }, env.JWT_SECRET, '1h');
       
       return new Response(JSON.stringify({ verified: true, access_token }), { headers: { 'Content-Type': 'application/json' } });
     }
@@ -238,11 +246,11 @@ router.post('/auth/token', withRepo, async (request, env: Env) => {
 router.post('/auth/confirm', withRepo, async (request, env: Env) => {
   const { user_code, access_token } = await request.json() as { user_code: string, access_token: string };
   try {
-    const payload = await verifyLocalToken(access_token, env);
+    const payload = await verifyLocalToken(access_token, env.JWT_SECRET);
     const sub = payload.sub as string;
 
-    const cli_access_token = await signLocalToken({ sub, role: payload.role }, env, '1h');
-    const cli_id_token = await signLocalToken({ sub, role: payload.role }, env, '1h');
+    const cli_access_token = await signLocalToken({ sub, role: payload.role }, env.JWT_SECRET, '1h');
+    const cli_id_token = await signLocalToken({ sub, role: payload.role }, env.JWT_SECRET, '1h');
     const cli_refresh_token = nanoid(32);
 
     const success = await request.repo.approveSession(user_code, sub, cli_access_token, cli_id_token, cli_refresh_token);
@@ -281,5 +289,12 @@ router.post('/auth/mock-approve', withRepo, async (request, env: Env) => {
 });
 
 export default {
-  fetch: (request: Request, env: Env, ctx: ExecutionContext) => router.handle(request as PharosRequest, env, ctx)
+  fetch: async (request: Request, env: Env, ctx: ExecutionContext) => {
+    try {
+      return await router.handle(request as PharosRequest, env, ctx);
+    } catch (e: unknown) {
+      const err = e as Error;
+      return new Response(JSON.stringify({ error: 'system_error', message: err.message }), { status: 500 });
+    }
+  }
 };

@@ -114,7 +114,7 @@ describe('Auth Bridge: Clean Boundaries (DIP)', () => {
     });
 
     const res = await router.fetch(req, badEnv);
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(500);
     const data = await res.json() as any;
     expect(data.message).toContain('SEC_ERR: JWT_SECRET is missing');
   });
