@@ -37,7 +37,34 @@ export interface AuthCode {
   ttl: number;
 }
 
-export class AuthRepository {
+export interface IAuthRepository {
+  // Users & Credentials
+  getUserByUsername(username: string): Promise<User | null>;
+  getUserById(id: string): Promise<User | null>;
+  createUser(user: User): Promise<void>;
+  getCredentials(userId: string): Promise<Credential[]>;
+  getCredential(id: string): Promise<Credential | null>;
+  addCredential(cred: Credential): Promise<void>;
+  updateCredentialCounter(id: string, counter: number): Promise<void>;
+
+  // Sessions
+  createSession(device_code: string, user_code: string): Promise<void>;
+  getSession(device_code: string): Promise<AuthCode | null>;
+  approveSession(
+    user_code: string,
+    sub: string,
+    access_token: string,
+    id_token: string,
+    refresh_token: string
+  ): Promise<boolean>;
+  mockApprove(device_code: string, sub: string): Promise<void>;
+
+  // Admin
+  getAllUsers(): Promise<User[]>;
+  updateUserRole(username: string, role: string): Promise<boolean>;
+}
+
+export class AuthRepository implements IAuthRepository {
   constructor(private db: D1Database) {}
 
   // --- Users & Credentials (WebAuthn) ---
