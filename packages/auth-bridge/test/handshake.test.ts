@@ -5,7 +5,7 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Integration test for the full RFC 8628 handshake.
- * Traceability: ADR 0019, ADR 0021, Issue #11
+ * Traceability: ADR 0019, ADR 0021, Issue #206
  * ======================================================================== */
 
 import { describe, it, expect, vi } from 'vitest';
@@ -19,9 +19,7 @@ const mockEnv = {
     first: vi.fn().mockResolvedValue({ status: 'PENDING' }),
   },
   VERIFICATION_URI: 'http://example.com/verify',
-  COGNITO_REGION: 'us-east-1',
-  COGNITO_USER_POOL_ID: 'us-east-1_pool',
-  COGNITO_CLIENT_ID: 'client_id',
+  JWT_SECRET: 'test_secret_for_handshake',
   DEBUG: 'true'
 } as any;
 

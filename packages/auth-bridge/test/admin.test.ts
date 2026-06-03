@@ -5,59 +5,45 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Verification of Admin orchestration and impersonation logic.
- * Traceability: Issue #12 - Admin Control Plane
+ * Traceability: Issue #206 - Passkey Migration
  * ======================================================================== */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import router from '../src/index';
+import { SignJWT } from 'jose';
 
-// Mock Cognito Client
-vi.mock('@aws-sdk/client-cognito-identity-provider', () => {
-  const mockSend = vi.fn().mockImplementation((command) => {
-    // Check for property unique to ListUsersCommand if constructor name is unreliable
-    if (command.UserPoolId && !command.Username) {
-      return Promise.resolve({
-        Users: [
-          { Username: 'test@example.com', UserStatus: 'CONFIRMED', Attributes: [{ Name: 'email', Value: 'test@example.com' }, { Name: 'custom:role', Value: 'IKD' }] }
-        ]
-      });
-    }
-    return Promise.resolve({});
-  });
-
-  return {
-    CognitoIdentityProviderClient: vi.fn().mockImplementation(function() {
-      return { send: mockSend };
-    }),
-    ListUsersCommand: vi.fn().mockImplementation(function(args) { Object.assign(this, args); }),
-    AdminUpdateUserAttributesCommand: vi.fn().mockImplementation(function(args) { Object.assign(this, args); }),
-  };
-});
-
-// Mock jose for token verification
-vi.mock('jose', () => ({
-  createRemoteJWKSet: vi.fn(),
-  jwtVerify: vi.fn().mockResolvedValue({
-    payload: {
-      sub: 'admin-sub',
-      'custom:role': 'ADMIN'
-    }
-  })
-}));
-
+// Mock DB
 const mockEnv = {
-  COGNITO_REGION: 'us-east-1',
-  COGNITO_USER_POOL_ID: 'us-east-1_pool',
-  AWS_ACCESS_KEY_ID: 'access',
-  AWS_SECRET_ACCESS_KEY: 'secret',
+  DB: {
+    prepare: vi.fn().mockReturnThis(),
+    bind: vi.fn().mockReturnThis(),
+    all: vi.fn().mockResolvedValue({
+      results: [
+        { id: '1', username: 'test@example.com', role: 'IKD', created_at: 123 }
+      ]
+    }),
+    run: vi.fn().mockResolvedValue({ meta: { changes: 1 } }),
+  },
+  JWT_SECRET: 'test_secret',
 } as any;
+
+// Helper to generate a token
+async function generateToken(payload: any) {
+  const secret = new TextEncoder().encode(mockEnv.JWT_SECRET);
+  return await new SignJWT(payload)
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
+    .setExpirationTime('1h')
+    .sign(secret);
+}
 
 describe('Admin Control Plane Endpoints', () => {
 
   it('test_should_list_users_when_requester_is_admin', async () => {
+    const token = await generateToken({ sub: 'admin', role: 'ADMIN' });
     const req = new Request('http://auth.local/admin/users', {
       method: 'GET',
-      headers: { 'Authorization': 'Bearer valid-admin-token' }
+      headers: { 'Authorization': `Bearer ${token}` }
     });
 
     const res = await router.fetch(req, mockEnv);
@@ -68,14 +54,10 @@ describe('Admin Control Plane Endpoints', () => {
   });
 
   it('test_should_deny_listing_users_when_requester_is_not_admin', async () => {
-    const { jwtVerify } = await import('jose');
-    (jwtVerify as any).mockResolvedValueOnce({
-      payload: { sub: 'user-sub', 'custom:role': 'IKD' }
-    });
-
+    const token = await generateToken({ sub: 'user', role: 'IKD' });
     const req = new Request('http://auth.local/admin/users', {
       method: 'GET',
-      headers: { 'Authorization': 'Bearer valid-user-token' }
+      headers: { 'Authorization': `Bearer ${token}` }
     });
 
     const res = await router.fetch(req, mockEnv);
@@ -85,10 +67,11 @@ describe('Admin Control Plane Endpoints', () => {
   });
 
   it('test_should_update_user_role_when_requester_is_admin', async () => {
+    const token = await generateToken({ sub: 'admin', role: 'ADMIN' });
     const req = new Request('http://auth.local/admin/users/update', {
       method: 'POST',
       headers: { 
-        'Authorization': 'Bearer valid-admin-token',
+        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({ email: 'test@example.com', role: 'ADMIN' })
@@ -101,31 +84,25 @@ describe('Admin Control Plane Endpoints', () => {
   });
 
   it('test_should_allow_impersonation_when_requester_is_admin', async () => {
+    const token = await generateToken({ sub: 'admin', role: 'ADMIN' });
     const req = new Request('http://auth.local/admin/users', {
       method: 'GET',
       headers: { 
-        'Authorization': 'Bearer valid-admin-token',
+        'Authorization': `Bearer ${token}`,
         'X-Pharos-Impersonate': 'target-user-sub'
       }
     });
 
-    // We don't have a way to easily check the internal request state here 
-    // without more complex mocking, but we can verify it doesn't crash 
-    // and returns 200.
     const res = await router.fetch(req, mockEnv);
     expect(res.status).toBe(200);
   });
 
   it('test_should_deny_impersonation_when_requester_is_not_admin', async () => {
-    const { jwtVerify } = await import('jose');
-    (jwtVerify as any).mockResolvedValueOnce({
-      payload: { sub: 'user-sub', 'custom:role': 'IKD' }
-    });
-
+    const token = await generateToken({ sub: 'user', role: 'IKD' });
     const req = new Request('http://auth.local/admin/users', {
       method: 'GET',
       headers: { 
-        'Authorization': 'Bearer valid-user-token',
+        'Authorization': `Bearer ${token}`,
         'X-Pharos-Impersonate': 'target-user-sub'
       }
     });
@@ -133,6 +110,6 @@ describe('Admin Control Plane Endpoints', () => {
     const res = await router.fetch(req, mockEnv);
     expect(res.status).toBe(403);
     const data = await res.json() as any;
-    expect(data.message).toBe('Security Violation: Only ADMIN can use X-Pharos-Impersonate.');
+    expect(data.error).toBe('forbidden');
   });
 });

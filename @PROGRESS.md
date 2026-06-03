@@ -67,7 +67,11 @@
     - Removed vestigial curl dependency and environment audit check.
     - Verified syntax and functional integrity in PowerShell container.
     - Verified 🟢 PHAROS GREEN in Podman.
-- [ ] **Issue #206**: Task 5.7: Re-platforming Identity Bridge to Cloudflare D1 (Cognito Removal). [ECT: 4]
+- [x] **Issue #206**: Task 5.7: Re-platforming Identity Bridge to Cloudflare D1 (Cognito Removal). [ECT: 4]
+    - Migrated from AWS Cognito to sovereign Cloudflare D1-backed identity model.
+    - Implemented Passkey-First registration and authentication via `@simplewebauthn/server`.
+    - Removed `@aws-sdk/client-cognito-identity-provider` dependency.
+    - Verified 🟢 PHAROS GREEN in Podman with 12 integration tests.
 - [ ] **Issue #207**: Task 5.8: Lossless Authoritative Log Restructure. [ECT: 3]
 - [ ] **Issue #208**: Task 5.9: Implement Automated Roadmap Synchronization (The Sync Engine). [ECT: 3] (Blocked by #207)
 - [ ] **Issue #204**: Task 5.5: Implement Multi-Org Pulse Filtering & Delegate Enforcement. [ECT: 4]

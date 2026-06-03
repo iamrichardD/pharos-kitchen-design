@@ -27,7 +27,7 @@
 - [x] **Issue #196**: Task: Evaluate and upgrade to Astro 6.4 (Sätteri & CF Helpers). [ACT: 3]
 - [x] **Issue #199**: Governance: Implement ADR-0048 Human-Centric Communication Standard. [ACT: 3]
 - [x] **Issue #139**: Debt #139: Enhanced TOON Diagnostics (Blocked by #141). [ACT: 2]
-- [ ] **Issue #206**: Task 5.7: Re-platforming Identity Bridge to Cloudflare D1 (Cognito Removal). [ECT: 4]
+- [x] **Issue #206**: Task 5.7: Re-platforming Identity Bridge to Cloudflare D1 (Cognito Removal). [ACT: 4]
 - [ ] **Issue #207**: Task 5.8: Lossless Authoritative Log Restructure. [ECT: 3]
 - [ ] **Issue #208**: Task 5.9: Implement Automated Roadmap Synchronization (The Sync Engine). [ECT: 3] (Blocked by #207)
 - [ ] **Issue #204**: Task 5.5: Implement Multi-Org Pulse Filtering & Delegate Enforcement. [ECT: 4]
@@ -38,6 +38,7 @@
 ## ✅ Completed (Verified)
 
 ### Sprint 5.01: Core Parser & Remediation (2026-06-01)
+- [x] **Issue #206**: Re-platforming Identity Bridge (Passkey/D1).
 - [x] **Issue #139**: Enhanced TOON Diagnostics (Pinpoint Accuracy).
 - [x] **Issue #199**: Human-Centric Voice & Living Docs (ADR-0048).
 - [x] **Issue #196**: Upgrade to Astro 6.4 & Sätteri (Verified Pharos Green).
@@ -252,7 +253,7 @@
 - [x] **Issue #160**: Implement Mid-Sprint Rigor Gate (RET-03). [AUDITED: PHAROS GREEN]
 - [x] **Issue #161**: Implement CI Pulse Watchdog (RET-04). [AUDITED: PHAROS GREEN]
 - [x] **Issue #162**: Windows Installation Utility: Remediate Unnecessary `curl` Dependency. [ACT: 1]
-- [ ] **Issue #206**: Task 5.7: Re-platforming Identity Bridge to Cloudflare D1 (Cognito Removal). [ECT: 4]
+- [x] **Issue #206**: Task 5.7: Re-platforming Identity Bridge to Cloudflare D1 (Cognito Removal). [ACT: 4]
 - [ ] **Issue #204**: Task 5.5: Implement Multi-Org Pulse Filtering & Delegate Enforcement. [ECT: 4]
 - [ ] **Issue #205**: Task 5.6: Research Spike - Edge-Sovereign Passkey Prototype. [ECT: 4] (Blocked by #206)
 - [x] **Issue #124**: Task 5.2: JIT Sharded Registry Scaling. [ECT: 4]

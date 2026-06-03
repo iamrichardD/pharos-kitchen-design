@@ -4,29 +4,29 @@
  * File: src/index.ts
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
- * Purpose: Cloudflare Worker implementing the RFC 8628 bridge at the edge.
- * Traceability: ADR 0019, ADR 0021, Issue #7
+ * Purpose: Cloudflare Worker implementing RFC 8628 and Passkey-First Identity.
+ * Traceability: ADR 0019, ADR 0049, ADR 0050, Issue #206
  * ======================================================================== */
 
 import { Router, IRequest } from 'itty-router';
 import { nanoid } from 'nanoid';
-import { createRemoteJWKSet, jwtVerify } from 'jose';
+import { jwtVerify, SignJWT } from 'jose';
+import { Buffer } from 'node:buffer';
 import { AuthRepository } from './db';
-import { 
-  CognitoIdentityProviderClient, 
-  ListUsersCommand, 
-  AdminUpdateUserAttributesCommand 
-} from '@aws-sdk/client-cognito-identity-provider';
+import {
+  generateRegistrationOptions,
+  verifyRegistrationResponse,
+  generateAuthenticationOptions,
+  verifyAuthenticationResponse,
+} from '@simplewebauthn/server';
 
 interface Env {
   DB: D1Database;
   VERIFICATION_URI: string;
-  COGNITO_USER_POOL_ID: string;
-  COGNITO_CLIENT_ID: string;
-  COGNITO_REGION: string;
-  AWS_ACCESS_KEY_ID: string;
-  AWS_SECRET_ACCESS_KEY: string;
-  DEBUG?: string; // Flag to enable mock endpoints for local dev
+  JWT_SECRET: string;
+  RP_ID: string;
+  EXPECTED_ORIGIN: string;
+  DEBUG?: string;
 }
 
 interface PharosRequest extends IRequest {
@@ -34,273 +34,285 @@ interface PharosRequest extends IRequest {
   impersonatedUser?: string;
 }
 
-interface ConfirmPayload {
-  user_code: string;
-  id_token: string;
-  access_token: string;
-  refresh_token: string;
-}
-
 const router = Router();
 
-/**
- * Middleware: Verify Bearer Token and handle Impersonation
- */
-const withAuth = async (request: PharosRequest, env: Env) => {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return new Response(JSON.stringify({ 
-      error: 'unauthorized', 
-      message: 'Missing or invalid Authorization header. Run `pkd auth login`.' 
-    }), { status: 401 });
-  }
+// --- Utilities ---
 
-  const token = authHeader.split(' ')[1];
+async function verifyLocalToken(token: string, env: Env) {
+  const secret = new TextEncoder().encode(env.JWT_SECRET || 'fallback_secret_for_dev_only');
   try {
-    const payload = await verifyIdToken(token, env);
-    request.user = payload;
-
-    // Handle X-Pharos-Impersonate (Admin-only override)
-    const impersonateHeader = request.headers.get('X-Pharos-Impersonate');
-    if (impersonateHeader) {
-      if (payload['custom:role'] === 'ADMIN') {
-        request.impersonatedUser = impersonateHeader;
-        console.log(`[Impersonation] Admin ${payload.sub} is impersonating ${impersonateHeader}`);
-      } else {
-        return new Response(JSON.stringify({ 
-          error: 'forbidden', 
-          message: 'Security Violation: Only ADMIN can use X-Pharos-Impersonate.' 
-        }), { status: 403 });
-      }
-    }
-  } catch (e: any) {
-    return new Response(JSON.stringify({ 
-      error: 'unauthorized', 
-      message: e.message 
-    }), { status: 401 });
-  }
-};
-
-/**
- * Middleware: Ensure ADMIN role
- */
-const withAdmin = (request: PharosRequest) => {
-  if (request.user?.['custom:role'] !== 'ADMIN') {
-    return new Response(JSON.stringify({ error: 'forbidden', message: 'Admin role required' }), { status: 403 });
-  }
-};
-
-/**
- * Helper: Verify Cognito ID Token
- * Why: Centralized identity verification. Failing fast here prevents 
- *      unauthorized access from propagating into business logic.
- */
-async function verifyIdToken(token: string, env: Env) {
-  const JWKS = createRemoteJWKSet(
-    new URL(`https://cognito-idp.${env.COGNITO_REGION}.amazonaws.com/${env.COGNITO_USER_POOL_ID}/.well-known/jwks.json`)
-  );
-
-  try {
-    const { payload } = await jwtVerify(token, JWKS, {
-      issuer: `https://cognito-idp.${env.COGNITO_REGION}.amazonaws.com/${env.COGNITO_USER_POOL_ID}`,
-      audience: env.COGNITO_CLIENT_ID,
-    });
+    const { payload } = await jwtVerify(token, secret);
     return payload;
   } catch (e: any) {
-    if (e.code === 'ERR_JWT_EXPIRED') {
-      throw new Error('Identity session expired. Please run `pkd auth login` again.');
-    }
-    if (e.code === 'ERR_JWKS_FETCH_FAILED') {
-      throw new Error('Failed to connect to Pharos Identity Provider (Cognito).');
-    }
     throw new Error(`Authentication failed: ${e.message}`);
   }
 }
 
-/**
- * RFC 8628: Device Authorization Endpoint
- */
+async function signLocalToken(payload: any, env: Env, expiresIn: string = '1h') {
+  const secret = new TextEncoder().encode(env.JWT_SECRET || 'fallback_secret_for_dev_only');
+  return await new SignJWT(payload)
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
+    .setExpirationTime(expiresIn)
+    .sign(secret);
+}
+
+// --- Middlewares ---
+
+const withAuth = async (request: PharosRequest, env: Env) => {
+  const authHeader = request.headers.get('Authorization');
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return new Response(JSON.stringify({ error: 'unauthorized' }), { status: 401 });
+  }
+
+  const token = authHeader.split(' ')[1];
+  try {
+    const payload = await verifyLocalToken(token, env);
+    request.user = payload;
+
+    const impersonateHeader = request.headers.get('X-Pharos-Impersonate');
+    if (impersonateHeader) {
+      if (payload['role'] === 'ADMIN') {
+        request.impersonatedUser = impersonateHeader;
+      } else {
+        return new Response(JSON.stringify({ error: 'forbidden' }), { status: 403 });
+      }
+    }
+  } catch (e: any) {
+    return new Response(JSON.stringify({ error: 'unauthorized', message: e.message }), { status: 401 });
+  }
+};
+
+const withAdmin = (request: PharosRequest) => {
+  if (request.user?.['role'] !== 'ADMIN') {
+    return new Response(JSON.stringify({ error: 'forbidden' }), { status: 403 });
+  }
+};
+
+// --- WebAuthn Endpoints ---
+
+router.post('/auth/register/options', async (request, env: Env) => {
+  const { username } = await request.json() as { username: string };
+  if (!username) return new Response(JSON.stringify({ error: 'invalid_request' }), { status: 400 });
+
+  const repo = new AuthRepository(env.DB);
+  let user = await repo.getUserByUsername(username);
+  if (user) {
+     return new Response(JSON.stringify({ error: 'user_exists' }), { status: 400 });
+  }
+
+  user = { id: nanoid(), username, role: 'IKD', created_at: Date.now() };
+  await repo.createUser(user);
+
+  const options = await generateRegistrationOptions({
+    rpName: 'Pharos Kitchen Design',
+    rpID: env.RP_ID || 'localhost',
+    userID: new TextEncoder().encode(user.id),
+    userName: user.username,
+    attestationType: 'none',
+    authenticatorSelection: { residentKey: 'preferred', userVerification: 'preferred' }
+  });
+
+  const challengeToken = await signLocalToken({ challenge: options.challenge, userId: user.id }, env, '5m');
+
+  return new Response(JSON.stringify({ options, challengeToken }), { headers: { 'Content-Type': 'application/json' } });
+});
+
+router.post('/auth/register/verify', async (request, env: Env) => {
+  const { response, challengeToken } = await request.json() as any;
+  const repo = new AuthRepository(env.DB);
+
+  try {
+    const { challenge, userId } = await verifyLocalToken(challengeToken, env) as any;
+
+    const verification = await verifyRegistrationResponse({
+      response,
+      expectedChallenge: challenge,
+      expectedOrigin: env.EXPECTED_ORIGIN || 'http://localhost:3000',
+      expectedRPID: env.RP_ID || 'localhost',
+    });
+
+    if (verification.verified && verification.registrationInfo) {
+      const { credentialPublicKey, credentialID, counter, credentialDeviceType, credentialBackedUp } = verification.registrationInfo;
+      
+      const transports = response.response.transports ? response.response.transports.join(',') : '';
+
+      const b64PublicKey = Buffer.from(credentialPublicKey).toString('base64');
+      const b64CredID = Buffer.from(credentialID).toString('base64');
+
+      await repo.addCredential({
+        id: b64CredID,
+        user_id: userId,
+        public_key: b64PublicKey,
+        counter,
+        device_type: credentialDeviceType,
+        backed_up: credentialBackedUp,
+        transports,
+        created_at: Date.now()
+      });
+
+      const user = await repo.getUserById(userId);
+      const access_token = await signLocalToken({ sub: userId, role: user?.role }, env, '1h');
+
+      return new Response(JSON.stringify({ verified: true, access_token }), { headers: { 'Content-Type': 'application/json' } });
+    }
+  } catch (e: any) {
+    return new Response(JSON.stringify({ error: e.message }), { status: 400 });
+  }
+  return new Response(JSON.stringify({ error: 'verification_failed' }), { status: 400 });
+});
+
+router.post('/auth/login/options', async (request, env: Env) => {
+  const { username } = await request.json() as { username: string };
+  const repo = new AuthRepository(env.DB);
+  
+  const user = await repo.getUserByUsername(username);
+  if (!user) return new Response(JSON.stringify({ error: 'user_not_found' }), { status: 400 });
+
+  const credentials = await repo.getCredentials(user.id);
+  
+  const options = await generateAuthenticationOptions({
+    rpID: env.RP_ID || 'localhost',
+    allowCredentials: credentials.map(c => ({
+      id: Buffer.from(c.id, 'base64').toString('base64url'),
+      type: 'public-key',
+      transports: c.transports ? c.transports.split(',') as any : undefined,
+    })),
+    userVerification: 'preferred',
+  });
+
+  const challengeToken = await signLocalToken({ challenge: options.challenge, userId: user.id }, env, '5m');
+
+  return new Response(JSON.stringify({ options, challengeToken }), { headers: { 'Content-Type': 'application/json' } });
+});
+
+router.post('/auth/login/verify', async (request, env: Env) => {
+  const { response, challengeToken } = await request.json() as any;
+  const repo = new AuthRepository(env.DB);
+
+  try {
+    const { challenge, userId } = await verifyLocalToken(challengeToken, env) as any;
+    
+    const b64CredID = response.id;
+    const credential = await repo.getCredential(b64CredID);
+    
+    if (!credential) throw new Error('Credential not found');
+
+    const verification = await verifyAuthenticationResponse({
+      response,
+      expectedChallenge: challenge,
+      expectedOrigin: env.EXPECTED_ORIGIN || 'http://localhost:3000',
+      expectedRPID: env.RP_ID || 'localhost',
+      authenticator: {
+        credentialID: new Uint8Array(Buffer.from(credential.id, 'base64')),
+        credentialPublicKey: new Uint8Array(Buffer.from(credential.public_key, 'base64')),
+        counter: credential.counter,
+      }
+    });
+
+    if (verification.verified) {
+      await repo.updateCredentialCounter(credential.id, verification.authenticationInfo.newCounter);
+      const user = await repo.getUserById(userId);
+      const access_token = await signLocalToken({ sub: userId, role: user?.role }, env, '1h');
+      
+      return new Response(JSON.stringify({ verified: true, access_token }), { headers: { 'Content-Type': 'application/json' } });
+    }
+  } catch (e: any) {
+    return new Response(JSON.stringify({ error: e.message }), { status: 400 });
+  }
+  return new Response(JSON.stringify({ error: 'verification_failed' }), { status: 400 });
+});
+
+// --- RFC 8628 ---
+
 router.post('/auth/device', async (request, env: Env) => {
   const { client_id } = await request.json() as { client_id: string };
-  if (!client_id) {
-    return new Response(JSON.stringify({ error: 'invalid_request' }), { status: 400 });
-  }
+  if (!client_id) return new Response(JSON.stringify({ error: 'invalid_request' }), { status: 400 });
 
   const device_code = nanoid(32);
   const user_code = nanoid(8).toUpperCase();
   const repo = new AuthRepository(env.DB);
 
-  try {
-    await repo.createSession(device_code, user_code);
+  await repo.createSession(device_code, user_code);
 
-    return new Response(JSON.stringify({
-      device_code,
-      user_code,
-      verification_uri: env.VERIFICATION_URI,
-      expires_in: 600,
-      interval: 5
-    }), { headers: { 'Content-Type': 'application/json' } });
-  } catch (e) {
-    console.error(e);
-    return new Response(JSON.stringify({ error: 'server_error' }), { status: 500 });
-  }
+  return new Response(JSON.stringify({
+    device_code,
+    user_code,
+    verification_uri: env.VERIFICATION_URI,
+    expires_in: 600,
+    interval: 5
+  }), { headers: { 'Content-Type': 'application/json' } });
 });
 
-/**
- * RFC 8628: Token Endpoint (Polling)
- */
 router.post('/auth/token', async (request, env: Env) => {
   const { device_code, grant_type } = await request.json() as { device_code: string, grant_type: string };
-
   if (grant_type !== 'urn:ietf:params:oauth:grant-type:device_code') {
     return new Response(JSON.stringify({ error: 'unsupported_grant_type' }), { status: 400 });
   }
 
   const repo = new AuthRepository(env.DB);
+  const session = await repo.getSession(device_code);
 
-  try {
-    const session = await repo.getSession(device_code);
-
-    if (!session) {
-      return new Response(JSON.stringify({ error: 'invalid_grant' }), { status: 400 });
-    }
-
-    if (session.status === 'PENDING') {
-      return new Response(JSON.stringify({ error: 'authorization_pending' }), { status: 400 });
-    }
-
-    if (session.status === 'APPROVED') {
-      return new Response(JSON.stringify({
-        access_token: session.access_token,
-        id_token: session.id_token,
-        refresh_token: session.refresh_token,
-        token_type: 'Bearer',
-        expires_in: 3600
-      }), { headers: { 'Content-Type': 'application/json' } });
-    }
-
-    return new Response(JSON.stringify({ error: 'expired_token' }), { status: 400 });
-  } catch (e) {
-    console.error(e);
-    return new Response(JSON.stringify({ error: 'server_error' }), { status: 500 });
+  if (!session) return new Response(JSON.stringify({ error: 'invalid_grant' }), { status: 400 });
+  if (session.status === 'PENDING') return new Response(JSON.stringify({ error: 'authorization_pending' }), { status: 400 });
+  if (session.status === 'APPROVED') {
+    return new Response(JSON.stringify({
+      access_token: session.access_token,
+      id_token: session.id_token,
+      refresh_token: session.refresh_token,
+      token_type: 'Bearer',
+      expires_in: 3600
+    }), { headers: { 'Content-Type': 'application/json' } });
   }
+  return new Response(JSON.stringify({ error: 'expired_token' }), { status: 400 });
 });
 
-/**
- * Web Handshake: Confirmation Endpoint
- */
 router.post('/auth/confirm', async (request, env: Env) => {
-  const { user_code, id_token, access_token, refresh_token } = await request.json() as ConfirmPayload;
-  
+  const { user_code, access_token } = await request.json() as any;
   try {
-    // 1. Verify the ID Token from Cognito
-    const payload = await verifyIdToken(id_token, env);
+    const payload = await verifyLocalToken(access_token, env) as any;
     const sub = payload.sub;
+    
+    const cli_access_token = await signLocalToken({ sub, role: payload.role }, env, '1h');
+    const cli_id_token = await signLocalToken({ sub, role: payload.role }, env, '1h');
+    const cli_refresh_token = nanoid(32);
 
-    if (!sub) {
-        return new Response(JSON.stringify({ error: 'invalid_token_payload' }), { status: 400 });
-    }
-
-    // 2. Update the repository
     const repo = new AuthRepository(env.DB);
-    const success = await repo.approveSession(user_code, sub, access_token, id_token, refresh_token);
+    const success = await repo.approveSession(user_code, sub, cli_access_token, cli_id_token, cli_refresh_token);
 
-    if (!success) {
-      return new Response(JSON.stringify({ error: 'invalid_code_or_expired' }), { status: 400 });
-    }
-
+    if (!success) return new Response(JSON.stringify({ error: 'invalid_code_or_expired' }), { status: 400 });
     return new Response(JSON.stringify({ message: 'Success' }));
-  } catch (e) {
-    console.error(e);
+  } catch (e: any) {
     return new Response(JSON.stringify({ error: 'server_error', details: e.message }), { status: 500 });
   }
 });
 
-/**
- * Admin: List Users (Cognito Orchestration)
- */
+// --- Admin ---
+
 router.get('/admin/users', withAuth, withAdmin, async (request: PharosRequest, env: Env) => {
-  const client = new CognitoIdentityProviderClient({
-    region: env.COGNITO_REGION,
-    credentials: {
-      accessKeyId: env.AWS_ACCESS_KEY_ID,
-      secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
-    }
-  });
-
-  try {
-    const command = new ListUsersCommand({
-      UserPoolId: env.COGNITO_USER_POOL_ID,
-    });
-    const response = await client.send(command);
-    
-    const users = response.Users?.map(u => ({
-      username: u.Username,
-      status: u.UserStatus,
-      created: u.UserCreateDate,
-      attributes: u.Attributes?.reduce((acc: any, attr) => {
-        acc[attr.Name!] = attr.Value;
-        return acc;
-      }, {})
-    }));
-
-    return new Response(JSON.stringify({ users }), { headers: { 'Content-Type': 'application/json' } });
-  } catch (e) {
-    console.error(e);
-    return new Response(JSON.stringify({ error: 'cognito_error', message: e.message }), { status: 500 });
-  }
+  const repo = new AuthRepository(env.DB);
+  const users = await repo.getAllUsers();
+  return new Response(JSON.stringify({ users }), { headers: { 'Content-Type': 'application/json' } });
 });
 
-/**
- * Admin: Update User Attributes/Roles
- */
 router.post('/admin/users/update', withAuth, withAdmin, async (request: PharosRequest, env: Env) => {
   const { email, role } = await request.json() as { email: string, role: string };
+  const repo = new AuthRepository(env.DB);
   
-  const client = new CognitoIdentityProviderClient({
-    region: env.COGNITO_REGION,
-    credentials: {
-      accessKeyId: env.AWS_ACCESS_KEY_ID,
-      secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
-    }
-  });
-
-  try {
-    const command = new AdminUpdateUserAttributesCommand({
-      UserPoolId: env.COGNITO_USER_POOL_ID,
-      Username: email,
-      UserAttributes: [
-        { Name: 'custom:role', Value: role }
-      ]
-    });
-    await client.send(command);
-
+  const success = await repo.updateUserRole(email, role);
+  if (success) {
     return new Response(JSON.stringify({ message: `Successfully updated user ${email} to role ${role}` }));
-  } catch (e) {
-    console.error(e);
-    return new Response(JSON.stringify({ error: 'cognito_error', message: e.message }), { status: 500 });
   }
+  return new Response(JSON.stringify({ error: 'User not found' }), { status: 404 });
 });
 
-/**
- * Local-only MOCK: Approval via device_code
- * Guarded by env.DEBUG flag.
- */
 router.post('/auth/mock-approve', async (request, env: Env) => {
-  if (env.DEBUG !== 'true') {
-    return new Response(JSON.stringify({ error: 'forbidden' }), { status: 403 });
-  }
+  if (env.DEBUG !== 'true') return new Response(JSON.stringify({ error: 'forbidden' }), { status: 403 });
 
   const { device_code, sub } = await request.json() as any;
   const repo = new AuthRepository(env.DB);
-  
-  try {
-    await repo.mockApprove(device_code, sub);
-    return new Response(JSON.stringify({ message: 'Mock approval successful' }));
-  } catch (e) {
-    console.error(e);
-    return new Response(JSON.stringify({ error: 'server_error' }), { status: 500 });
-  }
+  await repo.mockApprove(device_code, sub);
+  return new Response(JSON.stringify({ message: 'Mock approval successful' }));
 });
 
 export default {

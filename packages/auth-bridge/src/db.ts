@@ -4,9 +4,27 @@
  * File: src/db.ts
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
- * Purpose: Unified D1 Database provider for the RFC 8628 bridge.
- * Traceability: ADR 0019, ADR 0021, Issue #7
+ * Purpose: Unified D1 Database provider for the RFC 8628 bridge and WebAuthn.
+ * Traceability: ADR 0019, ADR 0021, Issue #206
  * ======================================================================== */
+
+export interface User {
+  id: string;
+  username: string;
+  role: string;
+  created_at: number;
+}
+
+export interface Credential {
+  id: string;
+  user_id: string;
+  public_key: string;
+  counter: number;
+  device_type: string;
+  backed_up: boolean;
+  transports: string;
+  created_at: number;
+}
 
 export interface AuthCode {
   device_code: string;
@@ -21,6 +39,67 @@ export interface AuthCode {
 
 export class AuthRepository {
   constructor(private db: D1Database) {}
+
+  // --- Users & Credentials (WebAuthn) ---
+
+  async getUserByUsername(username: string): Promise<User | null> {
+    return await this.db.prepare(
+      "SELECT * FROM users WHERE username = ?"
+    ).bind(username).first<User>();
+  }
+
+  async getUserById(id: string): Promise<User | null> {
+    return await this.db.prepare(
+      "SELECT * FROM users WHERE id = ?"
+    ).bind(id).first<User>();
+  }
+
+  async createUser(user: User): Promise<void> {
+    await this.db.prepare(
+      "INSERT INTO users (id, username, role, created_at) VALUES (?, ?, ?, ?)"
+    ).bind(user.id, user.username, user.role, user.created_at).run();
+  }
+
+  async getCredentials(userId: string): Promise<Credential[]> {
+    const { results } = await this.db.prepare(
+      "SELECT * FROM credentials WHERE user_id = ?"
+    ).bind(userId).all<Credential>();
+    // Convert backed_up from number to boolean
+    return results.map(r => ({ ...r, backed_up: Boolean(r.backed_up) }));
+  }
+
+  async getCredential(id: string): Promise<Credential | null> {
+    const cred = await this.db.prepare(
+      "SELECT * FROM credentials WHERE id = ?"
+    ).bind(id).first<Credential & { backed_up: number }>();
+    if (cred) {
+      return { ...cred, backed_up: Boolean(cred.backed_up) };
+    }
+    return null;
+  }
+
+  async addCredential(cred: Credential): Promise<void> {
+    await this.db.prepare(
+      "INSERT INTO credentials (id, user_id, public_key, counter, device_type, backed_up, transports, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+    ).bind(
+      cred.id, 
+      cred.user_id, 
+      cred.public_key, 
+      cred.counter, 
+      cred.device_type, 
+      cred.backed_up ? 1 : 0, 
+      cred.transports, 
+      cred.created_at
+    ).run();
+  }
+
+  async updateCredentialCounter(id: string, counter: number): Promise<void> {
+    await this.db.prepare(
+      "UPDATE credentials SET counter = ? WHERE id = ?"
+    ).bind(counter, id).run();
+  }
+
+  // --- OAuth Device Flow ---
 
   /**
    * Creates a new pending auth session.
@@ -71,5 +150,20 @@ export class AuthRepository {
         `mock_refresh_${sub}`, 
         device_code
     ).run();
+  }
+
+  // --- Admin ---
+  async getAllUsers(): Promise<User[]> {
+      const { results } = await this.db.prepare(
+          "SELECT * FROM users"
+      ).all<User>();
+      return results;
+  }
+
+  async updateUserRole(username: string, role: string): Promise<boolean> {
+      const result = await this.db.prepare(
+          "UPDATE users SET role = ? WHERE username = ?"
+      ).bind(role, username).run();
+      return result.meta.changes > 0;
   }
 }
