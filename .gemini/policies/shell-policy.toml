@@ -22,7 +22,7 @@ priority = 100
 [[rule]]
 toolName = "run_shell_command"
 # Authorize primary package manager operations for vertical slice verification.
-commandPrefix = ["npm install", "npm test", "npm run", "npx vitest", "npx astro"]
+commandPrefix = ["npm install", "npm ci", "npm uninstall", "npm test", "npm run", "npx vitest", "npx astro"]
 decision = "allow"
 priority = 100
 
@@ -72,6 +72,6 @@ priority = 100
 [[rule]]
 toolName = "run_shell_command"
 # Authorize the project's orchestration and validation scripts, including bash/sh execution.
-commandRegex = "^(bash\\s+|sh\\s+)?scripts/.*\\.(sh|ts|ps1)$"
+commandRegex = "^(\\./|bash\\s+|sh\\s+)?scripts/.*\\.(sh|ts|ps1)(\\s+.*)?$"
 decision = "allow"
 priority = 100
