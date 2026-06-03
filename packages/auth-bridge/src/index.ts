@@ -45,14 +45,15 @@ function assertConfig(env: Env) {
     }
 }
 
-async function verifyLocalToken(token: string, env: Env) {
+async function verifyLocalToken(token: string, env: Env): Promise<{ challenge?: string, userId?: string, sub?: string, role?: string }> {
   assertConfig(env);
   const secret = new TextEncoder().encode(env.JWT_SECRET || 'fallback_secret_for_dev_only');
   try {
     const { payload } = await jwtVerify(token, secret);
-    return payload;
-  } catch (e: any) {
-    throw new Error(`Authentication failed: ${e.message}`);
+    return payload as { challenge?: string, userId?: string, sub?: string, role?: string };
+  } catch (e: unknown) {
+    const err = e as Error;
+    throw new Error(`Authentication failed: ${err.message}`);
   }
 }
 
@@ -129,10 +130,14 @@ router.post('/auth/register/options', withRepo, async (request, env: Env) => {
 });
 
 router.post('/auth/register/verify', withRepo, async (request, env: Env) => {
-  const { response, challengeToken } = await request.json() as { response: WebAuthnRegistrationDTO, challengeToken: string };
+  const payload = await request.json() as { response: WebAuthnRegistrationDTO, challengeToken: string };
+  const response = payload.response;
+  const challengeToken = payload.challengeToken;
 
   try {
-    const { challenge, userId } = await verifyLocalToken(challengeToken, env) as any;
+    const tokenPayload = await verifyLocalToken(challengeToken, env);
+    const challenge = tokenPayload.challenge as string;
+    const userId = tokenPayload.userId as string;
 
     const verification = await request.passkey.verifyRegistration(userId, response, challenge);
 
@@ -142,14 +147,16 @@ router.post('/auth/register/verify', withRepo, async (request, env: Env) => {
 
       return new Response(JSON.stringify({ verified: true, access_token }), { headers: { 'Content-Type': 'application/json' } });
     }
-  } catch (e: any) {
-    return new Response(JSON.stringify({ error: e.message }), { status: 400 });
+  } catch (e: unknown) {
+    const err = e as Error;
+    return new Response(JSON.stringify({ error: err.message }), { status: 400 });
   }
   return new Response(JSON.stringify({ error: 'verification_failed' }), { status: 400 });
 });
 
 router.post('/auth/login/options', withRepo, async (request, env: Env) => {
-  const { username } = await request.json() as { username: string };
+  const payload = await request.json() as { username: string };
+  const username = payload.username;
   
   const user = await request.repo.getUserByUsername(username);
   if (!user) return new Response(JSON.stringify({ error: 'user_not_found' }), { status: 400 });
@@ -162,10 +169,14 @@ router.post('/auth/login/options', withRepo, async (request, env: Env) => {
 });
 
 router.post('/auth/login/verify', withRepo, async (request, env: Env) => {
-  const { response, challengeToken } = await request.json() as { response: WebAuthnAuthenticationDTO, challengeToken: string };
+  const payload = await request.json() as { response: WebAuthnAuthenticationDTO, challengeToken: string };
+  const response = payload.response;
+  const challengeToken = payload.challengeToken;
 
   try {
-    const { challenge, userId } = await verifyLocalToken(challengeToken, env) as any;
+    const tokenPayload = await verifyLocalToken(challengeToken, env);
+    const challenge = tokenPayload.challenge as string;
+    const userId = tokenPayload.userId as string;
     
     const verification = await request.passkey.verifyAuthentication(userId, response, challenge);
 
@@ -175,8 +186,9 @@ router.post('/auth/login/verify', withRepo, async (request, env: Env) => {
       
       return new Response(JSON.stringify({ verified: true, access_token }), { headers: { 'Content-Type': 'application/json' } });
     }
-  } catch (e: any) {
-    return new Response(JSON.stringify({ error: e.message }), { status: 400 });
+  } catch (e: unknown) {
+    const err = e as Error;
+    return new Response(JSON.stringify({ error: err.message }), { status: 400 });
   }
   return new Response(JSON.stringify({ error: 'verification_failed' }), { status: 400 });
 });
@@ -226,8 +238,8 @@ router.post('/auth/token', withRepo, async (request, env: Env) => {
 router.post('/auth/confirm', withRepo, async (request, env: Env) => {
   const { user_code, access_token } = await request.json() as { user_code: string, access_token: string };
   try {
-    const payload = await verifyLocalToken(access_token, env) as any;
-    const sub = payload.sub;
+    const payload = await verifyLocalToken(access_token, env);
+    const sub = payload.sub as string;
 
     const cli_access_token = await signLocalToken({ sub, role: payload.role }, env, '1h');
     const cli_id_token = await signLocalToken({ sub, role: payload.role }, env, '1h');
@@ -237,8 +249,9 @@ router.post('/auth/confirm', withRepo, async (request, env: Env) => {
 
     if (!success) return new Response(JSON.stringify({ error: 'invalid_code_or_expired' }), { status: 400 });
     return new Response(JSON.stringify({ message: 'Success' }));
-  } catch (e: any) {
-    return new Response(JSON.stringify({ error: 'server_error', details: e.message }), { status: 500 });
+  } catch (e: unknown) {
+    const err = e as Error;
+    return new Response(JSON.stringify({ error: 'server_error', details: err.message }), { status: 500 });
   }
 });
 
@@ -262,7 +275,7 @@ router.post('/admin/users/update', withRepo, withAuth, withAdmin, async (request
 router.post('/auth/mock-approve', withRepo, async (request, env: Env) => {
   if (env.DEBUG !== 'true') return new Response(JSON.stringify({ error: 'forbidden' }), { status: 403 });
 
-  const { device_code, sub } = await request.json() as any;
+  const { device_code, sub } = await request.json() as { device_code: string, sub: string };
   await request.repo.mockApprove(device_code, sub);
   return new Response(JSON.stringify({ message: 'Mock approval successful' }));
 });

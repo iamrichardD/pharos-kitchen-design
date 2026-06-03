@@ -9,51 +9,32 @@
  * Last Updated: 2026-06-03
  * ======================================================================== */
 
+import { Buffer } from 'node:buffer';
 import {
   generateRegistrationOptions,
   verifyRegistrationResponse,
   generateAuthenticationOptions,
   verifyAuthenticationResponse,
 } from '@simplewebauthn/server';
-import type { AuthenticatorTransportFuture } from '@simplewebauthn/types';
+import type { 
+    RegistrationResponseJSON,
+    AuthenticationResponseJSON,
+    PublicKeyCredentialCreationOptionsJSON,
+    PublicKeyCredentialRequestOptionsJSON,
+    AuthenticatorTransportFuture
+} from '@simplewebauthn/types';
 import { IAuthRepository } from './db';
 
 /**
  * Internal DTO for WebAuthn Registration Response to encapsulate @simplewebauthn.
  * This ensures the domain logic remains decoupled from the specific library version.
  */
-export interface WebAuthnRegistrationDTO {
-    id: string;
-    rawId: string;
-    response: {
-        attestationObject: string;
-        clientDataJSON: string;
-        transports?: AuthenticatorTransportFuture[];
-        publicKeyAlgorithm?: number;
-        publicKey?: string;
-        authenticatorData?: string;
-    };
-    authenticatorAttachment?: 'platform' | 'cross-platform';
-    type: 'public-key';
-    clientExtensionResults: Record<string, any>;
-}
+export type WebAuthnRegistrationDTO = RegistrationResponseJSON;
 
 /**
  * Internal DTO for WebAuthn Authentication Response to encapsulate @simplewebauthn.
  */
-export interface WebAuthnAuthenticationDTO {
-    id: string;
-    rawId: string;
-    response: {
-        authenticatorData: string;
-        clientDataJSON: string;
-        signature: string;
-        userHandle?: string;
-    };
-    authenticatorAttachment?: 'platform' | 'cross-platform';
-    type: 'public-key';
-    clientExtensionResults: Record<string, any>;
-}
+export type WebAuthnAuthenticationDTO = AuthenticationResponseJSON;
 
 /**
  * Educational metadata for the UI to empower the user during the Passkey ceremony.
@@ -64,8 +45,13 @@ export interface PasskeyMetadata {
     hook: string;
 }
 
-export interface PasskeyOptionsResponse {
-    options: any; // Raw library options sent to browser
+export interface PasskeyRegistrationOptionsResponse {
+    options: PublicKeyCredentialCreationOptionsJSON;
+    pkd_metadata: PasskeyMetadata;
+}
+
+export interface PasskeyAuthenticationOptionsResponse {
+    options: PublicKeyCredentialRequestOptionsJSON;
     pkd_metadata: PasskeyMetadata;
 }
 
@@ -79,7 +65,7 @@ export class PasskeyService {
   /**
    * Generates options for a new Passkey registration.
    */
-  async generateRegistrationOptions(userId: string, username: string): Promise<PasskeyOptionsResponse> {
+  async generateRegistrationOptions(userId: string, username: string): Promise<PasskeyRegistrationOptionsResponse> {
     const options = await generateRegistrationOptions({
       rpName: 'Pharos Kitchen Design',
       rpID: this.rpID,
@@ -106,7 +92,7 @@ export class PasskeyService {
    */
   async verifyRegistration(userId: string, response: WebAuthnRegistrationDTO, expectedChallenge: string) {
     const verification = await verifyRegistrationResponse({
-      response: response as any, 
+      response, 
       expectedChallenge,
       expectedOrigin: this.origin,
       expectedRPID: this.rpID,
@@ -123,13 +109,13 @@ export class PasskeyService {
       
       const transports = response.response.transports ? response.response.transports.join(',') : '';
 
-      const b64PublicKey = Buffer.from(credentialPublicKey).toString('base64');
-      const b64CredID = Buffer.from(credentialID).toString('base64');
+      const b64UrlPublicKey = Buffer.from(credentialPublicKey).toString('base64url');
+      const b64UrlCredID = Buffer.from(credentialID).toString('base64url');
 
       await this.repo.addCredential({
-        id: b64CredID,
+        id: b64UrlCredID,
         user_id: userId,
-        public_key: b64PublicKey,
+        public_key: b64UrlPublicKey,
         counter,
         device_type: credentialDeviceType,
         backed_up: credentialBackedUp,
@@ -146,13 +132,13 @@ export class PasskeyService {
   /**
    * Generates options for a Passkey login.
    */
-  async generateAuthenticationOptions(userId: string): Promise<PasskeyOptionsResponse> {
+  async generateAuthenticationOptions(userId: string): Promise<PasskeyAuthenticationOptionsResponse> {
     const credentials = await this.repo.getCredentials(userId);
     
     const options = await generateAuthenticationOptions({
       rpID: this.rpID,
       allowCredentials: credentials.map(c => ({
-        id: Buffer.from(c.id, 'base64').toString('base64url'),
+        id: c.id, // already stored as base64url
         type: 'public-key' as const,
         transports: c.transports ? c.transports.split(',') as AuthenticatorTransportFuture[] : undefined,
       })),
@@ -172,21 +158,21 @@ export class PasskeyService {
    * Verifies the client's authentication response.
    */
   async verifyAuthentication(userId: string, response: WebAuthnAuthenticationDTO, expectedChallenge: string) {
-    const b64CredID = response.id;
-    const credential = await this.repo.getCredential(b64CredID);
+    const b64UrlCredID = response.id;
+    const credential = await this.repo.getCredential(b64UrlCredID);
     
     if (!credential) {
         throw new Error('Credential not found');
     }
 
     const verification = await verifyAuthenticationResponse({
-      response: response as any,
+      response,
       expectedChallenge,
       expectedOrigin: this.origin,
       expectedRPID: this.rpID,
       authenticator: {
-        credentialID: new Uint8Array(Buffer.from(credential.id, 'base64')),
-        credentialPublicKey: new Uint8Array(Buffer.from(credential.public_key, 'base64')),
+        credentialID: new Uint8Array(Buffer.from(credential.id, 'base64url')),
+        credentialPublicKey: new Uint8Array(Buffer.from(credential.public_key, 'base64url')),
         counter: credential.counter,
       }
     });
