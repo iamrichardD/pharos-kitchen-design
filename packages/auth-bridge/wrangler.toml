@@ -10,5 +10,5 @@ EXPECTED_ORIGIN = "https://iamrichardd.com"
 
 [[d1_databases]]
 binding = "DB"
-database_name = "pharos-auth"
-database_id = "xxxxxx"
+database_name = "pkd-prism-auth"
+database_id = "0d9569ba-f1f4-4b37-b653-f3043b000cdb"
