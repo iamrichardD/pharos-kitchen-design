@@ -19,12 +19,13 @@ import path from 'node:path';
 // Load automated roadmap data for testing
 const TOON_PATH = path.resolve(__dirname, 'content/roadmap.toon');
 const rawToon = fs.readFileSync(TOON_PATH, 'utf-8');
-const roadmapItems = Array.from(rawToon.matchAll(/^\s*"([^"]+)",\s*"([^"]+)",\s*"([^"]+)",\s*"([^"]+)",\s*"([^"]+)"/gm)).map(m => ({
-  name: m[1],
-  status: m[2],
-  phase: m[3],
-  tag: m[4],
-  description: m[5]
+const roadmapItems = Array.from(rawToon.matchAll(/^\s*"([^"]+)",\s*"([^"]+)",\s*"([^"]+)",\s*"([^"]+)",\s*"([^"]+)",\s*"([^"]+)"/gm)).map(m => ({
+  id: m[1],
+  name: m[2],
+  status: m[3],
+  phase: m[4],
+  tag: m[5],
+  description: m[6]
 }));
 
 describe('Marketing Site Monorepo Integrity', () => {
@@ -57,16 +58,17 @@ describe('Marketing Data Integrity (Issue #71)', () => {
     expect(warewashing?.fidelity).toBe('verified');
   });
 
-  it('test_should_mark_sprint_4_items_as_in_construction_when_state_is_active', () => {
-    const sprint4Items = roadmapItems.filter(i => i.phase === 'Sprint 4');
-    expect(sprint4Items.length).toBeGreaterThan(0);
-    sprint4Items.forEach(item => {
-      expect(item.status).toBe('In Construction');
-    });
+  it('test_should_mark_active_sprint_items_as_valid_when_synchronized', () => {
+    const activeItems = roadmapItems.filter(i => i.phase === 'Sprint 5.01');
+    expect(activeItems.length).toBeGreaterThan(0);
+    // Sprint 5.01 has both Deployed and In Construction items
+    const statuses = activeItems.map(i => i.status);
+    expect(statuses).toContain('Deployed');
+    expect(statuses).toContain('In Progress');
   });
 
-  it('test_should_mark_manufacturer_specs_as_deployed_when_sprint_3_is_complete', () => {
-    const specs = roadmapItems.find(i => i.name === 'Manufacturer-Verified Specs');
-    expect(specs?.status).toBe('Deployed');
+  it('test_should_mark_identity_replatforming_as_deployed_when_sync_engine_runs', () => {
+    const identity = roadmapItems.find(i => i.name === 'Identity Re-platforming');
+    expect(identity?.status).toBe('Deployed');
   });
 });

@@ -10,7 +10,7 @@
  * ======================================================================== -->
 
 <!-- 
-  AI_AGENT_PROTOCOL: @PROGRESS.md
+  AI_AGENT_PROTOCOL: @PROGRESS.md (ADR-0051)
   1. TEMPORAL INTEGRITY: This file is for PAST and PRESENT history only. 
   2. NO BACKLOG: Do not store pending [ ] tasks here. Move them to @TODO.md.
   3. SCHEMA: Use strict [TAG: ...] and [DESC: ...] markers for machine readability.
@@ -23,6 +23,7 @@
 **Status**: 🚀 ACTIVE (Sprint 5.01)
 
 ### Sprint 5.01: Core Parser & Remediation (2026-06-01) - 🚀 ACTIVE
+- [x] **Issue #215**: [TAG: UI] Professional Grade Roadmap UI Refactor. [DESC: Transformed the public roadmap into a segregated, searchable, and traceable tool with swimlanes and RFC-2378 CommandBar integration.]
 - [x] **Issue #206**: [TAG: Security] Identity Re-platforming. [DESC: Migrated from AWS Cognito to sovereign Cloudflare D1-backed identity model with Passkey-First authentication. Removed legacy password fields and implemented browser-side @simplewebauthn logic.]
 - [x] **Issue #139**: [TAG: Core] TOON Diagnostics. [DESC: Implemented line/column character tracking and snippet extraction for high-signal lexer errors.]
 - [x] **Issue #199**: [TAG: Governance] Human-Centric Communication. [DESC: Codified ADR-0048 for natural, first-person voice across all communications and living docs.]

@@ -13,6 +13,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 interface RoadmapItem {
+  id: number | null;
   name: string;
   status: 'Deployed' | 'In Construction' | 'Blueprint Approved' | 'Research Phase';
   phase: string;
@@ -63,6 +64,7 @@ function parseMarkdownLog(filePath: string, defaultStatus: RoadmapItem['status']
       const status: RoadmapItem['status'] = checked === 'x' ? 'Deployed' : defaultStatus;
       
       items.push({
+        id: parseInt(id, 10),
         name: name.trim().replace(/\.$/, ''),
         status,
         phase: currentSprint,
@@ -90,11 +92,11 @@ title: Pharos System Roadmap
 type: roadmap
 lastSynced: ${timestamp}
 
-items[${items.length}]{name, status, phase, tag, description}:
+items[${items.length}]{id, name, status, phase, tag, description}:
 `;
 
   for (const item of items) {
-    toon += `  "${item.name}", "${item.status}", "${item.phase}", "${item.tag}", "${item.description}"\n`;
+    toon += `  "${item.id ?? 0}", "${item.name}", "${item.status}", "${item.phase}", "${item.tag}", "${item.description}"\n`;
   }
   
   return toon;
@@ -103,19 +105,22 @@ items[${items.length}]{name, status, phase, tag, description}:
 function main() {
   console.log("🚀 Initializing Pharos Roadmap Sync Engine...");
   
-  // Legacy Foundation Items (Pre-Automation Phase)
-  const legacyItems: RoadmapItem[] = [
-    { name: "Secure Designer Profiles", status: "Deployed", phase: "Sprint 1", tag: "CORE", description: "Hardened identity storage with privacy-first attribution." },
-    { name: "Universal Tool Sync", status: "Deployed", phase: "Sprint 2", tag: "IDENTITY", description: "Connect your professional identity across tools." },
-    { name: "High-Performance Design Engine", status: "Deployed", phase: "Sprint 2", tag: "BRIDGE", description: "Lightning-fast core for metadata normalization." },
-    { name: "Designer Admin Portal", status: "Deployed", phase: "Sprint 3", tag: "CORE", description: "Advanced controls for managing manufacturer permissions." },
-    { name: "Professional Search (v0.1.0)", status: "Deployed", phase: "Sprint 3", tag: "TOOLING", description: "Instant equipment discovery and validation tool." },
-    { name: "Universal Search Standard", status: "Deployed", phase: "Sprint 3", tag: "PROTOCOL", description: "Unified search standard across the ecosystem." },
-    { name: "Manufacturer-Verified Specs", status: "Deployed", phase: "Sprint 3", tag: "IDENTITY", description: "Direct-from-factory data signatures." }
-  ];
+  // Rationale: Decoupled historical data (Crucible Audit #215 / ADR-0051)
+  const HISTORICAL_PATH = path.join('.project', 'historical-roadmap.json');
+  let legacyItems: RoadmapItem[] = [];
+  
+  try {
+    if (fs.existsSync(HISTORICAL_PATH)) {
+      const historicalData = JSON.parse(fs.readFileSync(HISTORICAL_PATH, 'utf-8'));
+      legacyItems = historicalData.legacy_items;
+      console.log(`🔎 Loaded ${legacyItems.length} historical items from ${HISTORICAL_PATH}`);
+    }
+  } catch (e) {
+    console.warn("⚠️ Warning: Could not load historical-roadmap.json, proceeding with active logs only.");
+  }
 
   const progressItems = parseMarkdownLog('@PROGRESS.md', 'Deployed');
-  const todoItems = parseMarkdownLog('@TODO.md', 'In Construction');
+  const todoItems = parseMarkdownLog('@TODO.md', 'In Progress');
   
   // ADR-0046: Shard-Based Logging (Task-specific .toon files)
   const shardItems: RoadmapItem[] = [];
@@ -134,10 +139,12 @@ function main() {
           const content = fs.readFileSync(fullPath, 'utf-8');
           const titleMatch = content.match(/title:\s*([^\n]+)/);
           const tagMatch = content.match(/tags?:\s*([^\n]+)/);
+          const issueMatch = content.match(/issue:\s*#?(\d+)/);
           if (titleMatch) {
             shardItems.push({
+              id: issueMatch ? parseInt(issueMatch[1], 10) : null,
               name: titleMatch[1].trim(),
-              status: 'In Construction',
+              status: 'In Progress',
               phase: 'Active Shard',
               tag: tagMatch ? (TAG_MAP[tagMatch[1].split(',')[0].trim()] || DEFAULT_TAG) : DEFAULT_TAG,
               description: 'In-progress task captured from authoritative shard.'

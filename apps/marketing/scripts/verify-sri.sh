@@ -7,10 +7,10 @@
 # License: FSL-1.1 (See LICENSE file for details)
 # Purpose: Fail Fast verification of third-party script integrity.
 # Traceability: Priority 2, Issue #29
-# Hash Update: 2026-05-05 (Upstream Umami script update)
+# Hash Update: 2026-06-04 (Upstream Umami script update)
 # ========================================================================
 
-EXPECTED_HASH="XIoKniD4y5+iahq2/CkYT+GAABKWaS/0hQl+1HKPL0Y9tRFxG5Z8BWQul4tL07IW"
+EXPECTED_HASH="v7sp9tJjYmYIjNGQ+4tBlUqPgeoo7bOaflft0h1cUgYLSngytXhj9NuKGZiqsMeX"
 URL="https://cloud.umami.is/script.js"
 
 echo "Checking script integrity for $URL..."
