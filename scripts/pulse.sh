@@ -61,6 +61,11 @@ run_core() {
     echo "   [Process] Verifying Governance Standards..."
     bash scripts/lint-governance.sh
 
+    # 4b. Roadmap Synchronization (ADR-0051)
+    # Why: Ensures the public roadmap is always in sync with authoritative logs.
+    echo "   [Process] Synchronizing Authoritative Roadmap..."
+    ./scripts/podman-wrapper.sh "public.ecr.aws/docker/library/node:24-bookworm" npx tsx scripts/sync-roadmap.ts
+
     # 5. File Prologue Audit (FSL-1.1 Legal Compliance)
     # Why: Ensures every source file acknowledges the FSL-1.1 license and traceability.
     echo "   [Process] Verifying FSL-1.1 File Prologues..."
