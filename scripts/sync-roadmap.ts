@@ -13,6 +13,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 interface RoadmapItem {
+  id: string;
   name: string;
   status: 'Deployed' | 'In Construction' | 'Blueprint Approved' | 'Research Phase';
   phase: string;
@@ -63,6 +64,7 @@ function parseMarkdownLog(filePath: string, defaultStatus: RoadmapItem['status']
       const status: RoadmapItem['status'] = checked === 'x' ? 'Deployed' : defaultStatus;
       
       items.push({
+        id: `#${id}`,
         name: name.trim().replace(/\.$/, ''),
         status,
         phase: currentSprint,
@@ -90,11 +92,11 @@ title: Pharos System Roadmap
 type: roadmap
 lastSynced: ${timestamp}
 
-items[${items.length}]{name, status, phase, tag, description}:
+items[${items.length}]{id, name, status, phase, tag, description}:
 `;
 
   for (const item of items) {
-    toon += `  "${item.name}", "${item.status}", "${item.phase}", "${item.tag}", "${item.description}"\n`;
+    toon += `  "${item.id}", "${item.name}", "${item.status}", "${item.phase}", "${item.tag}", "${item.description}"\n`;
   }
   
   return toon;
@@ -105,13 +107,13 @@ function main() {
   
   // Legacy Foundation Items (Pre-Automation Phase)
   const legacyItems: RoadmapItem[] = [
-    { name: "Secure Designer Profiles", status: "Deployed", phase: "Sprint 1", tag: "CORE", description: "Hardened identity storage with privacy-first attribution." },
-    { name: "Universal Tool Sync", status: "Deployed", phase: "Sprint 2", tag: "IDENTITY", description: "Connect your professional identity across tools." },
-    { name: "High-Performance Design Engine", status: "Deployed", phase: "Sprint 2", tag: "BRIDGE", description: "Lightning-fast core for metadata normalization." },
-    { name: "Designer Admin Portal", status: "Deployed", phase: "Sprint 3", tag: "CORE", description: "Advanced controls for managing manufacturer permissions." },
-    { name: "Professional Search (v0.1.0)", status: "Deployed", phase: "Sprint 3", tag: "TOOLING", description: "Instant equipment discovery and validation tool." },
-    { name: "Universal Search Standard", status: "Deployed", phase: "Sprint 3", tag: "PROTOCOL", description: "Unified search standard across the ecosystem." },
-    { name: "Manufacturer-Verified Specs", status: "Deployed", phase: "Sprint 3", tag: "IDENTITY", description: "Direct-from-factory data signatures." }
+    { id: "#0", name: "Secure Designer Profiles", status: "Deployed", phase: "Sprint 1", tag: "CORE", description: "Hardened identity storage with privacy-first attribution." },
+    { id: "#0", name: "Universal Tool Sync", status: "Deployed", phase: "Sprint 2", tag: "IDENTITY", description: "Connect your professional identity across tools." },
+    { id: "#0", name: "High-Performance Design Engine", status: "Deployed", phase: "Sprint 2", tag: "BRIDGE", description: "Lightning-fast core for metadata normalization." },
+    { id: "#0", name: "Designer Admin Portal", status: "Deployed", phase: "Sprint 3", tag: "CORE", description: "Advanced controls for managing manufacturer permissions." },
+    { id: "#0", name: "Professional Search (v0.1.0)", status: "Deployed", phase: "Sprint 3", tag: "TOOLING", description: "Instant equipment discovery and validation tool." },
+    { id: "#0", name: "Universal Search Standard", status: "Deployed", phase: "Sprint 3", tag: "PROTOCOL", description: "Unified search standard across the ecosystem." },
+    { id: "#0", name: "Manufacturer-Verified Specs", status: "Deployed", phase: "Sprint 3", tag: "IDENTITY", description: "Direct-from-factory data signatures." }
   ];
 
   const progressItems = parseMarkdownLog('@PROGRESS.md', 'Deployed');
@@ -134,8 +136,10 @@ function main() {
           const content = fs.readFileSync(fullPath, 'utf-8');
           const titleMatch = content.match(/title:\s*([^\n]+)/);
           const tagMatch = content.match(/tags?:\s*([^\n]+)/);
+          const issueMatch = content.match(/issue:\s*#?(\d+)/);
           if (titleMatch) {
             shardItems.push({
+              id: issueMatch ? `#${issueMatch[1]}` : '#TBD',
               name: titleMatch[1].trim(),
               status: 'In Construction',
               phase: 'Active Shard',
