@@ -17,10 +17,17 @@ Our public roadmap is currently a static file that doesn't reflect the high-velo
 ## Decision
 We're implementing the **Living Map Protocol**. The public roadmap will no longer be a manual page; it will be an automated reflection of our authoritative internal logs.
 
-1.  **Tagged Markdown Standard**: Our `@PROGRESS.md` and `@TODO.md` files will follow a machine-parsable format using `[TAG: ...]` and `[DESC: ...]` markers on issue lines.
-2.  **The Sync Engine**: I'm building a script (`scripts/sync-roadmap.ts`) that parses these logs and outputs a structured `roadmap.toon` file.
-3.  **Pulse Integration**: This engine will run as a mandatory step in our CI `pulse` check. Every merge to `main` will trigger a roadmap refresh.
-4.  **Transparency Badge**: The public UI will display the "Last Synced" timestamp to prove to the community that the map is alive and authoritative.
+1.  **Strict Temporal Segregation**:
+    - **`@TODO.md`**: Dedicated strictly to the **Present & Future** (backlog and active sprint). No completed history.
+    - **`@PROGRESS.md`**: Dedicated strictly to the **Past & Present** (historical record and current sprint outcomes).
+2.  **Standardized Header Schema**: All Sprint headers MUST follow the regex-ready format:
+    `### Sprint [ID]: [Name] ([YYYY-MM-DD]) - [STATUS]`
+3.  **Tagged Markdown Standard**: Every task entry MUST be enriched with metadata markers for machine readability:
+    - `[TAG: ...]` (e.g., `[TAG: Core]`, `[TAG: Security]`)
+    - `[DESC: ...]` (A human-centric summary of the user-facing value).
+4.  **Archival Policy**: Completed sprints older than the current Phase MUST be archived to `docs/governance/sprints/` to maintain root log performance.
+5.  **The Sync Engine**: I'm building a script (`scripts/sync-roadmap.ts`) that parses these logs and outputs a structured `roadmap.toon` file.
+6.  **Pulse Integration**: This engine will run as a mandatory step in our CI `pulse` check. Every merge to `main` will trigger a roadmap refresh.
 
 ## Rationale
 - **Zero Toil**: Developers just update the logs they're already using, and the website updates itself.

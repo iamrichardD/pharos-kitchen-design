@@ -22,12 +22,20 @@ We adopt a formal **4+1 Weekly Cadence** for all Pharos vertical slices.
 ### 1. Engineering Days (Monday – Thursday)
 - **Focus**: 6 hours per day of dedicated engineering focus.
 - **Activities**: Day planning, task research, implementation (TDD), and validation (Pulse).
+- **Midday Ritual**: **Strategic SPM Check-in (ECT 4+)**. Builders pause to verify that implementation strategy and `[DESC]` metadata align with the long-term architectural goal.
+- **End-of-Day Ritual**: **Authoritative Log Enrichment**.
+    - Finalize all `[TAG]` and `[DESC]` metadata in `@PROGRESS.md` or the active shard.
+    - Perform an IA Quality Pass to ensure the entry serves as a machine-readable DTO for the roadmap.
+    - Synchronize temporal logs (Move completed tasks from `@TODO.md` to `@PROGRESS.md`).
 - **Standards**: Strict adherence to VSA, Clean Architecture, and the Three-Option Crucible (ADR-0017).
 
 ### 2. Synthesis & Innovation Day (Friday)
 - **Focus**: Strategic reconciliation, marketing, and capacity planning.
 - **Phase 1: Planning**: Audit velocity metrics and stage the next week's sprint.
-- **Phase 2: Release**: Publication of the "Friday Pulse" (Human/Agent Collaborative Log).
+- **Phase 2: Release**: **Automated Release Ritual (ADR-0051)**.
+    - Execute the **Sync Engine** (`scripts/sync-roadmap.ts`) to update the public roadmap.
+    - Perform **Phase Archival**: Move completed sprints from root logs to `docs/governance/sprints/`.
+    - Verification: Review the automated output at `iamrichardd.com/pharos-kitchen-design/demo`.
 - **Phase 3: Hackathon**: Optional unconstrained prototyping window for high-innovation ideas.
 
 ## Consequences

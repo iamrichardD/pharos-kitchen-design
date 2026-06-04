@@ -10,7 +10,7 @@
  * ======================================================================== -->
 
 <!-- 
- * AI_AGENT_PROTOCOL: @TODO.md
+ * AI_AGENT_PROTOCOL: @TODO.md (ADR-0051)
  * 1. TEMPORAL INTEGRITY: This file is for PRESENT and FUTURE backlog only.
  * 2. NO HISTORY: Do not store completed [x] tasks here. Move them to @PROGRESS.md.
  * 3. SCHEMA: Use strict [TAG: ...] and [DESC: ...] markers for machine readability.
@@ -23,7 +23,7 @@
 
 ### Sprint 5.01: Core Parser & Remediation (2026-06-01) - 🚀 ACTIVE
 - [ ] **Issue #207**: [TAG: Governance] Lossless Authoritative Log Restructure. [DESC: Hardening @PROGRESS and @TODO into machine-readable DTOs for the Sync Engine.]
-- [ ] **Issue #208**: [TAG: Governance] Automated Roadmap Synchronization. [DESC: Implementing the Sync Engine to automate roadmap updates from sharded logs.] (Blocked by #207)
+- [ ] **Issue #208**: [TAG: Governance] Automated Roadmap Synchronization. [DESC: Implementing the Sync Engine to automate roadmap updates from sharded logs.]
 - [ ] **Issue #204**: [TAG: Security] Multi-Org Pulse Filtering. [DESC: Implementing delegate enforcement for organizational equipment shards.]
 - [ ] **Issue #205**: [TAG: Security] Hardening & Integration - Edge-Sovereign Passkey. [DESC: Verifying CLI ergonomics (biometrics) and implementing 'Magic Link' fallback recovery.] (Blocked by #204)
 

@@ -10,7 +10,7 @@
  * ======================================================================== -->
 
 <!-- 
-  AI_AGENT_PROTOCOL: @PROGRESS.md
+  AI_AGENT_PROTOCOL: @PROGRESS.md (ADR-0051)
   1. TEMPORAL INTEGRITY: This file is for PAST and PRESENT history only. 
   2. NO BACKLOG: Do not store pending [ ] tasks here. Move them to @TODO.md.
   3. SCHEMA: Use strict [TAG: ...] and [DESC: ...] markers for machine readability.

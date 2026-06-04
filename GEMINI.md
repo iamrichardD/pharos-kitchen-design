@@ -127,7 +127,18 @@ Every non-trivial task completion MUST follow the **Multi-Agent Handover & Cruci
 - **IA Clarity Pass (MANDATORY):** Any changes to collaborator-facing documentation or the Marketing Site MUST be reviewed by **`PHAROS_IA_CORE`**.
 - **Auditor Invocation:** Generate an **Audit Invocation Prompt** for a fresh AI session to perform Phase 4 (The Crucible Audit), referencing the PR as the primary context.
 
-## 6. Team Topology & Personas
+## 6. The Authoritative Log Protocol (ADR-0051)
+To ensure the automated Public Roadmap remains lossless and machine-readable, all Agentic sessions MUST adhere to the following standards when updating `@TODO.md` and `@PROGRESS.md`:
+- **Temporal Integrity**:
+    - **`@TODO.md`**: Dedicated strictly to the **Present & Future** (backlog and active sprint). NEVER store completed tasks here.
+    - **`@PROGRESS.md`**: Dedicated strictly to the **Past & Present** (historical record and current sprint outcomes). NEVER store pending tasks here.
+- **Tagged Markdown Standard**: EVERY task entry MUST include:
+    - `[TAG: ...]` (e.g., `[TAG: Core]`, `[TAG: Security]`)
+    - `[DESC: ...]` (A human-centric summary of the impact/value).
+- **Header Schema**: ALL Sprint headers MUST follow the regex-ready format:
+    `### Sprint [ID]: [Name] ([YYYY-MM-DD]) - [STATUS]`
+
+## 7. Team Topology & Personas
 To ensure context efficiency and architectural consistency across sessions, use the following **Team Keywords** to invoke specialized sub-agent rosters.
 
 | Keyword | Team Designation | Members & Expertise |
