@@ -44,9 +44,9 @@ try {
   console.error("[PHAROS_FATAL]: Failed to load authoritative roadmap.toon", e);
 }
 
-// Deterministic Sort
+// Deterministic Sort (Descending: Sprint 5 -> 1)
 const sortedRoadmap = roadmapItems.toSorted((a, b) => {
-    return a.phase.localeCompare(b.phase, undefined, { numeric: true, sensitivity: 'base' });
+    return b.phase.localeCompare(a.phase, undefined, { numeric: true, sensitivity: 'base' });
 });
 
 // Swimlane Segregation (ADR-0017 / Issue #215)
