@@ -12,8 +12,20 @@ import { describe, it, expect } from 'vitest';
 // High-Rigor: Import via workspace package name, not relative path
 import * as pkdCore from '@pkd/core';
 import schema from '@pkd/core/schema/pharos-schema.json';
-import { roadmapItems } from './data/roadmap';
 import { categories } from './data/categories';
+import fs from 'node:fs';
+import path from 'node:path';
+
+// Load automated roadmap data for testing
+const TOON_PATH = path.resolve(__dirname, 'content/roadmap.toon');
+const rawToon = fs.readFileSync(TOON_PATH, 'utf-8');
+const roadmapItems = Array.from(rawToon.matchAll(/^\s*"([^"]+)",\s*"([^"]+)",\s*"([^"]+)",\s*"([^"]+)",\s*"([^"]+)"/gm)).map(m => ({
+  name: m[1],
+  status: m[2],
+  phase: m[3],
+  tag: m[4],
+  description: m[5]
+}));
 
 describe('Marketing Site Monorepo Integrity', () => {
   /**
