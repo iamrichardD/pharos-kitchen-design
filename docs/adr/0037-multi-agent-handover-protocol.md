@@ -48,6 +48,8 @@ Before a "Builder" session concludes, it MUST:
 ### 3. The Auditor Persona (Auditor Side)
 - **Zero Memory**: The Auditor MUST be a fresh session with no history of the Builder's internal reasoning.
 - **Standardized Heuristics**: The Auditor MUST strictly follow `.github/CRUCIBLE_HEURISTICS.md`.
+- **Audit-in-Thread Standard**: The Auditor MUST NOT modify the PR Description. The PR Description is the **Immutable Builder's Record**. 
+- **The Audit Report**: The final verdict and high-signal summary MUST be posted as a **top-level PR comment**.
 - **Mentorship Voice**: Review comments and feedback MUST follow the **Human-Centric Communication Standard** (ADR-0048). Feedback should be instructive and professional, avoiding clinical labels or "AI slop."
 
 ## Rationale
