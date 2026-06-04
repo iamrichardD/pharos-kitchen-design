@@ -116,6 +116,8 @@ Before moving from **Research** to **Strategy/Execution**, you MUST explicitly c
 Every non-trivial task completion MUST follow the **Multi-Agent Handover & Crucible Protocol (ADR-0037)** and the **Mandatory PR Gate (ADR-0043)**:
 - **Brutal Self-Critique:** Before finalizing, perform a \"Brutally Honest\" gap and security analysis to identify technical debt or edge cases.
 - **The Mandatory PR Gate:** The Builder MUST create a high-rigor Pull Request BEFORE the Audit phase begins. This PR serves as the \"Long-Term Memory\" of the task.
+- **Immutable Builder's Record**: The PR Description (body) belongs strictly to the **Builder** and MUST remain immutable once the audit begins.
+- **The Audit Thread**: All Crucible Audit results, verdicts (`🟢 PHAROS GREEN`), and technical critiques MUST be recorded as **comments** within the PR thread, preserving the temporal narrative of the feature's evolution.
 - **Voice Standard (ADR-0048):** All PRs, comments, and documentation MUST use the **Human-Centric Voice**. 
 - **Mid-Sprint Rigor Gate (ECT 4+):** For any task with an ECT of 4 or higher, the Builder MUST pause at the 50% implementation mark (or Turn 5) to request a **Strategic SPM Check-in**. This prevents architectural drift in high-complexity \"Big Rocks.\"
 - **Shard-Based Logging (Conflict Mitigation):** Parallel agents MUST NOT edit a shared log file. Instead, write all progress to a dedicated task-specific file in the current sprint directory: \`.project/shards/sprint-4.10/issue-X.toon\`. The SPM will aggregate these into the master log during final integration.

@@ -26,10 +26,12 @@ A Builder's task is considered "Incomplete" even if all tests pass. The task is 
 
 ### 2. PR-Centric Mentorship (Hybrid Model)
 To maintain a lean and readable codebase while preserving deep technical mentorship:
-- **In-PR Feedback:** All peer review comments, technical rationale, and instructive guidance MUST be recorded within the GitHub PR review history.
+- **Immutable Builder's Record**: The PR Description (body) belongs strictly to the **Builder**. It is the "Commit Message" for the feature and remains immutable once the audit begins. 
+- **The Audit Thread**: All Crucible Audit results, verdicts (`🟢 PHAROS GREEN`), and technical critiques MUST be recorded as **comments** within the PR thread.
+- **In-PR Feedback:** All peer review comments, technical rationale, and instructive guidance MUST be recorded within the GitHub PR review history and inline code comments.
 - **Human Voice:** Mentorship comments MUST use the natural, first-person voice mandated by **ADR-0048**. 
 - **In-Code References:** The source code will remain lean. For high-impact or non-obvious logic, a single-line reference is required: `// Rationale: See PR #X (Feature Name)`.
-- **No Meta-Labels:** Prohibited from using "The Why," "Teachable Moment," or other labels that signal "AI Slop."
+- **No Meta-Labels**: Prohibited from using "The Why," "Teachable Moment," or other labels that signal "AI Slop."
 
 ### 3. Sprint-Isolated Velocity Reporting
 Granular DORA and ECT metrics will be moved from a monolithic `WEEKLY_VELOCITY_LOG.toon` to sprint-specific archival files in `docs/governance/REPORTS/` (e.g., `SPRINT_5.1_VELOCITY.toon`). This ensures context efficiency and prevents historical data from cluttering the active development window.
