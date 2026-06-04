@@ -107,13 +107,14 @@ const {
 
   function matchWildcard(text, pattern) {
     // RFC-2378 Wildcard Support: *, +, ?, []
-    // Implementation: Convert RFC-2378 wildcards to Regex
-    let regexPattern = pattern
-      .replace(/\*/g, '.*')
-      .replace(/\+/g, '.+')
-      .replace(/\?/g, '.');
+    // Implementation: Convert RFC-2378 wildcards to Regex after escaping metacharacters
+    const regexPattern = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      .replace(/\\\*/g, '.*')
+      .replace(/\\\+/g, '.+')
+      .replace(/\\\?/g, '.')
+      .replace(/\\\[/g, '[')
+      .replace(/\\\]/g, ']');
     
-    // Brackets [abc] are natively supported by Regex
     const regex = new RegExp(`^${regexPattern}$`, 'i');
     return regex.test(text);
   }
