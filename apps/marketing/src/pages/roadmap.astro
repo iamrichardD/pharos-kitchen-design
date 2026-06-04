@@ -30,8 +30,9 @@ try {
   const itemRows = rawToon.matchAll(/^\s*"([^"]+)",\s*"([^"]+)",\s*"([^"]+)",\s*"([^"]+)",\s*"([^"]+)",\s*"([^"]+)"/gm);
   
   for (const match of itemRows) {
+    const rawId = parseInt(match[1], 10);
     roadmapItems.push({
-      id: match[1],
+      id: rawId > 0 ? rawId : null,
       name: match[2],
       status: match[3],
       phase: match[4],
@@ -49,19 +50,19 @@ const sortedRoadmap = roadmapItems.toSorted((a, b) => {
 });
 
 // Swimlane Segregation (ADR-0017 / Issue #215)
-const activeSquad = sortedRoadmap.filter(i => i.status === 'In Construction');
+const activeSquad = sortedRoadmap.filter(i => i.status === 'In Progress');
 const deployedSpec = sortedRoadmap.filter(i => i.status === 'Deployed');
 const futureBlueprint = sortedRoadmap.filter(i => i.status === 'Blueprint Approved' || i.status === 'Research Phase');
 
 const filterPills = [
   { label: "Deployed", value: "status=deployed" },
-  { label: "Active", value: "status=construction" },
+  { label: "Active", value: "status=progress" },
   { label: "Core", value: "tag=core" },
   { label: "Security", value: "tag=identity" }
 ];
 ---
 
-<BaseLayout title="Technical Maturity Matrix | Pharos Kitchen Design">
+<BaseLayout title="PKD Roadmap | Pharos Kitchen Design">
   <main class="max-w-7xl mx-auto px-6 py-20 min-h-screen blueprint-grid transition-colors duration-300">
     <div class="mb-20 border-l-4 border-ph-blue pl-8 py-4 bg-ph-blue/5 backdrop-blur-sm relative">
       <!-- Freshness Badge (ADR-0051) -->
@@ -77,7 +78,7 @@ const filterPills = [
       </div>
 
       <h1 class="text-6xl font-bold text-text-base tracking-tighter mb-4 font-mono italic uppercase">
-        SYSTEM_VELOCITY_v1.2
+        PKD Roadmap
       </h1>
       <p class="text-xl text-text-muted max-w-3xl leading-relaxed">
         Pharos Kitchen Design (PKD) is a **Metadata-First Standard**. 
@@ -88,22 +89,22 @@ const filterPills = [
     <!-- Command Bar Integration -->
     <CommandBar 
       targetSelector=".roadmap-card" 
-      placeholder="Filter by status=deployed, tag=core, or keywords..."
+      placeholder="Filter by status=deployed, tag=core, stream=phase_1..."
       pills={filterPills}
     />
 
     <div class="space-y-32">
       <!-- ACTIVE SQUAD -->
-      <section class="filter-section">
+      <section class="filter-section transition-all duration-500">
         <div class="flex items-center gap-4 mb-10">
-          <h2 class="text-2xl font-black font-mono tracking-tighter text-ph-blue uppercase">01. ACTIVE_SQUAD</h2>
+          <h2 class="text-2xl font-black font-mono tracking-tighter text-ph-blue uppercase">01. Active Squad</h2>
           <div class="h-px flex-1 bg-ph-blue/20"></div>
-          <span class="text-[10px] font-mono text-text-muted uppercase tracking-widest">{activeSquad.length} IN_PROGRESS</span>
+          <span class="text-[10px] font-mono text-text-muted uppercase tracking-widest">{activeSquad.length} In Progress</span>
         </div>
         
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {activeSquad.map((item) => (
-            <div class="roadmap-card group relative bg-bg-base/40 border border-ph-blue/20 p-8 hover:border-ph-blue transition-all duration-300 shadow-lg hover:shadow-ph-blue/10 flex flex-col justify-between" data-raw={`status=construction tag=${item.tag.toLowerCase()} name=${item.name.toLowerCase()} desc=${item.description.toLowerCase()}`}>
+            <div class="roadmap-card group relative bg-bg-base/40 border border-ph-blue/20 p-8 hover:border-ph-blue transition-all duration-300 shadow-lg hover:shadow-ph-blue/10 flex flex-col justify-between" data-raw={`status=progress tag=${item.tag.toLowerCase()} stream=${item.phase.toLowerCase()} name=${item.name.toLowerCase()} desc=${item.description.toLowerCase()}`}>
               <div class="absolute top-0 left-0 bg-ph-blue px-3 py-1 text-[9px] font-mono text-ph-charcoal uppercase tracking-widest font-bold">
                 [{item.tag}]
               </div>
@@ -113,7 +114,9 @@ const filterPills = [
                 <p class="text-text-muted text-sm leading-relaxed mb-6 italic">{item.description}</p>
               </div>
               <div class="mt-4 pt-4 border-t border-border-blueprint/10 flex justify-between items-center opacity-40 group-hover:opacity-100 transition-opacity">
-                <div class="text-[9px] font-mono text-text-muted uppercase">SPEC_ID: {item.id}</div>
+                <div class="text-[9px] font-mono text-text-muted uppercase">
+                  {item.id ? `SPEC_ID: #${item.id}` : 'SPEC_ID: PENDING'}
+                </div>
                 <div class="h-px flex-1 mx-4 bg-border-blueprint/20"></div>
                 <div class="w-2 h-2 border border-ph-blue/40 rounded-full animate-pulse"></div>
               </div>
@@ -126,16 +129,16 @@ const filterPills = [
       </section>
 
       <!-- DEPLOYED SPEC -->
-      <section class="filter-section">
+      <section class="filter-section transition-all duration-500">
         <div class="flex items-center gap-4 mb-10">
-          <h2 class="text-2xl font-black font-mono tracking-tighter text-ph-pulse uppercase">02. DEPLOYED_SPEC</h2>
+          <h2 class="text-2xl font-black font-mono tracking-tighter text-ph-pulse uppercase">02. Deployed Specifications</h2>
           <div class="h-px flex-1 bg-ph-pulse/20"></div>
-          <span class="text-[10px] font-mono text-text-muted uppercase tracking-widest">{deployedSpec.length} VERIFIED</span>
+          <span class="text-[10px] font-mono text-text-muted uppercase tracking-widest">{deployedSpec.length} Verified</span>
         </div>
         
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {deployedSpec.map((item) => (
-            <div class="roadmap-card group relative bg-bg-base/40 border border-ph-pulse/20 p-8 hover:border-ph-pulse transition-all duration-300 shadow-lg hover:shadow-ph-pulse/10 flex flex-col justify-between" data-raw={`status=deployed tag=${item.tag.toLowerCase()} name=${item.name.toLowerCase()} desc=${item.description.toLowerCase()}`}>
+            <div class="roadmap-card group relative bg-bg-base/40 border border-ph-pulse/20 p-8 hover:border-ph-pulse transition-all duration-300 shadow-lg hover:shadow-ph-pulse/10 flex flex-col justify-between" data-raw={`status=deployed tag=${item.tag.toLowerCase()} stream=${item.phase.toLowerCase()} name=${item.name.toLowerCase()} desc=${item.description.toLowerCase()}`}>
               <div class="absolute top-0 left-0 bg-ph-pulse px-3 py-1 text-[9px] font-mono text-ph-charcoal uppercase tracking-widest font-bold">
                 [{item.tag}]
               </div>
@@ -145,7 +148,9 @@ const filterPills = [
                 <p class="text-text-muted text-sm leading-relaxed mb-6 italic">{item.description}</p>
               </div>
               <div class="mt-4 pt-4 border-t border-border-blueprint/10 flex justify-between items-center opacity-40 group-hover:opacity-100 transition-opacity">
-                <div class="text-[9px] font-mono text-text-muted uppercase">SPEC_ID: {item.id}</div>
+                <div class="text-[9px] font-mono text-text-muted uppercase">
+                  {item.id ? `SPEC_ID: #${item.id}` : 'SPEC_ID: PENDING'}
+                </div>
                 <div class="h-px flex-1 mx-4 bg-border-blueprint/20"></div>
                 <div class="w-2 h-2 bg-ph-pulse rounded-full"></div>
               </div>
@@ -158,16 +163,16 @@ const filterPills = [
       </section>
 
       <!-- FUTURE BLUEPRINT -->
-      <section class="filter-section">
+      <section class="filter-section transition-all duration-500">
         <div class="flex items-center gap-4 mb-10">
-          <h2 class="text-2xl font-black font-mono tracking-tighter text-amber-500 uppercase">03. FUTURE_BLUEPRINT</h2>
+          <h2 class="text-2xl font-black font-mono tracking-tighter text-amber-500 uppercase">03. Future Blueprints</h2>
           <div class="h-px flex-1 bg-amber-500/20"></div>
-          <span class="text-[10px] font-mono text-text-muted uppercase tracking-widest">{futureBlueprint.length} APPROVED</span>
+          <span class="text-[10px] font-mono text-text-muted uppercase tracking-widest">{futureBlueprint.length} Approved</span>
         </div>
         
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {futureBlueprint.map((item) => (
-            <div class="roadmap-card group relative bg-bg-base/40 border border-amber-500/20 p-8 hover:border-amber-500 transition-all duration-300 shadow-lg hover:shadow-amber-500/10 flex flex-col justify-between" data-raw={`status=blueprint tag=${item.tag.toLowerCase()} name=${item.name.toLowerCase()} desc=${item.description.toLowerCase()}`}>
+            <div class="roadmap-card group relative bg-bg-base/40 border border-amber-500/20 p-8 hover:border-amber-500 transition-all duration-300 shadow-lg hover:shadow-amber-500/10 flex flex-col justify-between" data-raw={`status=blueprint tag=${item.tag.toLowerCase()} stream=${item.phase.toLowerCase()} name=${item.name.toLowerCase()} desc=${item.description.toLowerCase()}`}>
               <div class="absolute top-0 left-0 bg-amber-500 px-3 py-1 text-[9px] font-mono text-ph-charcoal uppercase tracking-widest font-bold">
                 [{item.tag}]
               </div>
@@ -177,7 +182,9 @@ const filterPills = [
                 <p class="text-text-muted text-sm leading-relaxed mb-6 italic">{item.description}</p>
               </div>
               <div class="mt-4 pt-4 border-t border-border-blueprint/10 flex justify-between items-center opacity-40 group-hover:opacity-100 transition-opacity">
-                <div class="text-[9px] font-mono text-text-muted uppercase">SPEC_ID: {item.id}</div>
+                <div class="text-[9px] font-mono text-text-muted uppercase">
+                  {item.id ? `SPEC_ID: #${item.id}` : 'SPEC_ID: PENDING'}
+                </div>
                 <div class="h-px flex-1 mx-4 bg-border-blueprint/20"></div>
                 <div class="w-2 h-2 border border-amber-500/40 rounded-full"></div>
               </div>
@@ -193,7 +200,7 @@ const filterPills = [
     <!-- Final CTA -->
     <div class="mt-32 p-12 bg-bg-base/40 border-b-8 border-ph-blue relative overflow-hidden blueprint-border">
       <div class="relative z-10">
-        <h2 class="text-3xl font-bold mb-6 font-mono tracking-tighter text-text-base">CONTRIBUTE_TO_THE_BLUEPRINT</h2>
+        <h2 class="text-3xl font-bold mb-6 font-mono tracking-tighter text-text-base">Contribute to the Blueprint</h2>
         <p class="text-text-muted max-w-2xl mb-8 leading-relaxed">
           PKD is built for the IKD community. Our roadmap is an open specification for the future of AEC data sovereignty.
         </p>
