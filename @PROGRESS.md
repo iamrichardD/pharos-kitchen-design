@@ -23,7 +23,7 @@
 **Status**: 🚀 ACTIVE (Sprint 5.01)
 
 ### Sprint 5.01: Core Parser & Remediation (2026-06-01) - 🚀 ACTIVE
-- [x] **Issue #206**: [TAG: Security] Identity Re-platforming. [DESC: Migrated from AWS Cognito to sovereign Cloudflare D1-backed identity model with Passkey-First authentication.]
+- [x] **Issue #206**: [TAG: Security] Identity Re-platforming. [DESC: Migrated from AWS Cognito to sovereign Cloudflare D1-backed identity model with Passkey-First authentication. Removed legacy password fields and implemented browser-side @simplewebauthn logic.]
 - [x] **Issue #139**: [TAG: Core] TOON Diagnostics. [DESC: Implemented line/column character tracking and snippet extraction for high-signal lexer errors.]
 - [x] **Issue #199**: [TAG: Governance] Human-Centric Communication. [DESC: Codified ADR-0048 for natural, first-person voice across all communications and living docs.]
 - [x] **Issue #196**: [TAG: UI] Astro 6.4 Upgrade. [DESC: Integrated Sätteri Rust-based processor, achieving ~70.5% reduction in site build times.]

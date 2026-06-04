@@ -25,7 +25,7 @@
 - [ ] **Issue #207**: [TAG: Governance] Lossless Authoritative Log Restructure. [DESC: Hardening @PROGRESS and @TODO into machine-readable DTOs for the Sync Engine.]
 - [ ] **Issue #208**: [TAG: Governance] Automated Roadmap Synchronization. [DESC: Implementing the Sync Engine to automate roadmap updates from sharded logs.] (Blocked by #207)
 - [ ] **Issue #204**: [TAG: Security] Multi-Org Pulse Filtering. [DESC: Implementing delegate enforcement for organizational equipment shards.]
-- [ ] **Issue #205**: [TAG: Research] Edge-Sovereign Passkey Prototype. [DESC: Investigating distributed passkey storage on Cloudflare Edge.] (Blocked by #206)
+- [ ] **Issue #205**: [TAG: Security] Hardening & Integration - Edge-Sovereign Passkey. [DESC: Verifying CLI ergonomics (biometrics) and implementing 'Magic Link' fallback recovery.] (Blocked by #204)
 
 ### 📋 Future Backlog
 
@@ -48,6 +48,6 @@
 ---
 
 ## 🗑️ Purge/Stale Logic
-- [x] **ADR-0019**: Superseded by ADR-0021 (Cloudflare Edge Pivot).
-- [x] **pkd-core legacy parser**: Refactored in favor of Vertical Slices (Issue #19).
-- [x] **Cognito Identity Provider**: Removed in favor of Cloudflare D1/Passkey model (Issue #206).
+- [x] **ADR-0019**: [TAG: Purged] Superseded by ADR-0021 (Cloudflare Edge Pivot). [DESC: Legacy AWS bridge design removed.]
+- [x] **pkd-core legacy parser**: [TAG: Purged] Refactored in favor of Vertical Slices (Issue #19). [DESC: Monolithic parser removed.]
+- [x] **Cognito Identity Provider**: [TAG: Purged] Removed in favor of Cloudflare D1/Passkey model (Issue #206). [DESC: Legacy auth provider removed.]
