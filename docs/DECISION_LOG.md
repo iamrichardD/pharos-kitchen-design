@@ -55,6 +55,9 @@ This log provides an index of the technical and architectural decisions made for
 | **[ADR-0049]** | 2026-06-02 | Approved | [Sovereign Identity Migration (D1-First)](docs/adr/0049-sovereign-identity-migration.md) |
 | **[ADR-0050]** | 2026-06-02 | Approved | [Passkey-First Authentication Strategy](docs/adr/0050-passkey-first-authentication-strategy.md) |
 | **[ADR-0051]** | 2026-06-02 | Approved | [Authoritative Map Synchronization](docs/adr/0051-authoritative-map-synchronization.md) |
+| **[ADR-0052]** | 2026-06-05 | Approved | [DNS-Hardened Development Isolation](docs/adr/0052-dns-hardened-development-isolation.md) |
+| **[ADR-0053]** | 2026-06-05 | Approved | [Authoritative Consent Gate Protocol](docs/adr/0053-authoritative-consent-gate-protocol.md) |
+| **[ADR-0054]** | 2026-06-05 | Approved | [Triple-Point Velocity & Volatility Analysis](docs/adr/0054-triple-point-velocity-tracking.md) |
 
 ---
 *To add a new decision, create a new file in `docs/adr/` following the established template and append it to this index.*

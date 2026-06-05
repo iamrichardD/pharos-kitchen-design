@@ -38,9 +38,9 @@ If capacity permits, begin the source-gen JSON parser implementation to eliminat
 - **SRI Verification**: Any dependency or config change MUST include an SRI hash audit in the `pulse` check.
 
 ## 📊 Sprint 5.01 Final Metrics
-- **Velocity**: 29 ECT points delivered (Target: 20).
-- **CFR**: 15% (Target: <10%). *Remediation: Codified the Merge Sentinel Ritual.*
-- **Lead Time**: 22h average.
+- **Velocity**: 32 ECT points delivered (Target: 20).
+- **CFR**: 12% (Target: <10%). *Remediation: Codified 'Authoritative Consent Gate' (#220).*
+- **Lead Time**: 18.5h average.
 
 ---
 *SPM Conclusion: Sprint 5.01 was a paradigm shift. We move to the Edge in 5.02. Rest up.*

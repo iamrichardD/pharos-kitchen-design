@@ -125,36 +125,51 @@ const { content } = Astro.props;
            Object.entries(doc.lists).forEach(([name, list]: [string, any]) => {
              if (name === 'body' || name === 'infographics') return; // Skip handled sections
 
+             const isNarrative = list.schema.length === 1 && list.schema[0].toLowerCase() === 'content';
              const listEl = document.createElement('div');
              listEl.className = "group animate-in fade-in slide-in-from-bottom-2 duration-700";
-             listEl.innerHTML = `
-               <div class="flex items-center gap-2 mb-3">
-                  <div class="h-[1px] flex-grow bg-ph-pulse/20"></div>
-                  <h3 class="text-[10px] font-bold uppercase tracking-[0.2em] text-ph-pulse/60">${name}</h3>
-                  <div class="h-[1px] w-8 bg-ph-pulse/20"></div>
-               </div>
-               <div class="overflow-hidden border border-ph-pulse/10 rounded-sm bg-ph-pulse/5">
-                 <table class="w-full text-left border-collapse text-[11px]">
-                   <thead>
-                     <tr class="bg-ph-pulse/5">
-                       ${list.schema.map((s: string) => `<th class="py-2.5 px-4 uppercase opacity-40 font-bold border-r border-ph-pulse/10 last:border-0">${s}</th>`).join('')}
-                     </tr>
-                   </thead>
-                   <tbody>
-                     ${list.items.map((row: string[]) => `
-                       <tr class="border-t border-ph-pulse/5 hover:bg-ph-pulse/5 transition-colors group/row">
-                         ${row.map((cell, idx) => {
-                           const isTrendColumn = idx === 2;
-                           const isPositive = cell.toLowerCase().includes('improvement') || cell.toLowerCase().includes('authoritative');
-                           const textColor = (isTrendColumn && isPositive) ? 'text-emerald-500 font-bold' : 'text-text-base opacity-80 group-hover/row:opacity-100';
-                           return `<td class="py-2 px-4 border-r border-ph-pulse/5 last:border-0 ${textColor} transition-colors">${cell}</td>`;
-                         }).join('')}
+
+             if (isNarrative) {
+               listEl.innerHTML = `
+                 <div class="flex items-center gap-2 mb-3">
+                    <div class="h-[1px] flex-grow bg-ph-pulse/20"></div>
+                    <h3 class="text-[10px] font-bold uppercase tracking-[0.2em] text-ph-pulse/60">${name}</h3>
+                    <div class="h-[1px] w-8 bg-ph-pulse/20"></div>
+                 </div>
+                 <div class="toon-narrative text-text-base leading-relaxed opacity-90 prose prose-slate dark:prose-invert max-w-none">
+                   ${list.items.map((row: string[]) => `<p class="mb-4 last:mb-0">${row[0]}</p>`).join('')}
+                 </div>
+               `;
+             } else {
+               listEl.innerHTML = `
+                 <div class="flex items-center gap-2 mb-3">
+                    <div class="h-[1px] flex-grow bg-ph-pulse/20"></div>
+                    <h3 class="text-[10px] font-bold uppercase tracking-[0.2em] text-ph-pulse/60">${name}</h3>
+                    <div class="h-[1px] w-8 bg-ph-pulse/20"></div>
+                 </div>
+                 <div class="overflow-hidden border border-ph-pulse/10 rounded-sm bg-ph-pulse/5">
+                   <table class="w-full text-left border-collapse text-[11px]">
+                     <thead>
+                       <tr class="bg-ph-pulse/5">
+                         ${list.schema.map((s: string) => `<th class="py-2.5 px-4 uppercase opacity-40 font-bold border-r border-ph-pulse/10 last:border-0">${s}</th>`).join('')}
                        </tr>
-                     `).join('')}
-                   </tbody>
-                 </table>
-               </div>
-             `;
+                     </thead>
+                     <tbody>
+                       ${list.items.map((row: string[]) => `
+                         <tr class="border-t border-ph-pulse/5 hover:bg-ph-pulse/5 transition-colors group/row">
+                           ${row.map((cell, idx) => {
+                             const isTrendColumn = idx === 2;
+                             const isPositive = cell.toLowerCase().includes('improvement') || cell.toLowerCase().includes('authoritative');
+                             const textColor = (isTrendColumn && isPositive) ? 'text-emerald-500 font-bold' : 'text-text-base opacity-80 group-hover/row:opacity-100';
+                             return `<td class="py-2 px-4 border-r border-ph-pulse/5 last:border-0 ${textColor} transition-colors">${cell}</td>`;
+                           }).join('')}
+                         </tr>
+                       `).join('')}
+                     </tbody>
+                   </table>
+                 </div>
+               `;
+             }
              lists.appendChild(listEl);
            });
          }

@@ -23,6 +23,7 @@
 **Status**: 🚀 ACTIVE (Sprint 5.01)
 
 ### Sprint 5.01: Core Parser & Remediation (2026-06-01) - 🚀 ACTIVE
+- [x] **Issue #218**: [TAG: Governance] Backlog Restructure for Multi-Sprint Roadmap Synchronization. [DESC: Reorganized @TODO and @PROGRESS into explicit 'Active' and 'Future' pools, enabling machine-readable roadmap swimlanes.]
 - [x] **Issue #215**: [TAG: UI] Professional Grade Roadmap UI Refactor. [DESC: Transformed the public roadmap into a segregated, searchable, and traceable tool with swimlanes and RFC-2378 CommandBar integration.]
 - [x] **Issue #208**: [TAG: Governance] Automated Roadmap Synchronization. [DESC: Implemented the Sync Engine to automate roadmap updates from sharded logs.]
 - [x] **Issue #207**: [TAG: Governance] Lossless Authoritative Log Restructure. [DESC: Hardened @PROGRESS and @TODO into machine-readable DTOs for the Sync Engine.]

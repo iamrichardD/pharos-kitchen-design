@@ -22,7 +22,9 @@
 ## 🚀 Active Sprint
 
 ### Sprint 5.01: Core Parser & Remediation (2026-06-01) - 🚀 ACTIVE
-- [ ] **Issue #218**: [TAG: Governance] Backlog Restructure for Multi-Sprint Roadmap Synchronization. [DESC: Reorganizing @TODO to support explicit 'Active' and 'Future' swimlane synchronization.]
+- [ ] **Issue #223**: [TAG: Security] Implement Domain Allowlist in bless-sri.sh. [DESC: Adding origin verification to the blessing script to prevent accidental malicious blessing.]
+- [ ] **Issue #222**: [TAG: Debt] Refine 'sed' targeting in bless-sri.sh. [DESC: Tightening regex targeting to prevent cross-talk during SRI updates.]
+- [ ] **Issue #220**: [TAG: Governance] Formalize Authoritative Consent Gate for Upstream Scripts. [DESC: Implementing a 'Blessing' workflow for third-party scripts to prevent build-killing SRI failures.]
 - [ ] **Issue #204**: [TAG: Security] Multi-Org Pulse Filtering. [DESC: Implementing delegate enforcement for organizational equipment shards.]
 - [ ] **Issue #205**: [TAG: Security] Hardening & Integration - Edge-Sovereign Passkey. [DESC: Verifying CLI ergonomics (biometrics) and implementing 'Magic Link' fallback recovery.] (Blocked by #204)
 

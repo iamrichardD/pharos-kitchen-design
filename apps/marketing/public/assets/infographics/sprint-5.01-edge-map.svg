@@ -1,0 +1,111 @@
+<svg width="1200" height="600" viewBox="0 0 1200 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    :root {
+      --bg: #1A1A1A;
+      --text: #F3F4F6;
+      --muted: #9CA3AF;
+      --accent: #FF6B00;
+      --grid: #FFFFFF;
+      --grid-op: 0.05;
+      --panel-bg: rgba(255, 107, 0, 0.05);
+      --border: #1E2D3D;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #F8FAFC;
+        --text: #1A1A1A;
+        --muted: #4B5563;
+        --accent: #FF6B00;
+        --grid: #005FB8;
+        --grid-op: 0.1;
+        --panel-bg: rgba(0, 95, 184, 0.03);
+        --border: #E2E8F0;
+      }
+    }
+    text { font-family: system-ui, -apple-system, sans-serif; fill: var(--text); }
+    .accent { fill: var(--accent); }
+    .muted { fill: var(--muted); }
+    .stroke-accent { stroke: var(--accent); }
+    .stroke-muted { stroke: var(--muted); }
+    .stroke-border { stroke: var(--border); }
+    .fill-panel { fill: var(--panel-bg); }
+    .grid-line { stroke: var(--grid); stroke-opacity: var(--grid-op); }
+    .header-main { font-weight: 900; font-size: 42px; letter-spacing: -0.03em; }
+    .header-sub { font-weight: 700; font-size: 18px; letter-spacing: 0.3em; opacity: 0.8; fill: var(--accent); }
+    .panel-title { font-weight: 800; font-size: 12px; letter-spacing: 0.2em; fill: var(--accent); }
+    .panel-label { font-weight: 700; font-size: 18px; }
+    .panel-desc { font-size: 14px; opacity: 0.6; fill: var(--muted); }
+    .velocity-val { font-weight: 900; font-size: 64px; fill: var(--accent); }
+    .velocity-label { font-weight: 700; font-size: 14px; letter-spacing: 0.1em; }
+  </style>
+
+  <!-- Background -->
+  <rect width="1200" height="600" fill="var(--bg)"/>
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" class="grid-line" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="600" fill="url(#grid)"/>
+
+  <!-- Header Section -->
+  <g transform="translate(60, 60)">
+    <text class="header-sub">SPRINT 5.01 SCHEMATIC</text>
+    <text y="45" class="header-main">THE SOVEREIGN EDGE STACK</text>
+    <rect y="70" width="1080" height="2" fill="var(--accent)" fill-opacity="0.2"/>
+  </g>
+
+  <!-- Panel 1: IDENTITY -->
+  <g transform="translate(60, 180)">
+    <rect width="340" height="340" rx="8" class="fill-panel" stroke="var(--border)" stroke-width="1"/>
+    <text x="170" y="40" text-anchor="middle" class="panel-title">01. IDENTITY</text>
+    
+    <!-- Simple Device Icon -->
+    <g transform="translate(170, 160)">
+      <rect x="-40" y="-60" width="80" height="120" rx="8" stroke="var(--text)" stroke-width="3"/>
+      <circle cx="0" cy="20" r="15" class="stroke-accent" stroke-width="3" fill="none"/>
+      <path d="M 0 35 L 0 45" class="stroke-accent" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="0" cy="20" r="25" class="stroke-accent" stroke-width="1" opacity="0.3"/>
+    </g>
+    
+    <text x="170" y="270" text-anchor="middle" class="panel-label">PASSKEY-FIRST</text>
+    <text x="170" y="295" text-anchor="middle" class="panel-desc">HARDWARE VERIFIED</text>
+  </g>
+
+  <!-- Panel 2: SECURITY -->
+  <g transform="translate(430, 180)">
+    <rect width="340" height="340" rx="8" class="fill-panel" stroke="var(--border)" stroke-width="1"/>
+    <text x="170" y="40" text-anchor="middle" class="panel-title">02. SECURITY</text>
+    
+    <!-- Stamp/Blessing Icon -->
+    <g transform="translate(170, 160)">
+      <path d="M -40 -40 L 40 -40 L 40 40 L -40 40 Z" stroke="var(--text)" stroke-width="3"/>
+      <circle cx="0" cy="0" r="30" fill="var(--accent)" fill-opacity="0.1" class="stroke-accent" stroke-width="2" stroke-dasharray="4 4"/>
+      <path d="M -15 0 L -5 10 L 15 -10" class="stroke-accent" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    
+    <text x="170" y="270" text-anchor="middle" class="panel-label">HUMAN SIGN-OFF</text>
+    <text x="170" y="295" text-anchor="middle" class="panel-desc">AUDITED SECURITY</text>
+  </g>
+
+  <!-- Panel 3: VELOCITY -->
+  <g transform="translate(800, 180)">
+    <rect width="340" height="340" rx="8" class="fill-panel" stroke="var(--border)" stroke-width="1"/>
+    <text x="170" y="40" text-anchor="middle" class="panel-title">03. VELOCITY</text>
+    
+    <!-- Velocity Metric -->
+    <g transform="translate(170, 160)">
+      <text text-anchor="middle" class="velocity-val">+12</text>
+      <text y="30" text-anchor="middle" class="velocity-label">ECT DIVIDEND</text>
+    </g>
+    
+    <text x="170" y="270" text-anchor="middle" class="panel-label">AUTOMATION ROI</text>
+    <text x="170" y="295" text-anchor="middle" class="panel-desc">32 POINTS DELIVERED</text>
+  </g>
+
+  <!-- Status Bar -->
+  <g transform="translate(60, 550)">
+    <rect width="1080" height="30" rx="4" fill="var(--border)" fill-opacity="0.3"/>
+  </g>
+
+</svg>

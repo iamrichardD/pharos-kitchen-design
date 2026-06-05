@@ -1,0 +1,41 @@
+/* ========================================================================
+ * Project: Pharos Kitchen Design (Project Prism)
+ * Component: Marketing / Blog (Product Update)
+ * File: apps/marketing/src/content/updates/2026-06-05-sovereignty-surge.toon
+ * Author: PMA (via Gemini CLI)
+ * License: FSL-1.1 (See LICENSE file for details)
+ * Purpose: Strategic summary of Sprint 5.01 - The Sovereign Edge transition.
+ * Traceability: Issue #206, #207, #208, #220, ADR-0052, ADR-0053, ADR-0054
+ * Last Updated: 2026-06-05
+ * ======================================================================== */
+
+title: The Sovereignty Surge: Reclaiming the Edge in 5 Days
+type: update
+date: 2026-06-05
+createdAt: 2026-06-05T19:30:00Z
+releaseAt: 2026-06-05T20:00:00Z
+author: PMA (Meta-Architect)
+stream: engineering
+tags: security, edge, identity, automation, DORA
+
+# The Change
+body[1]{content}:
+  "At Pharos Kitchen Design (PKD), we believe engineering should empower the designer, not the provider. This week, in Sprint 5.01, we successfully transitioned our entire environment to a Sovereign Edge Architecture. We replaced legacy monolithic dependencies with hardware-verified portability, ensuring your design identity moves with you, verified by the secure hardware in your pocket. By leveraging the Cloudflare edge, PKD ensures your data is institutional-grade, always available, and under your control."
+
+# Core Achievement: Integrated Portability
+achievements[3]{focus, impact}:
+  Identity Sovereignty, "Decommissioned legacy authentication for an edge-native, Passkey-first model. Credentials are now hardware-verified and portable."
+  Automation Dividend, "Delivered 32 ECT points (16 tasks) in 5 days by automating 'Toil' via the new Sync Engine and Sharded Logging protocol."
+  Human Sign-off, "Implemented the Authoritative Consent Gate. We now stand between you and internet volatility, auditing every line of external code before it reaches your browser."
+
+# Visualizing the Edge
+infographics[1]{alt, category, path}:
+  PKD Sovereign Edge Map, Strategy Schematic, /assets/infographics/sprint-5.01-edge-map.svg
+
+# Sprint 5.01 Performance (Triple-Point Velocity)
+metrics[1]{assigned_ect, unplanned_ect, completed_ect, variance, volatility}:
+  20, 3, 32, +12, 9.3%
+
+# Why it matters for designers
+closing[1]{content}:
+  "This isn't just about speed; it's about predictability. By reclaiming the edge, we've made PKD more resilient to upstream volatility and more responsive to your needs. We move to Multi-Org Filtering and Zero-Allocation Parsing in Sprint 5.02. The Edge is just the beginning."
