@@ -33,6 +33,7 @@ WORKSPACE_ROOT=$(git rev-parse --show-toplevel)
 # --security-opt: Required for certain WASM/Rust build operations
 podman run --rm \
     --security-opt seccomp=unconfined \
+    --network host \
     -v "${WORKSPACE_ROOT}:/work:z" \
     -w /work \
     "$IMAGE" \

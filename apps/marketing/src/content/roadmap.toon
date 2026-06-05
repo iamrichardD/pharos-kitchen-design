@@ -3,21 +3,14 @@
  * Component: Marketing / Content
  * File: roadmap.toon
  * Purpose: Automated reflection of authoritative internal logs.
- * Last Synced: 2026-06-04T23:01:25.907Z
+ * Last Synced: 2026-06-05T17:49:11.862Z
  * ======================================================================== */
 
 title: Pharos System Roadmap
 type: roadmap
-lastSynced: 2026-06-04T23:01:25.907Z
+lastSynced: 2026-06-05T17:49:11.862Z
 
-items[37]{id, name, status, phase, tag, description}:
-  "1", "Secure Designer Profiles", "Deployed", "Sprint 1", "CORE", "Hardened identity storage with privacy-first attribution."
-  "2", "Universal Tool Sync", "Deployed", "Sprint 2", "IDENTITY", "Connect your professional identity across tools."
-  "3", "High-Performance Design Engine", "Deployed", "Sprint 2", "BRIDGE", "Lightning-fast core for metadata normalization."
-  "4", "Designer Admin Portal", "Deployed", "Sprint 3", "CORE", "Advanced controls for managing manufacturer permissions."
-  "12", "Professional Search (v0.1.0)", "Deployed", "Sprint 3", "TOOLING", "Instant equipment discovery and validation tool."
-  "13", "Universal Search Standard", "Deployed", "Sprint 3", "PROTOCOL", "Unified search standard across the ecosystem."
-  "7", "Manufacturer-Verified Specs", "Deployed", "Sprint 3", "IDENTITY", "Direct-from-factory data signatures."
+items[30]{id, name, status, phase, tag, description}:
   "215", "Professional Grade Roadmap UI Refactor", "Deployed", "Sprint 5.01", "UX", "Transformed the public roadmap into a segregated, searchable, and traceable tool with swimlanes and RFC-2378 CommandBar integration."
   "206", "Identity Re-platforming", "Deployed", "Sprint 5.01", "IDENTITY", "Migrated from AWS Cognito to sovereign Cloudflare D1-backed identity model with Passkey-First authentication. Removed legacy password fields and implemented browser-side @simplewebauthn logic."
   "139", "TOON Diagnostics", "Deployed", "Sprint 5.01", "CORE", "Implemented line/column character tracking and snippet extraction for high-signal lexer errors."
@@ -38,13 +31,13 @@ items[37]{id, name, status, phase, tag, description}:
   "208", "Automated Roadmap Synchronization", "In Progress", "Sprint 5.01", "PROTOCOL", "Implementing the Sync Engine to automate roadmap updates from sharded logs."
   "204", "Multi-Org Pulse Filtering", "In Progress", "Sprint 5.01", "IDENTITY", "Implementing delegate enforcement for organizational equipment shards."
   "205", "Hardening & Integration - Edge-Sovereign Passkey", "In Progress", "Sprint 5.01", "IDENTITY", "Verifying CLI ergonomics (biometrics) and implementing 'Magic Link' fallback recovery."
-  "185", "Zero-Allocation JSON Parsing", "In Progress", "Sprint 5.01", "CORE", "Implementing source-generated JSON parsers to eliminate allocation overhead in WASM."
-  "148", "Metadata Builder Pattern (Native)", "In Progress", "Sprint 5.01", "CORE", "Implementing the builder pattern for native C# objects in the Revit Bridge."
-  "107", "Dependency Pruning", "In Progress", "Sprint 5.01", "CORE", "Audit and prune `pkd-core` dependencies for lean WASM binaries."
-  "30", "Ghost Link Prototype", "In Progress", "Sprint 5.01", "CORE", "Initial implementation of the Ghost Link mechanism for remote metadata hydration."
-  "28", "Shared Design System Extraction", "In Progress", "Sprint 5.01", "UX", "Extracting core components into a shared design system package for cross-app reuse."
-  "42", "SRI & SEO Audit", "In Progress", "Sprint 5.01", "IDENTITY", "Remediating SRI hashes and optimizing SEO for the Marketing site."
-  "84", "Dual-Stream Release Pipeline", "In Progress", "Sprint 5.01", "TOOLING", "Configuring separate channels for stable and nightly releases."
-  "85", "Official Homebrew Tap", "In Progress", "Sprint 5.01", "TOOLING", "Initializing the official Pharos Homebrew tap for macOS/Linux distribution."
-  "87", "Domain-to-Org Mapping", "In Progress", "Sprint 5.01", "IDENTITY", "Implementing secure domain validation for organizational onboarding."
-  "89", "Manufacturer Sidecar", "In Progress", "Sprint 5.01", "CORE", "Developing a background service for manufacturer metadata updates."
+  "185", "Zero-Allocation JSON Parsing", "In Progress", "Sprint 5.02", "CORE", "Implementing source-generated JSON parsers to eliminate allocation overhead in WASM."
+  "107", "Dependency Pruning", "In Progress", "Sprint 5.02", "CORE", "Audit and prune `pkd-core` dependencies for lean WASM binaries."
+  "42", "SRI & SEO Audit", "In Progress", "Sprint 5.02", "IDENTITY", "Remediating SRI hashes and optimizing SEO for the Marketing site."
+  "87", "Domain-to-Org Mapping", "In Progress", "Sprint 5.02", "IDENTITY", "Implementing secure domain validation for organizational onboarding."
+  "30", "Ghost Link Prototype", "In Progress", "Sprint 5.03", "CORE", "Initial implementation of the Ghost Link mechanism for remote metadata hydration."
+  "148", "Metadata Builder Pattern (Native)", "In Progress", "Sprint 5.03", "CORE", "Implementing the builder pattern for native C# objects in the Revit Bridge."
+  "28", "Shared Design System Extraction", "In Progress", "Sprint 5.03", "UX", "Extracting core components into a shared design system package for cross-app reuse."
+  "89", "Manufacturer Sidecar", "In Progress", "Sprint 5.03", "CORE", "Developing a background service for manufacturer metadata updates."
+  "84", "Dual-Stream Release Pipeline", "In Progress", "Sprint 5.04", "TOOLING", "Configuring separate channels for stable and nightly releases."
+  "85", "Official Homebrew Tap", "In Progress", "Sprint 5.04", "TOOLING", "Initializing the official Pharos Homebrew tap for macOS/Linux distribution."

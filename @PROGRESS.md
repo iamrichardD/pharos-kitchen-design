@@ -48,3 +48,8 @@
 
 ## 🗄️ Historical Archive
 - [Sprint Archive: Phase 1 - 4](docs/governance/sprints/archive-phase-1-4.md)
+
+## 🗑️ Tombstones & Purged Logic
+- [x] **ADR-0019**: [TAG: Purged] Superseded by ADR-0021 (Cloudflare Edge Pivot). [DESC: Legacy AWS bridge design removed.]
+- [x] **pkd-core legacy parser**: [TAG: Purged] Refactored in favor of Vertical Slices (Issue #19). [DESC: Monolithic parser removed.]
+- [x] **Cognito Identity Provider**: [TAG: Purged] Removed in favor of Cloudflare D1/Passkey model (Issue #206). [DESC: Legacy auth provider removed.]
