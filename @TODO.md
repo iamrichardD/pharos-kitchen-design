@@ -22,8 +22,7 @@
 ## 🚀 Active Sprint
 
 ### Sprint 5.01: Core Parser & Remediation (2026-06-01) - 🚀 ACTIVE
-- [ ] **Issue #207**: [TAG: Governance] Lossless Authoritative Log Restructure. [DESC: Hardening @PROGRESS and @TODO into machine-readable DTOs for the Sync Engine.]
-- [ ] **Issue #208**: [TAG: Governance] Automated Roadmap Synchronization. [DESC: Implementing the Sync Engine to automate roadmap updates from sharded logs.]
+- [ ] **Issue #218**: [TAG: Governance] Backlog Restructure for Multi-Sprint Roadmap Synchronization. [DESC: Reorganizing @TODO to support explicit 'Active' and 'Future' swimlane synchronization.]
 - [ ] **Issue #204**: [TAG: Security] Multi-Org Pulse Filtering. [DESC: Implementing delegate enforcement for organizational equipment shards.]
 - [ ] **Issue #205**: [TAG: Security] Hardening & Integration - Edge-Sovereign Passkey. [DESC: Verifying CLI ergonomics (biometrics) and implementing 'Magic Link' fallback recovery.] (Blocked by #204)
 

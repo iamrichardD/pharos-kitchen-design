@@ -3,15 +3,17 @@
  * Component: Marketing / Content
  * File: roadmap.toon
  * Purpose: Automated reflection of authoritative internal logs.
- * Last Synced: 2026-06-05T17:49:11.862Z
+ * Last Synced: 2026-06-05T19:07:05.236Z
  * ======================================================================== */
 
 title: Pharos System Roadmap
 type: roadmap
-lastSynced: 2026-06-05T17:49:11.862Z
+lastSynced: 2026-06-05T19:07:05.236Z
 
-items[30]{id, name, status, phase, tag, description}:
+items[31]{id, name, status, phase, tag, description}:
   "215", "Professional Grade Roadmap UI Refactor", "Deployed", "Sprint 5.01", "UX", "Transformed the public roadmap into a segregated, searchable, and traceable tool with swimlanes and RFC-2378 CommandBar integration."
+  "208", "Automated Roadmap Synchronization", "Deployed", "Sprint 5.01", "PROTOCOL", "Implemented the Sync Engine to automate roadmap updates from sharded logs."
+  "207", "Lossless Authoritative Log Restructure", "Deployed", "Sprint 5.01", "PROTOCOL", "Hardened @PROGRESS and @TODO into machine-readable DTOs for the Sync Engine."
   "206", "Identity Re-platforming", "Deployed", "Sprint 5.01", "IDENTITY", "Migrated from AWS Cognito to sovereign Cloudflare D1-backed identity model with Passkey-First authentication. Removed legacy password fields and implemented browser-side @simplewebauthn logic."
   "139", "TOON Diagnostics", "Deployed", "Sprint 5.01", "CORE", "Implemented line/column character tracking and snippet extraction for high-signal lexer errors."
   "199", "Human-Centric Communication", "Deployed", "Sprint 5.01", "PROTOCOL", "Codified ADR-0048 for natural, first-person voice across all communications and living docs."
@@ -27,8 +29,7 @@ items[30]{id, name, status, phase, tag, description}:
   "123", "Zero-Allocation Marshalling", "Deployed", "Sprint 4.11", "BRIDGE", "Delivered high-performance memory-safe marshalling for the Revit Bridge (ECT 4)."
   "175", "Design System Alignment", "Deployed", "Sprint 4.11", "UX", "Aligned the Marketing TOON loader with the Pharos Design System typography."
   "168", "Automated Boundary Enforcement", "Deployed", "Sprint 4.11", "PROTOCOL", "Implemented ADR-0044 drift detection to ensure Rust/C# parity."
-  "207", "Lossless Authoritative Log Restructure", "In Progress", "Sprint 5.01", "PROTOCOL", "Hardening @PROGRESS and @TODO into machine-readable DTOs for the Sync Engine."
-  "208", "Automated Roadmap Synchronization", "In Progress", "Sprint 5.01", "PROTOCOL", "Implementing the Sync Engine to automate roadmap updates from sharded logs."
+  "218", "Backlog Restructure for Multi-Sprint Roadmap Synchronization", "In Progress", "Sprint 5.01", "PROTOCOL", "Reorganizing @TODO to support explicit 'Active' and 'Future' swimlane synchronization."
   "204", "Multi-Org Pulse Filtering", "In Progress", "Sprint 5.01", "IDENTITY", "Implementing delegate enforcement for organizational equipment shards."
   "205", "Hardening & Integration - Edge-Sovereign Passkey", "In Progress", "Sprint 5.01", "IDENTITY", "Verifying CLI ergonomics (biometrics) and implementing 'Magic Link' fallback recovery."
   "185", "Zero-Allocation JSON Parsing", "In Progress", "Sprint 5.02", "CORE", "Implementing source-generated JSON parsers to eliminate allocation overhead in WASM."
