@@ -30,4 +30,5 @@
 
 ## 🛡️ Audit History
 - **Phase 1.4**: Integrated Truth Engine validation. SSRF Sentinel verified.
-- **Phase 1.4**: File Prologue Audit active in `scripts/pulse.sh`.
+- **Phase 1.4**: File Prologue Audit active in \`scripts/pulse.sh\`.
+- **Phase 5.01**: [2026-06-05] **DNS-Hardened Container Isolation**. Implemented explicit Cloudflare DNS (\`1.1.1.1\`) in \`podman-wrapper.sh\`. This ensures reliable name resolution within the bridge network while strictly avoiding \`--network host\`, maintaining the principle of least privilege and container isolation.
