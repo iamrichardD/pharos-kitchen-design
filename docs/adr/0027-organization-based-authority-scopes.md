@@ -6,12 +6,14 @@
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Codifying the "Claim & Delegate" strategy for organization-based security.
  * Traceability: Issue #86, Task 4.21 (SPM Verified)
- * Status: Proposed
+ * Status: Superseded by ADR-0056
  * ======================================================================== -->
 
-# ADR 0027: Organization-Based Authority Scopes
+# ADR 0027: Organization-Based Authority Scopes (SUPERSEDED)
 
 ## Context
+**NOTE: This ADR is SUPERSEDED by ADR-0056.** The logic for organization scoping has transitioned from Cognito custom claims to Sovereign Authority Handshakes.
+
 As Pharos Kitchen Design (Project Prism) transitions from a flat role-based access control (RBAC) model to a high-rigor distribution platform, we must address the complex relationships between Manufacturers (OEMs), Representatives, and Independent Kitchen Designers (IKDs). 
 
 Legacy systems usually give you "everything or nothing." This doesn't work for us. Pharos needs a unified identity layer that understands "Organization-Based" authority. We need to know who owns what, who can update a Hobart dishwasher's metadata, and how we deliver proprietary diagnostic tools (Dialects) without leaking them to the whole world.

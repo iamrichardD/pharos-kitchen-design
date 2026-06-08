@@ -6,13 +6,15 @@
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Defining the cross-platform identity model (Web, Revit, CLI).
  * Traceability: ADR 0005, ADR 0016, RFC 8628, ADR 0019, Issue #20
- * Status: Approved
+ * Status: Superseded by ADR-0056
  * ======================================================================== -->
 
-# ADR 0018: Identity & Authentication Architecture
+# ADR 0018: Identity & Authentication Architecture (SUPERSEDED)
 
 ## Context
-Pharos Kitchen Design (PKD) requires a unified identity model to manage manufacturer "Hero" metadata and IKD (Independent Kitchen Designer) sessions. Standard web-based OIDC (OpenID Connect) flows fail to address the **Revit Desktop** and **CLI** environments, creating a "Web-Desktop Gap." We must ensure that authentication is high-performance, legally defensive (FSL-1.1), and eliminates "Credential Toil."
+**NOTE: This ADR is SUPERSEDED by ADR-0056.** The legacy AWS Cognito/DynamoDB stack has been replaced by a Sovereign Passkey (D1-backed) model.
+
+PKD requires a unified identity model to manage manufacturer "Hero" metadata and IKD (Independent Kitchen Designer) sessions. Standard web-based OIDC (OpenID Connect) flows fail to address the **Revit Desktop** and **CLI** environments, creating a "Web-Desktop Gap." We must ensure that authentication is high-performance, legally defensive (FSL-1.1), and eliminates "Credential Toil."
 
 ## Decision
 1. **RFC 8628 (Device Authorization Grant)**: Standardize on the "Device Code" pattern for all non-browser environments (Revit Plugin, CLI).

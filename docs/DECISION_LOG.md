@@ -59,6 +59,7 @@ This log provides an index of the technical and architectural decisions made for
 | **[ADR-0053]** | 2026-06-05 | Approved | [Authoritative Consent Gate Protocol](docs/adr/0053-authoritative-consent-gate-protocol.md) |
 | **[ADR-0054]** | 2026-06-05 | Approved | [Triple-Point Velocity & Volatility Analysis](docs/adr/0054-triple-point-velocity-tracking.md) |
 | **[ADR-0055]** | 2026-06-08 | Proposed | [Sprint Taxonomy & Capacity Governance](docs/adr/0055-sprint-taxonomy-and-capacity-governance.md) |
+| **[ADR-0056]** | 2026-06-08 | Proposed | [Sovereign Authority & Delegate Enforcement](docs/adr/0056-sovereign-authority-and-delegate-enforcement.md) |
 
 ---
 *To add a new decision, create a new file in `docs/adr/` following the established template and append it to this index.*
