@@ -60,6 +60,7 @@ This log provides an index of the technical and architectural decisions made for
 | **[ADR-0054]** | 2026-06-05 | Approved | [Triple-Point Velocity & Volatility Analysis](docs/adr/0054-triple-point-velocity-tracking.md) |
 | **[ADR-0055]** | 2026-06-08 | Proposed | [Sprint Taxonomy & Capacity Governance](docs/adr/0055-sprint-taxonomy-and-capacity-governance.md) |
 | **[ADR-0056]** | 2026-06-08 | Proposed | [Sovereign Authority & Delegate Enforcement](docs/adr/0056-sovereign-authority-and-delegate-enforcement.md) |
+| **[ADR-0057]** | 2026-06-08 | Proposed | [Public Search & Authenticated Fulfillment](docs/adr/0057-public-search-and-authenticated-fulfillment.md) |
 
 ---
 *To add a new decision, create a new file in `docs/adr/` following the established template and append it to this index.*
