@@ -23,8 +23,9 @@ As we implement **Issue #204 (Multi-Org Pulse Filtering)**, we must formalize th
     - **`scope_set`**: A cryptographic capability set (e.g., `oem.write`, `maintenance.execute`).
     - **`identity_thumbprint`**: The public key thumbprint of the user's Passkey.
 3. **The "Informed Sentinel" Logic (Issue #204)**:
-    - **Local Priority (The Fork)**: The `PolicyGuard` in `pkd-core` MUST prioritize the `IKD_PRIVATE_FORK` over the `OFFICIAL_OEM_DATA` in the local registry context.
-    - **Resolution Hints**: Denials are no longer silent. The Sentinel MUST return a `ResolutionHint` DTO to the UI, explaining the restriction and the strategy for access (e.g., "Verification Required").
+    - **Anonymous State Handling**: The `PolicyGuard` MUST support an `ANONYMOUS` state. In this state, only `Public` search metadata is visible. Any attempt to `download`, `import`, or `fork` MUST trigger an `AUTHENTICATION_REQUIRED` Resolution Hint.
+    - **Local Priority (The Fork)**: For authenticated users, the `PolicyGuard` MUST prioritize the `IKD_PRIVATE_FORK` over the `OFFICIAL_OEM_DATA`.
+    - **Resolution Hints**: Denials are no longer silent. The Sentinel MUST return a `ResolutionHint` DTO, including `Access Denied` (Authority failure) and `Authentication Required` (Identity failure).
 4. **Delegate Enforcement Handshake**: 
     - Delegation between a Manufacturer and a Rep Agency is a **Biometric Handshake**. 
     - The Manufacturer grants a `ScopedCapability` which is signed by their Passkey and stored in D1. 
@@ -33,16 +34,21 @@ As we implement **Issue #204 (Multi-Org Pulse Filtering)**, we must formalize th
 ```mermaid
 graph TD
     %% Actors
+    GUEST[Anonymous Guest]
     IKD[Independent Designer]
     OEM_O[OEM Owner]
-    OEM_S[OEM Staff]
     REP[Rep Agency / Partner]
+
+    %% Resources
+    S_IDX[Public Search Index]
+    PUB[Public Metadata Shards]
+    PRI[OEM Dialects / WASM]
+    FORK[IKD Private Fork]
 
     %% Identity Layer (Sovereign)
     subgraph Identity_Layer [Sovereign Passkey Gate]
         D1[(Cloudflare D1)]
         PK[Passkey Auth]
-        PK -->|Validates| D1
     end
 
     %% Authority Layer (The Sentinel)
@@ -52,27 +58,24 @@ graph TD
         PG --- Claims
     end
 
-    %% Resources
-    subgraph Registry_Shards [Pharos Registry]
-        PUB[Public Metadata]
-        PRI[OEM Dialects / WASM]
-        FORK[IKD Private Fork]
-    end
-
     %% Access Patterns
+    GUEST -->|Search| S_IDX
+    GUEST -->|Read| PUB
+    GUEST -.->|ACTION GATE| PK
+
+    IKD -->|Search| S_IDX
     IKD -->|Read| PUB
     IKD -->|Write| FORK
     
     OEM_O -->|Full Authority| PRI
     OEM_O -->|Delegates| REP
     
-    OEM_S -->|Read/Execute| PRI
-    
     REP -->|Scoped Write| PRI
     
     %% Enforcement Logic
     PG -->|Gating| PRI
     PG -->|Resolution| FORK
+    PG -->|Hint| PK
 ```
 
 ## Rationale
