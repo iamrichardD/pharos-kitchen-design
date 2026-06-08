@@ -3,12 +3,12 @@
  * Component: Marketing / Content
  * File: roadmap.toon
  * Purpose: Automated reflection of authoritative internal logs.
- * Last Synced: 2026-06-08T18:44:34.094Z
+ * Last Synced: 2026-06-08T18:52:06.385Z
  * ======================================================================== */
 
 title: Pharos System Roadmap
 type: roadmap
-lastSynced: 2026-06-08T18:44:34.094Z
+lastSynced: 2026-06-08T18:52:06.385Z
 
 items[30]{id, name, status, phase, tag, description}:
   "223", "Implement Domain Allowlist in bless-sri.sh", "Deployed", "Sprint 5.02", "IDENTITY", "Added origin verification to the blessing script to prevent accidental malicious blessing and hardened the Node.js bridge against shell injection."
