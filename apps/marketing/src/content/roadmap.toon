@@ -3,43 +3,41 @@
  * Component: Marketing / Content
  * File: roadmap.toon
  * Purpose: Automated reflection of authoritative internal logs.
- * Last Synced: 2026-06-05T21:05:18.142Z
+ * Last Synced: 2026-06-08T18:44:34.094Z
  * ======================================================================== */
 
 title: Pharos System Roadmap
 type: roadmap
-lastSynced: 2026-06-05T21:05:18.142Z
+lastSynced: 2026-06-08T18:44:34.094Z
 
-items[32]{id, name, status, phase, tag, description}:
+items[30]{id, name, status, phase, tag, description}:
+  "223", "Implement Domain Allowlist in bless-sri.sh", "Deployed", "Sprint 5.02", "IDENTITY", "Added origin verification to the blessing script to prevent accidental malicious blessing and hardened the Node.js bridge against shell injection."
+  "222", "Refine 'sed' targeting in bless-sri.sh", "Deployed", "Sprint 5.02", "CORE", "Tightened regex targeting to prevent cross-talk during SRI updates."
+  "220", "Authoritative Consent Gate for Upstream Scripts", "Deployed", "Sprint 5.01", "PROTOCOL", "Implemented the `bless-sri.sh` workflow and ADR-0053 to prevent build-killing SRI failures."
   "218", "Backlog Restructure for Multi-Sprint Roadmap Synchronization", "Deployed", "Sprint 5.01", "PROTOCOL", "Reorganized @TODO and @PROGRESS into explicit 'Active' and 'Future' pools, enabling machine-readable roadmap swimlanes."
-  "215", "Professional Grade Roadmap UI Refactor", "Deployed", "Sprint 5.01", "UX", "Transformed the public roadmap into a segregated, searchable, and traceable tool with swimlanes and RFC-2378 CommandBar integration."
+  "215", "Professional Grade Roadmap UI Refactor", "Deployed", "Sprint 5.01", "UX", "Transformed the public roadmap into a segregated, searchable, and traceable tool."
   "208", "Automated Roadmap Synchronization", "Deployed", "Sprint 5.01", "PROTOCOL", "Implemented the Sync Engine to automate roadmap updates from sharded logs."
   "207", "Lossless Authoritative Log Restructure", "Deployed", "Sprint 5.01", "PROTOCOL", "Hardened @PROGRESS and @TODO into machine-readable DTOs for the Sync Engine."
-  "206", "Identity Re-platforming", "Deployed", "Sprint 5.01", "IDENTITY", "Migrated from AWS Cognito to sovereign Cloudflare D1-backed identity model with Passkey-First authentication. Removed legacy password fields and implemented browser-side @simplewebauthn logic."
-  "139", "TOON Diagnostics", "Deployed", "Sprint 5.01", "CORE", "Implemented line/column character tracking and snippet extraction for high-signal lexer errors."
-  "199", "Human-Centric Communication", "Deployed", "Sprint 5.01", "PROTOCOL", "Codified ADR-0048 for natural, first-person voice across all communications and living docs."
+  "206", "Identity Re-platforming", "Deployed", "Sprint 5.01", "IDENTITY", "Migrated to sovereign Cloudflare D1-backed identity model with Passkey-First authentication."
+  "139", "TOON Diagnostics", "Deployed", "Sprint 5.01", "CORE", "Implemented line/column character tracking and snippet extraction for lexer errors."
+  "199", "Human-Centric Communication", "Deployed", "Sprint 5.01", "PROTOCOL", "Codified ADR-0048 for natural, first-person voice."
   "196", "Astro 6.4 Upgrade", "Deployed", "Sprint 5.01", "UX", "Integrated Sätteri Rust-based processor, achieving ~70.5% reduction in site build times."
-  "195", "Rust 1.96.0 Upgrade", "Deployed", "Sprint 5.01", "CORE", "Hardened toolchain with security betterments and verified universal toolchain parity."
+  "195", "Rust 1.96.0 Upgrade", "Deployed", "Sprint 5.01", "CORE", "Hardened toolchain with security betterments."
   "194", "Monorepo Remediation", "Deployed", "Sprint 5.01", "PROTOCOL", "Restored compliance with ADR-0043/44/46 and implemented WASM panic isolation."
-  "187", "Build Warning Remediation", "Deployed", "Sprint 5.01", "TOOLING", "Resolved CI build warnings and hardened zero-warning sentinels across all slices."
-  "148", "Metadata Builder Pattern", "Deployed", "Sprint 5.01", "CORE", "Implemented `PharosMetadata::builder()` for safe, fail-fast object construction."
+  "187", "Build Warning Remediation", "Deployed", "Sprint 5.01", "TOOLING", "Resolved CI build warnings and hardened zero-warning sentinels."
+  "148", "Metadata Builder Pattern", "Deployed", "Sprint 5.01", "CORE", "Implemented `PharosMetadata::builder()` for safe object construction."
   "138", "RFC-2378 Query Logic", "Deployed", "Sprint 5.01", "CORE", "Delivered full query logic and wildcard engine with 33 integration tests in Podman."
-  "141", "Relational Handle Mapping", "Deployed", "Sprint 5.01", "CORE", "Implemented O(n) linear parsing velocity for TOON handles via consumer-side resolution."
-  "162", "PowerShell Remediation", "Deployed", "Sprint 5.01", "TOOLING", "Refactored install.ps1 to use native Invoke-WebRequest, removing vestigial curl dependency."
+  "141", "Relational Handle Mapping", "Deployed", "Sprint 5.01", "CORE", "Implemented O(n) linear parsing velocity for TOON handles."
+  "162", "PowerShell Remediation", "Deployed", "Sprint 5.01", "TOOLING", "Refactored install.ps1 to use native Invoke-WebRequest."
   "169", "Supply Chain Watchdog", "Deployed", "Sprint 4.11", "IDENTITY", "Implemented immutable SHA-256 image pinning and automated dependency auditing."
   "123", "Zero-Allocation Marshalling", "Deployed", "Sprint 4.11", "BRIDGE", "Delivered high-performance memory-safe marshalling for the Revit Bridge (ECT 4)."
   "175", "Design System Alignment", "Deployed", "Sprint 4.11", "UX", "Aligned the Marketing TOON loader with the Pharos Design System typography."
   "168", "Automated Boundary Enforcement", "Deployed", "Sprint 4.11", "PROTOCOL", "Implemented ADR-0044 drift detection to ensure Rust/C# parity."
-  "220", "Formalize Authoritative Consent Gate for Upstream Scripts", "In Progress", "Sprint 5.01", "PROTOCOL", "Implementing a 'Blessing' workflow for third-party scripts to prevent build-killing SRI failures."
-  "204", "Multi-Org Pulse Filtering", "In Progress", "Sprint 5.01", "IDENTITY", "Implementing delegate enforcement for organizational equipment shards."
-  "205", "Hardening & Integration - Edge-Sovereign Passkey", "In Progress", "Sprint 5.01", "IDENTITY", "Verifying CLI ergonomics (biometrics) and implementing 'Magic Link' fallback recovery."
-  "185", "Zero-Allocation JSON Parsing", "In Progress", "Sprint 5.02", "CORE", "Implementing source-generated JSON parsers to eliminate allocation overhead in WASM."
-  "107", "Dependency Pruning", "In Progress", "Sprint 5.02", "CORE", "Audit and prune `pkd-core` dependencies for lean WASM binaries."
-  "42", "SRI & SEO Audit", "In Progress", "Sprint 5.02", "IDENTITY", "Remediating SRI hashes and optimizing SEO for the Marketing site."
-  "87", "Domain-to-Org Mapping", "In Progress", "Sprint 5.02", "IDENTITY", "Implementing secure domain validation for organizational onboarding."
-  "30", "Ghost Link Prototype", "In Progress", "Sprint 5.03", "CORE", "Initial implementation of the Ghost Link mechanism for remote metadata hydration."
-  "148", "Metadata Builder Pattern (Native)", "In Progress", "Sprint 5.03", "CORE", "Implementing the builder pattern for native C# objects in the Revit Bridge."
-  "28", "Shared Design System Extraction", "In Progress", "Sprint 5.03", "UX", "Extracting core components into a shared design system package for cross-app reuse."
-  "89", "Manufacturer Sidecar", "In Progress", "Sprint 5.03", "CORE", "Developing a background service for manufacturer metadata updates."
+  "204", "Multi-Org Pulse Filtering", "In Progress", "Sprint 5.02", "IDENTITY", "Implementing delegate enforcement for organizational equipment shards."
+  "205", "Hardening & Integration - Edge-Sovereign Passkey", "In Progress", "Sprint 5.02", "IDENTITY", "Verifying CLI ergonomics (biometrics) and implementing 'Magic Link' fallback recovery."
+  "185", "Zero-Allocation JSON Parsing", "In Progress", "Sprint 5.03", "CORE", "Implementing source-generated JSON parsers to eliminate allocation overhead in WASM."
+  "107", "Dependency Pruning", "In Progress", "Sprint 5.03", "CORE", "Audit and prune `pkd-core` dependencies for lean WASM binaries."
+  "42", "SRI & SEO Audit", "In Progress", "Sprint 5.03", "IDENTITY", "Remediating SRI hashes and optimizing SEO for the Marketing site."
+  "87", "Domain-to-Org Mapping", "In Progress", "Sprint 5.03", "IDENTITY", "Implementing secure domain validation for organizational onboarding."
   "84", "Dual-Stream Release Pipeline", "In Progress", "Sprint 5.04", "TOOLING", "Configuring separate channels for stable and nightly releases."
   "85", "Official Homebrew Tap", "In Progress", "Sprint 5.04", "TOOLING", "Initializing the official Pharos Homebrew tap for macOS/Linux distribution."

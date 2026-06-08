@@ -22,6 +22,10 @@
 ## 🎯 Current Milestone: Phase 5 - IKD Enablement (Ghost Links & Scale)
 **Status**: 🚀 ACTIVE (Sprint 5.02)
 
+### Sprint 5.02: The Speed & Security Foundation (2026-06-08) - 🚀 ACTIVE
+- [x] **Issue #223**: [TAG: Security] Implement Domain Allowlist in bless-sri.sh. [DESC: Added origin verification to the blessing script to prevent accidental malicious blessing and hardened the Node.js bridge against shell injection.]
+- [x] **Issue #222**: [TAG: Debt] Refine 'sed' targeting in bless-sri.sh. [DESC: Tightened regex targeting to prevent cross-talk during SRI updates.]
+
 ### Sprint 5.01: Core Parser & Remediation (2026-06-01) - ✅ COMPLETED
 - [x] **Issue #220**: [TAG: Governance] Authoritative Consent Gate for Upstream Scripts. [DESC: Implemented the `bless-sri.sh` workflow and ADR-0053 to prevent build-killing SRI failures.]
 - [x] **Issue #218**: [TAG: Governance] Backlog Restructure for Multi-Sprint Roadmap Synchronization. [DESC: Reorganized @TODO and @PROGRESS into explicit 'Active' and 'Future' pools, enabling machine-readable roadmap swimlanes.]
