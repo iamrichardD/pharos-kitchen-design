@@ -27,11 +27,11 @@
     - [x] **Sub-Task**: [TAG: Core] Implement `Vfs` trait and `PolicyGuard` in `pkd-core` [ECT: 3]. [PR: #228]
     - [x] **Sub-Task**: [TAG: UI] Implement `ActionGate.astro` and 'Lazy Shard' loading [ECT: 2]. [PR: #229]
     - [x] **Sub-Task**: [TAG: Infra] Configure public `search-index.bin` in R2 [ECT: 2]. [PR: #230]
-- [ ] **Issue #205**: [TAG: Security] Hardening & Integration - Edge-Sovereign Passkey [ECT: 4].
+- [x] **Issue #205**: [TAG: Security] Hardening & Integration - Edge-Sovereign Passkey [ECT: 4].
     - **Context**: Establish the "Zero-to-Hero" onboarding path for Solo IKDs. Explicitly reject OAuth/SSO (Google/Apple) to maintain sovereignty, relying instead on native iCloud/Google Password Manager Passkey syncing.
-    - [ ] **Sub-Task**: [TAG: UI] The Web Registration Pivot. (Handle `user_not_found` by seamlessly initiating `startRegistration` in `verify.astro`) [ECT: 2].
-    - [ ] **Sub-Task**: [TAG: UX] The Cross-Device Hook. (Educate users to use phone QR codes for hardware verification) [ECT: 1].
-    - [ ] **Sub-Task**: [TAG: Core] The Magic Link Fallback. (Implement secure email-based recovery for Edge-Sovereign identity) [ECT: 3].
+    - [x] **Sub-Task**: [TAG: UI] The Web Registration Pivot. (Handle `user_not_found` by seamlessly initiating `startRegistration` in `verify.astro`) [ECT: 2]. [PR: #231]
+    - [x] **Sub-Task**: [TAG: UX] The Cross-Device Hook. (Educate users to use phone QR codes for hardware verification) [ECT: 1]. [PR: #231]
+    - [x] **Sub-Task**: [TAG: Core] The Magic Link Fallback. (Implement secure email-based recovery for Edge-Sovereign identity) [ECT: 3]. [PR: #232]
 
 ---
 
