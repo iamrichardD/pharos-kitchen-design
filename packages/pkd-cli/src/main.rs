@@ -268,7 +268,15 @@ async fn handle_core_pulse() -> Result<()> {
     println!("{} Performing system pulse check...", "ℹ".blue());
 
     // Call the core PulseEngine (ADR-0026)
-    let status = pkd_core::pulse::PulseEngine::heartbeat()
+    let guard = pkd_core::policy::BoundaryGuard::new("");
+    let context = pkd_core::policy::PolicyContext {
+        organization_id: "local_cli".to_string(),
+        user_id: "cli_user".to_string(),
+        resource_id: "system:pulse".to_string(),
+        action: "read".to_string(),
+    };
+
+    let status = pkd_core::pulse::PulseEngine::heartbeat(&guard, &context)
         .map_err(|e| anyhow!("Pulse check failed: {}", e))?;
 
     println!("{} Status: {}", "  -".blue(), status.status.cyan());
