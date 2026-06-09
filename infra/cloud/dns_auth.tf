@@ -34,13 +34,18 @@ resource "cloudflare_record" "dkim" {
 resource "cloudflare_record" "dmarc" {
   zone_id = var.cloudflare_zone_id
   name    = "_dmarc"
-  value   = "v=DMARC1; p=quarantine; rua=mailto:admin@iamrichardd.com"
+  value   = "v=DMARC1; p=quarantine; rua=mailto:${var.admin_email}"
   type    = "TXT"
   ttl     = 3600
 }
 
 # --- Variables ---
 # Injected via TF_VAR_ environmental variables in GitHub Actions.
+variable "admin_email" {
+  description = "The administrative email for DMARC reports"
+  type        = string
+}
+
 variable "cloudflare_zone_id" {
   description = "The Cloudflare Zone ID for the domain"
   type        = string
