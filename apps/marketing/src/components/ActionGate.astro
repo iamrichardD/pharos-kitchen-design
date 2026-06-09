@@ -1,0 +1,56 @@
+---
+/** ========================================================================
+ * Project: Pharos Kitchen Design (Project Prism)
+ * Component: UI / ActionGate
+ * File: apps/marketing/src/components/ActionGate.astro
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * License: FSL-1.1 (See LICENSE file for details)
+ * Purpose: The 'Informed Sentinel' UX for discovery vs. fulfillment.
+ * Traceability: Issue #204, ADR-0056, ADR-0057
+ * Last Updated: 2026-06-10
+ * ======================================================================== */
+
+interface Props {
+  organizationId?: string;
+}
+
+const { organizationId } = Astro.props;
+---
+
+<div id="action-gate" data-org={organizationId} class="pharos-gate">
+  <div class="pharos-gate-shield">
+    <slot name="discovery" />
+    
+    <div class="pharos-gate-boundary">
+      <slot name="fulfillment" />
+    </div>
+  </div>
+</div>
+
+<script>
+  // High-performance client-side interception for privileged actions.
+  const gate = document.getElementById('action-gate');
+  if (gate) {
+    gate.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      if (target.closest('[data-privileged]')) {
+        const session = localStorage.getItem('pharos_session');
+        if (!session) {
+          e.preventDefault();
+          const orgId = gate.getAttribute('data-org');
+          window.location.href = `/verify?org=${orgId || 'global'}&reason=fulfillment`;
+        }
+      }
+    });
+  }
+</script>
+
+<style>
+  .pharos-gate-boundary {
+    /* Visual indicator of the fulfillment boundary */
+    border-top: 1px solid var(--pharos-border-muted);
+    margin-top: 1rem;
+    padding-top: 1rem;
+    opacity: 0.8;
+  }
+</style>
