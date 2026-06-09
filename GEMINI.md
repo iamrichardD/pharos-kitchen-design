@@ -211,6 +211,13 @@ To ensure isolation and prevent \"Search/Artifact Pollution\" during parallel en
     - **Durable Crucible**: The Three-Option Crucible rationale MUST be documented in `SESSION_CONTEXT.md` before implementation begins.
     - **Physical Audit Gate**: No merge to `main` is permitted without a corresponding `docs/governance/audits/` log verified via the Auditor persona.
 
+### 5. Paved Road Operational Rules (Sprint 5.02 Retro)
+To prevent CI/CD failures, session hangs, and sub-agent timeouts, ALL sessions MUST adhere to the following:
+- **Monolithic Verification:** Never push to `main` or merge without running a full workspace validation (e.g., `cargo check --workspace` or `scripts/pulse.sh` across all slices). Local testing of a single package is insufficient.
+- **Micro-Delegation:** `invoke_agent` tasks MUST be aggressively scoped. Do not bundle Crucible Strategy with Execution in a single invocation for Tier 3+ tasks to prevent timeouts.
+- **Non-Interactive Git:** ALL git commands that can generate commits (merges, reverts, commits) MUST use the `-m` flag or be explicitly non-interactive (e.g., `GIT_MERGE_AUTOEDIT=no`) to prevent terminal hangs from `nano`.
+- **Workspace-Bound Siblings:** All isolated AI worktrees MUST be created strictly within `.worktrees/<sibling-name>` inside the `main` workspace to comply with file-system security policies. Do not use parent directories (e.g., `../`).
+
 ---
 ### Legal & Interoperability Compliance
 **Pharos Kitchen Design** (Project Prism) is an independent software development effort. Use of any third-party trademarks (e.g., KCL, AutoQuotes, Hobart, Vulcan) is strictly for **Nominative Fair Use** to identify compatibility and achieve software interoperability under **17 U.S.C. § 1201(f)**. Please see [DISCLAIMER.md](./DISCLAIMER.md) for full legal disclosures.

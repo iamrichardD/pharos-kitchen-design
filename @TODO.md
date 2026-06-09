@@ -22,12 +22,12 @@
 ## 🚀 Active Sprint
 
 ### Sprint 5.02: The Speed & Security Foundation (2026-06-08) - 🚀 ACTIVE
-- [ ] **Issue #204**: [TAG: Security] Multi-Org Pulse Filtering (The Informed Sentinel). 
-    - [ ] **Sub-Task**: [TAG: Debt] Purge AWS SDK from `pkd-cli` and `auth-bridge` & Remediate @simplewebauthn deprecations.
-    - [ ] **Sub-Task**: [TAG: Core] Implement `Vfs` trait and `PolicyGuard` in `pkd-core`.
-    - [ ] **Sub-Task**: [TAG: UI] Implement `ActionGate.astro` and 'Lazy Shard' loading.
-    - [ ] **Sub-Task**: [TAG: Infra] Configure public `search-index.bin` in R2.
-- [ ] **Issue #205**: [TAG: Security] Hardening & Integration - Edge-Sovereign Passkey. [DESC: Verifying CLI ergonomics (biometrics) and implementing 'Magic Link' fallback recovery.] (Blocked by #204)
+- [x] **Issue #204**: [TAG: Security] Multi-Org Pulse Filtering (The Informed Sentinel) [ECT: 4]. 
+    - [x] **Sub-Task**: [TAG: Debt] Purge AWS SDK from `pkd-cli` and `auth-bridge` & Remediate @simplewebauthn deprecations [ECT: 2]. [PR: #228, #229, #230]
+    - [x] **Sub-Task**: [TAG: Core] Implement `Vfs` trait and `PolicyGuard` in `pkd-core` [ECT: 3]. [PR: #228]
+    - [x] **Sub-Task**: [TAG: UI] Implement `ActionGate.astro` and 'Lazy Shard' loading [ECT: 2]. [PR: #229]
+    - [x] **Sub-Task**: [TAG: Infra] Configure public `search-index.bin` in R2 [ECT: 2]. [PR: #230]
+- [ ] **Issue #205**: [TAG: Security] Hardening & Integration - Edge-Sovereign Passkey. [DESC: Verifying CLI ergonomics (biometrics) and implementing 'Magic Link' fallback recovery.]
 
 ---
 
