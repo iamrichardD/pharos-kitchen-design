@@ -4,60 +4,90 @@
  * File: infra/cloud/dns_auth.tf
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
- * Purpose: Authoritative Email Deliverability Records (SPF, DKIM, DMARC).
+ * Purpose: Authoritative DNS Records for the 'pkd' Startup Subdomain.
+ * Why: Segregates Startup Identity from primary Google Workspace records.
  * Traceability: Issue #205, ADR-0050
  * Last Updated: 2026-06-09
  * ======================================================================== */
 
 # --- SPF (Sender Policy Framework) ---
-# Authorizes Cloudflare Email Routing to send on behalf of the domain.
-resource "cloudflare_record" "spf" {
+# Authorizes Cloudflare to send on behalf of pkd.iamrichardd.com
+resource "cloudflare_record" "pkd_spf" {
   zone_id = var.cloudflare_zone_id
-  name    = "@"
+  name    = "pkd"
   value   = "v=spf1 include:_spf.mx.cloudflare.net ~all"
   type    = "TXT"
   ttl     = 3600
 }
 
 # --- DKIM (DomainKeys Identified Mail) ---
-# Establishing authority via GitHub Secrets provided at deployment time.
-resource "cloudflare_record" "dkim" {
+# Cryptographic signature for the 'pkd' subdomain.
+resource "cloudflare_record" "pkd_dkim" {
   zone_id = var.cloudflare_zone_id
-  name    = "${var.dkim_selector}._domainkey"
+  name    = "${var.dkim_selector}._domainkey.pkd"
   value   = "v=DKIM1; k=rsa; p=${var.dkim_public_key}"
   type    = "TXT"
   ttl     = 3600
 }
 
 # --- DMARC (Domain-based Message Authentication) ---
-# Instructs recipient servers to quarantine emails that fail SPF/DKIM.
-resource "cloudflare_record" "dmarc" {
+# Policy for the 'pkd' subdomain.
+resource "cloudflare_record" "pkd_dmarc" {
   zone_id = var.cloudflare_zone_id
-  name    = "_dmarc"
+  name    = "_dmarc.pkd"
   value   = "v=DMARC1; p=quarantine; rua=mailto:${var.admin_email}"
   type    = "TXT"
   ttl     = 3600
 }
 
-# --- Variables ---
-# Injected via TF_VAR_ environmental variables in GitHub Actions.
-variable "admin_email" {
-  description = "The administrative email for DMARC reports"
-  type        = string
+# --- MX Records (Cloudflare Email Routing) ---
+# Directs mail for the 'pkd' subdomain to the Edge router.
+resource "cloudflare_record" "pkd_mx_1" {
+  zone_id  = var.cloudflare_zone_id
+  name     = "pkd"
+  value    = "route1.mx.cloudflare.net"
+  type     = "MX"
+  priority = 10
+  ttl      = 3600
 }
 
+resource "cloudflare_record" "pkd_mx_2" {
+  zone_id  = var.cloudflare_zone_id
+  name     = "pkd"
+  value    = "route2.mx.cloudflare.net"
+  type     = "MX"
+  priority = 20
+  ttl      = 3600
+}
+
+resource "cloudflare_record" "pkd_mx_3" {
+  zone_id  = var.cloudflare_zone_id
+  name     = "pkd"
+  value    = "route3.mx.cloudflare.net"
+  type     = "MX"
+  priority = 30
+  ttl      = 3600
+}
+
+# --- Variables ---
+# Injected via TF_VAR_ environmental variables in GitHub Actions.
 variable "cloudflare_zone_id" {
-  description = "The Cloudflare Zone ID for the domain"
+  description = "The Cloudflare Zone ID for the root domain"
   type        = string
 }
 
 variable "dkim_selector" {
-  description = "The DKIM selector (e.g., 'cloudflare')"
+  description = "The DKIM selector for the Startup subdomain"
   type        = string
 }
 
 variable "dkim_public_key" {
-  description = "The DKIM public key provided by the edge provider"
+  description = "The DKIM public key for the Startup subdomain"
   type        = string
   sensitive   = true
+}
+
+variable "admin_email" {
+  description = "The administrative email for DMARC reports"
+  type        = string
 }
