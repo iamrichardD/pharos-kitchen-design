@@ -122,7 +122,7 @@ router.post('/auth/register/options', withRepo, async (request, env: Env) => {
      return new Response(JSON.stringify({ error: 'user_exists' }), { status: 400 });
   }
 
-  user = { id: nanoid(), username, role: 'IKD', created_at: Date.now() };
+  user = { id: generateId(), username, role: 'IKD', created_at: Date.now() };
   await request.repo.createUser(user);
 
   const { options, pkd_metadata } = await request.passkey.generateRegistrationOptions(user.id, user.username);
