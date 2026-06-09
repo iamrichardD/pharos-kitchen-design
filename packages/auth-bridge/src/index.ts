@@ -9,39 +9,34 @@
  * ======================================================================== */
 
 import { Router, IRequest } from 'itty-router';
-import { nanoid } from 'nanoid';
 import { jwtVerify, SignJWT } from 'jose';
-import { Buffer } from 'node:buffer';
 import { AuthRepository, IAuthRepository } from './db';
 import { PasskeyService, WebAuthnRegistrationDTO, WebAuthnAuthenticationDTO } from './service';
 
-interface Env {
-  DB: D1Database;
-  VERIFICATION_URI: string;
-  JWT_SECRET: string;
-  RP_ID: string;
-  EXPECTED_ORIGIN: string;
-  DEBUG?: string;
-  REPO?: IAuthRepository; // Optional injection for testing
-}
-
-export interface PharosJwtPayload {
-  sub?: string;
-  userId?: string;
-  role?: string;
-  challenge?: string;
-}
-
-interface PharosRequest extends IRequest {
-  user?: PharosJwtPayload;
-  impersonatedUser?: string;
-  repo: IAuthRepository;
-  passkey: PasskeyService;
-}
-
-const router = Router<PharosRequest, [Env, unknown]>();
-
 // --- Utilities ---
+
+/**
+ * Native, zero-dependency nanoid alternative using Web Crypto.
+ * Why: Adheres to the 'Boring Crypto' mandate and purges nodejs_compat.
+ */
+function generateId(length: number = 21): string {
+  const alphabet = 'useand-6789BCDFGHJKLMNPQRSTVWXYZ_cfghkpqrsatuvwz012345';
+  const bytes = new Uint8Array(length);
+  crypto.getRandomValues(bytes);
+  let id = '';
+  for (let i = 0; i < length; i++) {
+    id += alphabet[bytes[i] % 64];
+  }
+  return id;
+}
+
+/**
+ * Native base64url encoding using Web Standard APIs.
+ */
+function toBase64Url(bytes: Uint8Array): string {
+    const base64 = btoa(String.fromCharCode(...bytes));
+    return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+}
 
 /**
  * Validates the core configuration and fails fast if missing.
@@ -207,8 +202,8 @@ router.post('/auth/device', withRepo, async (request, env: Env) => {
   const { client_id } = await request.json() as { client_id: string };
   if (!client_id) return new Response(JSON.stringify({ error: 'invalid_request' }), { status: 400 });
 
-  const device_code = nanoid(32);
-  const user_code = nanoid(8).toUpperCase();
+  const device_code = generateId(32);
+  const user_code = generateId(8).toUpperCase();
 
   await request.repo.createSession(device_code, user_code);
 
