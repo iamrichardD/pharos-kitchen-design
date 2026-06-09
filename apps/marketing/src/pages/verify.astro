@@ -27,6 +27,10 @@ import BaseLayout from "../layouts/BaseLayout.astro";
           Enter the code displayed on your device and authenticate to link your identity.
         </p>
 
+        <p id="hardware-hint" class="hidden mb-6 text-xs text-ph-blue font-mono bg-ph-blue/5 p-4 border-l-2 border-ph-blue text-left leading-relaxed">
+          Looking for a security key. If you don't have one plugged in, you can scan the QR code with your phone's camera to sign in.
+        </p>
+
         <!-- Kathy Sierra UX Hook: Empowering Context -->
         <div id="ux-hook-container" class="hidden mb-6 text-left border-l-2 border-ph-blue pl-4 py-2 bg-ph-blue/5">
             <h3 id="ux-hook-title" class="text-ph-blue font-bold text-sm tracking-widest uppercase mb-1">Secure Identity</h3>
@@ -114,6 +118,8 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
+    const hardwareHint = document.getElementById('hardware-hint');
+    if (hardwareHint) hardwareHint.classList.remove('hidden');
     const formData = new FormData(form);
     const user_code = formData.get('user_code') as string;
     const username = formData.get('username') as string;
