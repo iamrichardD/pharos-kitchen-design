@@ -25,6 +25,10 @@
 ### Sprint 5.02: The Speed & Security Foundation (2026-06-08) - 🚀 ACTIVE
 - [x] **Issue #223**: [TAG: Security] Implement Domain Allowlist in bless-sri.sh. [DESC: Added origin verification to the blessing script to prevent accidental malicious blessing and hardened the Node.js bridge against shell injection.]
 - [x] **Issue #222**: [TAG: Debt] Refine 'sed' targeting in bless-sri.sh. [DESC: Tightened regex targeting to prevent cross-talk during SRI updates.]
+- [x] **Issue #204-STRATEGY**: [TAG: Architecture] The Sovereign Authority Audit. [DESC: Performed a forensic audit of the identity stack, identified the 'Dual-Stack Ghost' (AWS legacy), and drafted ADR-0056/ADR-0057 to formalize the Sovereign Identity transition.]
+- [x] **ADR-0056**: [TAG: Governance] Sovereign Authority & Delegate Enforcement. [DESC: Codified the 'Informed Sentinel' logic and the biometric delegation handshake.]
+- [x] **ADR-0057**: [TAG: Governance] Public Search & Authenticated Fulfillment. [DESC: Defined the 'Action Gate' boundary and 'Sharded Indexing' strategy for enterprise scalability.]
+- [x] **ADR-0060-64**: [TAG: Architecture] The Commercial & Interaction Blueprint. [DESC: Codified the universal 4-phase interaction lifecycle, team delegation/pricing, and the 'Authority Ladder' for manufacturer onboarding.]
 
 ### Sprint 5.01: Core Parser & Remediation (2026-06-01) - ✅ COMPLETED
 - [x] **Issue #220**: [TAG: Governance] Authoritative Consent Gate for Upstream Scripts. [DESC: Implemented the `bless-sri.sh` workflow and ADR-0053 to prevent build-killing SRI failures.]
