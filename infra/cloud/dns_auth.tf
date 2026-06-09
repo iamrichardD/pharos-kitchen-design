@@ -77,12 +77,12 @@ variable "cloudflare_zone_id" {
 }
 
 variable "dkim_selector" {
-  description = "The DKIM selector for the Startup subdomain"
+  description = "The DKIM selector for the identity subdomain"
   type        = string
 }
 
 variable "dkim_public_key" {
-  description = "The DKIM public key for the Startup subdomain"
+  description = "The DKIM public key for the identity subdomain"
   type        = string
   sensitive   = true
 }
@@ -90,4 +90,6 @@ variable "dkim_public_key" {
 variable "admin_email" {
   description = "The administrative email for DMARC reports"
   type        = string
+}
+= string
 }
