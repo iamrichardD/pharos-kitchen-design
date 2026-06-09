@@ -64,6 +64,8 @@ This log provides an index of the technical and architectural decisions made for
 | **[ADR-0058]** | 2026-06-08 | Proposed | [Progressive Identity & Profile Maturation](docs/adr/0058-progressive-identity-and-profile-maturation.md) |
 | **[ADR-0059]** | 2026-06-08 | Proposed | [Organizational Entity & Subscription Mapping](docs/adr/0059-organizational-entity-and-subscription-mapping.md) |
 | **[ADR-0060]** | 2026-06-08 | Proposed | [Interaction Model Framework](docs/adr/0060-interaction-model-framework.md) |
+| **[ADR-0061]** | 2026-06-08 | Proposed | [Firm Interaction & Team Delegation](docs/adr/0061-firm-interaction-and-team-delegation.md) |
+| **[ADR-0062]** | 2026-06-08 | Proposed | [Team Subscription Breakpoints & Collaborative Incentives](docs/adr/0062-team-subscription-breakpoints-and-collaborative-incentives.md) |
 
 ---
 *To add a new decision, create a new file in `docs/adr/` following the established template and append it to this index.*
