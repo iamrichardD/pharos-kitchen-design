@@ -13,3 +13,7 @@ EXPECTED_ORIGIN = "https://iamrichardd.com"
 binding = "DB"
 database_name = "pkd-prism-auth"
 database_id = "0d9569ba-f1f4-4b37-b653-f3043b000cdb"
+
+[[send_email]]
+name = "SEND_EMAIL"
+
