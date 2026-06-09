@@ -63,6 +63,7 @@ This log provides an index of the technical and architectural decisions made for
 | **[ADR-0057]** | 2026-06-08 | Proposed | [Public Search & Authenticated Fulfillment](docs/adr/0057-public-search-and-authenticated-fulfillment.md) |
 | **[ADR-0058]** | 2026-06-08 | Proposed | [Progressive Identity & Profile Maturation](docs/adr/0058-progressive-identity-and-profile-maturation.md) |
 | **[ADR-0059]** | 2026-06-08 | Proposed | [Organizational Entity & Subscription Mapping](docs/adr/0059-organizational-entity-and-subscription-mapping.md) |
+| **[ADR-0060]** | 2026-06-08 | Proposed | [Interaction Model Framework](docs/adr/0060-interaction-model-framework.md) |
 
 ---
 *To add a new decision, create a new file in `docs/adr/` following the established template and append it to this index.*
