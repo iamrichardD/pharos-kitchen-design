@@ -12,6 +12,7 @@ pub mod bindings;
 pub mod geometry;
 pub mod lazy_loader;
 pub mod models;
+pub mod policy;
 pub mod pulse;
 pub mod security;
 pub mod slices;
