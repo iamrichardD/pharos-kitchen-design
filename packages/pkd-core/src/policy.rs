@@ -45,7 +45,9 @@ pub struct BoundaryGuard {
 
 impl BoundaryGuard {
     pub fn new(prefix: &str) -> Self {
-        Self { allowed_prefix: prefix.to_string() }
+        Self {
+            allowed_prefix: prefix.to_string(),
+        }
     }
 }
 
@@ -55,8 +57,10 @@ impl PolicyGuard for BoundaryGuard {
             PolicyDecision::Allow
         } else {
             PolicyDecision::Deny {
-                reason: format!("Access denied: resource '{}' outside allowed boundary '{}'", 
-                        context.resource_id, self.allowed_prefix),
+                reason: format!(
+                    "Access denied: resource '{}' outside allowed boundary '{}'",
+                    context.resource_id, self.allowed_prefix
+                ),
             }
         }
     }
@@ -69,7 +73,9 @@ pub struct LocalDiskVfs {
 
 impl LocalDiskVfs {
     pub fn new<P: AsRef<Path>>(root: P) -> Self {
-        Self { root: root.as_ref().to_path_buf() }
+        Self {
+            root: root.as_ref().to_path_buf(),
+        }
     }
 
     fn secure_path(&self, path: &str) -> Result<PathBuf, String> {
