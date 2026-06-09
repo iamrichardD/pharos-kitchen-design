@@ -67,6 +67,7 @@ This log provides an index of the technical and architectural decisions made for
 | **[ADR-0061]** | 2026-06-08 | Proposed | [Firm Interaction & Team Delegation](docs/adr/0061-firm-interaction-and-team-delegation.md) |
 | **[ADR-0062]** | 2026-06-08 | Proposed | [Team Subscription Breakpoints & Collaborative Incentives](docs/adr/0062-team-subscription-breakpoints-and-collaborative-incentives.md) |
 | **[ADR-0063]** | 2026-06-08 | Proposed | [Manufacturer Distribution & Certification Workflow](docs/adr/0063-manufacturer-distribution-and-certification-workflow.md) |
+| **[ADR-0064]** | 2026-06-08 | Proposed | [Manufacturer Subscription & Value Framework](docs/adr/0064-manufacturer-subscription-and-value-framework.md) |
 
 ---
 *To add a new decision, create a new file in `docs/adr/` following the established template and append it to this index.*
