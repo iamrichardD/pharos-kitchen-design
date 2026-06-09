@@ -17,9 +17,11 @@ Legacy AEC platforms treat Manufacturers (OEMs) as passive content providers who
 ## Decision
 We are adopting a **Certification-First Manufacturer Workflow**:
 
-1.  **Authority Initialization (DNS Verification)**:
-    - Manufacturers MUST prove ownership of their corporate domain via DNS TXT records (ADR-0052).
-    - This verification unlocks the `MANUFACTURER` organization type and the ability to publish `OEM_CERTIFIED` shards.
+1.  **The Authority Ladder (Onboarding Friction Reduction)**:
+    - Manufacturers are no longer required to provide DNS verification on day one. Instead, we implement a three-tier escalation model:
+    - **Tier 1: Domain-Bound Identity**: Proof of a corporate email (e.g., `@itwfoodequipment.com`) unlocks `STAFF` access to private dialects and "Provisional" registry updates.
+    - **Tier 2: Peer Vouch (Manual)**: Manual verification by the Pharos Founder or PMA unlocks `DELEGATION` authority for Rep Agencies.
+    - **Tier 3: DNS Domain Claim**: Proving ownership via DNS TXT records (ADR-0052) unlocks the **`OEM_CERTIFIED`** cryptographic badge and total brand sovereignty.
 
 2.  **Truth Automation (The Proxy Sync)**:
     - Pharos implements a **"Truth Proxy"** model. Manufacturers provide a link to their public spec portal or API.
