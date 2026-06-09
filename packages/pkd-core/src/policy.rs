@@ -9,15 +9,16 @@
  * Last Updated: 2026-06-10
  * ======================================================================== */
 
-use serde::{Deserialize, Serialize};
-use std::path::{Path, PathBuf};
 use std::fs;
+use std::path::{Path, PathBuf};
+
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum PolicyDecision {
     Allow,
     Deny { reason: String },
-    Challenge { factor: String }, 
+    Challenge { factor: String },
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

@@ -9,9 +9,10 @@
  * Last Updated: 2026-06-10
  * ======================================================================== */
 
+use serde::{Deserialize, Serialize};
+
 use crate::policy::{PolicyContext, PolicyDecision, PolicyGuard};
 use crate::validator::ValidationError;
-use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PulseStatus {
