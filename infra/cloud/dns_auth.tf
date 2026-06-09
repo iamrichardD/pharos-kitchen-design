@@ -4,8 +4,8 @@
  * File: infra/cloud/dns_auth.tf
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
- * Purpose: Authoritative DNS Records for the 'pkd' Startup Subdomain.
- * Why: Segregates Startup Identity from primary Google Workspace records.
+ * Purpose: Authoritative DNS Records for the 'pkd' identity subdomain.
+ * Why: Segregates application-specific email authority from primary business records.
  * Traceability: Issue #205, ADR-0050
  * Last Updated: 2026-06-09
  * ======================================================================== */
@@ -22,9 +22,11 @@ resource "cloudflare_record" "pkd_spf" {
 
 # --- DKIM (DomainKeys Identified Mail) ---
 # Cryptographic signature for the 'pkd' subdomain.
+# Note: This is conditional to allow the MX records to be provisioned FIRST.
 resource "cloudflare_record" "pkd_dkim" {
+  count   = var.dkim_public_key != "" ? 1 : 0
   zone_id = var.cloudflare_zone_id
-  name    = "${var.dkim_selector}._domainkey.pkd"
+  name    = "${var.dkim_selector != "" ? var.dkim_selector : "cloudflare"}._domainkey.pkd"
   value   = "v=DKIM1; k=rsa; p=${var.dkim_public_key}"
   type    = "TXT"
   ttl     = 3600
@@ -79,17 +81,18 @@ variable "cloudflare_zone_id" {
 variable "dkim_selector" {
   description = "The DKIM selector for the identity subdomain"
   type        = string
+  default     = "cloudflare"
 }
 
 variable "dkim_public_key" {
   description = "The DKIM public key for the identity subdomain"
   type        = string
   sensitive   = true
+  default     = ""
 }
 
 variable "admin_email" {
   description = "The administrative email for DMARC reports"
   type        = string
-}
-= string
+  default     = ""
 }
