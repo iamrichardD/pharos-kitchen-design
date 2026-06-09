@@ -12,31 +12,47 @@ import { Router, IRequest } from 'itty-router';
 import { jwtVerify, SignJWT } from 'jose';
 import { AuthRepository, IAuthRepository } from './db';
 import { PasskeyService, WebAuthnRegistrationDTO, WebAuthnAuthenticationDTO } from './service';
+import { generateId, toBase64Url, fromBase64Url } from './utils';
+
+interface Env {
+  DB: D1Database;
+  VERIFICATION_URI: string;
+  JWT_SECRET: string;
+  RP_ID: string;
+  EXPECTED_ORIGIN: string;
+  DEBUG?: string;
+  REPO?: IAuthRepository; // Optional injection for testing
+}
+
+export interface PharosJwtPayload {
+  sub?: string;
+  userId?: string;
+  role?: string;
+  challenge?: string;
+}
+
+interface PharosRequest extends IRequest {
+  user?: PharosJwtPayload;
+  impersonatedUser?: string;
+  repo: IAuthRepository;
+  passkey: PasskeyService;
+}
+
+const router = Router<PharosRequest, [Env, unknown]>();
+
+// --- Middlewares ---
+
+const withRepo = (request: PharosRequest, env: Env) => {
+  assertConfig(env);
+  request.repo = env.REPO || new AuthRepository(env.DB);
+  request.passkey = new PasskeyService(
+    request.repo, 
+    env.RP_ID || 'localhost', 
+    env.EXPECTED_ORIGIN || 'http://localhost:3000'
+  );
+};
 
 // --- Utilities ---
-
-/**
- * Native, zero-dependency nanoid alternative using Web Crypto.
- * Why: Adheres to the 'Boring Crypto' mandate and purges nodejs_compat.
- */
-function generateId(length: number = 21): string {
-  const alphabet = 'useand-6789BCDFGHJKLMNPQRSTVWXYZ_cfghkpqrsatuvwz012345';
-  const bytes = new Uint8Array(length);
-  crypto.getRandomValues(bytes);
-  let id = '';
-  for (let i = 0; i < length; i++) {
-    id += alphabet[bytes[i] % 64];
-  }
-  return id;
-}
-
-/**
- * Native base64url encoding using Web Standard APIs.
- */
-function toBase64Url(bytes: Uint8Array): string {
-    const base64 = btoa(String.fromCharCode(...bytes));
-    return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
-}
 
 /**
  * Fallback Magic Link Trigger.
@@ -88,16 +104,6 @@ async function signLocalToken(payload: PharosJwtPayload, secretString: string, e
 }
 
 // --- Middlewares ---
-
-const withRepo = (request: PharosRequest, env: Env) => {
-  assertConfig(env);
-  request.repo = env.REPO || new AuthRepository(env.DB);
-  request.passkey = new PasskeyService(
-    request.repo, 
-    env.RP_ID || 'localhost', 
-    env.EXPECTED_ORIGIN || 'http://localhost:3000'
-  );
-};
 
 const withAuth = async (request: PharosRequest, env: Env) => {
   assertConfig(env);

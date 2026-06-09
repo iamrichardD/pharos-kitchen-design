@@ -9,7 +9,6 @@
  * Last Updated: 2026-06-03
  * ======================================================================== */
 
-import { Buffer } from 'node:buffer';
 import {
   generateRegistrationOptions,
   verifyRegistrationResponse,
@@ -22,8 +21,9 @@ import type {
     PublicKeyCredentialCreationOptionsJSON,
     PublicKeyCredentialRequestOptionsJSON,
     AuthenticatorTransportFuture
-} from '@simplewebauthn/types';
+} from '@simplewebauthn/server';
 import { IAuthRepository } from './db';
+import { toBase64Url, fromBase64Url } from './utils';
 
 /**
  * Internal DTO for WebAuthn Registration Response to encapsulate @simplewebauthn.
@@ -171,8 +171,8 @@ export class PasskeyService {
       expectedOrigin: this.origin,
       expectedRPID: this.rpID,
       authenticator: {
-        credentialID: new Uint8Array(Buffer.from(credential.id, 'base64url')),
-        credentialPublicKey: new Uint8Array(Buffer.from(credential.public_key, 'base64url')),
+        credentialID: fromBase64Url(credential.id),
+        credentialPublicKey: fromBase64Url(credential.public_key),
         counter: credential.counter,
       }
     });
