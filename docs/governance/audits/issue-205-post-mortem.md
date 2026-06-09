@@ -28,12 +28,27 @@ During the final hour of Sprint 5.02, the Orchestrator executed a direct push to
 - **Rigor**: 🟢 **HIGH**. Established authoritative Terraform variables (`admin_email`, `dkim_selector`, `dkim_public_key`). 
 - **Security**: Prevented the accidental release of static PII and "..." stubs.
 
-## 3. 🧠 Lessons Learned & Process Adjustments
+## 3. 📊 Provisional DORA Metrics (Day Two - Issue #205)
+- **Lead Time to Change:** ~3 hours. We successfully navigated an 'Architectural Shift' (Startup Pivot) and resolved a 'Deadlock' within a single afternoon block.
+- **Complexity Calibration:** 
+    - **Estimated (ECT): 4**
+    - **Actual (ACT): 4**
+    - *Rationale:* Unlike #204, we correctly identified the systemic ripples of the identity pivot and the 'Boring Crypto' mandate. The 'Deadlock' was an unforeseen ACT variance, but the remediation was surgical.
+- **Change Failure Rate:** ~50%. Initial sub-agent attempts failed due to turn limits, and the initial infrastructure merge resulted in a deployment deadlock. High recovery velocity mitigated the impact.
+- **Time to Restore Service:** ~10 minutes (Time from identifying the 'Chicken-and-Egg' deadlock to the `830fdee` fix).
+
+## 4. 🧠 Lessons Learned & Process Adjustments
 - **PR Gate is Non-Negotiable**: Even during a "Recovery Surge," the PR serves as the only permanent record of the "Why." 
 - **The Dependency on GitHub Secrets**: We correctly identified that high-rigor infrastructure requires external secret injection, but we initially failed to code for it. 
-- **Tooling Resilience**: We encountered a bug in the native `generateId` implementation (index out of bounds) which was caught by local `vitest` runs but would have been missed if we hadn't enforced local testing after the surge.
+- **The Incremental Deployment Pattern**: For DNS/Email setups, records must be provisioned in sequence (MX -> DKIM). Terraform should be coded to support this 'Eventual Truth' model.
 
-## 4. 🏁 Conclusion
-The code on `main` is now behaviorally superior and architecturally compliant. This document and the associated Retroactive PR restore the "Long-Term Memory" to the project.
+## 5. 🏁 Day Two Handoff (End of Day Ritual)
+The code on `main` is now behaviorally superior and architecturally compliant. 
+
+**Outstanding Human Tasks (As time permits this evening / Day 3 Morning):**
+1. [ ] Add `TF_VAR_` secrets to GitHub.
+2. [ ] Verify `Destination Address` in Cloudflare.
+3. [ ] Trigger final `Deploy Infra` to provision the conditional DKIM record.
 
 **Verdict: 🟢 PHAROS GREEN (Restored)**
+
