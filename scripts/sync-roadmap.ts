@@ -6,7 +6,7 @@
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Automated Roadmap Synchronization Engine (Living Map Protocol).
  * Traceability: Issue #208, ADR-0051
- * Last Updated: 2026-06-04
+ * Last Updated: 2026-06-08
  * ======================================================================== */
 
 import fs from 'node:fs';
@@ -15,7 +15,7 @@ import path from 'node:path';
 interface RoadmapItem {
   id: number | null;
   name: string;
-  status: 'Deployed' | 'In Construction' | 'Blueprint Approved' | 'Research Phase';
+  status: 'Deployed' | 'In Progress' | 'In Construction' | 'Blueprint Approved' | 'Research Phase';
   phase: string;
   tag: string;
   description: string;
@@ -46,12 +46,26 @@ function parseMarkdownLog(filePath: string, defaultStatus: RoadmapItem['status']
   const items: RoadmapItem[] = [];
   
   let currentSprint = 'Backlog';
+  let sectionStatus = defaultStatus;
   
   // Regex patterns
+  const sectionPattern = /^## (.*)/;
   const sprintPattern = /^### (Sprint [\d.]+)/;
-  const issuePattern = /^- \[([ x])\] \*\*Issue #(\d+)\*\*: \[TAG: ([^\]]+)\] ([^\[]+) \[DESC: ([^\]]+)\]/;
+  const issuePattern = /^- \[([ x])\] \*\*Issue #([^:]+)\*\*: \[TAG: ([^\]]+)\] (.*)/;
 
   for (const line of lines) {
+    // Section Tracking (ADR-0051)
+    const sectionMatch = line.match(sectionPattern);
+    if (sectionMatch) {
+      const sectionTitle = sectionMatch[1];
+      if (sectionTitle.includes('Active Sprint')) {
+        sectionStatus = 'In Progress';
+      } else if (sectionTitle.includes('Future Sprints')) {
+        sectionStatus = 'Blueprint Approved';
+      }
+      continue;
+    }
+
     const sprintMatch = line.match(sprintPattern);
     if (sprintMatch) {
       currentSprint = sprintMatch[1];
@@ -60,12 +74,21 @@ function parseMarkdownLog(filePath: string, defaultStatus: RoadmapItem['status']
 
     const issueMatch = line.match(issuePattern);
     if (issueMatch) {
-      const [_, checked, id, tag, name, desc] = issueMatch;
-      const status: RoadmapItem['status'] = checked === 'x' ? 'Deployed' : defaultStatus;
+      const [_, checked, id, tag, rest] = issueMatch;
+      
+      // Extract Description if present
+      const descMatch = rest.match(/\[DESC: ([^\]]+)\]/);
+      const desc = descMatch ? descMatch[1] : 'Authoritative task item captured from log.';
+      
+      // Clean up Name (remove DESC and ECT markers)
+      const name = rest.split('[DESC:')[0].split('[ECT:')[0].trim().replace(/\.$/, '');
+
+      // Universal Truth: Checked is always Deployed
+      const status: RoadmapItem['status'] = checked === 'x' ? 'Deployed' : sectionStatus;
       
       items.push({
-        id: parseInt(id, 10),
-        name: name.trim().replace(/\.$/, ''),
+        id: parseInt(id, 10) || null,
+        name,
         status,
         phase: currentSprint,
         tag: TAG_MAP[tag.trim()] || DEFAULT_TAG,
