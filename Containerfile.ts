@@ -82,8 +82,21 @@ RUN (npm audit --audit-level=high || echo "⚠️ Warning: Audit found known iss
 # Verify WASM Integrity before build (ADR-0033 Small Stones)
 RUN [ -f "packages/pkd-toon/pkg/pkd_toon_bg.wasm" ] || (echo "❌ Error: pkd-toon WASM missing!" && exit 1)
 
+# Build internal protocol package first (ADR-0007)
+RUN npm run build --workspace=@pkd/protocol
+
 # Build Marketing Site
 RUN npm run build --workspace=apps/marketing
+
+# Build Demo Site (ADR-0004)
+RUN npm run build --workspace=apps/demo
+
+# Nest Demo Site into Marketing (ADR-0004)
+RUN mkdir -p apps/marketing/dist/demo && \
+    cp -r apps/demo/dist/* apps/marketing/dist/demo/
+
+# Final Validation: Verify nesting (Fail Fast)
+RUN [ -f "apps/marketing/dist/demo/index.html" ] || (echo "❌ Error: Demo build nesting failed!" && exit 1)
 
 # Default command: No-op
 CMD ["echo", "Pharos TS Build Complete"]
