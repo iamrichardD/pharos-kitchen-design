@@ -15,7 +15,7 @@
 resource "cloudflare_record" "pkd_spf" {
   zone_id = var.cloudflare_zone_id
   name    = "pkd"
-  value   = "v=spf1 include:_spf.mx.cloudflare.net ~all"
+  content = "v=spf1 include:_spf.mx.cloudflare.net ~all"
   type    = "TXT"
   ttl     = 3600
 }
@@ -27,7 +27,7 @@ resource "cloudflare_record" "pkd_dkim" {
   count   = var.dkim_public_key != "" ? 1 : 0
   zone_id = var.cloudflare_zone_id
   name    = "${var.dkim_selector != "" ? var.dkim_selector : "cloudflare"}._domainkey.pkd"
-  value   = "v=DKIM1; k=rsa; p=${var.dkim_public_key}"
+  content = "v=DKIM1; k=rsa; p=${var.dkim_public_key}"
   type    = "TXT"
   ttl     = 3600
 }
@@ -37,7 +37,7 @@ resource "cloudflare_record" "pkd_dkim" {
 resource "cloudflare_record" "pkd_dmarc" {
   zone_id = var.cloudflare_zone_id
   name    = "_dmarc.pkd"
-  value   = "v=DMARC1; p=quarantine; rua=mailto:${var.admin_email}"
+  content = "v=DMARC1; p=quarantine; rua=mailto:${var.admin_email}"
   type    = "TXT"
   ttl     = 3600
 }
@@ -47,7 +47,7 @@ resource "cloudflare_record" "pkd_dmarc" {
 resource "cloudflare_record" "pkd_mx_1" {
   zone_id  = var.cloudflare_zone_id
   name     = "pkd"
-  value    = "route1.mx.cloudflare.net"
+  content  = "route1.mx.cloudflare.net"
   type     = "MX"
   priority = 10
   ttl      = 3600
@@ -56,7 +56,7 @@ resource "cloudflare_record" "pkd_mx_1" {
 resource "cloudflare_record" "pkd_mx_2" {
   zone_id  = var.cloudflare_zone_id
   name     = "pkd"
-  value    = "route2.mx.cloudflare.net"
+  content  = "route2.mx.cloudflare.net"
   type     = "MX"
   priority = 20
   ttl      = 3600
@@ -65,7 +65,7 @@ resource "cloudflare_record" "pkd_mx_2" {
 resource "cloudflare_record" "pkd_mx_3" {
   zone_id  = var.cloudflare_zone_id
   name     = "pkd"
-  value    = "route3.mx.cloudflare.net"
+  content  = "route3.mx.cloudflare.net"
   type     = "MX"
   priority = 30
   ttl      = 3600
