@@ -53,6 +53,9 @@ jobs:
       - name: "🔄 Initialize OpenTofu"
         run: tofu init
 
+      - name: "🔓 Force Unlock State (Targeted Recovery)"
+        run: tofu force-unlock -force fe77418b-f4bd-c044-9151-d42c764b1ee1 || true
+
       - name: "📋 Infrastructure Plan"
         run: tofu plan -out=tfplan
         env:
