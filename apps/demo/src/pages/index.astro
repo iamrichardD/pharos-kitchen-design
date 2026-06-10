@@ -10,8 +10,7 @@
  * ======================================================================== */
 
 import DemoLayout from '../layouts/DemoLayout.astro';
-import { InteropSandbox } from '../components/InteropSandbox';
-import { WasmProvider } from '../components/WasmContext';
+import { DemoSandbox } from '../components/DemoSandbox';
 ---
 
 <DemoLayout title="Phase 4: Interop Sandbox">
@@ -19,9 +18,7 @@ import { WasmProvider } from '../components/WasmContext';
 		<h1 style="color: var(--ph-orange); font-size: 3rem; margin-bottom: 0.5rem;">PROJECT PRISM DEMO</h1>
 		<p style="font-family: monospace; opacity: 0.8; letter-spacing: 0.1rem; margin-bottom: 2rem;">PHASE 4: DYNAMIC REGISTRY & GHOST LINK VERIFICATION</p>
 		
-        <WasmProvider client:only="react">
-            <InteropSandbox client:only="react" />
-        </WasmProvider>
+        <DemoSandbox client:only="react" />
 
         <div style="margin-top: 3rem; font-size: 0.9rem; opacity: 0.7; max-width: 600px; text-align: center;">
             <p>This sandbox demonstrates the <strong>Hybrid Handle</strong> architecture (Option C). The metadata above is being retrieved from a dynamic, resident registry inside the Pharos Rust/WASM core.</p>

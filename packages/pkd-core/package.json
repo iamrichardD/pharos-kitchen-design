@@ -18,5 +18,9 @@
   },
   "scripts": {
     "test": "echo 'No TS tests for pkd-core, logic verified via Rust' && exit 0"
+  },
+  "dependencies": {
+    "react": "19.0.0",
+    "react-dom": "19.0.0"
   }
 }
