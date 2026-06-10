@@ -137,6 +137,8 @@ To ensure the automated Public Roadmap remains lossless and machine-readable, al
 - **Tagged Markdown Standard**: EVERY task entry MUST include:
     - `[TAG: ...]` (e.g., `[TAG: Core]`, `[TAG: Security]`)
     - `[DESC: ...]` (A human-centric summary of the impact/value).
+    - `[ECT: X]` (Estimated Complexity Tier 1-5).
+    - `[ACT: X]` (**MANDATORY for @PROGRESS.md**): The actual effort/complexity observed during execution.
 - **Header Schema**: ALL Sprint headers MUST follow the regex-ready format:
     `### Sprint [ID]: [Name] ([YYYY-MM-DD]) - [STATUS]`
 
@@ -217,6 +219,32 @@ To prevent CI/CD failures, session hangs, and sub-agent timeouts, ALL sessions M
 - **Micro-Delegation:** `invoke_agent` tasks MUST be aggressively scoped. Do not bundle Crucible Strategy with Execution in a single invocation for Tier 3+ tasks to prevent timeouts.
 - **Non-Interactive Git:** ALL git commands that can generate commits (merges, reverts, commits) MUST use the `-m` flag or be explicitly non-interactive (e.g., `GIT_MERGE_AUTOEDIT=no`) to prevent terminal hangs from `nano`.
 - **Workspace-Bound Siblings:** All isolated AI worktrees MUST be created strictly within `.worktrees/<sibling-name>` inside the `main` workspace to comply with file-system security policies. Do not use parent directories (e.g., `../`).
+
+### 6. Issue Management & Label Governance (ADR-0065)
+To ensure machine-readability for the Sync Engine (ADR-0051) and minimize architectural drift, all Agentic sessions MUST adhere to the following standards for GitHub Issue management.
+
+#### **A. The Label Verification Gate (Mandatory Pre-Flight)**
+- **Research**: Before any `gh issue create` or `gh issue edit` command, the agent MUST run `gh label list --limit 100` to verify the existence of target labels.
+- **Remediation**: If a required label (e.g., a new `phase-X`) is missing, the agent MUST create it using `gh label create <name> --color <hex> --description <desc>` BEFORE proceeding to issue creation or modification.
+- **Fail-Fast**: If label creation fails or if the agent cannot verify labels, the task MUST stop. Agents are strictly PROHIBITED from creating issues with "deviated" stubs or missing metadata.
+
+#### **B. The Title Standard**
+- **Format**: `Action-Oriented Summary of Intent` (e.g., `Refactor Roadmap Sync Mapping Logic`).
+- **Prohibitions**: Absolutely no `[TAG: ...]` prefixes, brackets, or redundant metadata in the title. Metadata belongs strictly in the labels.
+- **Voice**: Professional, human-centric, and descriptive (ADR-0048).
+
+#### **C. The Body Schema (Authoritative)**
+Every issue description MUST include the following headers to maintain a machine-readable schema for the Sync Engine:
+- **Problem**: 1-2 sentences describing the current defect or requirement.
+- **Cause**: (For Bugs) Technical root cause analysis.
+- **Remediation**: Bulleted list of specific technical actions to be taken.
+- **Traceability**: References to relevant ADRs, issues, or PRs.
+
+#### **D. Metadata Requirements**
+Every issue MUST have:
+- **Category Label**: Exactly one functional label (e.g., `Security`, `Infrastructure`, `debt`, `governance`, `UX`).
+- **Complexity Label**: Exactly one ECT label (`ECT: 1` through `ECT: 5`).
+- **Sprint Label**: Exactly one Phase label (e.g., `phase-5`).
 
 ---
 ### Legal & Interoperability Compliance
