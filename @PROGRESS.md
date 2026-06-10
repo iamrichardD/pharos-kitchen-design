@@ -23,6 +23,7 @@
 **Status**: 🚀 ACTIVE (Sprint 5.02)
 
 ### Sprint 5.02: The Speed & Security Foundation (2026-06-08) - 🚀 ACTIVE
+- [x] **Issue #235**: [TAG: Infra] Resolve Demo URL 404 Build Omission. [DESC: Refactored Containerfile.ts to build and nest the Demo app, enforced React 19.0.0, and unified the React island for context sharing. Verified 🟢 PHAROS GREEN.] [ECT: 2] [ACT: 2]
 - [x] **Issue #234**: [TAG: Protocol] Remediate Roadmap Status Mapping Mismatch. [DESC: Implemented section-aware 'Sentinel State Machine' in sync-roadmap.ts per ADR-0051. Verified 🟢 PHAROS GREEN.] [ECT: 2] [ACT: 2]
 - [x] **Issue #236**: [TAG: Protocol] Document GitHub Issue and Label Governance Standard. [DESC: Codified ADR-0065 in GEMINI.md, establishing the Label Verification Gate and standardized Title/Body schema. Re-standardized the active backlog. Verified 🟢 PHAROS GREEN.] [ECT: 1] [ACT: 1]
 - [x] **Issue #205**: [TAG: Security] Edge-Sovereign Onboarding & Recovery. [DESC: Implemented the 'Zero-to-Hero' path for solo IKDs, including seamless registration pivots, cross-device hardware hooks, and a resilient Magic Link fallback with SPF/DKIM infrastructure. Verified 🟢 PHAROS GREEN.] [ECT: 4] [ACT: 5]

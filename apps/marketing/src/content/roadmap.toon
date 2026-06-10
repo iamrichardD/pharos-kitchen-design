@@ -3,14 +3,15 @@
  * Component: Marketing / Content
  * File: roadmap.toon
  * Purpose: Automated reflection of authoritative internal logs.
- * Last Synced: 2026-06-10T22:52:13.088Z
+ * Last Synced: 2026-06-10T22:59:52.143Z
  * ======================================================================== */
 
 title: Pharos System Roadmap
 type: roadmap
-lastSynced: 2026-06-10T22:52:13.088Z
+lastSynced: 2026-06-10T22:59:52.143Z
 
-items[35]{id, name, status, phase, tag, description}:
+items[36]{id, name, status, phase, tag, description}:
+  "235", "Resolve Demo URL 404 Build Omission", "Deployed", "Sprint 5.02", "TOOLING", "Refactored Containerfile.ts to build and nest the Demo app, enforced React 19.0.0, and unified the React island for context sharing. Verified 🟢 PHAROS GREEN."
   "234", "Remediate Roadmap Status Mapping Mismatch", "Deployed", "Sprint 5.02", "PROTOCOL", "Implemented section-aware 'Sentinel State Machine' in sync-roadmap.ts per ADR-0051. Verified 🟢 PHAROS GREEN."
   "236", "Document GitHub Issue and Label Governance Standard", "Deployed", "Sprint 5.02", "PROTOCOL", "Codified ADR-0065 in GEMINI.md, establishing the Label Verification Gate and standardized Title/Body schema. Re-standardized the active backlog. Verified 🟢 PHAROS GREEN."
   "205", "Edge-Sovereign Onboarding & Recovery", "Deployed", "Sprint 5.02", "IDENTITY", "Implemented the 'Zero-to-Hero' path for solo IKDs, including seamless registration pivots, cross-device hardware hooks, and a resilient Magic Link fallback with SPF/DKIM infrastructure. Verified 🟢 PHAROS GREEN."
@@ -36,9 +37,9 @@ items[35]{id, name, status, phase, tag, description}:
   "123", "Zero-Allocation Marshalling", "Deployed", "Sprint 4.11", "BRIDGE", "Delivered high-performance memory-safe marshalling for the Revit Bridge (ECT 4)."
   "175", "Design System Alignment", "Deployed", "Sprint 4.11", "UX", "Aligned the Marketing TOON loader with the Pharos Design System typography."
   "168", "Automated Boundary Enforcement", "Deployed", "Sprint 4.11", "PROTOCOL", "Implemented ADR-0044 drift detection to ensure Rust/C# parity."
-  "235", "Resolve Demo URL 404 Build Omission", "In Progress", "Sprint 5.02", "TOOLING", "Refactor CI/CD to build and nest the Demo application within the marketing dist folder."
   "237", "Remediate Rust Toolchain and Metadata Warnings", "In Progress", "Sprint 5.02", "CORE", "Fix deprecated edition placement, unused code in pkd-cli, and missing repository metadata."
   "238", "Remediate NPM Dependency Vulnerabilities", "In Progress", "Sprint 5.02", "IDENTITY", "Perform audit fix and resolve critical RCE vulnerabilities in Happy DOM and others."
+  "242", "Implement RFC-2378 OmniBar & Procedural Hover-Bake", "Blueprint Approved", "Sprint 5.03", "CORE", "Unify Demo UX with Command-First vision and real-time Rust baking."
   "239", "Refactor Marketing Site IA for Command-First Identity", "Blueprint Approved", "Sprint 5.03", "CORE", "Implement high-fidelity Terminal Hero and capability-based documentation flow."
   "185", "Zero-Allocation JSON Parsing", "Blueprint Approved", "Sprint 5.03", "CORE", "Implementing source-generated JSON parsers to eliminate allocation overhead in WASM."
   "107", "Dependency Pruning", "Blueprint Approved", "Sprint 5.03", "CORE", "Audit and prune `pkd-core` dependencies for lean WASM binaries."

@@ -23,7 +23,6 @@
 
 ### Sprint 5.02: The Speed & Security Foundation (2026-06-08) - 🚀 ACTIVE
 - [ ] **Issue #234**: [TAG: Protocol] Remediate Roadmap Status Mapping Mismatch. [DESC: Update sync-roadmap.ts to correctly categorize future sprints as 'Blueprint Approved' per ADR-0051.] [ECT: 2]
-- [ ] **Issue #235**: [TAG: Infra] Resolve Demo URL 404 Build Omission. [DESC: Refactor CI/CD to build and nest the Demo application within the marketing dist folder.] [ECT: 2]
 - [ ] **Issue #237**: [TAG: Debt] Remediate Rust Toolchain and Metadata Warnings. [DESC: Fix deprecated edition placement, unused code in pkd-cli, and missing repository metadata.] [ECT: 2]
 - [ ] **Issue #238**: [TAG: Security] Remediate NPM Dependency Vulnerabilities. [DESC: Perform audit fix and resolve critical RCE vulnerabilities in Happy DOM and others.] [ECT: 3]
 
@@ -32,6 +31,7 @@
 ## 📅 Future Sprints
 
 ### Sprint 5.03: The Ghost & The Bridge (2026-06-22) - 🔮 PLANNED
+- [ ] **Issue #242**: [TAG: UX] Implement RFC-2378 OmniBar & Procedural Hover-Bake. [DESC: Unify Demo UX with Command-First vision and real-time Rust baking.] [ECT: 3]
 - [ ] **Issue #239**: [TAG: UX] Refactor Marketing Site IA for Command-First Identity. [DESC: Implement high-fidelity Terminal Hero and capability-based documentation flow.] [ECT: 5]
 - [ ] **Issue #185**: [TAG: Perf] Zero-Allocation JSON Parsing. [DESC: Implementing source-generated JSON parsers to eliminate allocation overhead in WASM.]
 - [ ] **Issue #107**: [TAG: Perf] Dependency Pruning. [DESC: Audit and prune `pkd-core` dependencies for lean WASM binaries.]
