@@ -52,3 +52,4 @@ TestResults/
 data/*.db
 /docs/plans/
 /docs/reviews/
+.worktrees/
