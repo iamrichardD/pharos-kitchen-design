@@ -1,0 +1,58 @@
+# ========================================================================
+# Project: Pharos Kitchen Design (Project Prism)
+# Component: CI/CD / Infrastructure Recovery
+# File: infra-recovery.yml
+# Author: PMA (Orchestrator)
+# License: FSL-1.1 (See LICENSE file for details)
+# Purpose: Manual surgical release of stale Terraform state locks.
+# Why: Breaks 'Lock Cascades' by allowing precise ID-based force-unlock.
+# Traceability: Issue #205, Sprint 5.02 Retro
+# ========================================================================
+
+name: "🛠️ Infra Recovery: Force Unlock"
+
+on:
+  workflow_dispatch:
+    inputs:
+      lock_id:
+        description: "The Lock ID from the failing OpenTofu log (e.g., 'fe77418b...')"
+        required: true
+        type: string
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  force-unlock:
+    name: "Force Unlock State"
+    runs-on: ubuntu-latest
+    environment: production
+    
+    defaults:
+      run:
+        working-directory: infra/cloud
+
+    steps:
+      - name: "🛒 Checkout Code"
+        uses: actions/checkout@v4
+
+      - name: "🏗️ Setup OpenTofu"
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: 1.9.0
+
+      - name: "🔐 Configure AWS Credentials (OIDC)"
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/pkd-prism-gh-deployer
+          aws-region: ${{ secrets.AWS_REGION || 'us-west-2' }}
+
+      - name: "🔄 Initialize OpenTofu"
+        run: tofu init
+
+      - name: "🔓 Execute Surgical Unlock"
+        run: tofu force-unlock -force ${{ github.event.inputs.lock_id }}
