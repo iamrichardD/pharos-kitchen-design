@@ -6,7 +6,7 @@
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Central tracking for Phase-specific tasks and issues (Present & Future).
  * Traceability: Issue #207
- * Last Updated: 2026-06-08
+ * Last Updated: 2026-06-10
  * ======================================================================== -->
 
 <!-- 
@@ -22,22 +22,17 @@
 ## 🚀 Active Sprint
 
 ### Sprint 5.02: The Speed & Security Foundation (2026-06-08) - 🚀 ACTIVE
-- [x] **Issue #204**: [TAG: Security] Multi-Org Pulse Filtering (The Informed Sentinel) [ECT: 4]. 
-    - [x] **Sub-Task**: [TAG: Debt] Purge AWS SDK from `pkd-cli` and `auth-bridge` & Remediate @simplewebauthn deprecations [ECT: 2]. [PR: #228, #229, #230]
-    - [x] **Sub-Task**: [TAG: Core] Implement `Vfs` trait and `PolicyGuard` in `pkd-core` [ECT: 3]. [PR: #228]
-    - [x] **Sub-Task**: [TAG: UI] Implement `ActionGate.astro` and 'Lazy Shard' loading [ECT: 2]. [PR: #229]
-    - [x] **Sub-Task**: [TAG: Infra] Configure public `search-index.bin` in R2 [ECT: 2]. [PR: #230]
-- [x] **Issue #205**: [TAG: Security] Hardening & Integration - Edge-Sovereign Passkey [ECT: 4].
-    - **Context**: Establish the "Zero-to-Hero" onboarding path for Solo IKDs. Explicitly reject OAuth/SSO (Google/Apple) to maintain sovereignty, relying instead on native iCloud/Google Password Manager Passkey syncing.
-    - [x] **Sub-Task**: [TAG: UI] The Web Registration Pivot. (Handle `user_not_found` by seamlessly initiating `startRegistration` in `verify.astro`) [ECT: 2]. [PR: #231]
-    - [x] **Sub-Task**: [TAG: UX] The Cross-Device Hook. (Educate users to use phone QR codes for hardware verification) [ECT: 1]. [PR: #231]
-    - [x] **Sub-Task**: [TAG: Core] The Magic Link Fallback. (Implement secure email-based recovery for Edge-Sovereign identity) [ECT: 3]. [PR: #232]
+- [ ] **Issue #234**: [TAG: Protocol] Remediate Roadmap Status Mapping Mismatch. [DESC: Update sync-roadmap.ts to correctly categorize future sprints as 'Blueprint Approved' per ADR-0051.] [ECT: 2]
+- [ ] **Issue #235**: [TAG: Infra] Resolve Demo URL 404 Build Omission. [DESC: Refactor CI/CD to build and nest the Demo application within the marketing dist folder.] [ECT: 2]
+- [ ] **Issue #237**: [TAG: Debt] Remediate Rust Toolchain and Metadata Warnings. [DESC: Fix deprecated edition placement, unused code in pkd-cli, and missing repository metadata.] [ECT: 2]
+- [ ] **Issue #238**: [TAG: Security] Remediate NPM Dependency Vulnerabilities. [DESC: Perform audit fix and resolve critical RCE vulnerabilities in Happy DOM and others.] [ECT: 3]
 
 ---
 
 ## 📅 Future Sprints
 
 ### Sprint 5.03: The Ghost & The Bridge (2026-06-22) - 🔮 PLANNED
+- [ ] **Issue #239**: [TAG: UX] Refactor Marketing Site IA for Command-First Identity. [DESC: Implement high-fidelity Terminal Hero and capability-based documentation flow.] [ECT: 5]
 - [ ] **Issue #185**: [TAG: Perf] Zero-Allocation JSON Parsing. [DESC: Implementing source-generated JSON parsers to eliminate allocation overhead in WASM.]
 - [ ] **Issue #107**: [TAG: Perf] Dependency Pruning. [DESC: Audit and prune `pkd-core` dependencies for lean WASM binaries.]
 - [ ] **Issue #42**: [TAG: Security] SRI & SEO Audit. [DESC: Remediating SRI hashes and optimizing SEO for the Marketing site.]

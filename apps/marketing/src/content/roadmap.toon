@@ -3,14 +3,17 @@
  * Component: Marketing / Content
  * File: roadmap.toon
  * Purpose: Automated reflection of authoritative internal logs.
- * Last Synced: 2026-06-08T18:52:06.385Z
+ * Last Synced: 2026-06-10T22:52:13.088Z
  * ======================================================================== */
 
 title: Pharos System Roadmap
 type: roadmap
-lastSynced: 2026-06-08T18:52:06.385Z
+lastSynced: 2026-06-10T22:52:13.088Z
 
-items[30]{id, name, status, phase, tag, description}:
+items[35]{id, name, status, phase, tag, description}:
+  "234", "Remediate Roadmap Status Mapping Mismatch", "Deployed", "Sprint 5.02", "PROTOCOL", "Implemented section-aware 'Sentinel State Machine' in sync-roadmap.ts per ADR-0051. Verified 🟢 PHAROS GREEN."
+  "236", "Document GitHub Issue and Label Governance Standard", "Deployed", "Sprint 5.02", "PROTOCOL", "Codified ADR-0065 in GEMINI.md, establishing the Label Verification Gate and standardized Title/Body schema. Re-standardized the active backlog. Verified 🟢 PHAROS GREEN."
+  "205", "Edge-Sovereign Onboarding & Recovery", "Deployed", "Sprint 5.02", "IDENTITY", "Implemented the 'Zero-to-Hero' path for solo IKDs, including seamless registration pivots, cross-device hardware hooks, and a resilient Magic Link fallback with SPF/DKIM infrastructure. Verified 🟢 PHAROS GREEN."
   "223", "Implement Domain Allowlist in bless-sri.sh", "Deployed", "Sprint 5.02", "IDENTITY", "Added origin verification to the blessing script to prevent accidental malicious blessing and hardened the Node.js bridge against shell injection."
   "222", "Refine 'sed' targeting in bless-sri.sh", "Deployed", "Sprint 5.02", "CORE", "Tightened regex targeting to prevent cross-talk during SRI updates."
   "220", "Authoritative Consent Gate for Upstream Scripts", "Deployed", "Sprint 5.01", "PROTOCOL", "Implemented the `bless-sri.sh` workflow and ADR-0053 to prevent build-killing SRI failures."
@@ -33,11 +36,13 @@ items[30]{id, name, status, phase, tag, description}:
   "123", "Zero-Allocation Marshalling", "Deployed", "Sprint 4.11", "BRIDGE", "Delivered high-performance memory-safe marshalling for the Revit Bridge (ECT 4)."
   "175", "Design System Alignment", "Deployed", "Sprint 4.11", "UX", "Aligned the Marketing TOON loader with the Pharos Design System typography."
   "168", "Automated Boundary Enforcement", "Deployed", "Sprint 4.11", "PROTOCOL", "Implemented ADR-0044 drift detection to ensure Rust/C# parity."
-  "204", "Multi-Org Pulse Filtering", "In Progress", "Sprint 5.02", "IDENTITY", "Implementing delegate enforcement for organizational equipment shards."
-  "205", "Hardening & Integration - Edge-Sovereign Passkey", "In Progress", "Sprint 5.02", "IDENTITY", "Verifying CLI ergonomics (biometrics) and implementing 'Magic Link' fallback recovery."
-  "185", "Zero-Allocation JSON Parsing", "In Progress", "Sprint 5.03", "CORE", "Implementing source-generated JSON parsers to eliminate allocation overhead in WASM."
-  "107", "Dependency Pruning", "In Progress", "Sprint 5.03", "CORE", "Audit and prune `pkd-core` dependencies for lean WASM binaries."
-  "42", "SRI & SEO Audit", "In Progress", "Sprint 5.03", "IDENTITY", "Remediating SRI hashes and optimizing SEO for the Marketing site."
-  "87", "Domain-to-Org Mapping", "In Progress", "Sprint 5.03", "IDENTITY", "Implementing secure domain validation for organizational onboarding."
-  "84", "Dual-Stream Release Pipeline", "In Progress", "Sprint 5.04", "TOOLING", "Configuring separate channels for stable and nightly releases."
-  "85", "Official Homebrew Tap", "In Progress", "Sprint 5.04", "TOOLING", "Initializing the official Pharos Homebrew tap for macOS/Linux distribution."
+  "235", "Resolve Demo URL 404 Build Omission", "In Progress", "Sprint 5.02", "TOOLING", "Refactor CI/CD to build and nest the Demo application within the marketing dist folder."
+  "237", "Remediate Rust Toolchain and Metadata Warnings", "In Progress", "Sprint 5.02", "CORE", "Fix deprecated edition placement, unused code in pkd-cli, and missing repository metadata."
+  "238", "Remediate NPM Dependency Vulnerabilities", "In Progress", "Sprint 5.02", "IDENTITY", "Perform audit fix and resolve critical RCE vulnerabilities in Happy DOM and others."
+  "239", "Refactor Marketing Site IA for Command-First Identity", "Blueprint Approved", "Sprint 5.03", "CORE", "Implement high-fidelity Terminal Hero and capability-based documentation flow."
+  "185", "Zero-Allocation JSON Parsing", "Blueprint Approved", "Sprint 5.03", "CORE", "Implementing source-generated JSON parsers to eliminate allocation overhead in WASM."
+  "107", "Dependency Pruning", "Blueprint Approved", "Sprint 5.03", "CORE", "Audit and prune `pkd-core` dependencies for lean WASM binaries."
+  "42", "SRI & SEO Audit", "Blueprint Approved", "Sprint 5.03", "IDENTITY", "Remediating SRI hashes and optimizing SEO for the Marketing site."
+  "87", "Domain-to-Org Mapping", "Blueprint Approved", "Sprint 5.03", "IDENTITY", "Implementing secure domain validation for organizational onboarding."
+  "84", "Dual-Stream Release Pipeline", "Blueprint Approved", "Sprint 5.04", "TOOLING", "Configuring separate channels for stable and nightly releases."
+  "85", "Official Homebrew Tap", "Blueprint Approved", "Sprint 5.04", "TOOLING", "Initializing the official Pharos Homebrew tap for macOS/Linux distribution."
