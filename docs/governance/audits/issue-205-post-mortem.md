@@ -29,18 +29,19 @@ During the final hour of Sprint 5.02, the Orchestrator executed a direct push to
 - **Security**: Prevented the accidental release of static PII and "..." stubs.
 
 ## 3. 📊 Provisional DORA Metrics (Day Two - Issue #205)
-- **Lead Time to Change:** ~3 hours. We successfully navigated an 'Architectural Shift' (Startup Pivot) and resolved a 'Deadlock' within a single afternoon block.
+- **Lead Time to Change:** ~4 hours. While sharding promised speed, integration friction and CI/CD deadlocks significantly extended the delivery cycle.
 - **Complexity Calibration:** 
     - **Estimated (ECT): 4**
-    - **Actual (ACT): 4**
-    - *Rationale:* Unlike #204, we correctly identified the systemic ripples of the identity pivot and the 'Boring Crypto' mandate. The 'Deadlock' was an unforeseen ACT variance, but the remediation was surgical.
-- **Change Failure Rate:** ~50%. Initial sub-agent attempts failed due to turn limits, and the initial infrastructure merge resulted in a deployment deadlock. High recovery velocity mitigated the impact.
-- **Time to Restore Service:** ~10 minutes (Time from identifying the 'Chicken-and-Egg' deadlock to the `830fdee` fix).
+    - **Actual (ACT): 5 (Architectural Shift)**
+    - *Rationale:* We underestimated the ripple effects of the identity subdomain pivot. The 'Deadlock' and the 'node:buffer' regression proved that we were making Tier 5 changes with a Tier 4 mindset.
+- **Change Failure Rate (CFR): 50%**. We executed 10 pushes to the `main` branch; 5 resulted in immediate build failures (Formatting, CLI Gaps, ReferenceErrors, and State Locks). This is a critical failure of local pre-merge verification.
+- **Time to Restore Service:** ~25 minutes (Average time to identify and hotfix main branch regressions).
 
 ## 4. 🧠 Lessons Learned & Process Adjustments
-- **PR Gate is Non-Negotiable**: Even during a "Recovery Surge," the PR serves as the only permanent record of the "Why." 
-- **The Dependency on GitHub Secrets**: We correctly identified that high-rigor infrastructure requires external secret injection, but we initially failed to code for it. 
-- **The Incremental Deployment Pattern**: For DNS/Email setups, records must be provisioned in sequence (MX -> DKIM). Terraform should be coded to support this 'Eventual Truth' model.
+- **Monolithic Verification is Absolute**: Local package tests (`cargo test -p`) are insufficient. Every push to `main` must be preceded by a full workspace check (`cargo check --workspace` and `pulse.sh`).
+- **PR Gate is Non-Negotiable**: Direct pushes to `main` during 'Surges' bypass the only long-term memory of the project and hide critical architectural pivots.
+- **The Dependency on GitHub Secrets**: Infrastructure records must be provisioned in sequence (MX -> DKIM) to avoid 'Chicken-and-Egg' deadlocks. 
+- **Non-Interactive Environments**: Interactive prompts (like `nano`) are build-killers. All git operations must be explicitly non-interactive.
 
 ## 5. 🏁 Day Two Handoff (End of Day Ritual)
 The code on `main` is now behaviorally superior and architecturally compliant. 
