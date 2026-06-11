@@ -26,8 +26,12 @@ ENV RUST_BACKTRACE=full
 ENV CARGO_INCREMENTAL=0
 WORKDIR /work
 
-# Build cargo-audit from source or download binary
-RUN curl -LsSf https://github.com/rustsec/rustsec/releases/download/cargo-audit%2Fv0.22.1/cargo-audit-x86_64-unknown-linux-musl-v0.22.1.tgz | tar xzf - -C /usr/local/cargo/bin --strip-components 1
+# Standardized cargo-audit installation (v0.22.2 pinned binary)
+RUN curl -LsSf https://github.com/rustsec/rustsec/releases/download/cargo-audit%2Fv0.22.2/cargo-audit-x86_64-unknown-linux-musl-v0.22.2.tgz -o cargo-audit.tgz && \
+    echo "7fb9497f8594b389e5fce5ef9b92db08432996895b2e0c5a0167a69ed445c428  cargo-audit.tgz" | sha256sum -c - && \
+    tar xzf cargo-audit.tgz && \
+    mv cargo-audit-x86_64-unknown-linux-musl-v0.22.2/cargo-audit /usr/local/cargo/bin/ && \
+    rm -rf cargo-audit.tgz cargo-audit-x86_64-unknown-linux-musl-v0.22.2
 
 # Cook dependencies in the same stage to avoid multi-gigabyte layer copies
 COPY --from=planner /work/recipe.json recipe.json

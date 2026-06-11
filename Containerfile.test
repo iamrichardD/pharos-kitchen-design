@@ -23,10 +23,14 @@ RUN curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
     && apt-get install -y nodejs \
     && npm install -g npm@latest
 
-# Install cargo-audit for Rust vulnerability scanning
-RUN cargo install cargo-audit && cargo install wasm-pack --version 0.15.0
+# Standardized cargo-audit installation (v0.22.2 pinned binary)
+RUN curl -LsSf https://github.com/rustsec/rustsec/releases/download/cargo-audit%2Fv0.22.2/cargo-audit-x86_64-unknown-linux-musl-v0.22.2.tgz -o cargo-audit.tgz && \
+    echo "7fb9497f8594b389e5fce5ef9b92db08432996895b2e0c5a0167a69ed445c428  cargo-audit.tgz" | sha256sum -c - && \
+    tar xzf cargo-audit.tgz && \
+    mv cargo-audit-x86_64-unknown-linux-musl-v0.22.2/cargo-audit /usr/local/cargo/bin/ && \
+    rm -rf cargo-audit.tgz cargo-audit-x86_64-unknown-linux-musl-v0.22.2
 
-WORKDIR /work
+# Install wasm-pack 0.15.0 (pinned via cargo install)
 COPY . .
 
 # Ensure workspaces are recognized even if empty
