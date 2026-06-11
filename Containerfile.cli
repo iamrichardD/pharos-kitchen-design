@@ -19,9 +19,12 @@ RUN apt-get update && apt-get install -y \
     libssl-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Pre-install cargo-audit to enforce Shift-Left Security (ADR-0016)
-# This reduces build time in the 'Act' phase of the development cycle.
-RUN cargo install cargo-audit
+# Standardized cargo-audit installation (v0.22.2 pinned binary)
+RUN curl -LsSf https://github.com/rustsec/rustsec/releases/download/cargo-audit%2Fv0.22.2/cargo-audit-x86_64-unknown-linux-musl-v0.22.2.tgz -o cargo-audit.tgz && \
+    echo "7fb9497f8594b389e5fce5ef9b92db08432996895b2e0c5a0167a69ed445c428  cargo-audit.tgz" | sha256sum -c - && \
+    tar xzf cargo-audit.tgz && \
+    mv cargo-audit-x86_64-unknown-linux-musl-v0.22.2/cargo-audit /usr/local/cargo/bin/ && \
+    rm -rf cargo-audit.tgz cargo-audit-x86_64-unknown-linux-musl-v0.22.2
 
 WORKDIR /work
 

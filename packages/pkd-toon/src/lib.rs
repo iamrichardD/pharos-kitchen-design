@@ -300,7 +300,11 @@ tasks[2]{id, title, status}:
         assert!(result.is_ok(), "TOON Parse Error: {:?}", result.err());
         let doc = result.unwrap();
         let tasks = doc.lists.get("tasks").unwrap();
-        assert_eq!(tasks.items.len(), 2, "Should have parsed 2 tasks from fixture");
+        assert_eq!(
+            tasks.items.len(),
+            2,
+            "Should have parsed 2 tasks from fixture"
+        );
         assert_eq!(tasks.items[0][0], "task_001");
     }
 
@@ -317,7 +321,7 @@ child[2]{id, parent_handle, note}:
   c2, @p1, Second child
 "#;
         let doc = ToonParser::parse(input).expect("Failed to parse linked lists");
-        
+
         let parent = doc.lists.get("parent").unwrap();
         assert_eq!(parent.items[0][0], "@p1");
 
@@ -336,7 +340,7 @@ sensors[1]{id, target}:
   @sens:temp_01, @comp:fryer_01
 "#;
         let doc = ToonParser::parse(input).expect("Failed to parse complex handles");
-        
+
         let components = doc.lists.get("components").unwrap();
         assert_eq!(components.items[0][0], "@comp:fryer_01");
 

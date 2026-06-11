@@ -19,3 +19,18 @@ members = [
     "packages/dialects/pkd-dialect-true",
     "packages/pkd-toon",
 ]
+
+[workspace.package]
+edition = "2021"
+authors = ["Richard D. (https://github.com/iamrichardd)"]
+license = "FSL-1.1"
+repository = "https://github.com/iamrichardd/pharos-kitchen-design"
+
+# Optimization: Reduce debug symbol bloat for dependencies to prevent CI disk exhaustion (Issue #237)
+[profile.dev]
+debug = 1 # Keep some line info for backtraces but strip full symbols
+
+[profile.dev.package."*"]
+debug = 0 # Strip all debug symbols for dependencies
+opt-level = 2 # Compile dependencies with some optimization for faster test runs
+

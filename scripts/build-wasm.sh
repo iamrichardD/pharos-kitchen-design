@@ -24,28 +24,31 @@ fi
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     NEEDED_DEPS=""
     if ! command -v curl &> /dev/null; then NEEDED_DEPS="$NEEDED_DEPS curl"; fi
-    if ! command -v wasm-pack &> /dev/null; then NEEDED_DEPS="$NEEDED_DEPS wasm-pack"; fi
     # CLI dependencies for manifest generation
     if ! command -v pkg-config &> /dev/null; then NEEDED_DEPS="$NEEDED_DEPS pkg-config libssl-dev"; fi
     
     if [ -n "$NEEDED_DEPS" ]; then
-        echo "⚠️  Missing build dependencies. Installing: $NEEDED_DEPS..."
+        echo "⚠️  Missing system dependencies. Installing: $NEEDED_DEPS..."
         if command -v apt-get &> /dev/null; then
-            apt-get update && apt-get install -y curl pkg-config libssl-dev
-        fi
-        
-        # Install wasm-pack if it was in NEEDED_DEPS
-        if [[ "$NEEDED_DEPS" == *"wasm-pack"* ]]; then
-            curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+            apt-get update && apt-get install -y $NEEDED_DEPS
         fi
     fi
 fi
 
-# Fallback for non-linux or if wasm-pack still missing
-if ! command -v wasm-pack &> /dev/null; then
-    echo "⚠️ wasm-pack not found. Attempting generic install..."
-    curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+# Ensure correct wasm-pack version (ADR-0033 Small Stones)
+WASM_PACK_VERSION="0.15.0"
+WASM_PACK_BIN=$(command -v wasm-pack || echo "")
+
+if [ -z "$WASM_PACK_BIN" ] || [[ "$($WASM_PACK_BIN --version 2>&1)" != *"wasm-pack $WASM_PACK_VERSION"* ]]; then
+    echo "⚠️  wasm-pack missing or incorrect version. Installing version $WASM_PACK_VERSION..."
+    cargo install wasm-pack --version "$WASM_PACK_VERSION"
+    WASM_PACK_BIN=$(command -v wasm-pack)
 fi
+
+# Ensure LICENSE file visibility for WASM builds (ADR-0033 Small Stones)
+echo "🛡️  Syncing LICENSE metadata..."
+cp LICENSE packages/pkd-core/
+cp LICENSE packages/pkd-toon/
 
 echo "🦀 Building PKD WASM Core..."
 RUSTFLAGS="-D warnings" wasm-pack build packages/pkd-core --target web

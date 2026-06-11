@@ -5,11 +5,10 @@
 # Author: Richard D. (https://github.com/iamrichardd)
 # License: FSL-1.1
 # Purpose: Unified \"Pulse\" validation for Rust, .NET, and TypeScript.
-# Traceability: Issue #117, ADR-0029
+# Traceability: Issue #117, ADR-0029, Issue #237 (Space Optimization)
 # ========================================================================
 FROM public.ecr.aws/docker/library/rust@sha256:fb328f0f58becb23ba1719940a2c94ece8b0b48afa837d05b79ef64bc1e18f6e AS chef
 RUN apt-get update && apt-get install -y pkg-config libssl-dev curl && \
-    curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh && \
     rm -rf /var/lib/apt/lists/*
 RUN rustup component add rustfmt clippy && rustup target add wasm32-unknown-unknown
 RUN cargo install cargo-chef
@@ -19,25 +18,35 @@ FROM chef AS planner
 COPY . .
 RUN cargo chef prepare --recipe-path recipe.json
 
-FROM chef AS cacher
-COPY --from=planner /work/recipe.json recipe.json
-RUN cargo chef cook --recipe-path recipe.json
-
+# Combined Build Stage (Eliminates COPY --from=cacher disk churn)
 FROM chef AS rust-builder
 ARG BUILD_MODE=debug
 ENV BUILD_MODE=$BUILD_MODE
 ENV RUST_BACKTRACE=full
+ENV CARGO_INCREMENTAL=0
 WORKDIR /work
-RUN curl -LsSf https://github.com/rustsec/rustsec/releases/download/cargo-audit%2Fv0.22.1/cargo-audit-x86_64-unknown-linux-musl-v0.22.1.tgz | tar xzf - -C /usr/local/cargo/bin --strip-components 1
-COPY --from=cacher /work/target target
-COPY --from=cacher /usr/local/cargo /usr/local/cargo
+
+# Standardized cargo-audit installation (v0.22.2 pinned binary)
+RUN curl -LsSf https://github.com/rustsec/rustsec/releases/download/cargo-audit%2Fv0.22.2/cargo-audit-x86_64-unknown-linux-musl-v0.22.2.tgz -o cargo-audit.tgz && \
+    echo "7fb9497f8594b389e5fce5ef9b92db08432996895b2e0c5a0167a69ed445c428  cargo-audit.tgz" | sha256sum -c - && \
+    tar xzf cargo-audit.tgz && \
+    mv cargo-audit-x86_64-unknown-linux-musl-v0.22.2/cargo-audit /usr/local/cargo/bin/ && \
+    rm -rf cargo-audit.tgz cargo-audit-x86_64-unknown-linux-musl-v0.22.2
+
+# Cook dependencies in the same stage to avoid multi-gigabyte layer copies
+COPY --from=planner /work/recipe.json recipe.json
+RUN if [ "$BUILD_MODE" = "release" ]; then MODE_FLAG="--release"; else MODE_FLAG=""; fi && \
+    cargo chef cook $MODE_FLAG --recipe-path recipe.json
+
+# Copy source code and build
 COPY . .
 RUN if [ "$BUILD_MODE" = "release" ]; then MODE_FLAG="--release"; else MODE_FLAG=""; fi && \
-    cd packages/pkd-core && \
-    cargo fmt --check && cargo clippy -- -D warnings && cargo test && cargo build $MODE_FLAG && cargo audit && \
-    cd ../pkd-cli && \
-    cargo fmt --check && cargo clippy -- -D warnings && cargo test && cargo build $MODE_FLAG && \
-    cd ../.. && bash scripts/build-wasm.sh
+    (cd packages/pkd-core && cargo fmt --check && cargo clippy -- -D warnings && cargo test && cargo build $MODE_FLAG && cargo audit) && \
+    (cd packages/pkd-cli && cargo fmt --check && cargo clippy -- -D warnings && cargo test && cargo build $MODE_FLAG) && \
+    bash scripts/build-wasm.sh && \
+    # Surgical cleanup of intermediate objects to free space for downstream stages
+    find target -name "*.o" -type f -delete && \
+    find target -name "*.rlib" -type f -delete
 
 # Stage 5: Manifest Verifier (Supply Chain Gate)
 FROM rust-builder AS manifest-verifier
