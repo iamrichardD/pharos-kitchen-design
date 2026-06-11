@@ -30,10 +30,15 @@ RUN curl -LsSf https://github.com/rustsec/rustsec/releases/download/cargo-audit%
     mv cargo-audit-x86_64-unknown-linux-musl-v0.22.2/cargo-audit /usr/local/cargo/bin/ && \
     rm -rf cargo-audit.tgz cargo-audit-x86_64-unknown-linux-musl-v0.22.2
 
-# Install wasm-pack 0.15.0 (pinned via cargo install)
-COPY . .
+# Standardized wasm-pack installation (v0.15.0 pinned binary)
+RUN curl -LsSf https://github.com/rustwasm/wasm-pack/releases/download/v0.15.0/wasm-pack-v0.15.0-x86_64-unknown-linux-musl.tar.gz -o wasm-pack.tgz && \
+    echo "c09f971ecaed9a2efc80fdcea7a00ef6b53c7fadc8c57d1f61b53a6aa66b668a  wasm-pack.tgz" | sha256sum -c - && \
+    tar xzf wasm-pack.tgz && \
+    mv wasm-pack-v0.15.0-x86_64-unknown-linux-musl/wasm-pack /usr/local/cargo/bin/ && \
+    rm -rf wasm-pack.tgz wasm-pack-v0.15.0-x86_64-unknown-linux-musl
 
-# Ensure workspaces are recognized even if empty
+WORKDIR /work
+
 RUN mkdir -p apps packages
 
 # Default command: Audit then Test
