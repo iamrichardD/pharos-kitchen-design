@@ -5,12 +5,8 @@
  * Author: PMA (via Gemini CLI)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Automated Roadmap Synchronization Engine (Living Map Protocol).
-<<<<<<< HEAD
- * Traceability: Issue #208, ADR-0051
-=======
  * Traceability: Issue #208, #234, ADR-0051
->>>>>>> a5203c7 (feat(roadmap): update sync engine with future section awareness (Issue #234))
- * Last Updated: 2026-06-08
+ * Last Updated: 2026-06-10
  * ======================================================================== */
 
 import fs from 'node:fs';
@@ -19,11 +15,7 @@ import path from 'node:path';
 interface RoadmapItem {
   id: number | null;
   name: string;
-<<<<<<< HEAD
   status: 'Deployed' | 'In Progress' | 'In Construction' | 'Blueprint Approved' | 'Research Phase';
-=======
-  status: 'Deployed' | 'In Construction' | 'Blueprint Approved' | 'Research Phase' | 'In Progress';
->>>>>>> a5203c7 (feat(roadmap): update sync engine with future section awareness (Issue #234))
   phase: string;
   tag: string;
   description: string;
@@ -54,31 +46,11 @@ function parseMarkdownLog(filePath: string, defaultStatus: RoadmapItem['status']
   const items: RoadmapItem[] = [];
   
   let currentSprint = 'Backlog';
-<<<<<<< HEAD
-  let sectionStatus = defaultStatus;
-=======
   let isFutureSection = false; // ADR-0051: Future blueprints tracking
->>>>>>> a5203c7 (feat(roadmap): update sync engine with future section awareness (Issue #234))
   
   // Regex patterns
   const sectionPattern = /^## (.*)/;
   const sprintPattern = /^### (Sprint [\d.]+)/;
-<<<<<<< HEAD
-  const issuePattern = /^- \[([ x])\] \*\*Issue #([^:]+)\*\*: \[TAG: ([^\]]+)\] (.*)/;
-
-  for (const line of lines) {
-    // Section Tracking (ADR-0051)
-    const sectionMatch = line.match(sectionPattern);
-    if (sectionMatch) {
-      const sectionTitle = sectionMatch[1];
-      if (sectionTitle.includes('Active Sprint')) {
-        sectionStatus = 'In Progress';
-      } else if (sectionTitle.includes('Future Sprints')) {
-        sectionStatus = 'Blueprint Approved';
-      }
-      continue;
-=======
-  const sectionPattern = /^## (.*)/;
   const issuePattern = /^- \[([ x])\] \*\*Issue #(\d+)\*\*: \[TAG: ([^\]]+)\] ([^\[]+) \[DESC: ([^\]]+)\]/;
 
   for (const line of lines) {
@@ -91,7 +63,7 @@ function parseMarkdownLog(filePath: string, defaultStatus: RoadmapItem['status']
       } else if (sectionTitle.includes('Active Sprint')) {
         isFutureSection = false;
       }
->>>>>>> a5203c7 (feat(roadmap): update sync engine with future section awareness (Issue #234))
+      continue;
     }
 
     const sprintMatch = line.match(sprintPattern);
@@ -102,19 +74,6 @@ function parseMarkdownLog(filePath: string, defaultStatus: RoadmapItem['status']
 
     const issueMatch = line.match(issuePattern);
     if (issueMatch) {
-<<<<<<< HEAD
-      const [_, checked, id, tag, rest] = issueMatch;
-      
-      // Extract Description if present
-      const descMatch = rest.match(/\[DESC: ([^\]]+)\]/);
-      const desc = descMatch ? descMatch[1] : 'Authoritative task item captured from log.';
-      
-      // Clean up Name (remove DESC and ECT markers)
-      const name = rest.split('[DESC:')[0].split('[ECT:')[0].trim().replace(/\.$/, '');
-
-      // Universal Truth: Checked is always Deployed
-      const status: RoadmapItem['status'] = checked === 'x' ? 'Deployed' : sectionStatus;
-=======
       const [_, checked, id, tag, name, desc] = issueMatch;
       
       // Determine status based on section and checked state
@@ -126,11 +85,10 @@ function parseMarkdownLog(filePath: string, defaultStatus: RoadmapItem['status']
       } else {
         status = defaultStatus;
       }
->>>>>>> a5203c7 (feat(roadmap): update sync engine with future section awareness (Issue #234))
       
       items.push({
         id: parseInt(id, 10) || null,
-        name,
+        name: name.trim().replace(/\.$/, ''),
         status,
         phase: currentSprint,
         tag: TAG_MAP[tag.trim()] || DEFAULT_TAG,
