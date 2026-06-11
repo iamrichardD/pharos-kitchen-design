@@ -40,8 +40,14 @@ WASM_PACK_VERSION="0.15.0"
 WASM_PACK_BIN=$(command -v wasm-pack || echo "")
 
 if [ -z "$WASM_PACK_BIN" ] || [[ "$($WASM_PACK_BIN --version 2>&1)" != *"wasm-pack $WASM_PACK_VERSION"* ]]; then
-    echo "⚠️  wasm-pack missing or incorrect version. Installing version $WASM_PACK_VERSION..."
-    cargo install wasm-pack --version "$WASM_PACK_VERSION"
+    echo "⚠️  wasm-pack missing or incorrect version. Installing pinned version $WASM_PACK_VERSION..."
+    curl -LsSf https://github.com/rustwasm/wasm-pack/releases/download/v0.15.0/wasm-pack-v0.15.0-x86_64-unknown-linux-musl.tar.gz -o wasm-pack.tgz
+    echo "c09f971ecaed9a2efc80fdcea7a00ef6b53c7fadc8c57d1f61b53a6aa66b668a  wasm-pack.tgz" | sha256sum -c -
+    tar xzf wasm-pack.tgz
+    # Note: Using sudo or appropriate permissions might be needed depending on environment, 
+    # but in our Podman/CI context we target /usr/local/cargo/bin/ which is usually writable.
+    mv wasm-pack-v0.15.0-x86_64-unknown-linux-musl/wasm-pack /usr/local/cargo/bin/
+    rm -rf wasm-pack.tgz wasm-pack-v0.15.0-x86_64-unknown-linux-musl
     WASM_PACK_BIN=$(command -v wasm-pack)
 fi
 
