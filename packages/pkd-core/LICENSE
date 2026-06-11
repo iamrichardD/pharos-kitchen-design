@@ -1,0 +1,21 @@
+Functional Source License, Version 1.1
+
+Copyright (C) 2026 Richard D. (https://github.com/iamrichardd)
+
+This software is licensed under the Functional Source License, Version 1.1 (the "License").
+You may use, modify, and redistribute this software for any purpose, EXCEPT for creating
+a Competing Service.
+
+"Competing Service" means a software-as-a-service, platform-as-a-service, or similar
+offering that provides substantially similar functionality to the software.
+
+CONDITIONS:
+1. You must include this license and copyright notice in all copies or substantial portions of the software.
+2. If you create a non-competing derivative work, you must clearly mark the changes.
+
+CONVERSION TO OPEN SOURCE:
+On the date two (2) years after the initial public release of this version of the software,
+this License automatically converts to the Apache License, Version 2.0.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED.
+SEE THE FULL FSL-1.1 TEXT AT https://fsl.software/ FOR DETAILS.

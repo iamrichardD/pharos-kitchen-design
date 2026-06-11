@@ -21,12 +21,15 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install wasm-pack
-RUN curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+# Install wasm-pack (Explicit versioning for environment stability)
+RUN cargo install wasm-pack --version 0.15.0
 
-# Copy necessary files for Rust build
-COPY Cargo.toml Cargo.lock ./
+# Copy necessary files for Rust build (including LICENSE for wasm-pack metadata)
+COPY Cargo.toml Cargo.lock LICENSE ./
 COPY packages/ ./packages/
+
+# Ensure LICENSE file visibility in package directories for wasm-pack
+RUN cp LICENSE packages/pkd-core/ && cp LICENSE packages/pkd-toon/
 
 # Build WASM packages (Fail Fast)
 RUN wasm-pack build packages/pkd-core --target web
