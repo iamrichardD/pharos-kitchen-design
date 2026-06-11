@@ -19,3 +19,10 @@ members = [
     "packages/dialects/pkd-dialect-true",
     "packages/pkd-toon",
 ]
+
+[workspace.package]
+edition = "2021"
+authors = ["Richard D. (https://github.com/iamrichardd)"]
+license = "FSL-1.1"
+repository = "https://github.com/iamrichardd/pharos-kitchen-design"
+

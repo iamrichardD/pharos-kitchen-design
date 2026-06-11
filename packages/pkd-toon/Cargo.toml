@@ -11,10 +11,11 @@
 [package]
 name = "pkd-toon"
 version = "0.1.0"
-authors = ["Richard D. (https://github.com/iamrichardd)"]
-edition = "2021"
+authors.workspace = true
+edition.workspace = true
 description = "High-density TOON format parser for the Pharos ecosystem."
-license = "FSL-1.1"
+license.workspace = true
+repository.workspace = true
 
 [package.metadata.wasm-pack.profile.release]
 wasm-opt = false

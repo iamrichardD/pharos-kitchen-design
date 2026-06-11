@@ -1,10 +1,11 @@
 [package]
 name = "pkd-core"
 version = "0.1.0"
-authors = ["Richard D. (https://github.com/iamrichardd)"]
-edition = "2021"
+authors.workspace = true
+edition.workspace = true
 description = "Pharos Kitchen Design (Project Prism) - High-performance Rust/WASM engine for BIM interoperability."
-license = "FSL-1.1"
+license.workspace = true
+repository.workspace = true
 
 [package.metadata.wasm-pack.profile.release]
 wasm-opt = false

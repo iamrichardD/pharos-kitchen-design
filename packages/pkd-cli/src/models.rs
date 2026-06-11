@@ -66,25 +66,3 @@ impl fmt::Display for PharosRole {
         }
     }
 }
-
-#[cfg(test)]
-pub struct TestGuard<'a>(std::sync::MutexGuard<'a, ()>);
-
-#[cfg(test)]
-impl TestGuard<'_> {
-    pub fn new() -> Self {
-        use std::sync::Mutex;
-        static ENV_MUTEX: Mutex<()> = Mutex::new(());
-        let guard = ENV_MUTEX.lock().unwrap();
-        std::env::set_var("CI", "true");
-        Self(guard)
-    }
-}
-
-#[cfg(test)]
-impl Drop for TestGuard<'_> {
-    fn drop(&mut self) {
-        std::env::remove_var("PHAROS_TEST_TOKEN");
-        std::env::remove_var("PHAROS_TEST_ID_TOKEN");
-    }
-}

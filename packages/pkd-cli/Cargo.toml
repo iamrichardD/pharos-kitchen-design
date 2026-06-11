@@ -11,9 +11,10 @@
 [package]
 name = "pkd"
 version = "0.1.0"
-edition = "2021"
-authors = ["Richard D. <https://github.com/iamrichardd>"]
-license = "FSL-1.1"
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
 
 [dependencies]
 # CLI & Error Handling
