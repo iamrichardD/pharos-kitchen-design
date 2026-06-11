@@ -18,28 +18,31 @@ FROM chef AS planner
 COPY . .
 RUN cargo chef prepare --recipe-path recipe.json
 
-FROM chef AS cacher
-COPY --from=planner /work/recipe.json recipe.json
-RUN cargo chef cook --recipe-path recipe.json
-
+# Combined Build Stage (Eliminates COPY --from=cacher disk churn)
 FROM chef AS rust-builder
 ARG BUILD_MODE=debug
 ENV BUILD_MODE=$BUILD_MODE
 ENV RUST_BACKTRACE=full
 ENV CARGO_INCREMENTAL=0
 WORKDIR /work
-RUN curl -LsSf https://github.com/rustsec/rustsec/releases/download/cargo-audit%2Fv0.22.1/cargo-audit-x86_64-unknown-linux-musl-v0.22.1.tgz | tar xzf - -C /usr/local/cargo/bin --strip-components 1
-COPY --from=cacher /work/target target
-COPY --from=cacher /usr/local/cargo /usr/local/cargo
-COPY . .
 
-# Combined Validation & Build (Single Layer to minimize disk copy)
+# Build cargo-audit from source or download binary
+RUN curl -LsSf https://github.com/rustsec/rustsec/releases/download/cargo-audit%2Fv0.22.1/cargo-audit-x86_64-unknown-linux-musl-v0.22.1.tgz | tar xzf - -C /usr/local/cargo/bin --strip-components 1
+
+# Cook dependencies in the same stage to avoid multi-gigabyte layer copies
+COPY --from=planner /work/recipe.json recipe.json
+RUN if [ "$BUILD_MODE" = "release" ]; then MODE_FLAG="--release"; else MODE_FLAG=""; fi && \
+    cargo chef cook $MODE_FLAG --recipe-path recipe.json
+
+# Copy source code and build
+COPY . .
 RUN if [ "$BUILD_MODE" = "release" ]; then MODE_FLAG="--release"; else MODE_FLAG=""; fi && \
     (cd packages/pkd-core && cargo fmt --check && cargo clippy -- -D warnings && cargo test && cargo build $MODE_FLAG && cargo audit) && \
     (cd packages/pkd-cli && cargo fmt --check && cargo clippy -- -D warnings && cargo test && cargo build $MODE_FLAG) && \
     bash scripts/build-wasm.sh && \
-    # Cleanup intermediate build artifacts but keep binaries for next stages
-    cargo clean -p pkd-core && cargo clean -p pkd
+    # Surgical cleanup of intermediate objects to free space for downstream stages
+    find target -name "*.o" -type f -delete && \
+    find target -name "*.rlib" -type f -delete
 
 # Stage 5: Manifest Verifier (Supply Chain Gate)
 FROM rust-builder AS manifest-verifier
