@@ -5,7 +5,7 @@
  * File: DemoLayout.astro
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
- * Purpose: Global shell for the PKD demo sandbox inheriting shared theme tokens and marketing header.
+ * Purpose: Global shell for the PKD demo sandbox inheriting shared theme tokens, marketing header, and footer.
  * Traceability: Priority 3, Issue #28, Issue #235
  * Last Updated: 2026-06-12
  * ======================================================================== */
@@ -107,7 +107,7 @@ const { title } = Astro.props;
 			}
 		</style>
 	</head>
-	<body class="blueprint-grid min-h-screen flex flex-col">
+	<body class="blueprint-grid min-h-screen flex flex-col justify-between">
 		<!-- Unified Marketing Header -->
 		<header class="border-b border-ph-blue/30 py-4 bg-bg-base/80 backdrop-blur-sm sticky top-0 z-50 transition-colors duration-300">
 			<div class="container mx-auto px-4 flex justify-between items-center">
@@ -127,6 +127,22 @@ const { title } = Astro.props;
 			</div>
 		</header>
 
-		<slot />
+		<!-- Main Workspace Area -->
+		<div class="flex-grow">
+			<slot />
+		</div>
+
+		<!-- Unified Marketing Footer -->
+		<footer class="border-t border-ph-blue/30 py-8 bg-bg-base/50 transition-colors duration-300">
+			<div class="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
+				<div class="text-xs text-text-muted font-mono uppercase tracking-widest">
+					PROJECT: PKD // STATUS: DETERMINISTIC // [FSL-1.1]
+				</div>
+				<div class="flex gap-6 items-center">
+					<a href="https://iamrichardd.com" class="text-xs text-text-muted hover:text-ph-orange transition-colors no-underline">A Project by Richard D.</a>
+					<a href="https://github.com/iamrichardD/pharos-kitchen-design" class="text-xs text-ph-blue hover:text-ph-orange transition-colors uppercase font-bold tracking-widest no-underline">GitHub Repository</a>
+				</div>
+			</div>
+		</footer>
 	</body>
 </html>
