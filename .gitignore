@@ -54,3 +54,5 @@ data/*.db
 /docs/plans/
 /docs/reviews/
 .worktrees/
+
+wasm-pack*/
