@@ -5,8 +5,9 @@
  * File: DemoLayout.astro
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
- * Purpose: Global shell for the PKD demo sandbox.
- * Traceability: Priority 3, Issue #28
+ * Purpose: Global shell for the PKD demo sandbox inheriting shared theme tokens.
+ * Traceability: Priority 3, Issue #28, Issue #235
+ * Last Updated: 2026-06-12
  * ======================================================================== */
 
 interface Props {
@@ -26,20 +27,81 @@ const { title } = Astro.props;
 		<title>{title} | PKD Demo</title>
 		<style is:global>
 			:root {
-				--bg-ph-charcoal: #121212;
-				--ph-orange: #ff6b00;
-				--ph-blue: #0070f3;
-				--text-light: #f5f5f5;
+				/* Foundation Colors */
+				--ph-charcoal: 26, 26, 26;
+				--ph-orange: 255, 107, 0;
+				--ph-blue: 0, 95, 184;
+				--ph-emerald: 16, 185, 129;
+
+				/* Theme Tokens (Default: Dark Mode / Charcoal) */
+				--bg-base: var(--ph-charcoal);
+				--text-base: 243, 244, 246; /* slate-100 */
+				--text-muted: 156, 163, 175; /* gray-400 */
+				--grid-line: 255, 255, 255;
+				--grid-opacity: 0.05;
+				--border-blueprint: 0, 95, 184;
+				--border-opacity: 0.3;
 			}
+
+			@media (prefers-color-scheme: light) {
+				:root {
+					/* Theme Tokens (Architectural Vellum / Light Mode) */
+					--bg-base: 248, 250, 252; /* slate-50 */
+					--text-base: 26, 26, 26; /* ph-charcoal */
+					--text-muted: 75, 85, 99; /* gray-600 */
+					--grid-line: 0, 95, 184;
+					--grid-opacity: 0.1;
+					--border-blueprint: 0, 95, 184;
+					--border-opacity: 0.5;
+				}
+			}
+
 			body {
-				background-color: var(--bg-ph-charcoal);
-				color: var(--text-light);
-				font-family: 'Inter', system-ui, sans-serif;
+				background-color: rgb(var(--bg-base));
+				color: rgb(var(--text-base));
+				font-family: 'Inter', system-ui, -apple-system, sans-serif;
 				margin: 0;
+				min-height: 100vh;
+				transition: background-color 0.3s, color 0.3s;
+			}
+
+			/* Utility Classes (Parity with Marketing global.css) */
+			.blueprint-grid {
+				background-image: 
+					linear-gradient(to right, rgba(var(--grid-line), var(--grid-opacity)) 1px, transparent 1px),
+					linear-gradient(to bottom, rgba(var(--grid-line), var(--grid-opacity)) 1px, transparent 1px);
+				background-size: 30px 30px;
+			}
+
+			.blueprint-border {
+				border: 1px solid rgba(var(--border-blueprint), var(--border-opacity));
+				position: relative;
+			}
+
+			.blueprint-border::before {
+				content: '';
+				position: absolute;
+				top: -4px;
+				left: -4px;
+				width: 8px;
+				height: 8px;
+				background-color: rgb(var(--ph-orange));
+				z-index: 10;
+			}
+
+			.blueprint-border::after {
+				content: '';
+				position: absolute;
+				bottom: -4px;
+				right: -4px;
+				width: 8px;
+				height: 8px;
+				background-color: rgb(var(--ph-orange));
+				z-index: 10;
 			}
 		</style>
 	</head>
-	<body>
+	<body class="blueprint-grid">
 		<slot />
 	</body>
 </html>
