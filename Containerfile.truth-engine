@@ -18,8 +18,12 @@ RUN apt-get update && apt-get install -y \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-# Install wasm-pack
-RUN cargo install wasm-pack --version 0.15.0
+# Install wasm-pack (Standardized pinned binary for environment stability)
+RUN curl -LsSf https://github.com/rustwasm/wasm-pack/releases/download/v0.15.0/wasm-pack-v0.15.0-x86_64-unknown-linux-musl.tar.gz -o wasm-pack.tgz && \
+    echo "c09f971ecaed9a2efc80fdcea7a00ef6b53c7fadc8c57d1f61b53a6aa66b668a  wasm-pack.tgz" | sha256sum -c - && \
+    tar xzf wasm-pack.tgz && \
+    mv wasm-pack-v0.15.0-x86_64-unknown-linux-musl/wasm-pack /usr/local/cargo/bin/ && \
+    rm -rf wasm-pack.tgz wasm-pack-v0.15.0-x86_64-unknown-linux-musl
 
 WORKDIR /build
 COPY . .

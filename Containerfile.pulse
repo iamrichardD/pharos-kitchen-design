@@ -9,6 +9,12 @@
 # ========================================================================
 FROM public.ecr.aws/docker/library/rust@sha256:fb328f0f58becb23ba1719940a2c94ece8b0b48afa837d05b79ef64bc1e18f6e AS chef
 RUN apt-get update && apt-get install -y pkg-config libssl-dev curl && \
+    # Standardized wasm-pack installation (v0.15.0 pinned binary)
+    curl -LsSf https://github.com/rustwasm/wasm-pack/releases/download/v0.15.0/wasm-pack-v0.15.0-x86_64-unknown-linux-musl.tar.gz -o wasm-pack.tgz && \
+    echo "c09f971ecaed9a2efc80fdcea7a00ef6b53c7fadc8c57d1f61b53a6aa66b668a  wasm-pack.tgz" | sha256sum -c - && \
+    tar xzf wasm-pack.tgz && \
+    mv wasm-pack-v0.15.0-x86_64-unknown-linux-musl/wasm-pack /usr/local/cargo/bin/ && \
+    rm -rf wasm-pack.tgz wasm-pack-v0.15.0-x86_64-unknown-linux-musl && \
     rm -rf /var/lib/apt/lists/*
 RUN rustup component add rustfmt clippy && rustup target add wasm32-unknown-unknown
 RUN cargo install cargo-chef
