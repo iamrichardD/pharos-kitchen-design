@@ -19,6 +19,7 @@ target/
 .vscode/
 .history/
 *.log
+*.tgz
 
 # Cloudflare Wrangler & D1
 .wrangler/

@@ -6,7 +6,7 @@
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Central tracking for Phase-specific tasks and issues (Present & Future).
  * Traceability: Issue #207
- * Last Updated: 2026-06-10
+ * Last Updated: 2026-06-11
  * ======================================================================== -->
 
 <!-- 
@@ -22,9 +22,6 @@
 ## 🚀 Active Sprint
 
 ### Sprint 5.02: The Speed & Security Foundation (2026-06-08) - 🚀 ACTIVE
-- [ ] **Issue #234**: [TAG: Protocol] Remediate Roadmap Status Mapping Mismatch. [DESC: Update sync-roadmap.ts to correctly categorize future sprints as 'Blueprint Approved' per ADR-0051.] [ECT: 2]
-- [ ] **Issue #237**: [TAG: Debt] Remediate Rust Toolchain and Metadata Warnings. [DESC: Fix deprecated edition placement, unused code in pkd-cli, and missing repository metadata.] [ECT: 2]
-- [ ] **Issue #238**: [TAG: Security] Remediate NPM Dependency Vulnerabilities. [DESC: Perform audit fix and resolve critical RCE vulnerabilities in Happy DOM and others.] [ECT: 3]
 
 ---
 
