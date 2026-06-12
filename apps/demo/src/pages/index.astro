@@ -21,7 +21,7 @@ import DemoLayout from '../layouts/DemoLayout.astro';
 				<span class="baldessari-dot dot-yellow"></span>
 				<div class="dot-text">
 					<span class="zone-title">The OmniBar</span>
-					<p class="desc-text">Below the header is the OmniBar, where you will type search criteria such as a manufacturer name, a product name, or an equipment category.</p>
+					<p class="desc-text">This is the OmniBar, where you will type search criteria such as a manufacturer name, a product name, or an equipment category.</p>
 				</div>
 			</div>
 		</section>
@@ -34,7 +34,7 @@ import DemoLayout from '../layouts/DemoLayout.astro';
 					<span class="baldessari-dot dot-blue"></span>
 					<div class="dot-text">
 						<span class="zone-title">WebGL Canvas Stage</span>
-						<p class="desc-text">The center of the page is the canvas stage, where we will render a lightweight 3D preview model of your selected product.</p>
+						<p class="desc-text">Here we have the canvas stage, where we will render a lightweight 3D preview model of your selected product.</p>
 					</div>
 				</div>
 			</section>
@@ -45,7 +45,19 @@ import DemoLayout from '../layouts/DemoLayout.astro';
 					<span class="baldessari-dot dot-red"></span>
 					<div class="dot-text">
 						<span class="zone-title">Inspector Panel</span>
-						<p class="desc-text">To the right is the inspector panel, where we will display the metadata of the selected product—including its name, manufacturer, physical dimensions, and links to official specification documents.</p>
+						<ul class="conceptual-list">
+							<li>Name:</li>
+							<li>Manufacturer:</li>
+							<li>Dimensions:
+								<ul>
+									<li>Height:</li>
+									<li>Width:</li>
+									<li>Depth:</li>
+									<li>Power:</li>
+									<li>Spec Docs</li>
+								</ul>
+							</li>
+						</ul>
 					</div>
 				</div>
 			</section>
@@ -138,5 +150,21 @@ import DemoLayout from '../layouts/DemoLayout.astro';
 		font-size: 1rem;
 		line-height: 1.6;
 		color: rgb(var(--text-muted));
+	}
+
+	/* Conceptual List Styles */
+	.conceptual-list {
+		list-style-type: disc;
+		margin: 0.5rem 0 0 1.25rem;
+		padding: 0;
+		color: rgb(var(--text-muted));
+		font-size: 1rem;
+		line-height: 1.7;
+	}
+
+	.conceptual-list ul {
+		list-style-type: circle;
+		margin: 0.25rem 0 0 1.25rem;
+		padding: 0;
 	}
 </style>
