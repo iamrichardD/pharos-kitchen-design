@@ -1,0 +1,31 @@
+---
+/* ========================================================================
+ * Project: Pharos Kitchen Design (Project Prism)
+ * Component: Demo / Pages
+ * File: sandbox.astro
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * License: FSL-1.1 (See LICENSE file for details)
+ * Purpose: Internal developer-facing sandbox for WASM/WebGL integration verification.
+ * Traceability: Priority 3, Issue #28, Issue #235
+ * Last Updated: 2026-06-12
+ * ======================================================================== */
+
+import DemoLayout from '../layouts/DemoLayout.astro';
+import { InteropSandbox } from '../components/InteropSandbox';
+import { WasmProvider } from '../components/WasmContext';
+---
+
+<DemoLayout title="PKD Developer Sandbox">
+	<main style="display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: 100vh; padding-top: 4rem; padding-left: 1rem; padding-right: 1rem;">
+		<h1 style="color: rgb(var(--ph-orange)); font-size: 2.5rem; margin-bottom: 0.5rem; font-weight: 800; font-family: 'Inter', sans-serif;">DEVELOPER SANDBOX</h1>
+		<p style="font-family: monospace; opacity: 0.8; letter-spacing: 0.1rem; margin-bottom: 2rem; text-align: center;">PHASE 4: DYNAMIC REGISTRY & GHOST LINK VERIFICATION (INTERNAL HARNESS)</p>
+		
+		<WasmProvider client:only="react">
+			<InteropSandbox client:only="react" />
+		</WasmProvider>
+
+		<div style="margin-top: 3rem; font-size: 0.9rem; opacity: 0.7; max-width: 600px; text-align: center; line-height: 1.6;">
+			<p>This internal page is reserved for the engineering team to verify the <strong>Hybrid Handle</strong> architecture (Option C) and WASM compilation boundaries. It retrieves active metadata from the resident Rust/WASM core.</p>
+		</div>
+	</main>
+</DemoLayout>
