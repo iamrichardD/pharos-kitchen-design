@@ -5,7 +5,7 @@
  * File: DemoLayout.astro
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
- * Purpose: Global shell for the PKD demo sandbox inheriting shared theme tokens.
+ * Purpose: Global shell for the PKD demo sandbox inheriting shared theme tokens and marketing header.
  * Traceability: Priority 3, Issue #28, Issue #235
  * Last Updated: 2026-06-12
  * ======================================================================== */
@@ -25,6 +25,12 @@ const { title } = Astro.props;
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
 		<title>{title} | PKD Demo</title>
+
+		<!-- Fonts -->
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Roboto+Condensed:wght@700&display=swap" rel="stylesheet">
+
 		<style is:global>
 			:root {
 				/* Foundation Colors */
@@ -101,7 +107,26 @@ const { title } = Astro.props;
 			}
 		</style>
 	</head>
-	<body class="blueprint-grid">
+	<body class="blueprint-grid min-h-screen flex flex-col">
+		<!-- Unified Marketing Header -->
+		<header class="border-b border-ph-blue/30 py-4 bg-bg-base/80 backdrop-blur-sm sticky top-0 z-50 transition-colors duration-300">
+			<div class="container mx-auto px-4 flex justify-between items-center">
+				<a href="/pharos-kitchen-design/" class="flex items-center gap-2 text-current no-underline">
+					<div class="w-8 h-8 bg-ph-orange flex items-center justify-center font-condensed text-ph-charcoal text-xl font-bold">P</div>
+					<span class="font-condensed text-xl tracking-tight hidden sm:inline font-bold">PHAROS KITCHEN DESIGN</span>
+				</a>
+				<nav class="flex gap-6 font-condensed text-sm tracking-widest uppercase">
+					<a href="/pharos-kitchen-design/features" class="hover:text-ph-orange transition-colors text-current no-underline">Features</a>
+					<a href="/pharos-kitchen-design/docs/user-guide" class="hover:text-ph-orange transition-colors text-current no-underline">Guide</a>
+					<a href="/pharos-kitchen-design/coverage" class="hover:text-ph-orange transition-colors text-current no-underline">Coverage</a>
+					<a href="/pharos-kitchen-design/blog" class="hover:text-ph-orange transition-colors text-current no-underline font-bold">Pulse</a>
+					<a href="/pharos-kitchen-design/bridge" class="hover:text-ph-orange transition-colors text-current no-underline">Bridge</a>
+					<a href="/pharos-kitchen-design/install" class="hover:text-ph-orange transition-colors text-current no-underline">Install</a>
+					<a href="/pharos-kitchen-design/roadmap" class="hover:text-ph-blue transition-colors text-current no-underline">Roadmap</a>
+				</nav>
+			</div>
+		</header>
+
 		<slot />
 	</body>
 </html>
