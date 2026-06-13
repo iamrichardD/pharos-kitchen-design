@@ -1,0 +1,41 @@
+/* ========================================================================
+ * Project: Pharos Kitchen Design (Project Prism)
+ * Component: Marketing / Blog (Product Update)
+ * File: apps/marketing/src/content/updates/2026-06-12-speed-and-security.toon
+ * Author: PMA
+ * License: FSL-1.1 (See LICENSE file for details)
+ * Purpose: Strategic summary of Sprint 5.02 - Speed & Security Foundation.
+ * Traceability: Issue #248
+ * Last Updated: 2026-06-12
+ * ======================================================================== */
+
+title: Speed and Security: Hardening the Edge Foundation
+type: update
+date: 2026-06-12
+createdAt: 2026-06-12T19:30:00Z
+releaseAt: 2026-06-12T20:00:00Z
+author: PMA (Meta-Architect)
+stream: engineering
+tags: security, performance, ci-cd, edge, DORA
+
+# The Change
+body[1]{content}:
+  "At Pharos Kitchen Design (PKD), we build with a commitment to zero friction and high reliability. This week, in Sprint 5.02, we focused on securing our CI pipelines, hardening our onboarding infrastructure, and integrating the live interactive demo directly into our primary edge deployment. By pinning core Rust/WASM toolchains and resolving dependencies, we cut out build errors, while the newly introduced edge mail backup ensures solo designers can recover their workspace with absolute privacy."
+
+# Core Achievement: Speed & Security Hardening
+achievements[3]{focus, impact}:
+  Edge Recovery, "Hardened Passkey onboarding with a secure, Cloudflare D1-linked Magic Link recovery flow and robust email delivery protocols."
+  Speed & CI Parity, "Standardized pre-compiled wasm-pack and cargo-audit toolchain binaries, resolving CI space limits and compiler warning debt."
+  Single-Island Demo, "Remediated demo page build omissions, achieving seamless rendering of Astro layout blocks with the interactive 3D WebGL sandbox."
+
+# Visualizing the Edge
+infographics[1]{alt, category, path}:
+  PKD Speed & Security Map, Strategy Schematic, /assets/infographics/sprint-5.02-foundation.svg
+
+# Sprint 5.02 Performance (Speed & Security)
+metrics[1]{assigned_ect, unplanned_ect, completed_ect, variance, volatility}:
+  20, 3, 21, +1, 4.8%
+
+# Why it matters for designers
+closing[1]{content}:
+  "Resilience is a foundation, not a state. With our toolchains pinned and our demo online, we set our sights on Sprint 5.03: implementing the command-first OmniBar UI and refactoring the marketing identity. The kitchen design pipeline remains lean."

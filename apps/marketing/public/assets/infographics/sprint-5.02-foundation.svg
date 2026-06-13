@@ -1,0 +1,122 @@
+<!-- ========================================================================
+ * Project: Pharos Kitchen Design (Project Prism)
+ * Component: Marketing / Infographics
+ * File: apps/marketing/public/assets/infographics/sprint-5.02-foundation.svg
+ * Author: PMA
+ * License: FSL-1.1 (See LICENSE file for details)
+ * Purpose: Strategic infographic for Sprint 5.02 speed & security.
+ * Traceability: Issue #248
+ * Last Updated: 2026-06-12
+ * ======================================================================== -->
+<svg width="1200" height="600" viewBox="0 0 1200 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    :root {
+      --bg: #1A1A1A;
+      --text: #F3F4F6;
+      --muted: #9CA3AF;
+      --accent: #FF6B00;
+      --grid: #FFFFFF;
+      --grid-op: 0.05;
+      --panel-bg: rgba(255, 107, 0, 0.05);
+      --border: #1E2D3D;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #F8FAFC;
+        --text: #1A1A1A;
+        --muted: #4B5563;
+        --accent: #FF6B00;
+        --grid: #005FB8;
+        --grid-op: 0.1;
+        --panel-bg: rgba(0, 95, 184, 0.03);
+        --border: #E2E8F0;
+      }
+    }
+    text { font-family: system-ui, -apple-system, sans-serif; fill: var(--text); }
+    .accent { fill: var(--accent); }
+    .muted { fill: var(--muted); }
+    .stroke-accent { stroke: var(--accent); }
+    .stroke-muted { stroke: var(--muted); }
+    .stroke-border { stroke: var(--border); }
+    .fill-panel { fill: var(--panel-bg); }
+    .grid-line { stroke: var(--grid); stroke-opacity: var(--grid-op); }
+    .header-main { font-weight: 900; font-size: 42px; letter-spacing: -0.03em; }
+    .header-sub { font-weight: 700; font-size: 18px; letter-spacing: 0.3em; opacity: 0.8; fill: var(--accent); }
+    .panel-title { font-weight: 800; font-size: 12px; letter-spacing: 0.2em; fill: var(--accent); }
+    .panel-label { font-weight: 700; font-size: 18px; }
+    .panel-desc { font-size: 14px; opacity: 0.6; fill: var(--muted); }
+    .velocity-val { font-weight: 900; font-size: 64px; fill: var(--accent); }
+    .velocity-label { font-weight: 700; font-size: 14px; letter-spacing: 0.1em; }
+  </style>
+
+  <!-- Background -->
+  <rect width="1200" height="600" fill="var(--bg)"/>
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" class="grid-line" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="600" fill="url(#grid)"/>
+
+  <!-- Header Section -->
+  <g transform="translate(60, 60)">
+    <text class="header-sub">SPRINT 5.02 SCHEMATIC</text>
+    <text y="45" class="header-main">SPEED &amp; SECURITY FOUNDATION</text>
+    <rect y="70" width="1080" height="2" fill="var(--accent)" fill-opacity="0.2"/>
+  </g>
+
+  <!-- Panel 1: SPEED -->
+  <g transform="translate(60, 180)">
+    <rect width="340" height="340" rx="8" class="fill-panel" stroke="var(--border)" stroke-width="1"/>
+    <text x="170" y="40" text-anchor="middle" class="panel-title">01. SPEED</text>
+    
+    <!-- Pinned Toolchain (Gear/Clock/Gauge) -->
+    <g transform="translate(170, 160)">
+      <path d="M -40 20 A 45 45 0 0 1 40 20" stroke="var(--text)" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <line x1="-40" y1="20" x2="40" y2="20" stroke="var(--text)" stroke-width="1" stroke-dasharray="2 2"/>
+      <circle cx="0" cy="20" r="6" fill="var(--accent)"/>
+      <line x1="0" y1="20" x2="25" y2="-5" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/>
+    </g>
+    
+    <text x="170" y="270" text-anchor="middle" class="panel-label">PINNED BINARIES</text>
+    <text x="170" y="295" text-anchor="middle" class="panel-desc">ZERO-DRIFT CI PIPELINE</text>
+  </g>
+
+  <!-- Panel 2: SECURITY -->
+  <g transform="translate(430, 180)">
+    <rect width="340" height="340" rx="8" class="fill-panel" stroke="var(--border)" stroke-width="1"/>
+    <text x="170" y="40" text-anchor="middle" class="panel-title">02. SECURITY</text>
+    
+    <!-- Magic Link Email Backup -->
+    <g transform="translate(170, 160)">
+      <rect x="-40" y="-30" width="80" height="60" rx="4" stroke="var(--text)" stroke-width="3" fill="none"/>
+      <path d="M -40 -30 L 0 10 L 40 -30" stroke="var(--text)" stroke-width="3" fill="none" stroke-linejoin="round"/>
+      <circle cx="20" cy="15" r="8" fill="var(--accent)" stroke="var(--bg)" stroke-width="2"/>
+      <path d="M 17 15 L 23 15 M 20 12 L 20 18" stroke="var(--bg)" stroke-width="2"/>
+    </g>
+    
+    <text x="170" y="270" text-anchor="middle" class="panel-label">SOVEREIGN MAIL</text>
+    <text x="170" y="295" text-anchor="middle" class="panel-desc">MAGIC LINK D1 BACKUP</text>
+  </g>
+
+  <!-- Panel 3: VELOCITY -->
+  <g transform="translate(800, 180)">
+    <rect width="340" height="340" rx="8" class="fill-panel" stroke="var(--border)" stroke-width="1"/>
+    <text x="170" y="40" text-anchor="middle" class="panel-title">03. VELOCITY</text>
+    
+    <!-- Velocity Metric -->
+    <g transform="translate(170, 160)">
+      <text text-anchor="middle" class="velocity-val">21</text>
+      <text y="30" text-anchor="middle" class="velocity-label">ECT DELIVERED</text>
+    </g>
+    
+    <text x="170" y="270" text-anchor="middle" class="panel-label">TARGET ACHIEVED</text>
+    <text x="170" y="295" text-anchor="middle" class="panel-desc">11 SPRINT TASKS CLOSED</text>
+  </g>
+
+  <!-- Status Bar -->
+  <g transform="translate(60, 550)">
+    <rect width="1080" height="30" rx="4" fill="var(--border)" fill-opacity="0.3"/>
+  </g>
+
+</svg>

@@ -5,42 +5,41 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1
  * Purpose: Strategic Handoff for Sprint 5.02 Monday Kickoff.
- * Traceability: ADR-0037, ADR-0043, ADR-0051
- * Last Updated: 2026-06-05
+ * Traceability: ADR-0037, ADR-0043, ADR-0051, Issue #248
+ * Last Updated: 2026-06-12
  * ======================================================================== -->
 
-# Pharos Friday Handoff: Sprint 5.01 Conclusion
+# Pharos Friday Handoff: Sprint 5.02 Conclusion
 
 ## 🎯 Current Status: 🟢 PHAROS GREEN
-Sprint 5.01 has concluded with high velocity. We have successfully transitioned to a sovereign identity model and automated our project roadmap.
+Sprint 5.02 has concluded successfully. We secured the core build pipeline, pinned crucial WASM compiler binaries, delivered edge-sovereign user onboarding recovery, and resolved the live demo 404 omission.
 
 ## 🏗️ Technical Achievement Summary
-- **Identity Re-platforming (#206)**: Successfully migrated to Cloudflare D1 and Passkey-First auth. Legacy Cognito debt is scheduled for removal.
-- **Automated Roadmap (#207, #208, #215)**: The roadmap is now authoritative, live-synced, and supports RFC-2378 filtering.
-- **Core Performance (#196)**: Build times reduced by ~70% via Astro 6.4/Sätteri.
+- **Edge Recovery Infrastructure (#205)**: Hardened Passkey onboarding with D1-linked Magic Link recovery and mail delivery routing to ensure solo IKDs never lose access.
+- **Speed & CI Hardening (#238, #246)**: Standardized pre-compiled `wasm-pack` and `cargo-audit` binaries with SHA-256 integrity verification, remediating CI disk exhaustion and eliminating dependency warnings.
+- **Demo Integration & Build Parity (#235)**: Refactored `Containerfile.ts` to cleanly bundle the compiled Astro distribution under `/demo/`, eliminating the 404 build omission and unifying the React island components.
 
-## 📋 Strategic Context for Monday (June 8)
+## 📋 Strategic Context for Monday (June 15)
 
-### 1. Primary Objective: Multi-Org Delegate Enforcement (#204)
-Implement the "Delegate Enforcement" logic for organizational equipment shards. This is the foundation for our multi-tenant scaling strategy.
-- **The Seam**: Integration with the new Cloudflare D1 identity schema.
-- **Rigor Gate**: ECT 4. Requires a **Strategic SPM Check-in** at the 50% mark.
+### 1. Primary Objective: OmniBar UI & Command-First Search (#242)
+Implement RFC-2378 OmniBar & Procedural Hover-Bake. This will unify the Demo UX with our command-first vision and integrate real-time Rust baking.
+- **Rigor Gate**: ECT 3. Atomic verification tests required.
 
-### 2. Secondary Objective: Passkey Hardening (#205)
-Finalize biometrics ergonomics and 'Magic Link' recovery fallback. 
-- **Dependency**: Blocked by #204 delegate enforcement.
+### 2. Secondary Objective: Marketing IA Refactor (#239)
+Refactor Marketing Site IA for Command-First Identity. Implement high-fidelity Terminal Hero and capability-based documentation flow.
+- **Rigor Gate**: ECT 5. Requires **Strategic SPM Check-in** at the 50% mark.
 
-### 3. Innovation Window: Zero-Allocation Parsing (#185)
-If capacity permits, begin the source-gen JSON parser implementation to eliminate WASM memory pressure.
+### 3. Performance Objective: Zero-Allocation WASM (#185)
+Begin source-gen JSON parser implementation to eliminate WASM memory allocation pressure under large manufacturer datasets.
 
 ## 🛡️ Active Enforcers (MANDATORY)
 - **Merge Sentinel Ritual**: No PR merge without formal `Auditor Verdict: 🟢 PHAROS GREEN` in comments.
 - **SRI Verification**: Any dependency or config change MUST include an SRI hash audit in the `pulse` check.
 
-## 📊 Sprint 5.01 Final Metrics
-- **Velocity**: 32 ECT points delivered (Target: 20).
-- **CFR**: 12% (Target: <10%). *Remediation: Codified 'Authoritative Consent Gate' (#220).*
-- **Lead Time**: 18.5h average.
+## 📊 Sprint 5.02 Final Metrics
+- **Velocity**: 21 ECT points delivered (Target: 20).
+- **CFR**: 0% on main branch runs, ~4% overall developer runtime checks.
+- **Lead Time**: 12h average.
 
 ---
-*SPM Conclusion: Sprint 5.01 was a paradigm shift. We move to the Edge in 5.02. Rest up.*
+*SPM Conclusion: Sprint 5.02 built the foundation. In 5.03, we bring the Command-First vision to life. Rest up.*
