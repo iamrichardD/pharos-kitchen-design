@@ -19,7 +19,7 @@ RUN cd packages/pkd-core && \
     if [ "$BUILD_MODE" = "release" ]; then cargo build --release; else cargo build; fi
 
 # Stage 2: .NET SDK (Revit Bridge Integration Tests)
-FROM mcr.microsoft.com/dotnet/sdk@sha256:3e7b0cefe1b00a350ffb0e06b4e1271a4e791df6b8ac4239be05f1ae2736fcff AS dotnet-tester
+FROM public.ecr.aws/sam/build-dotnet8@sha256:d234c2e83b9f9cf1208f154aa4eb5df5ff3b5f74f12782afb8062ff31ee83174 AS dotnet-tester
 ARG BUILD_MODE=debug
 ENV BUILD_MODE=$BUILD_MODE
 WORKDIR /work

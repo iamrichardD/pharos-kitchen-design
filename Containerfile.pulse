@@ -76,12 +76,11 @@ RUN npm ci && \
     rm -rf /root/.npm/_cacache
 
 # Stage 7: .NET SDK (Integrated \"Pulse\" Handshake)
-FROM mcr.microsoft.com/dotnet/sdk@sha256:3e7b0cefe1b00a350ffb0e06b4e1271a4e791df6b8ac4239be05f1ae2736fcff AS pulse-final
+FROM public.ecr.aws/sam/build-dotnet8@sha256:d234c2e83b9f9cf1208f154aa4eb5df5ff3b5f74f12782afb8062ff31ee83174 AS pulse-final
 ARG BUILD_MODE=debug
 ENV BUILD_MODE=$BUILD_MODE
 WORKDIR /work
 COPY . .
-RUN apt-get update && apt-get install -y libssl-dev pkg-config && rm -rf /var/lib/apt/lists/*
 COPY --from=rust-builder /work/target/$BUILD_MODE/libpkd_core.so /work/target/$BUILD_MODE/libpkd_core.so
 COPY --from=rust-builder /work/target/$BUILD_MODE/pkd /usr/local/bin/pkd
 RUN chmod +x /usr/local/bin/pkd

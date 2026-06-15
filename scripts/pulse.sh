@@ -112,8 +112,7 @@ run_core() {
 
     # Check PR Marker (ADR-0037 Mandate)
     # Why: Enforces the 'Builder-to-Auditor' transition by requiring an audit log in the PR body.
-    if gh pr view --json body > /dev/null 2>&1; then
-        PR_BODY=$(gh pr view --json body -q '.body')
+    if PR_BODY=$(gh pr view --json body -q '.body' 2>/dev/null); then
         if [[ ! "$PR_BODY" == *"## ⚔️ The Pharos Crucible (Audit Log)"* ]]; then
             echo "❌ Error: Pull Request body is missing the mandatory 'Pharos Crucible' audit log."
             exit 1
