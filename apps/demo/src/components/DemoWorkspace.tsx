@@ -14,150 +14,37 @@ import { load_registry_wasm, get_ghost_metadata_wasm, type PharosRegistryHandle 
 import { useWasm, WasmProvider } from './WasmContext';
 import { OmniBar } from './OmniBar';
 import { CanvasStage } from './CanvasStage';
+import mockRegistry from '../__fixtures__/mockRegistry.json';
 
-// Mock Registry containing 4 highly detailed commercial kitchen items
-const mockRegistry = {
-    "PHX-DW-001": {
-        "metadata_id": "PHX-DW-001",
-        "name": "Hobart LXeR Commercial Dishwasher",
-        "schema_version": "1.0.0",
-        "classification": {
-            "omniclass_table_23": "23-33 11 11 11",
-            "category": "Specialty Equipment"
-        },
-        "parameters": {
-            "PKD_Manufacturer": "Hobart",
-            "PKD_ModelNumber": "LXeR",
-            "PKD_Voltage": "208V",
-            "PKD_Phase": 3,
-            "PKD_Wattage": "4500W",
-            "PKD_BTU": "0",
-            "PKD_WIDTH": 24.0,
-            "PKD_DEPTH": 24.0,
-            "PKD_HEIGHT": 34.0,
-            "PKD_DrainConnection": "2\" NPT"
-        },
-        "lod_geometry_specs": {
-            "100": {
-                "type": "PROCEDURAL_BOX",
-                "dimensions": { "width": "2.0", "depth": "2.0", "height": "2.83" },
-                "description": "LOD 100 Volumetric Placeholder"
-            }
-        },
-        "performance_metadata": {
-            "estimated_rfa_size_kb": 34,
-            "procedural_lod_enabled": true,
-            "ghost_link_active": true
-        }
-    },
-    "PHX-ST-002": {
-        "metadata_id": "PHX-ST-002",
-        "name": "AccuTemp Countertop Steamer",
-        "schema_version": "1.0.0",
-        "classification": {
-            "omniclass_table_23": "23-33 11 11 11",
-            "category": "Specialty Equipment"
-        },
-        "parameters": {
-            "PKD_Manufacturer": "AccuTemp Products",
-            "PKD_ModelNumber": "N6120-1",
-            "PKD_Voltage": "240V",
-            "PKD_Phase": 3,
-            "PKD_Wattage": "12000W",
-            "PKD_BTU": "0",
-            "PKD_WIDTH": 22.0,
-            "PKD_DEPTH": 30.0,
-            "PKD_HEIGHT": 20.0,
-            "PKD_DrainConnection": "1\" NPT"
-        },
-        "lod_geometry_specs": {
-            "100": {
-                "type": "PROCEDURAL_BOX",
-                "dimensions": { "width": "1.83", "depth": "2.5", "height": "1.67" },
-                "description": "LOD 100 Volumetric Placeholder"
-            }
-        },
-        "performance_metadata": {
-            "estimated_rfa_size_kb": 28,
-            "procedural_lod_enabled": true,
-            "ghost_link_active": true
-        }
-    },
-    "PHX-OV-003": {
-        "metadata_id": "PHX-OV-003",
-        "name": "ACP High Speed Oven",
-        "schema_version": "1.0.0",
-        "classification": {
-            "omniclass_table_23": "23-33 11 11 11",
-            "category": "Specialty Equipment"
-        },
-        "parameters": {
-            "PKD_Manufacturer": "ACP, Inc.",
-            "PKD_ModelNumber": "MXP22T",
-            "PKD_Voltage": "240V",
-            "PKD_Phase": 1,
-            "PKD_Wattage": "5700W",
-            "PKD_BTU": "0",
-            "PKD_WIDTH": 25.0,
-            "PKD_DEPTH": 26.0,
-            "PKD_HEIGHT": 20.0,
-            "PKD_DrainConnection": "None"
-        },
-        "lod_geometry_specs": {
-            "100": {
-                "type": "PROCEDURAL_BOX",
-                "dimensions": { "width": "2.08", "depth": "2.16", "height": "1.67" },
-                "description": "LOD 100 Volumetric Placeholder"
-            }
-        },
-        "performance_metadata": {
-            "estimated_rfa_size_kb": 42,
-            "procedural_lod_enabled": true,
-            "ghost_link_active": true
-        }
-    },
-    "PHX-RG-004": {
-        "metadata_id": "PHX-RG-004",
-        "name": "Vulcan V-Series Range",
-        "schema_version": "1.0.0",
-        "classification": {
-            "omniclass_table_23": "23-33 11 11 11",
-            "category": "Specialty Equipment"
-        },
-        "parameters": {
-            "PKD_Manufacturer": "Vulcan",
-            "PKD_ModelNumber": "V4B36",
-            "PKD_Voltage": "None",
-            "PKD_Phase": 0,
-            "PKD_Wattage": "0W",
-            "PKD_BTU": "120000",
-            "PKD_WIDTH": 36.0,
-            "PKD_DEPTH": 38.0,
-            "PKD_HEIGHT": 36.0,
-            "PKD_DrainConnection": "None"
-        },
-        "lod_geometry_specs": {
-            "100": {
-                "type": "PROCEDURAL_BOX",
-                "dimensions": { "width": "3.0", "depth": "3.16", "height": "3.0" },
-                "description": "LOD 100 Volumetric Placeholder"
-            }
-        },
-        "performance_metadata": {
-            "estimated_rfa_size_kb": 56,
-            "procedural_lod_enabled": true,
-            "ghost_link_active": true
-        }
-    }
-};
+export interface PharosMetadata {
+    metadata_id: string;
+    name: string;
+    schema_version: string;
+    classification: {
+        omniclass_table_23: string;
+        category: string;
+    };
+    parameters: Record<string, any>;
+    lod_geometry_specs: Record<string, {
+        type: string;
+        dimensions: Record<string, string>;
+        description: string;
+    }>;
+    geometry_manifest?: any;
+    performance_metadata: {
+        estimated_rfa_size_kb: number;
+        procedural_lod_enabled: boolean;
+        ghost_link_active: boolean;
+    };
+}
 
 const DemoWorkspaceContent: React.FC = () => {
     const { status: wasmStatus, error: wasmError } = useWasm();
     
     // Core Registry & Model State
     const [handle, setHandle] = useState<PharosRegistryHandle | null>(null);
-    const [selectedModel, setSelectedModel] = useState<any | null>(null);
-    const [hoveredModel, setHoveredModel] = useState<any | null>(null);
+    const [selectedModel, setSelectedModel] = useState<PharosMetadata | null>(null);
+    const [hoveredModel, setHoveredModel] = useState<PharosMetadata | null>(null);
     
     // Simulation / Connection State
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -175,7 +62,7 @@ const DemoWorkspaceContent: React.FC = () => {
             const h = load_registry_wasm(mockRegistry);
             setHandle(h);
             // Default select the first item
-            const defaultMetadata = get_ghost_metadata_wasm(h, "PHX-DW-001");
+            const defaultMetadata = get_ghost_metadata_wasm(h, "PHX-DW-001") as PharosMetadata;
             setSelectedModel(defaultMetadata);
         } catch (e: any) {
             console.error("WASM Registry Loading Failed:", e);

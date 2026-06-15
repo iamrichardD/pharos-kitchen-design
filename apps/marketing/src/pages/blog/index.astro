@@ -87,84 +87,14 @@ const streams = [
 
 <script>
   import '@pkd/protocol';
+  import { applyFilter } from '../../utils/wildcardFilter';
 
   const commandBar = document.getElementById('blog-command-bar');
   const targetSelector = '.blog-entry';
 
-  function matchWildcard(text: string, pattern: string) {
-    const startTime = performance.now();
-    try {
-      const regexPattern = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-        .replace(/\\\*/g, '.*')
-        .replace(/\\\+/g, '.+')
-        .replace(/\\\?/g, '.')
-        .replace(/\\\[/g, '[')
-        .replace(/\\\]/g, ']');
-      
-      const regex = new RegExp(`^${regexPattern}$`, 'i');
-      const result = regex.test(text);
-      const duration = performance.now() - startTime;
-      if (duration > 100) {
-        console.warn(`[ReDoS Warden] Wildcard match took ${duration.toFixed(2)}ms, exceeding 100ms temporal limit.`);
-        return false;
-      }
-      return result;
-    } catch (e) {
-      console.error("[ReDoS Warden] Regex compilation failed:", e);
-      return false;
-    }
-  }
-
-  function applyFilter(query: string) {
-    const entries = document.querySelectorAll(targetSelector);
-    const normalizedQuery = query.toLowerCase().trim();
-    
-    entries.forEach(entry => {
-      const htmlEntry = entry as HTMLElement;
-      const raw = htmlEntry.dataset.raw?.toLowerCase() || htmlEntry.innerText.toLowerCase() || '';
-      let match = true;
-
-      if (normalizedQuery.length > 0) {
-        if (normalizedQuery.includes('=')) {
-          const parts = normalizedQuery.split('=');
-          const key = parts[0]?.trim();
-          const value = parts[1]?.trim();
-          
-          if (key && value) {
-            const isWildcard = value.includes('*') || value.includes('+') || value.includes('?') || value.includes('[');
-            
-            if (isWildcard) {
-               const pattern = new RegExp(`${key}[:=]\\s?([^\\s]+)`, 'i');
-               const fieldMatch = raw.match(pattern);
-               match = (fieldMatch && fieldMatch[1]) ? matchWildcard(fieldMatch[1], value) : false;
-            } else {
-               match = raw.includes(`${key}: ${value}`) || 
-                       raw.includes(`${key}=${value}`) || 
-                       (raw.includes(`[${value.toUpperCase()}]`));
-            }
-          }
-        } else {
-          const isWildcard = normalizedQuery.includes('*') || normalizedQuery.includes('+') || normalizedQuery.includes('?') || normalizedQuery.includes('[');
-          if (isWildcard) {
-             match = matchWildcard(raw, `.*${normalizedQuery}.*`);
-          } else {
-             match = raw.includes(normalizedQuery);
-          }
-        }
-      }
-
-      htmlEntry.style.display = match ? 'block' : 'none';
-      if (match) {
-        htmlEntry.classList.add('animate-in', 'fade-in');
-      } else {
-        htmlEntry.classList.remove('animate-in', 'fade-in');
-      }
-    });
-  }
-
   commandBar?.addEventListener('pkd-query', (e: Event) => {
     const customEvent = e as CustomEvent;
-    applyFilter(customEvent.detail.value);
+    applyFilter(customEvent.detail.value, targetSelector);
   });
 </script>
 

@@ -400,7 +400,6 @@ export class PkdCommandBar extends HTMLElement {
         });
 
         this.inputField.addEventListener('focus', () => {
-            setIsFocused(true);
             this.updateDropdownState();
         });
 
@@ -437,7 +436,6 @@ export class PkdCommandBar extends HTMLElement {
         if (e.key === '/' && document.activeElement !== this && !this.shadowRoot!.activeElement) {
             e.preventDefault();
             this.inputField?.focus();
-            setIsFocused(true);
             this.updateDropdownState();
         }
         if (e.key === 'Escape' && (document.activeElement === this || this.shadowRoot!.activeElement === this.inputField)) {
@@ -477,12 +475,6 @@ export class PkdCommandBar extends HTMLElement {
         document.removeEventListener('click', this.handleOutsideClick);
         window.removeEventListener('keydown', this.handleWindowKeydown);
     }
-}
-
-// Global helper to manage focus state securely
-let _focusedElement: HTMLElement | null = null;
-function setIsFocused(focused: boolean) {
-    if (!focused) _focusedElement = null;
 }
 
 if (typeof window !== 'undefined' && !window.customElements.get('pkd-command-bar')) {

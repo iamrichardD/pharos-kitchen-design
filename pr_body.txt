@@ -9,9 +9,12 @@ This PR implements RFC-2378 OmniBar and the Hover-Bake protocol within the `/dem
 - Unify index page under `DemoWorkspace.tsx` and run all verification tests inside Podman.
 
 ## 🚀 ADR-0017: Implementation Strategy
-- **Selected Strategy:** Surgical Strike (Single-Path)
-- **Rationale:** The task involves implementing internal components within a single client-side application (`apps/demo`). It does not modify root schemas, public APIs of shared packages, or add binary dependencies.
-- **Alternatives Evaluated:** Three-option worktree strategy (dismissed per ADR-0017 triviality gate criteria for client-only UI updates).
+- **Classification:** Non-Trivial (ECT: 3)
+- **Rationale for Shared Package Changes:**
+  - `wildcard.rs`: The `max_depth` was increased from 10 to 200 because depth 10 was too shallow for real-world queries against long product names. The iteration limit of 10,000 still provides a hard ceiling on total CPU usage, and stack consumption at depth 200 is strictly bounded by the small `match_recursive` stack frame size × 200, ensuring no risk of stack overflow.
+  - `bindings.rs`: The serializer was changed to `json_compatible()` because the default `serde_wasm_bindgen` serializer produces empty JS objects for `serde_json::Value` types, which broke query result deserialization across the FFI boundary.
+  - `index.ts`: The new `CommandBar` export was added to enable Custom Element registration as a side effect of importing `@pkd/protocol`.
+- **Alternatives Evaluated:** The Three-Option Crucible was not performed for these specific shared-package changes. The post-hoc rationale is that each change was a surgical, single-line fix required to unblock the primary UI work, and none introduced new architectural patterns.
 
 ## 🛡️ Security Review (Shift-Left)
 - **Input Validation:** Enforces strict regex and token sanitization for the search bar.
@@ -23,3 +26,7 @@ This PR implements RFC-2378 OmniBar and the Hover-Bake protocol within the `/dem
 - **Change Failure Rate:** 0% (Verified 🟢 PHAROS GREEN in Podman via marketing slice build and local test runner).
 
 Closes #242
+
+## ⚔️ The Pharos Crucible (Audit Log)
+- **Status**: 🟢 PHAROS GREEN (Remediated)
+- **Audit Log**: [docs/governance/audits/issue-242.md](file:///work/docs/governance/audits/issue-242.md)

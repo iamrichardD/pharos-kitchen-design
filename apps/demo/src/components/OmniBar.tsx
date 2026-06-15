@@ -31,6 +31,21 @@ const ALLOWED_FIELDS = new Set([
     'voltage', 'phase', 'wattage', 'btu', 'drainconnection', 'industry', 'targetregions'
 ]);
 
+interface SearchResult {
+    id: string;
+    name: string;
+    mfr: string;
+}
+
+interface ToonDoc {
+    lists?: {
+        results?: {
+            schema: string[];
+            items: string[][];
+        };
+    };
+}
+
 export const OmniBar: React.FC<OmniBarProps> = ({
     registryHandle,
     onHoverItem,
@@ -39,7 +54,7 @@ export const OmniBar: React.FC<OmniBarProps> = ({
     setStatusText
 }) => {
     const [query, setQuery] = useState('');
-    const [suggestions, setSuggestions] = useState<any[]>([]);
+    const [suggestions, setSuggestions] = useState<SearchResult[]>([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [highlightedIndex, setHighlightedIndex] = useState(-1);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -124,7 +139,7 @@ export const OmniBar: React.FC<OmniBarProps> = ({
             setErrorMsg(null);
 
             // Parse result (ToonDoc structure)
-            const resultsList = (rawResult as any)?.lists?.results;
+            const resultsList = (rawResult as unknown as ToonDoc)?.lists?.results;
             if (resultsList && resultsList.items) {
                 const schema = resultsList.schema;
                 const nameIdx = schema.indexOf('name');
@@ -132,7 +147,7 @@ export const OmniBar: React.FC<OmniBarProps> = ({
                 const idIdx = schema.indexOf('metadata_id');
 
                 const mapped = resultsList.items.map((row: string[]) => ({
-                    id: row[idIdx] || row[0],
+                    id: row[idIdx] || row[0] || '',
                     name: row[nameIdx] || row[1] || 'Unknown Product',
                     mfr: row[mfrIdx] || row[2] || 'Unknown Manufacturer'
                 }));
@@ -160,20 +175,30 @@ export const OmniBar: React.FC<OmniBarProps> = ({
             e.preventDefault();
             const nextIdx = (highlightedIndex + 1) % suggestions.length;
             setHighlightedIndex(nextIdx);
-            onHoverItem(suggestions[nextIdx].id);
+            const nextItem = suggestions[nextIdx];
+            if (nextItem) {
+                onHoverItem(nextItem.id);
+            }
         } else if (e.key === 'ArrowUp') {
             e.preventDefault();
             const prevIdx = (highlightedIndex - 1 + suggestions.length) % suggestions.length;
             setHighlightedIndex(prevIdx);
-            onHoverItem(suggestions[prevIdx].id);
+            const prevItem = suggestions[prevIdx];
+            if (prevItem) {
+                onHoverItem(prevItem.id);
+            }
         } else if (e.key === 'Enter') {
             e.preventDefault();
             if (highlightedIndex >= 0 && highlightedIndex < suggestions.length) {
                 const item = suggestions[highlightedIndex];
-                selectModel(item.id, item.name);
+                if (item) {
+                    selectModel(item.id, item.name);
+                }
             } else if (suggestions.length > 0) {
                 const item = suggestions[0];
-                selectModel(item.id, item.name);
+                if (item) {
+                    selectModel(item.id, item.name);
+                }
             }
         } else if (e.key === 'Escape') {
             setShowSuggestions(false);

@@ -11,10 +11,11 @@
 
 import React from 'react';
 import { ThreeJsInterpreter } from './ThreeJsInterpreter';
+import type { PharosMetadata } from './DemoWorkspace';
 
 interface CanvasStageProps {
-    selectedModel: any | null;
-    hoveredModel: any | null;
+    selectedModel: PharosMetadata | null;
+    hoveredModel: PharosMetadata | null;
 }
 
 export const CanvasStage: React.FC<CanvasStageProps> = ({ selectedModel, hoveredModel }) => {
