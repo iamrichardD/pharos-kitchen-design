@@ -136,7 +136,10 @@ impl PharosRegistryHandle {
     /// Why: Centralizes the search logic in the WASM core for cross-platform parity.
     pub fn query_wasm(&self, query_string: String) -> Result<JsValue, JsValue> {
         match self.query_internal(query_string) {
-            Ok(json) => Ok(serde_wasm_bindgen::to_value(&json).unwrap()),
+            Ok(json) => {
+                let serializer = serde_wasm_bindgen::Serializer::json_compatible();
+                Ok(Serialize::serialize(&json, &serializer).unwrap())
+            }
             Err(e) => Err(JsValue::from_str(&e)),
         }
     }

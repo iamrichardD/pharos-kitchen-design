@@ -201,6 +201,44 @@ export class PkdCommandBar extends HTMLElement {
                     color: #84a59d;
                     text-transform: uppercase;
                 }
+                .expand-toggle {
+                    background: transparent;
+                    border: 1px dashed rgba(255, 107, 0, 0.4);
+                    color: #ff6b00;
+                    font-family: monospace;
+                    font-size: 10px;
+                    padding: 4px 8px;
+                    cursor: pointer;
+                    border-radius: 4px;
+                    text-transform: uppercase;
+                    transition: all 0.2s;
+                    margin-top: 12px;
+                    align-self: flex-start;
+                    display: inline-block;
+                }
+                .expand-toggle:hover {
+                    background-color: rgba(255, 107, 0, 0.1);
+                    border-color: #ff6b00;
+                }
+                .expanded-section {
+                    display: none;
+                    border-top: 1px dashed rgba(255, 255, 255, 0.05);
+                    padding-top: 12px;
+                    margin-top: 12px;
+                }
+                .expanded-section.active {
+                    display: block;
+                }
+                .expanded-grid {
+                    display: grid;
+                    grid-template-columns: 1fr;
+                    gap: 16px;
+                }
+                @media (min-width: 640px) {
+                    .expanded-grid {
+                        grid-template-columns: 1fr 1fr;
+                    }
+                }
                 .footer {
                     display: flex;
                     justify-content: space-between;
@@ -269,7 +307,40 @@ export class PkdCommandBar extends HTMLElement {
                             </ul>
                         </div>
                     </div>
-                    <div class="footer">
+                    
+                    <button class="expand-toggle" id="expand-help-btn">Show Expanded Schema Keys</button>
+                    
+                    <div class="expanded-section" id="expanded-section">
+                        <h4 class="section-title">Expanded Schema Keys (IKD Parameters)</h4>
+                        <div class="expanded-grid">
+                            <ul class="list">
+                                <li class="item">
+                                    <code class="code">phase=</code>
+                                    <span class="desc">Electrical phase count (e.g. 3)</span>
+                                </li>
+                                <li class="item">
+                                    <code class="code">wattage=</code>
+                                    <span class="desc">Power usage (e.g. 4500W)</span>
+                                </li>
+                                <li class="item">
+                                    <code class="code">btu=</code>
+                                    <span class="desc">Gas heating capacity (e.g. 120000)</span>
+                                </li>
+                            </ul>
+                            <ul class="list">
+                                <li class="item">
+                                    <code class="code">drainconnection=</code>
+                                    <span class="desc">Plumbing sizing (e.g. 2" NPT)</span>
+                                </li>
+                                <li class="item">
+                                    <code class="code">width=</code> / <code class="code">depth=</code> / <code class="code">height=</code>
+                                    <span class="desc">Equipment dimensions in inches</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="footer" style="margin-top: 16px;">
                         <span>CCSO NAMESERVER ARCHITECTURE // RFC-2378 STANDARD</span>
                         <div class="footer-right">
                             <span>SLASH to focus</span>
@@ -335,6 +406,21 @@ export class PkdCommandBar extends HTMLElement {
 
         // Use document-level click to handle clicks outside the custom element
         document.addEventListener('click', this.handleOutsideClick);
+
+        // Toggle expanded help section
+        const expandBtn = this.shadowRoot!.getElementById('expand-help-btn');
+        const expandedSec = this.shadowRoot!.getElementById('expanded-section');
+        if (expandBtn && expandedSec) {
+            expandBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                expandedSec.classList.toggle('active');
+                if (expandedSec.classList.contains('active')) {
+                    expandBtn.innerText = "Hide Expanded Schema Keys";
+                } else {
+                    expandBtn.innerText = "Show Expanded Schema Keys";
+                }
+            });
+        }
 
         // Hotkeys support
         window.addEventListener('keydown', this.handleWindowKeydown);
