@@ -12,11 +12,8 @@
 
 import DemoLayout from '../layouts/DemoLayout.astro';
 import { DemoWorkspace } from '../components/DemoWorkspace';
-import { WasmProvider } from '../components/WasmContext';
 ---
 
 <DemoLayout title="Pharos Kitchen Design - Interactive Catalog Demo">
-	<WasmProvider client:only="react">
-		<DemoWorkspace client:only="react" />
-	</WasmProvider>
+	<DemoWorkspace client:only="react" />
 </DemoLayout>

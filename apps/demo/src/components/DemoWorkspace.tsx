@@ -11,7 +11,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { load_registry_wasm, get_ghost_metadata_wasm, type PharosRegistryHandle } from '@pkd/core';
-import { useWasm } from './WasmContext';
+import { useWasm, WasmProvider } from './WasmContext';
 import { OmniBar } from './OmniBar';
 import { CanvasStage } from './CanvasStage';
 
@@ -151,7 +151,7 @@ const mockRegistry = {
     }
 };
 
-export const DemoWorkspace: React.FC = () => {
+const DemoWorkspaceContent: React.FC = () => {
     const { status: wasmStatus, error: wasmError } = useWasm();
     
     // Core Registry & Model State
@@ -513,5 +513,13 @@ export const DemoWorkspace: React.FC = () => {
                 </div>
             </div>
         </main>
+    );
+};
+
+export const DemoWorkspace: React.FC = () => {
+    return (
+        <WasmProvider>
+            <DemoWorkspaceContent />
+        </WasmProvider>
     );
 };
