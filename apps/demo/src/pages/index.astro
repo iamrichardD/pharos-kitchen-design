@@ -5,166 +5,18 @@
  * File: index.astro
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
- * Purpose: Conceptual blueprint and statement of intent for the PKD interface.
- * Traceability: Priority 3, Issue #28, Issue #235
- * Last Updated: 2026-06-12
+ * Purpose: Interactive PKD interface demo page loading WASM and Three.js visualization.
+ * Traceability: Issue #242, ADR-0006, ADR-0066
+ * Last Updated: 2026-06-15
  * ======================================================================== */
 
 import DemoLayout from '../layouts/DemoLayout.astro';
+import { DemoWorkspace } from '../components/DemoWorkspace';
+import { WasmProvider } from '../components/WasmContext';
 ---
 
-<DemoLayout title="Pharos Kitchen Design - Concept Demo">
-	<main class="demo-container">
-		<!-- OmniBar Zone (Pure Concept) -->
-		<section class="blueprint-border conceptual-omnibar">
-			<div class="dot-label">
-				<span class="baldessari-dot dot-yellow"></span>
-				<div class="dot-text">
-					<span class="zone-title">The OmniBar</span>
-					<p class="desc-text">This is the OmniBar, where you will type search criteria such as a manufacturer name, a product name, or an equipment category.</p>
-				</div>
-			</div>
-		</section>
-
-		<!-- Main Workspace Columns (Pure Concept) -->
-		<div class="workspace-layout">
-			<!-- Canvas Stage Zone -->
-			<section class="blueprint-border conceptual-stage">
-				<div class="dot-label">
-					<span class="baldessari-dot dot-blue"></span>
-					<div class="dot-text">
-						<span class="zone-title">WebGL Canvas Stage</span>
-						<p class="desc-text">Here we have the canvas stage, where we will render a lightweight 3D preview model of your selected product.</p>
-					</div>
-				</div>
-			</section>
-
-			<!-- Inspector Panel Zone -->
-			<section class="blueprint-border conceptual-inspector">
-				<div class="dot-label">
-					<span class="baldessari-dot dot-red"></span>
-					<div class="dot-text">
-						<span class="zone-title">Inspector Panel</span>
-						<ul class="conceptual-list">
-							<li>Name:</li>
-							<li>Manufacturer:</li>
-							<li>Dimensions:
-								<ul>
-									<li>Height:</li>
-									<li>Width:</li>
-									<li>Depth:</li>
-									<li>Power:</li>
-									<li>Spec Docs</li>
-								</ul>
-							</li>
-						</ul>
-					</div>
-				</div>
-			</section>
-		</div>
-	</main>
+<DemoLayout title="Pharos Kitchen Design - Interactive Catalog Demo">
+	<WasmProvider client:only="react">
+		<DemoWorkspace client:only="react" />
+	</WasmProvider>
 </DemoLayout>
-
-<style>
-	.demo-container {
-		max-width: 1200px;
-		margin: 0 auto;
-		padding: 4rem 1.5rem;
-		display: flex;
-		flex-direction: column;
-		gap: 3rem;
-	}
-
-	/* Layout & Spacing */
-	.conceptual-omnibar {
-		padding: 2.5rem;
-		display: flex;
-		align-items: flex-start;
-		min-height: 120px;
-	}
-
-	.workspace-layout {
-		display: grid;
-		grid-template-columns: 2fr 1fr;
-		gap: 3rem;
-	}
-
-	@media (max-width: 768px) {
-		.workspace-layout {
-			grid-template-columns: 1fr;
-			gap: 2.5rem;
-		}
-	}
-
-	.conceptual-stage {
-		padding: 3rem 2.5rem;
-		display: flex;
-		flex-direction: column;
-		justify-content: flex-start;
-		min-height: 350px;
-	}
-
-	.conceptual-inspector {
-		padding: 3rem 2.5rem;
-		display: flex;
-		flex-direction: column;
-		justify-content: flex-start;
-		min-height: 350px;
-	}
-
-	/* John Baldessari Dots */
-	.dot-label {
-		display: flex;
-		align-items: flex-start;
-		gap: 1.5rem;
-	}
-
-	.baldessari-dot {
-		width: 32px;
-		height: 32px;
-		border-radius: 50%;
-		display: inline-block;
-		flex-shrink: 0;
-		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
-	}
-
-	.dot-yellow { background-color: #fbbf24; }
-	.dot-blue { background-color: #3b82f6; }
-	.dot-red { background-color: #ef4444; }
-
-	.dot-text {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-	}
-
-	.zone-title {
-		font-size: 1.35rem;
-		font-weight: 800;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-	}
-
-	.desc-text {
-		margin: 0;
-		font-size: 1rem;
-		line-height: 1.6;
-		color: rgb(var(--text-muted));
-	}
-
-	/* Conceptual List Styles */
-	.conceptual-list {
-		list-style-type: disc;
-		margin: 0.5rem 0 0 1.25rem;
-		padding: 0;
-		color: rgb(var(--text-muted));
-		font-size: 1rem;
-		line-height: 1.7;
-	}
-
-	.conceptual-list ul {
-		list-style-type: circle;
-		margin: 0.25rem 0 0 1.25rem;
-		padding: 0;
-	}
-</style>
