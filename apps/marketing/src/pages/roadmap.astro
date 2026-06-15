@@ -10,7 +10,6 @@
  * ======================================================================== */
 
 import BaseLayout from "../layouts/BaseLayout.astro";
-import CommandBar from "../components/CommandBar.astro";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -24,13 +23,13 @@ try {
   
   // Extract Sync Metadata
   const syncMatch = rawToon.match(/lastSynced:\s*([^\n]+)/);
-  if (syncMatch) lastSynced = new Date(syncMatch[1]).toLocaleString();
+  if (syncMatch && syncMatch[1]) lastSynced = new Date(syncMatch[1]).toLocaleString();
 
   // Updated TOON Parsing (includes ID)
   const itemRows = rawToon.matchAll(/^\s*"([^"]+)",\s*"([^"]+)",\s*"([^"]+)",\s*"([^"]+)",\s*"([^"]+)",\s*"([^"]+)"/gm);
   
   for (const match of itemRows) {
-    const rawId = parseInt(match[1], 10);
+    const rawId = parseInt(match[1] || "", 10);
     roadmapItems.push({
       id: rawId > 0 ? rawId : null,
       name: match[2],
@@ -87,11 +86,13 @@ const filterPills = [
     </div>
 
     <!-- Command Bar Integration -->
-    <CommandBar 
-      targetSelector=".roadmap-card" 
-      placeholder="Filter by status=deployed, tag=core, stream=phase_1..."
-      pills={filterPills}
-    />
+    <div class="mb-16 sticky top-24 z-40">
+      <pkd-command-bar 
+        id="roadmap-command-bar"
+        placeholder="Filter by status=deployed, tag=core, stream=phase_1..."
+        pills={JSON.stringify(filterPills)}
+      />
+    </div>
 
     <div class="space-y-32">
       <!-- ACTIVE SQUAD -->
@@ -219,3 +220,109 @@ const filterPills = [
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
 </style>
+
+<script>
+  import '@pkd/protocol';
+
+  const commandBar = document.getElementById('roadmap-command-bar');
+  const targetSelector = '.roadmap-card';
+
+  function matchWildcard(text: string, pattern: string) {
+    const startTime = performance.now();
+    try {
+      const regexPattern = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+        .replace(/\\\*/g, '.*')
+        .replace(/\\\+/g, '.+')
+        .replace(/\\\?/g, '.')
+        .replace(/\\\[/g, '[')
+        .replace(/\\\]/g, ']');
+      
+      const regex = new RegExp(`^${regexPattern}$`, 'i');
+      const result = regex.test(text);
+      const duration = performance.now() - startTime;
+      if (duration > 100) {
+        console.warn(`[ReDoS Warden] Wildcard match took ${duration.toFixed(2)}ms, exceeding 100ms temporal limit.`);
+        return false;
+      }
+      return result;
+    } catch (e) {
+      console.error("[ReDoS Warden] Regex compilation failed:", e);
+      return false;
+    }
+  }
+
+  function applyFilter(query: string) {
+    const entries = document.querySelectorAll(targetSelector);
+    const normalizedQuery = query.toLowerCase().trim();
+    
+    entries.forEach(entry => {
+      const htmlEntry = entry as HTMLElement;
+      const raw = htmlEntry.dataset.raw?.toLowerCase() || htmlEntry.innerText.toLowerCase() || '';
+      let match = true;
+
+      if (normalizedQuery.length > 0) {
+        if (normalizedQuery.includes('=')) {
+          const parts = normalizedQuery.split('=');
+          const key = parts[0]?.trim();
+          const value = parts[1]?.trim();
+          
+          if (key && value) {
+            const isWildcard = value.includes('*') || value.includes('+') || value.includes('?') || value.includes('[');
+            
+            if (isWildcard) {
+               const pattern = new RegExp(`${key}[:=]\\s?([^\\s]+)`, 'i');
+               const fieldMatch = raw.match(pattern);
+               match = (fieldMatch && fieldMatch[1]) ? matchWildcard(fieldMatch[1], value) : false;
+            } else {
+               match = raw.includes(`${key}: ${value}`) || 
+                       raw.includes(`${key}=${value}`) || 
+                       (raw.includes(`[${value.toUpperCase()}]`));
+            }
+          }
+        } else {
+          const isWildcard = normalizedQuery.includes('*') || normalizedQuery.includes('+') || normalizedQuery.includes('?') || normalizedQuery.includes('[');
+          if (isWildcard) {
+             match = matchWildcard(raw, `.*${normalizedQuery}.*`);
+          } else {
+             match = raw.includes(normalizedQuery);
+          }
+        }
+      }
+
+      htmlEntry.style.display = match ? 'block' : 'none';
+      if (match) {
+        htmlEntry.classList.add('animate-in', 'fade-in');
+      } else {
+        htmlEntry.classList.remove('animate-in', 'fade-in');
+      }
+    });
+
+    // Collapse empty sections
+    const sections = document.querySelectorAll('.filter-section');
+    sections.forEach(section => {
+      const cards = section.querySelectorAll(targetSelector);
+      let visibleCount = 0;
+      cards.forEach(card => {
+        if ((card as HTMLElement).style.display !== 'none') {
+          visibleCount++;
+        }
+      });
+
+      const noMatchMsg = section.querySelector('.no-match-msg');
+      const grid = section.querySelector('.grid');
+      
+      if (visibleCount === 0) {
+        if (noMatchMsg) noMatchMsg.classList.remove('hidden');
+        if (grid) grid.classList.add('hidden');
+      } else {
+        if (noMatchMsg) noMatchMsg.classList.add('hidden');
+        if (grid) grid.classList.remove('hidden');
+      }
+    });
+  }
+
+  commandBar?.addEventListener('pkd-query', (e: Event) => {
+    const customEvent = e as CustomEvent;
+    applyFilter(customEvent.detail.value);
+  });
+</script>

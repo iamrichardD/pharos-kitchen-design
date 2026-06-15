@@ -4,13 +4,16 @@
  * File: OmniBar.tsx
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
- * Purpose: Command-palette style search input with RFC-2378 validation and schema hints.
- * Traceability: Issue #242, ADR-0006
+ * Purpose: Consumes the shared framework-agnostic <pkd-command-bar> Web Component 
+ *          to query the local WASM registry.
+ * Traceability: Issue #242, ADR-0006, Option C
  * Last Updated: 2026-06-15
  * ======================================================================== */
 
 import React, { useState, useEffect, useRef } from 'react';
 import type { PharosRegistryHandle } from '@pkd/core';
+// Import the Custom Element package to guarantee registration
+import '@pkd/protocol';
 
 interface OmniBarProps {
     registryHandle: PharosRegistryHandle | null;
@@ -39,32 +42,33 @@ export const OmniBar: React.FC<OmniBarProps> = ({
     const [suggestions, setSuggestions] = useState<any[]>([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [highlightedIndex, setHighlightedIndex] = useState(-1);
-    const [isPrefixHidden, setIsPrefixHidden] = useState(false);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const [hintMsg, setHintMsg] = useState<string | null>(null);
     
-    const inputRef = useRef<HTMLInputElement>(null);
+    const barRef = useRef<HTMLElement>(null);
 
-    // Standard CCSO Verbs
-    const verbs = [
-        { cmd: '/add', desc: 'Place equipment from catalog', isCommand: true },
-        { cmd: '/export', desc: 'Generate Revit/CAD files', isCommand: true },
-        { cmd: '/help', desc: 'View all commands', isCommand: true }
-    ];
-
+    // Bind custom event from native Web Component
     useEffect(() => {
-        // Enforce prefix hidden logic if user types their own slash
-        if (query.startsWith('/')) {
-            setIsPrefixHidden(true);
-        } else {
-            setIsPrefixHidden(false);
-        }
+        const bar = barRef.current;
+        if (!bar) return;
 
+        const handleQueryEvent = (e: any) => {
+            setQuery(e.detail.value);
+            setShowSuggestions(true);
+        };
+
+        bar.addEventListener('pkd-query', handleQueryEvent);
+        return () => {
+            bar.removeEventListener('pkd-query', handleQueryEvent);
+        };
+    }, []);
+
+    // Core catalog query execution logic
+    useEffect(() => {
         if (!registryHandle) return;
 
-        // Perform validation and search
-        if (query === '') {
-            setSuggestions(verbs);
+        if (query.trim() === '') {
+            setSuggestions([]);
             setErrorMsg(null);
             setHintMsg(null);
             return;
@@ -90,16 +94,15 @@ export const OmniBar: React.FC<OmniBarProps> = ({
             setHintMsg(null);
         }
 
-        // Build query string
+        // Build CCSO query string. Automatically prefix with "query " if omitted.
         let ccsoQuery = '';
-        if (query.startsWith('/add ')) {
-            const term = query.substring(5).trim();
-            ccsoQuery = `query name=*${term}*`;
-        } else if (query.startsWith('query ') || query.startsWith('ph ')) {
-            ccsoQuery = query;
+        const trimmed = query.trim();
+        if (trimmed.toLowerCase().startsWith('query ') || trimmed.toLowerCase().startsWith('ph ')) {
+            ccsoQuery = trimmed;
+        } else if (trimmed.includes('=')) {
+            ccsoQuery = `query ${trimmed}`;
         } else {
-            // Default to matching name
-            ccsoQuery = `query name=*${query}*`;
+            ccsoQuery = `query name=*${trimmed}*`;
         }
 
         // Execute query with temporal 100ms sentinel check for wildcards
@@ -131,8 +134,7 @@ export const OmniBar: React.FC<OmniBarProps> = ({
                 const mapped = resultsList.items.map((row: string[]) => ({
                     id: row[idIdx] || row[0],
                     name: row[nameIdx] || row[1] || 'Unknown Product',
-                    mfr: row[mfrIdx] || row[2] || 'Unknown Manufacturer',
-                    isCommand: false
+                    mfr: row[mfrIdx] || row[2] || 'Unknown Manufacturer'
                 }));
 
                 setSuggestions(mapped);
@@ -151,53 +153,42 @@ export const OmniBar: React.FC<OmniBarProps> = ({
         }
     }, [query, registryHandle]);
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
         if (suggestions.length === 0) return;
 
         if (e.key === 'ArrowDown') {
             e.preventDefault();
             const nextIdx = (highlightedIndex + 1) % suggestions.length;
             setHighlightedIndex(nextIdx);
-            onHoverItem(suggestions[nextIdx].isCommand ? null : suggestions[nextIdx].id);
+            onHoverItem(suggestions[nextIdx].id);
         } else if (e.key === 'ArrowUp') {
             e.preventDefault();
             const prevIdx = (highlightedIndex - 1 + suggestions.length) % suggestions.length;
             setHighlightedIndex(prevIdx);
-            onHoverItem(suggestions[prevIdx].isCommand ? null : suggestions[prevIdx].id);
+            onHoverItem(suggestions[prevIdx].id);
         } else if (e.key === 'Enter') {
             e.preventDefault();
             if (highlightedIndex >= 0 && highlightedIndex < suggestions.length) {
                 const item = suggestions[highlightedIndex];
-                if (item.isCommand) {
-                    applyVerb(item.cmd);
-                } else {
-                    selectModel(item.id, item.name);
-                }
+                selectModel(item.id, item.name);
             } else if (suggestions.length > 0) {
-                // Default to first suggestion
                 const item = suggestions[0];
-                if (item.isCommand) {
-                    applyVerb(item.cmd);
-                } else {
-                    selectModel(item.id, item.name);
-                }
+                selectModel(item.id, item.name);
             }
         } else if (e.key === 'Escape') {
             setShowSuggestions(false);
             setHighlightedIndex(-1);
             onHoverItem(null);
-            inputRef.current?.blur();
         }
     };
 
-    const applyVerb = (cmd: string) => {
-        setQuery(cmd + ' ');
-        setHighlightedIndex(-1);
-        inputRef.current?.focus();
-    };
-
     const selectModel = (id: string, name: string) => {
-        setQuery(`/add ${name}`);
+        setQuery(name);
+        // Sync the value back to the Custom Element input field
+        const bar = barRef.current;
+        if (bar) {
+            bar.setAttribute('value', name);
+        }
         setShowSuggestions(false);
         setHighlightedIndex(-1);
         onHoverItem(null);
@@ -205,58 +196,28 @@ export const OmniBar: React.FC<OmniBarProps> = ({
         setStatusText(`[SYS] Linked ${name}. Syncing spatial canvas...`);
     };
 
-    return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
-            <div 
-                style={{ 
-                    backgroundColor: 'rgba(26, 26, 26, 0.95)',
-                    backdropFilter: 'blur(20px)',
-                    border: '1px solid rgba(0, 95, 184, 0.3)',
-                    borderLeft: '3px solid #ff6b00',
-                    borderRadius: '4px',
-                    padding: '12px 20px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)'
-                }}
-            >
-                {!isPrefixHidden && (
-                    <span 
-                        style={{ 
-                            color: '#ff6b00',
-                            fontFamily: 'monospace',
-                            fontWeight: 600,
-                            fontSize: '15px'
-                        }}
-                    >
-                        /
-                    </span>
-                )}
-                <input
-                    ref={inputRef}
-                    type="text"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    onFocus={() => {
-                        setShowSuggestions(true);
-                        if (query === '') setSuggestions(verbs);
-                    }}
-                    placeholder="Search catalog or type '/' for commands..."
-                    style={{
-                        background: 'transparent',
-                        border: 'none',
-                        color: '#f3f4f6',
-                        fontFamily: 'monospace',
-                        fontSize: '15px',
-                        width: '100%',
-                        outline: 'none'
-                    }}
-                />
-            </div>
+    // Declarative pills passed to custom element
+    const pillsValue = JSON.stringify([
+        { label: "Hobart", value: "manufacturer=Hobart" },
+        { label: "240V Specs", value: "voltage=240V" },
+        { label: "All Items", value: "category=*" }
+    ]);
 
-            {showSuggestions && suggestions.length > 0 && (
+    return (
+        <div 
+            onKeyDown={handleKeyDown}
+            style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%', position: 'relative' }}
+        >
+            {/* Native HTML5 Custom Web Component (Option C) */}
+            <pkd-command-bar
+                ref={barRef as any}
+                placeholder="Filter by keywords or key=value search parameters..."
+                pills={pillsValue}
+                value={query}
+            />
+
+            {/* Suggestions list */}
+            {showSuggestions && query.trim() !== '' && suggestions.length > 0 && (
                 <div 
                     style={{ 
                         backgroundColor: '#1a1a1a',
@@ -269,18 +230,12 @@ export const OmniBar: React.FC<OmniBarProps> = ({
                 >
                     {suggestions.map((item, i) => (
                         <div
-                            key={item.cmd || item.id}
+                            key={item.id}
                             onMouseEnter={() => {
                                 setHighlightedIndex(i);
-                                onHoverItem(item.isCommand ? null : item.id);
+                                onHoverItem(item.id);
                             }}
-                            onClick={() => {
-                                if (item.isCommand) {
-                                    applyVerb(item.cmd);
-                                } else {
-                                    selectModel(item.id, item.name);
-                                }
-                            }}
+                            onClick={() => selectModel(item.id, item.name)}
                             style={{
                                 padding: '10px 20px',
                                 fontSize: '13px',
@@ -294,15 +249,9 @@ export const OmniBar: React.FC<OmniBarProps> = ({
                                 color: i === highlightedIndex ? '#ff6b00' : '#e5e7eb'
                             }}
                         >
-                            <span>
-                                {item.isCommand ? (
-                                    <strong>{item.cmd}</strong>
-                                ) : (
-                                    item.name
-                                )}
-                            </span>
+                            <span>{item.name}</span>
                             <span style={{ opacity: 0.6, fontSize: '11px', fontFamily: 'monospace' }}>
-                                {item.isCommand ? item.desc : item.mfr}
+                                {item.mfr}
                             </span>
                         </div>
                     ))}
@@ -343,3 +292,16 @@ export const OmniBar: React.FC<OmniBarProps> = ({
         </div>
     );
 };
+
+// Declaring typing interface for TypeScript to recognize Custom Element tags in JSX
+declare module 'react' {
+    namespace JSX {
+        interface IntrinsicElements {
+            'pkd-command-bar': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & {
+                placeholder?: string;
+                value?: string;
+                pills?: string;
+            }, HTMLElement>;
+        }
+    }
+}
