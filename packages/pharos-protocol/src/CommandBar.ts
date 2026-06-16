@@ -308,10 +308,10 @@ export class PkdCommandBar extends HTMLElement {
                         </div>
                     </div>
                     
-                    <button class="expand-toggle" id="expand-help-btn">Show Expanded Schema Keys</button>
+                    <button class="expand-toggle" id="expand-help-btn">Show Additional Query Options</button>
                     
                     <div class="expanded-section" id="expanded-section">
-                        <h4 class="section-title">Expanded Schema Keys (IKD Parameters)</h4>
+                        <h4 class="section-title">Additional Query Options</h4>
                         <div class="expanded-grid">
                             <ul class="list">
                                 <li class="item">
@@ -396,6 +396,12 @@ export class PkdCommandBar extends HTMLElement {
             this.updateDropdownState();
         });
 
+        this.inputField.addEventListener('blur', () => {
+            setTimeout(() => {
+                this.updateDropdownState();
+            }, 150);
+        });
+
         // Use document-level click to handle clicks outside the custom element
         document.addEventListener('click', this.handleOutsideClick);
 
@@ -407,9 +413,9 @@ export class PkdCommandBar extends HTMLElement {
                 e.stopPropagation();
                 expandedSec.classList.toggle('active');
                 if (expandedSec.classList.contains('active')) {
-                    expandBtn.innerText = "Hide Expanded Schema Keys";
+                    expandBtn.innerText = "Hide Additional Query Options";
                 } else {
-                    expandBtn.innerText = "Show Expanded Schema Keys";
+                    expandBtn.innerText = "Show Additional Query Options";
                 }
             });
         }
@@ -450,8 +456,14 @@ export class PkdCommandBar extends HTMLElement {
     private updateDropdownState() {
         if (!this.inputField || !this.helperDropdown) return;
         
-        // Show help dropdown when focused, regardless of whether empty or not (G-07)
-        this.helperDropdown.classList.add('active');
+        const isFocused = this.shadowRoot!.activeElement === this.inputField;
+        const isEmpty = this.inputField.value.length === 0;
+
+        if (isFocused && isEmpty) {
+            this.helperDropdown.classList.add('active');
+        } else {
+            this.helperDropdown.classList.remove('active');
+        }
     }
 
     private hideDropdown() {

@@ -61,6 +61,7 @@ export const OmniBar: React.FC<OmniBarProps> = ({
     const [hintMsg, setHintMsg] = useState<string | null>(null);
     
     const barRef = useRef<HTMLElement>(null);
+    const syncTimeoutRef = useRef<any>(null);
 
     // Bind custom event from native Web Component
     useEffect(() => {
@@ -75,6 +76,9 @@ export const OmniBar: React.FC<OmniBarProps> = ({
         bar.addEventListener('pkd-query', handleQueryEvent);
         return () => {
             bar.removeEventListener('pkd-query', handleQueryEvent);
+            if (syncTimeoutRef.current) {
+                clearTimeout(syncTimeoutRef.current);
+            }
         };
     }, []);
 
@@ -229,6 +233,9 @@ export const OmniBar: React.FC<OmniBarProps> = ({
     };
 
     const selectModel = (id: string, name: string) => {
+        if (syncTimeoutRef.current) {
+            clearTimeout(syncTimeoutRef.current);
+        }
         setQuery(name);
         // Sync the value back to the Custom Element input field
         const bar = barRef.current;
@@ -240,6 +247,12 @@ export const OmniBar: React.FC<OmniBarProps> = ({
         onHoverItem(null);
         onSelectItem(id);
         setStatusText(`[SYS] Linked ${name}. Syncing spatial canvas...`);
+
+        // Automatically hide the syncing message after completion (1.5s delay)
+        syncTimeoutRef.current = setTimeout(() => {
+            setStatusText('');
+            syncTimeoutRef.current = null;
+        }, 1500);
     };
 
     // Declarative pills passed to custom element
