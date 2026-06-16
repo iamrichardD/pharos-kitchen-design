@@ -56,8 +56,7 @@ const DemoWorkspaceContent: React.FC = () => {
             ? '[SYS] Catalog Offline. Registry unavailable.'
             : ''
     );
-    const [theme, setTheme] = useState('perf-dark');
-    const [isMatrixExpanded, setIsMatrixExpanded] = useState(false);
+    const theme = 'perf-dark';
 
     // Handle catalog availability due to airplane mode / network state
     useEffect(() => {
@@ -186,94 +185,8 @@ const DemoWorkspaceContent: React.FC = () => {
                 }}
             >
                 {/* 3D Visualizer Canvas */}
-                <div style={{ display: 'flex', position: 'relative' }}>
+                <div style={{ display: 'flex', position: 'relative', width: '100%' }}>
                     <CanvasStage selectedModel={selectedModel} hoveredModel={hoveredModel} />
-
-                    {/* Matrix Switcher Widget */}
-                    <div 
-                        style={{ 
-                            position: 'absolute',
-                            bottom: '20px',
-                            right: '20px',
-                            zIndex: 30,
-                            backgroundColor: '#1a1a1a',
-                            border: '1px solid rgba(255,255,255,0.1)',
-                            borderRadius: '12px',
-                            padding: isMatrixExpanded ? '16px' : '0',
-                            boxShadow: '0 15px 40px rgba(0,0,0,0.5)',
-                            width: isMatrixExpanded ? '260px' : '48px',
-                            height: isMatrixExpanded ? 'auto' : '48px',
-                            overflow: 'hidden',
-                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                        }}
-                    >
-                        <button 
-                            onClick={() => setIsMatrixExpanded(!isMatrixExpanded)}
-                            style={{ 
-                                width: '48px',
-                                height: '48px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                background: 'transparent',
-                                border: 'none',
-                                cursor: 'pointer',
-                                color: '#ff6b00',
-                                position: 'absolute',
-                                top: 0,
-                                right: 0
-                            }}
-                        >
-                            {isMatrixExpanded ? (
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <line x1="18" y1="6" x2="6" y2="18"/>
-                                    <line x1="6" y1="6" x2="18" y2="18"/>
-                                </svg>
-                            ) : (
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                                </svg>
-                            )}
-                        </button>
-
-                        {isMatrixExpanded && (
-                            <div style={{ pointerEvents: 'auto' }}>
-                                <h4 style={{ fontSize: '10px', textTransform: 'uppercase', color: '#84a59d', marginBottom: '8px', fontWeight: 600 }}>Design Matrix</h4>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                                    {[
-                                        { id: 'perf-dark', label: 'Optimization Dark' },
-                                        { id: 'perf-light', label: 'Optimization Light' },
-                                        { id: 'bal-dark', label: 'Botanical Forest' },
-                                        { id: 'bal-light', label: 'Botanical Field' },
-                                        { id: 'moody-dark', label: 'Luxe Charcoal' },
-                                        { id: 'moody-light', label: 'Luxe Platinum' },
-                                        { id: 'solar-dark', label: 'Quiet Solar' },
-                                        { id: 'solar-light', label: 'Solar Lux' },
-                                        { id: 'legacy-dark', label: 'Legacy Dark' },
-                                        { id: 'legacy-light', label: 'Legacy Light' }
-                                    ].map(swatch => (
-                                        <button 
-                                            key={swatch.id}
-                                            onClick={() => setTheme(swatch.id)}
-                                            style={{
-                                                height: '36px',
-                                                borderRadius: '4px',
-                                                border: theme === swatch.id ? '2px solid #ff6b00' : '2px solid transparent',
-                                                cursor: 'pointer',
-                                                fontSize: '10px',
-                                                fontWeight: 600,
-                                                color: '#ffffff',
-                                                backgroundColor: theme === swatch.id ? 'rgba(255, 107, 0, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                                                transition: 'all 0.2s'
-                                            }}
-                                        >
-                                            {swatch.label}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                    </div>
                 </div>
 
                 {/* Sidebar Specifications & Action Gate */}
