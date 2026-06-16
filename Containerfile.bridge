@@ -6,6 +6,8 @@
 # License: FSL-1.1
 # Purpose: Zero-Host execution environment for Revit-to-Rust Interop.
 # Why: Multi-stage build (ADR-0017) ensures isolation of compilation and test environments.
+# Traceability: Issue #258
+# Last Updated: 2026-06-16
 # ========================================================================
 
 # Stage 1: Rust Builder (Metadata Core)
@@ -19,10 +21,19 @@ RUN cd packages/pkd-core && \
     if [ "$BUILD_MODE" = "release" ]; then cargo build --release; else cargo build; fi
 
 # Stage 2: .NET SDK (Revit Bridge Integration Tests)
-FROM public.ecr.aws/sam/build-dotnet8@sha256:d234c2e83b9f9cf1208f154aa4eb5df5ff3b5f74f12782afb8062ff31ee83174 AS dotnet-tester
+FROM public.ecr.aws/docker/library/debian@sha256:35ae959f6e83ffb465e7614d27b4fddd28288caa551fbca2798367567cce80d3 AS dotnet-tester
 ARG BUILD_MODE=debug
 ENV BUILD_MODE=$BUILD_MODE
 WORKDIR /work
+
+# Install dependencies and .NET 8 SDK on Debian Bookworm
+RUN apt-get update && apt-get install -y wget gpg && \
+    wget https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb -O packages-microsoft-prod.deb && \
+    dpkg -i packages-microsoft-prod.deb && \
+    rm packages-microsoft-prod.deb && \
+    apt-get update && apt-get install -y dotnet-sdk-8.0 && \
+    rm -rf /var/lib/apt/lists/*
+
 COPY . .
 
 # Copy the native core binary into the expected location for MSBuild $(RustTargetDir)
