@@ -63,9 +63,9 @@ namespace Pkd.RevitBridge.Tests
                         ""100"": {
                             ""type"": ""PROCEDURAL_BOX"",
                             ""dimensions"": {
-                                ""width"": ""2.5"",
-                                ""depth"": ""2.5"",
-                                ""height"": ""3.5""
+                                ""width"": 2.5,
+                                ""depth"": 2.5,
+                                ""height"": 3.5
                             },
                             ""description"": ""LOD 100 Volumetric Placeholder""
                         }
@@ -144,9 +144,9 @@ namespace Pkd.RevitBridge.Tests
                     ""100"": {
                         ""type"": ""PROCEDURAL_BOX"",
                         ""dimensions"": {
-                            ""width"": ""2.5"",
-                            ""depth"": ""2.5"",
-                            ""height"": ""3.5""
+                            ""width"": 2.5,
+                            ""depth"": 2.5,
+                            ""height"": 3.5
                         },
                         ""description"": ""LOD 100 Volumetric Placeholder""
                     }
