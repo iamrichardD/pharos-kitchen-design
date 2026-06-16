@@ -273,7 +273,7 @@ export class PkdCommandBar extends HTMLElement {
                 <div class="dropdown" id="helper-dropdown">
                     <div class="grid">
                         <div>
-                            <h4 class="section-title">RFC-2378 Query Parameters</h4>
+                            <h4 class="section-title">Query options</h4>
                             <ul class="list">
                                 <li class="item">
                                     <code class="code">manufacturer=</code>
@@ -294,11 +294,11 @@ export class PkdCommandBar extends HTMLElement {
                             <ul class="list">
                                 <li class="item">
                                     <code class="code">*</code>
-                                    <span class="desc">Zero or more characters (e.g. Hob*)</span>
+                                    <span class="desc">Zero or more characters (e.g. dish*)</span>
                                 </li>
                                 <li class="item">
                                     <code class="code">?</code>
-                                    <span class="desc">Exactly one character (e.g. v?lcan)</span>
+                                    <span class="desc">Exactly one character (e.g. gr?ll)</span>
                                 </li>
                                 <li class="item">
                                     <code class="code">[ ]</code>
