@@ -61,9 +61,6 @@ const DemoWorkspaceContent: React.FC = () => {
         try {
             const h = load_registry_wasm(mockRegistry);
             setHandle(h);
-            // Default select the first item
-            const defaultMetadata = get_ghost_metadata_wasm(h, "PHX-DW-001") as PharosMetadata;
-            setSelectedModel(defaultMetadata);
         } catch (e: any) {
             console.error("WASM Registry Loading Failed:", e);
             setStatusText(`[ERROR] WASM Registry initialization failure: ${e.toString()}`);
