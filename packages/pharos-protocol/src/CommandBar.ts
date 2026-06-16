@@ -277,7 +277,7 @@ export class PkdCommandBar extends HTMLElement {
                             <ul class="list">
                                 <li class="item">
                                     <code class="code">manufacturer=</code>
-                                    <span class="desc">Filter by brand (e.g. Hobart)</span>
+                                    <span class="desc">Filter by manufacturer</span>
                                 </li>
                                 <li class="item">
                                     <code class="code">voltage=</code>

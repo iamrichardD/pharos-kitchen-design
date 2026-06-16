@@ -72,7 +72,7 @@ describe('DemoWorkspace', () => {
         render(<CanvasStage selectedModel={null} hoveredModel={null} />);
 
         expect(
-            screen.getByText(/Type \/add to search catalog or hover matches to procedural bake 3D geometry/i)
+            screen.getByText(/Use the search bar above and select a product to view its model./i)
         ).toBeDefined();
     });
 });

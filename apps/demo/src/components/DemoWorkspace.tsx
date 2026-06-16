@@ -51,9 +51,27 @@ const DemoWorkspaceContent: React.FC = () => {
     const [isPluginConnected, setIsPluginConnected] = useState(false);
     
     // UI Feedback & Theme State
-    const [statusText, setStatusText] = useState('[SYS] Catalog Online. Ready for design instructions.');
+    const [statusText, setStatusText] = useState(
+        typeof navigator !== 'undefined' && !navigator.onLine
+            ? '[SYS] Catalog Offline. Registry unavailable.'
+            : ''
+    );
     const [theme, setTheme] = useState('perf-dark');
     const [isMatrixExpanded, setIsMatrixExpanded] = useState(false);
+
+    // Handle catalog availability due to airplane mode / network state
+    useEffect(() => {
+        const handleOnline = () => setStatusText('');
+        const handleOffline = () => setStatusText('[SYS] Catalog Offline. Registry unavailable.');
+
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+
+        return () => {
+            window.removeEventListener('online', handleOnline);
+            window.removeEventListener('offline', handleOffline);
+        };
+    }, []);
 
     // Initialize WASM Registry
     useEffect(() => {

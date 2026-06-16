@@ -38,27 +38,6 @@ export const CanvasStage: React.FC<CanvasStageProps> = ({ selectedModel, hovered
                 backgroundColor: '#050505'
             }}
         >
-            {/* Legend Overlay */}
-            <div 
-                style={{
-                    position: 'absolute',
-                    top: '20px',
-                    right: '20px',
-                    textAlign: 'right',
-                    color: '#84a59d',
-                    fontSize: '10px',
-                    fontFamily: 'monospace',
-                    opacity: 0.7,
-                    pointerEvents: 'none',
-                    zIndex: 20
-                }}
-            >
-                <b style={{ color: '#ff6b00' }}>[/]</b> COMMAND &nbsp; 
-                <b style={{ color: '#ff6b00' }}>[ENTER]</b> PLACE &nbsp; 
-                <b style={{ color: '#ff6b00' }}>[ESC]</b> CLEAR &nbsp; 
-                <b style={{ color: '#ff6b00' }}>[?]</b> HELP
-            </div>
-
             {/* Active Model Name Overlay */}
             {activeModel && (
                 <div 
@@ -107,7 +86,7 @@ export const CanvasStage: React.FC<CanvasStageProps> = ({ selectedModel, hovered
                     <div>
                         {activeModel 
                             ? 'No geometry manifest found for this model'
-                            : 'Type /add to search catalog or hover matches to procedural bake 3D geometry'}
+                            : 'Use the search bar above and select a product to view its model.'}
                     </div>
                 </div>
             )}
