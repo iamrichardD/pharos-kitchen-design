@@ -13,52 +13,15 @@
  * @vitest-environment happy-dom
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, vi } from 'vitest';
 import React from 'react';
 import { render, screen, waitFor, cleanup } from '@testing-library/react';
 import { DemoWorkspace } from './DemoWorkspace';
+import { CanvasStage } from './CanvasStage';
 import { resetWasmSingleton } from '../utils/wasmStore';
-import { get_ghost_metadata_wasm } from '@pkd/core';
-
-// Mock @pkd/core
-vi.mock('@pkd/core', () => ({
-    default: vi.fn(() => Promise.resolve()),
-    load_registry_wasm: vi.fn(() => ({})),
-    get_ghost_metadata_wasm: vi.fn(() => ({
-        metadata_id: "PHX-DW-001",
-        name: "Hobart LXeR Commercial Dishwasher",
-        schema_version: "1.0.0",
-        classification: {
-            omniclass_table_23: "23-33 11 11 11",
-            category: "Specialty Equipment"
-        },
-        parameters: {
-            PKD_Manufacturer: "Hobart",
-            PKD_ModelNumber: "LXeR",
-            PKD_Voltage: "208V",
-            PKD_Phase: 3,
-            PKD_Wattage: "4500W",
-            PKD_BTU: "0",
-            PKD_WIDTH: 24.0,
-            PKD_DEPTH: 24.0,
-            PKD_HEIGHT: 34.0,
-            PKD_DrainConnection: "2\" NPT"
-        },
-        lod_geometry_specs: {
-            "100": {
-                type: "PROCEDURAL_BOX",
-                dimensions: { width: "2.0", depth: "2.0", height: "2.83" },
-                description: "LOD 100 Volumetric Placeholder"
-            }
-        },
-        performance_metadata: {
-            estimated_rfa_size_kb: 34,
-            procedural_lod_enabled: true,
-            ghost_link_active: true
-        }
-    })),
-    sync_state_wasm: vi.fn(),
-}));
+import init from '@pkd/core';
+import fs from 'fs';
+import path from 'path';
 
 // Mock ThreeJsInterpreter to avoid WebGL / Canvas errors in happy-dom
 vi.mock('./ThreeJsInterpreter', () => ({
@@ -66,8 +29,15 @@ vi.mock('./ThreeJsInterpreter', () => ({
 }));
 
 describe('DemoWorkspace', () => {
+    beforeAll(async () => {
+        // Read the actual compiled WASM binary from the pkd-core package
+        const wasmPath = path.resolve(__dirname, '../../../../packages/pkd-core/pkg/pkd_core_bg.wasm');
+        const wasmBuffer = fs.readFileSync(wasmPath);
+        // Pre-initialize the WASM module using the buffer directly
+        await init(wasmBuffer);
+    });
+
     beforeEach(() => {
-        vi.clearAllMocks();
         resetWasmSingleton();
     });
 
@@ -98,16 +68,11 @@ describe('DemoWorkspace', () => {
         });
     });
 
-    it('test_should_render_canvas_placeholder_when_no_model_selected', async () => {
-        // Mock get_ghost_metadata_wasm to return null or no geometry manifest for the canvas stage placeholder check
-        (get_ghost_metadata_wasm as any).mockReturnValueOnce(null);
+    it('test_should_render_canvas_placeholder_when_no_model_selected', () => {
+        render(<CanvasStage selectedModel={null} hoveredModel={null} />);
 
-        render(<DemoWorkspace />);
-
-        await waitFor(() => {
-            expect(
-                screen.getByText(/Type \/add to search catalog or hover matches to procedural bake 3D geometry/i)
-            ).toBeDefined();
-        });
+        expect(
+            screen.getByText(/Type \/add to search catalog or hover matches to procedural bake 3D geometry/i)
+        ).toBeDefined();
     });
 });

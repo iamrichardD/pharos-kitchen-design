@@ -10,6 +10,20 @@
  * ======================================================================== */
 
 export function matchWildcard(text: string, pattern: string): boolean {
+  if (pattern.length > 100) {
+    console.warn("[ReDoS Warden] Query pattern length exceeds 100 characters limit.");
+    return false;
+  }
+  const wildcardCount = (pattern.match(/[*+?\[]/g) || []).length;
+  if (wildcardCount > 3) {
+    console.warn("[ReDoS Warden] Query pattern contains too many wildcard symbols (max 3).");
+    return false;
+  }
+  if (/([*+?]{2,})/.test(pattern)) {
+    console.warn("[ReDoS Warden] Query pattern contains pathological contiguous wildcards.");
+    return false;
+  }
+
   const startTime = performance.now();
   try {
     const regexPattern = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
@@ -30,56 +44,5 @@ export function matchWildcard(text: string, pattern: string): boolean {
   } catch (e) {
     console.error("[ReDoS Warden] Regex compilation failed:", e);
     return false;
-  }
-}
-
-export function applyFilter(query: string, targetSelector: string, postFilterCallback?: () => void) {
-  const entries = document.querySelectorAll(targetSelector);
-  const normalizedQuery = query.toLowerCase().trim();
-  
-  entries.forEach(entry => {
-    const htmlEntry = entry as HTMLElement;
-    const raw = htmlEntry.dataset.raw?.toLowerCase() || htmlEntry.innerText.toLowerCase() || '';
-    let match = true;
-
-    if (normalizedQuery.length > 0) {
-      if (normalizedQuery.includes('=')) {
-        const parts = normalizedQuery.split('=');
-        const key = parts[0]?.trim();
-        const value = parts[1]?.trim();
-        
-        if (key && value) {
-          const isWildcard = value.includes('*') || value.includes('+') || value.includes('?') || value.includes('[');
-          
-          if (isWildcard) {
-             const pattern = new RegExp(`${key}[:=]\\s?([^\\s]+)`, 'i');
-             const fieldMatch = raw.match(pattern);
-             match = (fieldMatch && fieldMatch[1]) ? matchWildcard(fieldMatch[1], value) : false;
-          } else {
-             match = raw.includes(`${key}: ${value}`) || 
-                     raw.includes(`${key}=${value}`) || 
-                     (raw.includes(`[${value.toUpperCase()}]`));
-          }
-        }
-      } else {
-        const isWildcard = normalizedQuery.includes('*') || normalizedQuery.includes('+') || normalizedQuery.includes('?') || normalizedQuery.includes('[');
-        if (isWildcard) {
-           match = matchWildcard(raw, `.*${normalizedQuery}.*`);
-        } else {
-           match = raw.includes(normalizedQuery);
-        }
-      }
-    }
-
-    htmlEntry.style.display = match ? 'block' : 'none';
-    if (match) {
-      htmlEntry.classList.add('animate-in', 'fade-in');
-    } else {
-      htmlEntry.classList.remove('animate-in', 'fade-in');
-    }
-  });
-
-  if (postFilterCallback) {
-    postFilterCallback();
   }
 }

@@ -226,16 +226,16 @@ const DemoWorkspaceContent: React.FC = () => {
                                 <h4 style={{ fontSize: '10px', textTransform: 'uppercase', color: '#84a59d', marginBottom: '8px', fontWeight: 600 }}>Design Matrix</h4>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                                     {[
-                                        { id: 'perf-dark', label: 'Opt-D' },
-                                        { id: 'perf-light', label: 'Optimism' },
-                                        { id: 'bal-dark', label: 'Bot-D' },
-                                        { id: 'bal-light', label: 'Botanical' },
-                                        { id: 'moody-dark', label: 'Lux-D' },
-                                        { id: 'moody-light', label: 'Luxe' },
-                                        { id: 'solar-dark', label: 'Quiet-D' },
+                                        { id: 'perf-dark', label: 'Optimization Dark' },
+                                        { id: 'perf-light', label: 'Optimization Light' },
+                                        { id: 'bal-dark', label: 'Botanical Forest' },
+                                        { id: 'bal-light', label: 'Botanical Field' },
+                                        { id: 'moody-dark', label: 'Luxe Charcoal' },
+                                        { id: 'moody-light', label: 'Luxe Platinum' },
+                                        { id: 'solar-dark', label: 'Quiet Solar' },
                                         { id: 'solar-light', label: 'Solar Lux' },
-                                        { id: 'legacy-dark', label: 'Leg-D' },
-                                        { id: 'legacy-light', label: 'Legacy' }
+                                        { id: 'legacy-dark', label: 'Legacy Dark' },
+                                        { id: 'legacy-light', label: 'Legacy Light' }
                                     ].map(swatch => (
                                         <button 
                                             key={swatch.id}
@@ -302,7 +302,7 @@ const DemoWorkspaceContent: React.FC = () => {
                                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
                                     <span style={{ color: '#9ca3af' }}>Voltage:</span>
                                     <span style={{ fontFamily: 'monospace', color: '#ff6b00' }}>
-                                        {activeModel.parameters.PKD_Voltage || 'N/A'}
+                                        {activeModel.parameters.PKD_Voltage ? `${activeModel.parameters.PKD_Voltage}V` : 'None'}
                                     </span>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
@@ -314,13 +314,13 @@ const DemoWorkspaceContent: React.FC = () => {
                                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
                                     <span style={{ color: '#9ca3af' }}>Wattage:</span>
                                     <span style={{ fontFamily: 'monospace', color: '#ff6b00' }}>
-                                        {activeModel.parameters.PKD_Wattage || 'N/A'}
+                                        {activeModel.parameters.PKD_Wattage ? `${activeModel.parameters.PKD_Wattage}W` : 'None'}
                                     </span>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
                                     <span style={{ color: '#9ca3af' }}>BTU / Hr:</span>
                                     <span style={{ fontFamily: 'monospace', color: '#ff6b00' }}>
-                                        {activeModel.parameters.PKD_BTU || 'N/A'}
+                                        {activeModel.parameters.PKD_BTU !== undefined ? activeModel.parameters.PKD_BTU : 'N/A'}
                                     </span>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
@@ -364,19 +364,23 @@ const DemoWorkspaceContent: React.FC = () => {
                             </button>
 
                             {/* Simulation Toggles (Interactive Testing Harness) */}
-                            <div 
+                            <details 
                                 style={{ 
                                     marginTop: '20px',
                                     backgroundColor: 'rgba(255,255,255,0.02)',
                                     padding: '12px',
                                     borderRadius: '4px',
-                                    border: '1px solid rgba(255,255,255,0.05)'
+                                    border: '1px solid rgba(255,255,255,0.05)',
+                                    cursor: 'pointer'
                                 }}
                             >
-                                <div style={{ fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase', color: '#84a59d', marginBottom: '8px' }}>
-                                    Action Gate Simulator
-                                </div>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                <summary style={{ fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase', color: '#84a59d', outline: 'none' }}>
+                                    Developer Diagnostics
+                                </summary>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '12px', cursor: 'default' }} onClick={(e) => e.stopPropagation()}>
+                                    <div style={{ fontSize: '9px', textTransform: 'uppercase', color: '#6b7280', fontWeight: 'bold', marginBottom: '4px' }}>
+                                        Action Gate Simulator
+                                    </div>
                                     <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', color: '#9ca3af', cursor: 'pointer' }}>
                                         <input 
                                             type="checkbox" 
@@ -394,7 +398,7 @@ const DemoWorkspaceContent: React.FC = () => {
                                         Simulate Revit Plugin Connected
                                     </label>
                                 </div>
-                            </div>
+                            </details>
                         </div>
                     </div>
                 </div>

@@ -10,10 +10,10 @@
         "parameters": {
             "PKD_Manufacturer": "Hobart",
             "PKD_ModelNumber": "LXeR",
-            "PKD_Voltage": "208V",
+            "PKD_Voltage": 208,
             "PKD_Phase": 3,
-            "PKD_Wattage": "4500W",
-            "PKD_BTU": "0",
+            "PKD_Wattage": 4500,
+            "PKD_BTU": 0,
             "PKD_WIDTH": 24.0,
             "PKD_DEPTH": 24.0,
             "PKD_HEIGHT": 34.0,
@@ -22,7 +22,7 @@
         "lod_geometry_specs": {
             "100": {
                 "type": "PROCEDURAL_BOX",
-                "dimensions": { "width": "2.0", "depth": "2.0", "height": "2.83" },
+                "dimensions": { "width": 2.0, "depth": 2.0, "height": 2.83 },
                 "description": "LOD 100 Volumetric Placeholder"
             }
         },
@@ -43,10 +43,10 @@
         "parameters": {
             "PKD_Manufacturer": "AccuTemp Products",
             "PKD_ModelNumber": "N6120-1",
-            "PKD_Voltage": "240V",
+            "PKD_Voltage": 240,
             "PKD_Phase": 3,
-            "PKD_Wattage": "12000W",
-            "PKD_BTU": "0",
+            "PKD_Wattage": 12000,
+            "PKD_BTU": 0,
             "PKD_WIDTH": 22.0,
             "PKD_DEPTH": 30.0,
             "PKD_HEIGHT": 20.0,
@@ -55,7 +55,7 @@
         "lod_geometry_specs": {
             "100": {
                 "type": "PROCEDURAL_BOX",
-                "dimensions": { "width": "1.83", "depth": "2.5", "height": "1.67" },
+                "dimensions": { "width": 1.83, "depth": 2.5, "height": 1.67 },
                 "description": "LOD 100 Volumetric Placeholder"
             }
         },
@@ -76,10 +76,10 @@
         "parameters": {
             "PKD_Manufacturer": "ACP, Inc.",
             "PKD_ModelNumber": "MXP22T",
-            "PKD_Voltage": "240V",
+            "PKD_Voltage": 240,
             "PKD_Phase": 1,
-            "PKD_Wattage": "5700W",
-            "PKD_BTU": "0",
+            "PKD_Wattage": 5700,
+            "PKD_BTU": 0,
             "PKD_WIDTH": 25.0,
             "PKD_DEPTH": 26.0,
             "PKD_HEIGHT": 20.0,
@@ -88,7 +88,7 @@
         "lod_geometry_specs": {
             "100": {
                 "type": "PROCEDURAL_BOX",
-                "dimensions": { "width": "2.08", "depth": "2.16", "height": "1.67" },
+                "dimensions": { "width": 2.08, "depth": 2.16, "height": 1.67 },
                 "description": "LOD 100 Volumetric Placeholder"
             }
         },
@@ -109,10 +109,10 @@
         "parameters": {
             "PKD_Manufacturer": "Vulcan",
             "PKD_ModelNumber": "V4B36",
-            "PKD_Voltage": "None",
+            "PKD_Voltage": 0,
             "PKD_Phase": 0,
-            "PKD_Wattage": "0W",
-            "PKD_BTU": "120000",
+            "PKD_Wattage": 0,
+            "PKD_BTU": 120000,
             "PKD_WIDTH": 36.0,
             "PKD_DEPTH": 38.0,
             "PKD_HEIGHT": 36.0,
@@ -121,7 +121,7 @@
         "lod_geometry_specs": {
             "100": {
                 "type": "PROCEDURAL_BOX",
-                "dimensions": { "width": "3.0", "depth": "3.16", "height": "3.0" },
+                "dimensions": { "width": 3.0, "depth": 3.16, "height": 3.0 },
                 "description": "LOD 100 Volumetric Placeholder"
             }
         },

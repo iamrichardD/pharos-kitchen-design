@@ -120,6 +120,27 @@ export const OmniBar: React.FC<OmniBarProps> = ({
             ccsoQuery = `query name=*${trimmed}*`;
         }
 
+        // Pre-sanitize and restrict query pattern for ReDoS protection (G-01)
+        if (ccsoQuery.length > 100) {
+            console.warn("[ReDoS Warden] Query pattern length exceeds 100 characters limit.");
+            setErrorMsg('UNVERIFIED_RAW_DATA: Query execution rejected. Length exceeds 100 characters.');
+            setSuggestions([]);
+            return;
+        }
+        const wildcardCount = (ccsoQuery.match(/[*+?\[]/g) || []).length;
+        if (wildcardCount > 3) {
+            console.warn("[ReDoS Warden] Query pattern contains too many wildcard symbols (max 3).");
+            setErrorMsg('UNVERIFIED_RAW_DATA: Query execution rejected. Too many wildcards (max 3).');
+            setSuggestions([]);
+            return;
+        }
+        if (/([*+?]{2,})/.test(ccsoQuery)) {
+            console.warn("[ReDoS Warden] Query pattern contains pathological contiguous wildcards.");
+            setErrorMsg('UNVERIFIED_RAW_DATA: Query execution rejected. Pathological contiguous wildcards.');
+            setSuggestions([]);
+            return;
+        }
+
         // Execute query with temporal 100ms sentinel check for wildcards
         const hasWildcards = /[*+?]/.test(ccsoQuery);
         const startTime = performance.now();
@@ -224,7 +245,7 @@ export const OmniBar: React.FC<OmniBarProps> = ({
     // Declarative pills passed to custom element
     const pillsValue = JSON.stringify([
         { label: "Hobart", value: "manufacturer=Hobart" },
-        { label: "240V Specs", value: "voltage=240V" },
+        { label: "240V Specs", value: "voltage=240" },
         { label: "All Items", value: "category=*" }
     ]);
 

@@ -263,7 +263,7 @@ mod tests {
                 "PKD_TargetRegions": ["US"],
                 "PKD_AssetViews": {}
             },
-            "lod_geometry_specs": { "100": { "type": "BoundingBox", "dimensions": { "width": "1", "depth": "1", "height": "1" }, "description": "test" } },
+            "lod_geometry_specs": { "100": { "type": "BoundingBox", "dimensions": { "width": 1.0, "depth": 1.0, "height": 1.0 }, "description": "test" } },
             "performance_metadata": { "estimated_rfa_size_kb": 1, "procedural_lod_enabled": false, "ghost_link_active": false }
         }"#;
 
@@ -326,7 +326,7 @@ mod tests {
                         "PKD_TargetRegions": ["US"],
                         "PKD_AssetViews": {}
                     },
-                    "lod_geometry_specs": { "100": { "type": "BoundingBox", "dimensions": { "width": "1", "depth": "1", "height": "1" }, "description": "test" } },
+                    "lod_geometry_specs": { "100": { "type": "BoundingBox", "dimensions": { "width": 1.0, "depth": 1.0, "height": 1.0 }, "description": "test" } },
                     "performance_metadata": { "estimated_rfa_size_kb": 1, "procedural_lod_enabled": false, "ghost_link_active": false }
                 }
             }

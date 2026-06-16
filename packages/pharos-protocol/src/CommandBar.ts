@@ -433,10 +433,20 @@ export class PkdCommandBar extends HTMLElement {
     };
 
     private handleWindowKeydown = (e: KeyboardEvent) => {
-        if (e.key === '/' && document.activeElement !== this && !this.shadowRoot!.activeElement) {
-            e.preventDefault();
-            this.inputField?.focus();
-            this.updateDropdownState();
+        if (e.key === '/') {
+            const active = document.activeElement;
+            if (active) {
+                const tagName = active.tagName.toUpperCase();
+                const contentEditable = active.getAttribute('contenteditable');
+                if (tagName === 'INPUT' || tagName === 'TEXTAREA' || contentEditable === 'true' || contentEditable === '') {
+                    return;
+                }
+            }
+            if (document.activeElement !== this && !this.shadowRoot!.activeElement) {
+                e.preventDefault();
+                this.inputField?.focus();
+                this.updateDropdownState();
+            }
         }
         if (e.key === 'Escape' && (document.activeElement === this || this.shadowRoot!.activeElement === this.inputField)) {
             this.inputField?.blur();
@@ -447,12 +457,8 @@ export class PkdCommandBar extends HTMLElement {
     private updateDropdownState() {
         if (!this.inputField || !this.helperDropdown) return;
         
-        // Show help dropdown ONLY when focused and empty
-        if (this.inputField.value.trim() === '') {
-            this.helperDropdown.classList.add('active');
-        } else {
-            this.helperDropdown.classList.remove('active');
-        }
+        // Show help dropdown when focused, regardless of whether empty or not (G-07)
+        this.helperDropdown.classList.add('active');
     }
 
     private hideDropdown() {

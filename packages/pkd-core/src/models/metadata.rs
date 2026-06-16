@@ -37,7 +37,7 @@ pub struct Classification {
 pub struct LodGeometrySpec {
     #[serde(rename = "type")]
     pub spec_type: String,
-    pub dimensions: Option<BTreeMap<String, String>>,
+    pub dimensions: Option<BTreeMap<String, f64>>,
     pub components: Option<Vec<String>>,
     pub features: Option<Vec<String>>,
     pub description: String,
