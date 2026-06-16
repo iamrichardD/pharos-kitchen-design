@@ -1,0 +1,134 @@
+{
+    "PHX-DW-001": {
+        "metadata_id": "PHX-DW-001",
+        "name": "Hobart LXeR Commercial Dishwasher",
+        "schema_version": "1.0.0",
+        "classification": {
+            "omniclass_table_23": "23-33 11 11 11",
+            "category": "Specialty Equipment"
+        },
+        "parameters": {
+            "PKD_Manufacturer": "Hobart",
+            "PKD_ModelNumber": "LXeR",
+            "PKD_Voltage": 208,
+            "PKD_Phase": 3,
+            "PKD_Wattage": 4500,
+            "PKD_BTU": 0,
+            "PKD_WIDTH": 24.0,
+            "PKD_DEPTH": 24.0,
+            "PKD_HEIGHT": 34.0,
+            "PKD_DrainConnection": "2\" NPT"
+        },
+        "lod_geometry_specs": {
+            "100": {
+                "type": "PROCEDURAL_BOX",
+                "dimensions": { "width": 2.0, "depth": 2.0, "height": 2.83 },
+                "description": "LOD 100 Volumetric Placeholder"
+            }
+        },
+        "performance_metadata": {
+            "estimated_rfa_size_kb": 34,
+            "procedural_lod_enabled": true,
+            "ghost_link_active": true
+        }
+    },
+    "PHX-ST-002": {
+        "metadata_id": "PHX-ST-002",
+        "name": "AccuTemp Countertop Steamer",
+        "schema_version": "1.0.0",
+        "classification": {
+            "omniclass_table_23": "23-33 11 11 11",
+            "category": "Specialty Equipment"
+        },
+        "parameters": {
+            "PKD_Manufacturer": "AccuTemp Products",
+            "PKD_ModelNumber": "N6120-1",
+            "PKD_Voltage": 240,
+            "PKD_Phase": 3,
+            "PKD_Wattage": 12000,
+            "PKD_BTU": 0,
+            "PKD_WIDTH": 22.0,
+            "PKD_DEPTH": 30.0,
+            "PKD_HEIGHT": 20.0,
+            "PKD_DrainConnection": "1\" NPT"
+        },
+        "lod_geometry_specs": {
+            "100": {
+                "type": "PROCEDURAL_BOX",
+                "dimensions": { "width": 1.83, "depth": 2.5, "height": 1.67 },
+                "description": "LOD 100 Volumetric Placeholder"
+            }
+        },
+        "performance_metadata": {
+            "estimated_rfa_size_kb": 28,
+            "procedural_lod_enabled": true,
+            "ghost_link_active": true
+        }
+    },
+    "PHX-OV-003": {
+        "metadata_id": "PHX-OV-003",
+        "name": "ACP High Speed Oven",
+        "schema_version": "1.0.0",
+        "classification": {
+            "omniclass_table_23": "23-33 11 11 11",
+            "category": "Specialty Equipment"
+        },
+        "parameters": {
+            "PKD_Manufacturer": "ACP, Inc.",
+            "PKD_ModelNumber": "MXP22T",
+            "PKD_Voltage": 240,
+            "PKD_Phase": 1,
+            "PKD_Wattage": 5700,
+            "PKD_BTU": 0,
+            "PKD_WIDTH": 25.0,
+            "PKD_DEPTH": 26.0,
+            "PKD_HEIGHT": 20.0,
+            "PKD_DrainConnection": "None"
+        },
+        "lod_geometry_specs": {
+            "100": {
+                "type": "PROCEDURAL_BOX",
+                "dimensions": { "width": 2.08, "depth": 2.16, "height": 1.67 },
+                "description": "LOD 100 Volumetric Placeholder"
+            }
+        },
+        "performance_metadata": {
+            "estimated_rfa_size_kb": 42,
+            "procedural_lod_enabled": true,
+            "ghost_link_active": true
+        }
+    },
+    "PHX-RG-004": {
+        "metadata_id": "PHX-RG-004",
+        "name": "Vulcan V-Series Range",
+        "schema_version": "1.0.0",
+        "classification": {
+            "omniclass_table_23": "23-33 11 11 11",
+            "category": "Specialty Equipment"
+        },
+        "parameters": {
+            "PKD_Manufacturer": "Vulcan",
+            "PKD_ModelNumber": "V4B36",
+            "PKD_Voltage": 0,
+            "PKD_Phase": 0,
+            "PKD_Wattage": 0,
+            "PKD_BTU": 120000,
+            "PKD_WIDTH": 36.0,
+            "PKD_DEPTH": 38.0,
+            "PKD_HEIGHT": 36.0,
+            "PKD_DrainConnection": "None"
+        },
+        "lod_geometry_specs": {
+            "100": {
+                "type": "PROCEDURAL_BOX",
+                "dimensions": { "width": 3.0, "depth": 3.16, "height": 3.0 },
+                "description": "LOD 100 Volumetric Placeholder"
+            }
+        },
+        "performance_metadata": {
+            "estimated_rfa_size_kb": 56,
+            "procedural_lod_enabled": true,
+            "ghost_link_active": true
+        }
+    }
+}

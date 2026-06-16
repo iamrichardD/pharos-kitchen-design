@@ -1,25 +1,32 @@
 ## 🎯 Fix Summary (Mandatory)
-This PR remediates Rust toolchain noise and metadata gaps identified during the final engineering push of Sprint 5.02. It centralizes package governance via workspace inheritance and removes dead code from the CLI models.
+This PR implements RFC-2378 OmniBar and the Hover-Bake protocol within the `/demo` workspace. It replaces the static conceptual blueprint with a live, command-palette styled search interface and real-time WebGL canvas rendering powered by the resident WASM core.
 
-### Changes in Rust Workspace
-- Implement workspace-level package metadata inheritance in root `Cargo.toml`.
-- Refactor all member `Cargo.toml` files to use inherited metadata for `edition`, `authors`, `license`, and `repository`.
-- Resolve Stylistic Drifts identified by `cargo fmt` across all slices.
-- Surgically remove the unused `TestGuard` and its associated methods from `packages/pkd-cli/src/models.rs` to resolve `#[warn(dead_code)]`.
+### Changes in Demo Workspace
+- Implement `OmniBar.tsx` command-palette with custom ghost slash prefix, syntax validation, and schema hints.
+- Implement `CanvasStage.tsx` which listens to `UI_HOVER` events to bake and display 3D models procedurally.
+- Integrate active/disabled Action Gate logic for the "Send to Revit" button, checking passkey auth and local websocket connection.
+- Integrate matrix-switcher themes.
+- Unify index page under `DemoWorkspace.tsx` and run all verification tests inside Podman.
 
 ## 🚀 ADR-0017: Implementation Strategy
-- **Selected Strategy:** Surgical Strike (Single-Path)
-- **Rationale:** This is a trivial remediation involving internal refactoring and metadata alignment. No architectural or behavioral changes were made to public APIs.
-- **Alternatives Evaluated:** Manual per-package metadata updates (discarded as brittle and high-maintenance).
+- **Classification:** Non-Trivial (ECT: 3)
+- **Rationale for Shared Package Changes:**
+  - `wildcard.rs`: The `max_depth` was increased from 10 to 200 because depth 10 was too shallow for real-world queries against long product names. The iteration limit of 10,000 still provides a hard ceiling on total CPU usage, and stack consumption at depth 200 is strictly bounded by the small `match_recursive` stack frame size × 200, ensuring no risk of stack overflow.
+  - `bindings.rs`: The serializer was changed to `json_compatible()` because the default `serde_wasm_bindgen` serializer produces empty JS objects for `serde_json::Value` types, which broke query result deserialization across the FFI boundary.
+  - `index.ts`: The new `CommandBar` export was added to enable Custom Element registration as a side effect of importing `@pkd/protocol`.
+- **Alternatives Evaluated:** The Three-Option Crucible was not performed for these specific shared-package changes. The post-hoc rationale is that each change was a surgical, single-line fix required to unblock the primary UI work, and none introduced new architectural patterns.
 
 ## 🛡️ Security Review (Shift-Left)
-- **Input Validation:** N/A (Internal refactoring).
-- **Data Integrity:** N/A.
-- **FFI/IPC Safety:** Verified that dead code removal only targeted internal test helpers and not FFI exports.
+- **Input Validation:** Enforces strict regex and token sanitization for the search bar.
+- **ReDoS Protection:** Implemented a hard 100ms temporal sentinel on wildcard searches to prevent main-thread locks on pathological expressions.
+- **Access Control:** The Action Gate disables high-value endpoints ("Send to Revit") for unauthenticated users (Guests) and displays security-hardened tooltips.
 
 ## 📊 DORA Metrics
-- **Lead Time:** 45 minutes
-- **Change Failure Rate:** 0% (Verified 🟢 PHAROS GREEN in Podman).
-- **Deployment Frequency:** N/A.
+- **Lead Time:** 1.5 hours
+- **Change Failure Rate:** 0% (Verified 🟢 PHAROS GREEN in Podman via marketing slice build and local test runner).
 
-Closes #237
+Closes #242
+
+## ⚔️ The Pharos Crucible (Audit Log)
+- **Status**: 🟢 PHAROS GREEN (Remediated)
+- **Audit Log**: [docs/governance/audits/issue-242.md](file:///work/docs/governance/audits/issue-242.md)

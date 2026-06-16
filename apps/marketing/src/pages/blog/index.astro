@@ -13,7 +13,6 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import ToonLoader from '../../components/ToonLoader.astro';
-import CommandBar from '../../components/CommandBar.astro';
 
 const allUpdates = await getCollection('updates');
 // Sort by Date descending, then ID descending
@@ -44,11 +43,13 @@ const streams = [
       </header>
 
       <!-- RFC-2378 Command Bar -->
-      <CommandBar 
-        targetSelector=".blog-entry" 
-        placeholder="Filter by stream=engineering, tag=wasm, or keywords..."
-        pills={streams}
-      />
+      <div class="mb-16 sticky top-24 z-40">
+        <pkd-command-bar 
+          id="blog-command-bar"
+          placeholder="Filter by stream=engineering, tag=wasm, or keywords..."
+          pills={JSON.stringify(streams)}
+        />
+      </div>
 
       <!-- Log Feed -->
       <div id="blog-feed" class="space-y-24">
@@ -83,3 +84,64 @@ const streams = [
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   }
 </style>
+
+<script>
+  import '@pkd/protocol';
+  import { matchWildcard } from '../../utils/wildcardFilter';
+
+  const commandBar = document.getElementById('blog-command-bar');
+  const targetSelector = '.blog-entry';
+
+  function applyFilterLocal(query: string, targetSelector: string) {
+    const entries = document.querySelectorAll(targetSelector);
+    const normalizedQuery = query.toLowerCase().trim();
+    
+    entries.forEach(entry => {
+      const htmlEntry = entry as HTMLElement;
+      const raw = htmlEntry.dataset.raw?.toLowerCase() || htmlEntry.innerText.toLowerCase() || '';
+      let match = true;
+
+      if (normalizedQuery.length > 0) {
+        if (normalizedQuery.includes('=')) {
+          const parts = normalizedQuery.split('=');
+          const key = parts[0]?.trim();
+          const value = parts[1]?.trim();
+          
+          if (key && value) {
+            const isWildcard = value.includes('*') || value.includes('+') || value.includes('?') || value.includes('[');
+            
+            if (isWildcard) {
+               const pattern = new RegExp(`${key}[:=]\\s?([^\\s]+)`, 'i');
+               const fieldMatch = raw.match(pattern);
+               match = (fieldMatch && fieldMatch[1]) ? matchWildcard(fieldMatch[1], value) : false;
+            } else {
+               match = raw.includes(`${key}: ${value}`) || 
+                       raw.includes(`${key}=${value}`) || 
+                       (raw.includes(`[${value.toUpperCase()}]`));
+            }
+          }
+        } else {
+          const isWildcard = normalizedQuery.includes('*') || normalizedQuery.includes('+') || normalizedQuery.includes('?') || normalizedQuery.includes('[');
+          if (isWildcard) {
+             match = matchWildcard(raw, `.*${normalizedQuery}.*`);
+          } else {
+             match = raw.includes(normalizedQuery);
+          }
+        }
+      }
+
+      htmlEntry.style.display = match ? 'block' : 'none';
+      if (match) {
+        htmlEntry.classList.add('animate-in', 'fade-in');
+      } else {
+        htmlEntry.classList.remove('animate-in', 'fade-in');
+      }
+    });
+  }
+
+  commandBar?.addEventListener('pkd-query', (e: Event) => {
+    const customEvent = e as CustomEvent;
+    applyFilterLocal(customEvent.detail.value, targetSelector);
+  });
+</script>
+

@@ -136,7 +136,10 @@ impl PharosRegistryHandle {
     /// Why: Centralizes the search logic in the WASM core for cross-platform parity.
     pub fn query_wasm(&self, query_string: String) -> Result<JsValue, JsValue> {
         match self.query_internal(query_string) {
-            Ok(json) => Ok(serde_wasm_bindgen::to_value(&json).unwrap()),
+            Ok(json) => {
+                let serializer = serde_wasm_bindgen::Serializer::json_compatible();
+                Ok(Serialize::serialize(&json, &serializer).unwrap())
+            }
             Err(e) => Err(JsValue::from_str(&e)),
         }
     }
@@ -213,8 +216,16 @@ impl PharosRegistryHandle {
 
 #[wasm_bindgen]
 pub fn load_registry_wasm(registry_js: JsValue) -> Result<PharosRegistryHandle, JsValue> {
-    let items: HashMap<String, PharosMetadata> = serde_wasm_bindgen::from_value(registry_js)
-        .map_err(|e| JsValue::from_str(&format!("Invalid registry format: {}", e)))?;
+    let registry_str: String = if registry_js.is_string() {
+        registry_js.as_string().unwrap()
+    } else {
+        let js_str = js_sys::JSON::stringify(&registry_js)
+            .map_err(|e| JsValue::from_str(&format!("Failed to stringify registry: {:?}", e)))?;
+        js_str.as_string().unwrap_or_default()
+    };
+
+    let items: HashMap<String, PharosMetadata> = serde_json::from_str(&registry_str)
+        .map_err(|e| JsValue::from_str(&format!("Invalid registry JSON format: {}", e)))?;
 
     let handle = PharosRegistryHandle::new();
     for (k, v) in items {
@@ -244,7 +255,10 @@ pub fn get_ghost_metadata_wasm(
                         &final_metadata,
                     );
             }
-            Ok(serde_wasm_bindgen::to_value(&final_metadata).unwrap())
+            let metadata_str = serde_json::to_string(&final_metadata)
+                .map_err(|e| JsValue::from_str(&format!("Failed to serialize metadata: {}", e)))?;
+            js_sys::JSON::parse(&metadata_str)
+                .map_err(|e| JsValue::from_str(&format!("Failed to parse metadata: {:?}", e)))
         }
         None => Err(JsValue::from_str(&format!(
             "Metadata ID '{}' not found in registry",
@@ -259,7 +273,14 @@ pub fn sync_state_wasm(
     id: String,
     delta_js: JsValue,
 ) -> Result<JsValue, JsValue> {
-    let deltas: BTreeMap<String, ParameterValue> = serde_wasm_bindgen::from_value(delta_js)
+    let delta_str: String = if delta_js.is_string() {
+        delta_js.as_string().unwrap()
+    } else {
+        let js_str = js_sys::JSON::stringify(&delta_js)
+            .map_err(|e| JsValue::from_str(&format!("Failed to stringify delta: {:?}", e)))?;
+        js_str.as_string().unwrap_or_default()
+    };
+    let deltas: BTreeMap<String, ParameterValue> = serde_json::from_str(&delta_str)
         .map_err(|e| JsValue::from_str(&format!("Invalid delta format: {}", e)))?;
 
     handle.tuning_deltas.insert(id, deltas);
@@ -271,10 +292,24 @@ pub fn validate_metadata_wasm(
     schema_js: JsValue,
     metadata_js: JsValue,
 ) -> Result<JsValue, JsValue> {
-    let schema: PharosSchema = serde_wasm_bindgen::from_value(schema_js)
+    let schema_str: String = if schema_js.is_string() {
+        schema_js.as_string().unwrap()
+    } else {
+        let js_str = js_sys::JSON::stringify(&schema_js)
+            .map_err(|e| JsValue::from_str(&format!("Failed to stringify schema: {:?}", e)))?;
+        js_str.as_string().unwrap_or_default()
+    };
+    let schema: PharosSchema = serde_json::from_str(&schema_str)
         .map_err(|e| JsValue::from_str(&format!("Invalid schema format: {}", e)))?;
 
-    let metadata: PharosMetadata = serde_wasm_bindgen::from_value(metadata_js)
+    let metadata_str: String = if metadata_js.is_string() {
+        metadata_js.as_string().unwrap()
+    } else {
+        let js_str = js_sys::JSON::stringify(&metadata_js)
+            .map_err(|e| JsValue::from_str(&format!("Failed to stringify metadata: {:?}", e)))?;
+        js_str.as_string().unwrap_or_default()
+    };
+    let metadata: PharosMetadata = serde_json::from_str(&metadata_str)
         .map_err(|e| JsValue::from_str(&format!("Invalid metadata format: {}", e)))?;
 
     let mut all_errors = Vec::new();
@@ -288,13 +323,23 @@ pub fn validate_metadata_wasm(
     if all_errors.is_empty() {
         Ok(JsValue::TRUE)
     } else {
-        Err(serde_wasm_bindgen::to_value(&all_errors).unwrap())
+        let errors_str = serde_json::to_string(&all_errors)
+            .map_err(|e| JsValue::from_str(&format!("Failed to serialize errors: {}", e)))?;
+        js_sys::JSON::parse(&errors_str)
+            .map_err(|e| JsValue::from_str(&format!("Failed to parse errors: {:?}", e)))
     }
 }
 
 #[wasm_bindgen]
 pub fn verify_lod_wasm(metadata_js: JsValue, target_lod: String) -> Result<bool, JsValue> {
-    let metadata: PharosMetadata = serde_wasm_bindgen::from_value(metadata_js)
+    let metadata_str: String = if metadata_js.is_string() {
+        metadata_js.as_string().unwrap()
+    } else {
+        let js_str = js_sys::JSON::stringify(&metadata_js)
+            .map_err(|e| JsValue::from_str(&format!("Failed to stringify metadata: {:?}", e)))?;
+        js_str.as_string().unwrap_or_default()
+    };
+    let metadata: PharosMetadata = serde_json::from_str(&metadata_str)
         .map_err(|e| JsValue::from_str(&format!("Invalid metadata format: {}", e)))?;
 
     match LodValidator::verify_lod(&metadata, &target_lod) {

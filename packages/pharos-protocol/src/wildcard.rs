@@ -40,7 +40,7 @@ struct Warden {
 impl Warden {
     fn new() -> Self {
         Self {
-            max_depth: 10,
+            max_depth: 200,
             max_iterations: 10000,
             current_depth: 0,
             current_iterations: 0,

@@ -52,9 +52,9 @@
     "100": {
       "type": "BoundingBox",
       "dimensions": {
-        "width": "24\"",
-        "depth": "24\"",
-        "height": "34\""
+        "width": 24.0,
+        "depth": 24.0,
+        "height": 34.0
       },
       "description": "Simple extruded footprint for spatial coordination."
     },

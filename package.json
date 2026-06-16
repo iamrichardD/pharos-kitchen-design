@@ -27,18 +27,16 @@
     "@types/node": "^25.9.1",
     "tsx": "^4.21.0"
   },
-  "overrides": {
-    "yaml": "^2.9.0",
-    "yaml-language-server": {
-      "yaml": "^2.9.0"
-    }
-  },
   "dependencies": {
     "fast-xml-parser": "5.7.3",
     "react": "19.0.0",
     "react-dom": "19.0.0"
   },
   "overrides": {
+    "yaml": "^2.9.0",
+    "yaml-language-server": {
+      "yaml": "^2.9.0"
+    },
     "react": "19.0.0",
     "react-dom": "19.0.0"
   }

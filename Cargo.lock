@@ -3323,6 +3323,7 @@ dependencies = [
  "anyhow",
  "dashmap",
  "hex",
+ "js-sys",
  "once_cell",
  "pharos-protocol",
  "rayon",

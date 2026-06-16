@@ -75,13 +75,21 @@ RUN npm ci && \
     npm cache clean --force && \
     rm -rf /root/.npm/_cacache
 
-# Stage 7: .NET SDK (Integrated \"Pulse\" Handshake)
-FROM mcr.microsoft.com/dotnet/sdk@sha256:3e7b0cefe1b00a350ffb0e06b4e1271a4e791df6b8ac4239be05f1ae2736fcff AS pulse-final
+# Stage 7: .NET SDK (Integrated "Pulse" Handshake) on Debian
+FROM public.ecr.aws/docker/library/debian@sha256:35ae959f6e83ffb465e7614d27b4fddd28288caa551fbca2798367567cce80d3 AS pulse-final
 ARG BUILD_MODE=debug
 ENV BUILD_MODE=$BUILD_MODE
 WORKDIR /work
+
+# Install dependencies and .NET 8 SDK on Debian Bookworm
+RUN apt-get update && apt-get install -y wget gpg && \
+    wget https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb -O packages-microsoft-prod.deb && \
+    dpkg -i packages-microsoft-prod.deb && \
+    rm packages-microsoft-prod.deb && \
+    apt-get update && apt-get install -y dotnet-sdk-8.0 && \
+    rm -rf /var/lib/apt/lists/*
+
 COPY . .
-RUN apt-get update && apt-get install -y libssl-dev pkg-config && rm -rf /var/lib/apt/lists/*
 COPY --from=rust-builder /work/target/$BUILD_MODE/libpkd_core.so /work/target/$BUILD_MODE/libpkd_core.so
 COPY --from=rust-builder /work/target/$BUILD_MODE/pkd /usr/local/bin/pkd
 RUN chmod +x /usr/local/bin/pkd
