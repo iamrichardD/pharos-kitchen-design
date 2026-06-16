@@ -22,7 +22,6 @@
 ## 🚀 Active Sprint
 
 ### Sprint 5.03: The Ghost & The Bridge (2026-06-15) - 🚀 ACTIVE
-- [ ] **Issue #242**: [TAG: UX] Implement RFC-2378 OmniBar & Procedural Hover-Bake. [DESC: Unify Demo UX with Command-First vision and real-time Rust baking.] [ECT: 3]
 - [ ] **Issue #239**: [TAG: UX] Refactor Marketing Site IA for Command-First Identity. [DESC: Implement high-fidelity Terminal Hero and capability-based documentation flow.] [ECT: 5]
 - [ ] **Issue #185**: [TAG: Perf] Zero-Allocation JSON Parsing. [DESC: Implementing source-generated JSON parsers to eliminate allocation overhead in WASM.]
 - [ ] **Issue #107**: [TAG: Perf] Dependency Pruning. [DESC: Audit and prune `pkd-core` dependencies for lean WASM binaries.]

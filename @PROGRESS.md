@@ -22,6 +22,9 @@
 ## 🎯 Current Milestone: Phase 5 - IKD Enablement (Ghost Links & Scale)
 **Status**: 🚀 ACTIVE (Sprint 5.03)
 
+### Sprint 5.03: The Ghost & The Bridge (2026-06-15) - 🚀 ACTIVE
+- [x] **Issue #242**: [TAG: UX] Implement RFC-2378 OmniBar & Procedural Hover-Bake. [DESC: Implemented Web Component command bar, unified wildcard search across workspaces, integrated real-time WebGL canvas, and verified input validation / ReDoS protections. Verified 🟢 PHAROS GREEN.] [ECT: 3] [ACT: 4]
+
 ### Sprint 5.02: The Speed & Security Foundation (2026-06-08) - ✅ COMPLETED
 - [x] **Issue #248**: [TAG: Governance] Conclude Sprint 5.02 and Draft Friday Handoff. [DESC: Reconciled Sprint 5.02 backlog, updated DORA metrics, drafted Friday handoff report, and prepared weekly update blog post. Verified 🟢 PHAROS GREEN.] [ECT: 1] [ACT: 1]
 - [x] **Issue #235**: [TAG: Infra] Resolve Demo URL 404 Build Omission. [DESC: Refactored Containerfile.ts to build and nest the Demo app, enforced React 19.0.0, and unified the React island for context sharing. Verified 🟢 PHAROS GREEN.] [ECT: 2] [ACT: 2]
