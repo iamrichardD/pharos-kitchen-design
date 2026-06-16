@@ -292,41 +292,43 @@ const DemoWorkspaceContent: React.FC = () => {
                             </button>
 
                             {/* Simulation Toggles (Interactive Testing Harness) */}
-                            <details 
-                                style={{ 
-                                    marginTop: '20px',
-                                    backgroundColor: 'rgba(255,255,255,0.02)',
-                                    padding: '12px',
-                                    borderRadius: '4px',
-                                    border: '1px solid rgba(255,255,255,0.05)',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                <summary style={{ fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase', color: '#84a59d', outline: 'none' }}>
-                                    Developer Diagnostics
-                                </summary>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '12px', cursor: 'default' }} onClick={(e) => e.stopPropagation()}>
-                                    <div style={{ fontSize: '9px', textTransform: 'uppercase', color: '#6b7280', fontWeight: 'bold', marginBottom: '4px' }}>
-                                        Action Gate Simulator
+                            {import.meta.env.DEV && (
+                                <details 
+                                    style={{ 
+                                        marginTop: '20px',
+                                        backgroundColor: 'rgba(255,255,255,0.02)',
+                                        padding: '12px',
+                                        borderRadius: '4px',
+                                        border: '1px solid rgba(255,255,255,0.05)',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    <summary style={{ fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase', color: '#84a59d', outline: 'none' }}>
+                                        Developer Diagnostics
+                                    </summary>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '12px', cursor: 'default' }} onClick={(e) => e.stopPropagation()}>
+                                        <div style={{ fontSize: '9px', textTransform: 'uppercase', color: '#6b7280', fontWeight: 'bold', marginBottom: '4px' }}>
+                                            Action Gate Simulator
+                                        </div>
+                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', color: '#9ca3af', cursor: 'pointer' }}>
+                                            <input 
+                                                type="checkbox" 
+                                                checked={isAuthenticated} 
+                                                onChange={(e) => setIsAuthenticated(e.target.checked)} 
+                                            />
+                                            Simulate Authenticated User
+                                        </label>
+                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', color: '#9ca3af', cursor: 'pointer' }}>
+                                            <input 
+                                                type="checkbox" 
+                                                checked={isPluginConnected} 
+                                                onChange={(e) => setIsPluginConnected(e.target.checked)} 
+                                            />
+                                            Simulate Revit Plugin Connected
+                                        </label>
                                     </div>
-                                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', color: '#9ca3af', cursor: 'pointer' }}>
-                                        <input 
-                                            type="checkbox" 
-                                            checked={isAuthenticated} 
-                                            onChange={(e) => setIsAuthenticated(e.target.checked)} 
-                                        />
-                                        Simulate Authenticated User
-                                    </label>
-                                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', color: '#9ca3af', cursor: 'pointer' }}>
-                                        <input 
-                                            type="checkbox" 
-                                            checked={isPluginConnected} 
-                                            onChange={(e) => setIsPluginConnected(e.target.checked)} 
-                                        />
-                                        Simulate Revit Plugin Connected
-                                    </label>
-                                </div>
-                            </details>
+                                </details>
+                            )}
                         </div>
                     </div>
                 </div>
