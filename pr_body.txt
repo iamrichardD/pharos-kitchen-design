@@ -1,32 +1,31 @@
 ## 🎯 Fix Summary (Mandatory)
-This PR implements RFC-2378 OmniBar and the Hover-Bake protocol within the `/demo` workspace. It replaces the static conceptual blueprint with a live, command-palette styled search interface and real-time WebGL canvas rendering powered by the resident WASM core.
+This PR connects the Demo OmniBar to the production search index and category shards, replacing the static mock registry.
 
 ### Changes in Demo Workspace
-- Implement `OmniBar.tsx` command-palette with custom ghost slash prefix, syntax validation, and schema hints.
-- Implement `CanvasStage.tsx` which listens to `UI_HOVER` events to bake and display 3D models procedurally.
-- Integrate active/disabled Action Gate logic for the "Send to Revit" button, checking passkey auth and local websocket connection.
-- Integrate matrix-switcher themes.
-- Unify index page under `DemoWorkspace.tsx` and run all verification tests inside Podman.
+- Fetches `search-index.bin` on mount from the production CDN URL (`https://registry.iamrichardd.com/search-index.bin`) and loads it into the WASM registry handle via `load_registry_wasm`.
+- Added an `add_shard_wasm` method to `PharosRegistryHandle` to merge category-specific shard records directly into the cache.
+- Lazily fetches category shards (e.g. `shards/refrigeration.bin`) when a search query specifies a category, reading the CDN shard payload as text and passing it directly to WASM to eliminate double serialization.
+- Implemented fetch cancellation via `AbortController` to cancel pending shard downloads if the query changes or the component unmounts.
+- Created `NetworkConnectivity.ts` to manage network connectivity detection using `navigator.onLine`, connection profile change events (`navigator.connection` change event), window online/offline events, and relaxed 60-second background polling.
+- Rendered a monospace offline status banner (`data-testid="offline-mode-indicator"`) when offline, with a manual "Retry Connection" button that immediately triggers the connectivity ping check.
+- Added warning feedback if searching offline yields 0 matches.
 
 ## 🚀 ADR-0017: Implementation Strategy
 - **Classification:** Non-Trivial (ECT: 3)
 - **Rationale for Shared Package Changes:**
-  - `wildcard.rs`: The `max_depth` was increased from 10 to 200 because depth 10 was too shallow for real-world queries against long product names. The iteration limit of 10,000 still provides a hard ceiling on total CPU usage, and stack consumption at depth 200 is strictly bounded by the small `match_recursive` stack frame size × 200, ensuring no risk of stack overflow.
-  - `bindings.rs`: The serializer was changed to `json_compatible()` because the default `serde_wasm_bindgen` serializer produces empty JS objects for `serde_json::Value` types, which broke query result deserialization across the FFI boundary.
-  - `index.ts`: The new `CommandBar` export was added to enable Custom Element registration as a side effect of importing `@pkd/protocol`.
-- **Alternatives Evaluated:** The Three-Option Crucible was not performed for these specific shared-package changes. The post-hoc rationale is that each change was a surgical, single-line fix required to unblock the primary UI work, and none introduced new architectural patterns.
+  - `bindings.rs`: Added `add_shard_wasm(&self, shard_str: &str)` to allow loading raw text shards directly into the registry handle's cache from TS.
+- **Alternatives Evaluated:** Option A (Direct CDN/R2 client-side fetch) was chosen to ensure the demo workspace uses the exact same data surface as production search index.
 
 ## 🛡️ Security Review (Shift-Left)
-- **Input Validation:** Enforces strict regex and token sanitization for the search bar.
-- **ReDoS Protection:** Implemented a hard 100ms temporal sentinel on wildcard searches to prevent main-thread locks on pathological expressions.
-- **Access Control:** The Action Gate disables high-value endpoints ("Send to Revit") for unauthenticated users (Guests) and displays security-hardened tooltips.
+- **Input Validation:** Category slug replaces non-alphanumeric characters with underscores, preventing traversal attacks when constructing shard URLs.
+- **Access Control:** UI features display robust warning tooltips and disabled button state when operating offline or as a Guest.
 
 ## 📊 DORA Metrics
-- **Lead Time:** 1.5 hours
-- **Change Failure Rate:** 0% (Verified 🟢 PHAROS GREEN in Podman via marketing slice build and local test runner).
+- **Lead Time:** 2 hours
+- **Change Failure Rate:** 0% (All 17 tests pass in Podman, full pulse run verified 🟢 PHAROS GREEN).
 
-Closes #242
+Closes #252
 
 ## ⚔️ The Pharos Crucible (Audit Log)
-- **Status**: 🟢 PHAROS GREEN (Remediated)
-- **Audit Log**: [docs/governance/audits/issue-242.md](file:///work/docs/governance/audits/issue-242.md)
+- **Status**: 🟢 PHAROS GREEN (Verified)
+- **Audit Log**: [docs/governance/audits/issue-252.md](file:///work/docs/governance/audits/issue-252.md)
