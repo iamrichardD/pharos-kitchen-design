@@ -10,7 +10,6 @@
 
 use crate::lazy_loader::{LazyShardLoader, ShardFetcher};
 use crate::models::metadata::PharosMetadata;
-#[cfg(any(test, not(target_arch = "wasm32")))]
 use crate::models::metadata::RegistryShard;
 use crate::models::query::{filter_metadata, results_to_toon_json, QueryEvaluator};
 use crate::models::schema::PharosSchema;
@@ -142,6 +141,25 @@ impl PharosRegistryHandle {
             }
             Err(e) => Err(JsValue::from_str(&e)),
         }
+    }
+
+    /// Merges category-specific shard records or generic metadata items directly into the cache.
+    /// Why: Enables lazy loading of shards client-side to keep the surface index small.
+    pub fn add_shard_wasm(&self, shard_str: &str) -> Result<(), JsValue> {
+        if let Ok(shard) = serde_json::from_str::<RegistryShard>(shard_str) {
+            for (k, v) in shard.records {
+                self.cache.insert(k, v);
+            }
+        } else if let Ok(records) =
+            serde_json::from_str::<HashMap<String, PharosMetadata>>(shard_str)
+        {
+            for (k, v) in records {
+                self.cache.insert(k, v);
+            }
+        } else {
+            return Err(JsValue::from_str("Invalid shard JSON format"));
+        }
+        Ok(())
     }
 }
 

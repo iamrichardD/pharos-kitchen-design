@@ -3,14 +3,15 @@
  * Component: Marketing / Content
  * File: roadmap.toon
  * Purpose: Automated reflection of authoritative internal logs.
- * Last Synced: 2026-06-16T06:23:40.575Z
+ * Last Synced: 2026-06-16T21:01:22.192Z
  * ======================================================================== */
 
 title: Pharos System Roadmap
 type: roadmap
-lastSynced: 2026-06-16T06:23:40.575Z
+lastSynced: 2026-06-16T21:01:22.192Z
 
 items[38]{id, name, status, phase, tag, description}:
+  "242", "Implement RFC-2378 OmniBar & Procedural Hover-Bake", "Deployed", "Sprint 5.03", "CORE", "Implemented Web Component command bar, unified wildcard search across workspaces, integrated real-time WebGL canvas, and verified input validation / ReDoS protections. Verified 🟢 PHAROS GREEN."
   "248", "Conclude Sprint 5.02 and Draft Friday Handoff", "Deployed", "Sprint 5.02", "PROTOCOL", "Reconciled Sprint 5.02 backlog, updated DORA metrics, drafted Friday handoff report, and prepared weekly update blog post. Verified 🟢 PHAROS GREEN."
   "235", "Resolve Demo URL 404 Build Omission", "Deployed", "Sprint 5.02", "TOOLING", "Refactored Containerfile.ts to build and nest the Demo app, enforced React 19.0.0, and unified the React island for context sharing. Verified 🟢 PHAROS GREEN."
   "237", "Remediate Rust Toolchain and Metadata Warnings", "Deployed", "Sprint 5.02", "CORE", "Centralized package metadata via workspace inheritance, resolved stylistic drifts, and removed dead code in `pkd-cli`. Verified 🟢 PHAROS GREEN."
@@ -41,7 +42,6 @@ items[38]{id, name, status, phase, tag, description}:
   "123", "Zero-Allocation Marshalling", "Deployed", "Sprint 4.11", "BRIDGE", "Delivered high-performance memory-safe marshalling for the Revit Bridge (ECT 4)."
   "175", "Design System Alignment", "Deployed", "Sprint 4.11", "UX", "Aligned the Marketing TOON loader with the Pharos Design System typography."
   "168", "Automated Boundary Enforcement", "Deployed", "Sprint 4.11", "PROTOCOL", "Implemented ADR-0044 drift detection to ensure Rust/C# parity."
-  "242", "Implement RFC-2378 OmniBar & Procedural Hover-Bake", "In Progress", "Sprint 5.03", "CORE", "Unify Demo UX with Command-First vision and real-time Rust baking."
   "239", "Refactor Marketing Site IA for Command-First Identity", "In Progress", "Sprint 5.03", "CORE", "Implement high-fidelity Terminal Hero and capability-based documentation flow."
   "185", "Zero-Allocation JSON Parsing", "In Progress", "Sprint 5.03", "CORE", "Implementing source-generated JSON parsers to eliminate allocation overhead in WASM."
   "107", "Dependency Pruning", "In Progress", "Sprint 5.03", "CORE", "Audit and prune `pkd-core` dependencies for lean WASM binaries."

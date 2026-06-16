@@ -14,7 +14,7 @@ import { load_registry_wasm, get_ghost_metadata_wasm, type PharosRegistryHandle 
 import { useWasm, WasmProvider } from './WasmContext';
 import { OmniBar } from './OmniBar';
 import { CanvasStage } from './CanvasStage';
-import mockRegistry from '../__fixtures__/mockRegistry.json';
+import { useConnectivity } from '../utils/NetworkConnectivity';
 
 export interface PharosMetadata {
     metadata_id: string;
@@ -50,38 +50,59 @@ const DemoWorkspaceContent: React.FC = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isPluginConnected, setIsPluginConnected] = useState(false);
     
-    // UI Feedback & Theme State
-    const [statusText, setStatusText] = useState(
-        typeof navigator !== 'undefined' && !navigator.onLine
-            ? '[SYS] Catalog Offline. Registry unavailable.'
-            : ''
-    );
+    // UI Feedback & Connection State
+    const { isOnline, triggerCheck } = useConnectivity();
+    const isOffline = !isOnline;
+    const [statusText, setStatusText] = useState('');
     const theme = 'perf-dark';
 
-    // Handle catalog availability due to airplane mode / network state
+    // Handle catalog availability due to network state changes from custom hook
     useEffect(() => {
-        const handleOnline = () => setStatusText('');
-        const handleOffline = () => setStatusText('[SYS] Catalog Offline. Registry unavailable.');
+        if (isOffline) {
+            setStatusText('[SYS] Catalog Offline. Registry unavailable.');
+        } else {
+            setStatusText('');
+        }
+    }, [isOffline]);
 
-        window.addEventListener('online', handleOnline);
-        window.addEventListener('offline', handleOffline);
-
-        return () => {
-            window.removeEventListener('online', handleOnline);
-            window.removeEventListener('offline', handleOffline);
-        };
-    }, []);
-
-    // Initialize WASM Registry
+    // Initialize WASM Registry by fetching search-index.bin from the CDN URL
+    // Why: Loads the unauthenticated public search surface index into local memory for fast discovery.
     useEffect(() => {
         if (wasmStatus !== 'READY') return;
-        try {
-            const h = load_registry_wasm(mockRegistry);
-            setHandle(h);
-        } catch (e: any) {
-            console.error("WASM Registry Loading Failed:", e);
-            setStatusText(`[ERROR] WASM Registry initialization failure: ${e.toString()}`);
-        }
+        
+        let active = true;
+        const loadRegistry = async () => {
+            try {
+                setStatusText('[SYS] Fetching production search index...');
+                const response = await fetch('https://registry.iamrichardd.com/search-index.bin');
+                if (!response.ok) {
+                    throw new Error(`HTTP error ${response.status}`);
+                }
+                const registryJson = await response.json();
+                if (!active) return;
+                
+                const h = load_registry_wasm(registryJson);
+                setHandle(h);
+                setStatusText('');
+            } catch (e: any) {
+                console.error("WASM Registry CDN Loading Failed, initializing empty registry handle:", e);
+                if (!active) return;
+                try {
+                    // Initialize empty handle instead of mockRegistry fallback
+                    const h = load_registry_wasm({});
+                    setHandle(h);
+                    setStatusText('');
+                } catch (fallbackErr: any) {
+                    setStatusText(`[ERROR] WASM Registry initialization failure: ${fallbackErr.toString()}`);
+                }
+            }
+        };
+        
+        loadRegistry();
+        
+        return () => {
+            active = false;
+        };
     }, [wasmStatus]);
 
     // Apply active design matrix class on document body
@@ -164,6 +185,44 @@ const DemoWorkspaceContent: React.FC = () => {
                 minHeight: 'calc(100vh - 180px)'
             }}
         >
+            {isOffline && (
+                <div 
+                    data-testid="offline-mode-indicator"
+                    style={{ 
+                        padding: '10px 16px', 
+                        backgroundColor: 'rgba(239, 68, 68, 0.15)', 
+                        border: '1px solid #ef4444', 
+                        borderRadius: '4px', 
+                        color: '#ef4444', 
+                        fontSize: '12px', 
+                        fontFamily: 'monospace',
+                        textAlign: 'center',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '12px'
+                    }}
+                >
+                    <span>[OFFLINE] Offline Mode Active. Local cache search enabled.</span>
+                    <button
+                        onClick={triggerCheck}
+                        style={{
+                            backgroundColor: '#ef4444',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: '2px',
+                            padding: '2px 8px',
+                            cursor: 'pointer',
+                            fontSize: '10px',
+                            textTransform: 'uppercase',
+                            fontWeight: 'bold'
+                        }}
+                    >
+                        Retry Connection
+                    </button>
+                </div>
+            )}
+
             {/* OmniBar Area */}
             <div className="blueprint-border" style={{ padding: '1.5rem', borderRadius: '8px', backgroundColor: 'rgba(26,26,26,0.3)' }}>
                 <OmniBar 

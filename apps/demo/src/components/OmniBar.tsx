@@ -14,6 +14,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import type { PharosRegistryHandle } from '@pkd/core';
 // Import the Custom Element package to guarantee registration
 import '@pkd/protocol';
+import { useConnectivity } from '../utils/NetworkConnectivity';
 
 interface OmniBarProps {
     registryHandle: PharosRegistryHandle | null;
@@ -53,12 +54,16 @@ export const OmniBar: React.FC<OmniBarProps> = ({
     statusText,
     setStatusText
 }) => {
+    const { isOnline } = useConnectivity();
     const [query, setQuery] = useState('');
     const [suggestions, setSuggestions] = useState<SearchResult[]>([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [highlightedIndex, setHighlightedIndex] = useState(-1);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const [hintMsg, setHintMsg] = useState<string | null>(null);
+    
+    const [loadedCategories, setLoadedCategories] = useState<Set<string>>(new Set());
+    const [loadingShard, setLoadingShard] = useState<string | null>(null);
     
     const barRef = useRef<HTMLElement>(null);
     const syncTimeoutRef = useRef<any>(null);
@@ -86,11 +91,65 @@ export const OmniBar: React.FC<OmniBarProps> = ({
     useEffect(() => {
         if (!registryHandle) return;
 
+        const abortController = new AbortController();
+
         if (query.trim() === '') {
             setSuggestions([]);
             setErrorMsg(null);
             setHintMsg(null);
-            return;
+            return () => {
+                abortController.abort();
+            };
+        }
+
+        // Lazy loading of category-specific shards
+        // Why: Lazily downloads deep forensic shards from Cloudflare R2 CDN when the query warrants it.
+        const categoryMatch = query.match(/category=(?:"([^"]+)"|'([^']+)'|([^\s&]+))/i);
+        const categoryVal = categoryMatch ? (categoryMatch[1] || categoryMatch[2] || categoryMatch[3]) : null;
+        if (categoryVal && categoryVal !== '*') {
+            const categorySlug = categoryVal
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '_')
+                .replace(/^_+|_+$/g, '');
+
+            if (categorySlug && !loadedCategories.has(categorySlug) && loadingShard !== categorySlug) {
+                setLoadingShard(categorySlug);
+                setStatusText(`[SYS] Lazily downloading category shard: ${categorySlug}...`);
+
+                fetch(`https://registry.iamrichardd.com/shards/${categorySlug}.bin`, {
+                    signal: abortController.signal
+                })
+                    .then(res => {
+                        if (!res.ok) {
+                            throw new Error(`HTTP error ${res.status}`);
+                        }
+                        return res.text();
+                    })
+                    .then(shardText => {
+                        try {
+                            registryHandle.add_shard_wasm(shardText);
+                            setLoadedCategories(prev => {
+                                const next = new Set(prev);
+                                next.add(categorySlug);
+                                return next;
+                            });
+                            setStatusText(`[SYS] Loaded category shard: ${categorySlug}`);
+                        } catch (err: any) {
+                            console.error(`Failed to add shard ${categorySlug} to WASM registry:`, err);
+                            setStatusText(`[ERROR] Failed to load category shard: ${categorySlug}`);
+                        } finally {
+                            setLoadingShard(null);
+                        }
+                    })
+                    .catch(err => {
+                        if (err.name === 'AbortError') {
+                            return;
+                        }
+                        console.error(`Failed to fetch shard ${categorySlug}:`, err);
+                        setStatusText(`[ERROR] Failed to download category shard: ${categorySlug}`);
+                        setLoadingShard(null);
+                    });
+            }
         }
 
         // Schema field validation hint
@@ -129,20 +188,26 @@ export const OmniBar: React.FC<OmniBarProps> = ({
             console.warn("[ReDoS Warden] Query pattern length exceeds 100 characters limit.");
             setErrorMsg('UNVERIFIED_RAW_DATA: Query execution rejected. Length exceeds 100 characters.');
             setSuggestions([]);
-            return;
+            return () => {
+                abortController.abort();
+            };
         }
         const wildcardCount = (ccsoQuery.match(/[*+?\[]/g) || []).length;
         if (wildcardCount > 3) {
             console.warn("[ReDoS Warden] Query pattern contains too many wildcard symbols (max 3).");
             setErrorMsg('UNVERIFIED_RAW_DATA: Query execution rejected. Too many wildcards (max 3).');
             setSuggestions([]);
-            return;
+            return () => {
+                abortController.abort();
+            };
         }
         if (/([*+?]{2,})/.test(ccsoQuery)) {
             console.warn("[ReDoS Warden] Query pattern contains pathological contiguous wildcards.");
             setErrorMsg('UNVERIFIED_RAW_DATA: Query execution rejected. Pathological contiguous wildcards.');
             setSuggestions([]);
-            return;
+            return () => {
+                abortController.abort();
+            };
         }
 
         // Execute query with temporal 100ms sentinel check for wildcards
@@ -158,7 +223,9 @@ export const OmniBar: React.FC<OmniBarProps> = ({
                 console.error(`[FORENSIC ALERT] Wildcard query exceeded 100ms threshold: ${duration.toFixed(2)}ms`);
                 setErrorMsg('UNVERIFIED_RAW_DATA: Query execution exceeded 100ms temporal sentinel.');
                 setSuggestions([]);
-                return;
+                return () => {
+                    abortController.abort();
+                };
             }
 
             setErrorMsg(null);
@@ -182,16 +249,27 @@ export const OmniBar: React.FC<OmniBarProps> = ({
                 if (mapped.length > 0) {
                     setStatusText(`[HINT] Found ${mapped.length} matches. Use arrow keys to select.`);
                 } else {
-                    setStatusText(`[SYS] No matches for "${query}".`);
+                    if (!isOnline) {
+                        setStatusText("Offline, and search results may be limited");
+                    } else {
+                        setStatusText(`[SYS] No matches for "${query}".`);
+                    }
                 }
             } else {
                 setSuggestions([]);
+                if (!isOnline) {
+                    setStatusText("Offline, and search results may be limited");
+                }
             }
         } catch (err: any) {
             setErrorMsg(`Syntax Error: ${err.toString()}`);
             setSuggestions([]);
         }
-    }, [query, registryHandle]);
+
+        return () => {
+            abortController.abort();
+        };
+    }, [query, registryHandle, loadedCategories, isOnline]);
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
         if (suggestions.length === 0) return;
