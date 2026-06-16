@@ -273,7 +273,7 @@ export class PkdCommandBar extends HTMLElement {
                 <div class="dropdown" id="helper-dropdown">
                     <div class="grid">
                         <div>
-                            <h4 class="section-title">Query options</h4>
+                            <h4 class="section-title">Query Options</h4>
                             <ul class="list">
                                 <li class="item">
                                     <code class="code">manufacturer=</code>
@@ -340,13 +340,6 @@ export class PkdCommandBar extends HTMLElement {
                         </div>
                     </div>
 
-                    <div class="footer" style="margin-top: 16px;">
-                        <span>CCSO NAMESERVER ARCHITECTURE // RFC-2378 STANDARD</span>
-                        <div class="footer-right">
-                            <span>SLASH to focus</span>
-                            <span>ESC to blur</span>
-                        </div>
-                    </div>
                 </div>
             </div>
         `;
