@@ -5,7 +5,8 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: AWS and Cloudflare provider configuration.
- * Traceability: ADR 0020
+ * Traceability: ADR 0020, Issue #254
+ * Last Updated: 2026-06-17
  * ======================================================================== */
 
 terraform {
@@ -18,7 +19,7 @@ terraform {
     }
     cloudflare = {
       source  = "cloudflare/cloudflare"
-      version = "~> 4.0"
+      version = "~> 5.0"
     }
   }
 

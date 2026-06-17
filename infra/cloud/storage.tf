@@ -4,12 +4,20 @@
  * File: storage.tf
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
- * Purpose: Cloudflare D1 database provisioning.
- * Traceability: ADR 0021, Issue #5
+ * Purpose: Cloudflare D1 database and R2 bucket provisioning.
+ * Traceability: ADR 0021, Issue #5, Issue #254
+ * Last Updated: 2026-06-17
  * ======================================================================== */
 
 # 1. Cloudflare D1 Database for Auth Bridge
 resource "cloudflare_d1_database" "auth_db" {
   account_id = var.CLOUDFLARE_ACCOUNT_ID
   name       = "${var.PROJECT_NAME}-auth"
+}
+
+# 2. Cloudflare R2 Bucket for BIM Registry Assets
+resource "cloudflare_r2_bucket" "registry_bucket" {
+  account_id = var.CLOUDFLARE_ACCOUNT_ID
+  name       = "${var.PROJECT_NAME}-registry"
+  location   = "WNAM" # Western North America (Low latency for primary targets)
 }
