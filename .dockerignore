@@ -7,4 +7,9 @@
 **/.artifacts/
 **/*.db
 **/*.log
+**/.terraform/
+**/.cargo/
 .git/
+.worktrees/
+*.png
+*.txt

@@ -66,7 +66,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mkdir -p ~/.cargo/registry ~/.cargo/git ~/.npm
-          bash scripts/pulse.sh
+          bash scripts/pulse.sh --slice core
 
       - name: "🏗️ Build Site (Zero-Host)"
         run: |
