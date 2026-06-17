@@ -6,8 +6,8 @@
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Authoritative DNS Records for the 'pkd' identity subdomain.
  * Why: Segregates application-specific email authority from primary business records.
- * Traceability: Issue #205, ADR-0050
- * Last Updated: 2026-06-09
+ * Traceability: Issue #205, Issue #254, ADR-0050
+ * Last Updated: 2026-06-17
  * ======================================================================== */
 
 # --- SPF (Sender Policy Framework) ---
