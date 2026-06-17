@@ -23,6 +23,7 @@
 **Status**: 🚀 ACTIVE (Sprint 5.03)
 
 ### Sprint 5.03: The Ghost & The Bridge (2026-06-15) - 🚀 ACTIVE
+- [x] **Issue #254**: [TAG: Infrastructure] Provision Cloudflare R2 Registry Storage. [DESC: Provisioned the R2 bucket for BIM Registry assets, bound `registry.iamrichardd.com` via `cloudflare_r2_custom_domain`, and upgraded the infrastructure slice to Cloudflare Provider v5.20.0 for compatibility. Verified 🟢 PHAROS GREEN.] [ECT: 2] [ACT: 3]
 - [x] **Issue #242**: [TAG: UX] Implement RFC-2378 OmniBar & Procedural Hover-Bake. [DESC: Implemented Web Component command bar, unified wildcard search across workspaces, integrated real-time WebGL canvas, and verified input validation / ReDoS protections. Verified 🟢 PHAROS GREEN.] [ECT: 3] [ACT: 4]
 
 ### Sprint 5.02: The Speed & Security Foundation (2026-06-08) - ✅ COMPLETED
