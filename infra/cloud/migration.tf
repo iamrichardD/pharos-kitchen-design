@@ -44,3 +44,18 @@ moved {
   from = cloudflare_d1_database.auth_db
   to   = cloudflare_d1_database.auth_db
 }
+
+moved {
+  from = cloudflare_r2_bucket.registry_bucket
+  to   = cloudflare_r2_bucket.registry_bucket
+}
+
+moved {
+  from = cloudflare_r2_bucket_domain.registry_domain
+  to   = cloudflare_r2_custom_domain.registry_domain
+}
+
+moved {
+  from = cloudflare_record.registry_dns
+  to   = cloudflare_dns_record.registry_dns
+}
