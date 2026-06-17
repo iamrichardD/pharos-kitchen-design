@@ -3,14 +3,15 @@
  * Component: Marketing / Content
  * File: roadmap.toon
  * Purpose: Automated reflection of authoritative internal logs.
- * Last Synced: 2026-06-16T21:01:22.192Z
+ * Last Synced: 2026-06-17T19:13:53.456Z
  * ======================================================================== */
 
 title: Pharos System Roadmap
 type: roadmap
-lastSynced: 2026-06-16T21:01:22.192Z
+lastSynced: 2026-06-17T19:13:53.456Z
 
-items[38]{id, name, status, phase, tag, description}:
+items[39]{id, name, status, phase, tag, description}:
+  "254", "Provision Cloudflare R2 Registry Storage", "Deployed", "Sprint 5.03", "CORE", "Provisioned the R2 bucket for BIM Registry assets, bound `registry.iamrichardd.com` via `cloudflare_r2_custom_domain`, and upgraded the infrastructure slice to Cloudflare Provider v5.20.0 for compatibility. Verified 🟢 PHAROS GREEN."
   "242", "Implement RFC-2378 OmniBar & Procedural Hover-Bake", "Deployed", "Sprint 5.03", "CORE", "Implemented Web Component command bar, unified wildcard search across workspaces, integrated real-time WebGL canvas, and verified input validation / ReDoS protections. Verified 🟢 PHAROS GREEN."
   "248", "Conclude Sprint 5.02 and Draft Friday Handoff", "Deployed", "Sprint 5.02", "PROTOCOL", "Reconciled Sprint 5.02 backlog, updated DORA metrics, drafted Friday handoff report, and prepared weekly update blog post. Verified 🟢 PHAROS GREEN."
   "235", "Resolve Demo URL 404 Build Omission", "Deployed", "Sprint 5.02", "TOOLING", "Refactored Containerfile.ts to build and nest the Demo app, enforced React 19.0.0, and unified the React island for context sharing. Verified 🟢 PHAROS GREEN."
