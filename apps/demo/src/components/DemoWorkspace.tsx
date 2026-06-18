@@ -71,11 +71,16 @@ const DemoWorkspaceContent: React.FC = () => {
         if (wasmStatus !== 'READY') return;
         
         let active = true;
+        const REGISTRY_ENDPOINT = 'https://registry.iamrichardd.com/pharos-kitchen-design/search-index.bin';
+
         const loadRegistry = async () => {
             try {
                 setStatusText('[SYS] Fetching production search index...');
-                const response = await fetch('https://registry.iamrichardd.com/search-index.bin');
+                const response = await fetch(REGISTRY_ENDPOINT);
                 if (!response.ok) {
+                    if (response.status === 404 || response.status === 403) {
+                        throw new Error(`Registry Access Denied: 404/403 Object Mismatch at target URL.`);
+                    }
                     throw new Error(`HTTP error ${response.status}`);
                 }
                 const registryJson = await response.json();
@@ -85,15 +90,21 @@ const DemoWorkspaceContent: React.FC = () => {
                 setHandle(h);
                 setStatusText('');
             } catch (e: any) {
-                console.error("WASM Registry CDN Loading Failed, initializing empty registry handle:", e);
+                console.error("WASM Registry CDN Loading Failed:", e);
                 if (!active) return;
-                try {
-                    // Initialize empty handle instead of mockRegistry fallback
-                    const h = load_registry_wasm({});
-                    setHandle(h);
-                    setStatusText('');
-                } catch (fallbackErr: any) {
-                    setStatusText(`[ERROR] WASM Registry initialization failure: ${fallbackErr.toString()}`);
+                
+                // If it's an explicit path routing/permissions block, stop initialization and alert user
+                if (e.message?.includes('Registry Access Denied')) {
+                    setStatusText(`[ERROR] Public asset registry routing block: File missing or permissions restricted.`);
+                } else {
+                    try {
+                        // Initialize empty handle instead of mockRegistry fallback for temporary recoverable network drops
+                        const h = load_registry_wasm({});
+                        setHandle(h);
+                        setStatusText('');
+                    } catch (fallbackErr: any) {
+                        setStatusText(`[ERROR] WASM Registry initialization failure: ${fallbackErr.toString()}`);
+                    }
                 }
             }
         };

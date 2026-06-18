@@ -144,7 +144,7 @@ describe('DemoWorkspace', () => {
 
         await waitFor(() => {
             expect(mockFetch).toHaveBeenCalledWith(
-                expect.stringContaining('search-index.bin')
+                'https://registry.iamrichardd.com/pharos-kitchen-design/search-index.bin'
             );
         });
     });

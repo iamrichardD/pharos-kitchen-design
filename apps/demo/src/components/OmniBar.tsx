@@ -116,7 +116,7 @@ export const OmniBar: React.FC<OmniBarProps> = ({
                 setLoadingShard(categorySlug);
                 setStatusText(`[SYS] Lazily downloading category shard: ${categorySlug}...`);
 
-                fetch(`https://registry.iamrichardd.com/shards/${categorySlug}.bin`, {
+                fetch(`https://registry.iamrichardd.com/pharos-kitchen-design/shards/${categorySlug}.bin`, {
                     signal: abortController.signal
                 })
                     .then(res => {
