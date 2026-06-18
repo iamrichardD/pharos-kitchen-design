@@ -15,6 +15,7 @@ import type { PharosRegistryHandle } from '@pkd/core';
 // Import the Custom Element package to guarantee registration
 import '@pkd/protocol';
 import { useConnectivity } from '../utils/NetworkConnectivity';
+import { getShardUrl, RegistryLoadError } from '../utils/registryConfig';
 
 interface OmniBarProps {
     registryHandle: PharosRegistryHandle | null;
@@ -114,14 +115,18 @@ export const OmniBar: React.FC<OmniBarProps> = ({
 
             if (categorySlug && !loadedCategories.has(categorySlug) && loadingShard !== categorySlug) {
                 setLoadingShard(categorySlug);
-                setStatusText(`[SYS] Lazily downloading category shard: ${categorySlug}...`);
+                setStatusText(`Loading ${categorySlug} products...`);
 
-                fetch(`https://registry.iamrichardd.com/shards/${categorySlug}.bin`, {
+                fetch(getShardUrl(categorySlug), {
                     signal: abortController.signal
                 })
                     .then(res => {
                         if (!res.ok) {
-                            throw new Error(`HTTP error ${res.status}`);
+                            throw new RegistryLoadError(
+                                `Failed to fetch shard: HTTP ${res.status}`,
+                                res.status === 404 || res.status === 403 ? 'DENIED' : 'NETWORK',
+                                res.status
+                            );
                         }
                         return res.text();
                     })
@@ -133,10 +138,10 @@ export const OmniBar: React.FC<OmniBarProps> = ({
                                 next.add(categorySlug);
                                 return next;
                             });
-                            setStatusText(`[SYS] Loaded category shard: ${categorySlug}`);
+                            setStatusText(`${categorySlug.charAt(0).toUpperCase() + categorySlug.slice(1)} products loaded.`);
                         } catch (err: any) {
                             console.error(`Failed to add shard ${categorySlug} to WASM registry:`, err);
-                            setStatusText(`[ERROR] Failed to load category shard: ${categorySlug}`);
+                            setStatusText(`Could not load products for this category.`);
                         } finally {
                             setLoadingShard(null);
                         }
@@ -146,7 +151,11 @@ export const OmniBar: React.FC<OmniBarProps> = ({
                             return;
                         }
                         console.error(`Failed to fetch shard ${categorySlug}:`, err);
-                        setStatusText(`[ERROR] Failed to download category shard: ${categorySlug}`);
+                        if (err instanceof RegistryLoadError && err.reason === 'DENIED') {
+                            setStatusText('Access to category products was denied.');
+                        } else {
+                            setStatusText('Could not load products for this category.');
+                        }
                         setLoadingShard(null);
                     });
             }
@@ -247,12 +256,12 @@ export const OmniBar: React.FC<OmniBarProps> = ({
                 setSuggestions(mapped);
                 
                 if (mapped.length > 0) {
-                    setStatusText(`[HINT] Found ${mapped.length} matches. Use arrow keys to select.`);
+                    setStatusText(`Found ${mapped.length} products. Use up and down arrows to choose.`);
                 } else {
                     if (!isOnline) {
                         setStatusText("Offline, and search results may be limited");
                     } else {
-                        setStatusText(`[SYS] No matches for "${query}".`);
+                        setStatusText(`No products found matching "${query}".`);
                     }
                 }
             } else {
@@ -324,7 +333,7 @@ export const OmniBar: React.FC<OmniBarProps> = ({
         setHighlightedIndex(-1);
         onHoverItem(null);
         onSelectItem(id);
-        setStatusText(`[SYS] Linked ${name}. Syncing spatial canvas...`);
+        setStatusText(`Selected ${name}. Loading 3D model...`);
 
         // Automatically hide the syncing message after completion (1.5s delay)
         syncTimeoutRef.current = setTimeout(() => {
