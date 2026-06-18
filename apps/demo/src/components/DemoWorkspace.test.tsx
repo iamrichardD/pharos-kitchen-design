@@ -19,6 +19,7 @@ import { render, screen, waitFor, cleanup } from '@testing-library/react';
 import { DemoWorkspace } from './DemoWorkspace';
 import { CanvasStage } from './CanvasStage';
 import { resetWasmSingleton } from '../utils/wasmStore';
+import { getSearchIndexUrl } from '../utils/registryConfig';
 import init from '@pkd/core';
 import fs from 'fs';
 import path from 'path';
@@ -143,9 +144,7 @@ describe('DemoWorkspace', () => {
         render(<DemoWorkspace />);
 
         await waitFor(() => {
-            expect(mockFetch).toHaveBeenCalledWith(
-                'https://registry.iamrichardd.com/pharos-kitchen-design/search-index.bin'
-            );
+            expect(mockFetch).toHaveBeenCalledWith(getSearchIndexUrl());
         });
     });
 
@@ -176,7 +175,7 @@ describe('DemoWorkspace', () => {
         render(<DemoWorkspace />);
 
         await waitFor(() => {
-            expect(screen.getByText(/Unable to load catalog. Please check your internet connection or try again later./i)).toBeDefined();
+            expect(screen.getByText(/Access to design catalog restricted or unauthorized./i)).toBeDefined();
         });
     });
 
@@ -195,7 +194,7 @@ describe('DemoWorkspace', () => {
         render(<DemoWorkspace />);
 
         await waitFor(() => {
-            expect(screen.getByText(/Unable to load catalog. Please check your internet connection or try again later./i)).toBeDefined();
+            expect(screen.getByText(/Access to design catalog restricted or unauthorized./i)).toBeDefined();
         });
     });
 

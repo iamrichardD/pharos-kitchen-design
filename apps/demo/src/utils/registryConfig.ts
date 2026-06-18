@@ -9,13 +9,21 @@
  * Last Updated: 2026-06-18
  * ======================================================================== */
 
+export const DEFAULT_REGISTRY_URL = 'https://registry.iamrichardd.com/pharos-kitchen-design';
+export const ENV_KEYS = ['PUBLIC_REGISTRY_URL', 'REGISTRY_URL'] as const;
+
 export const getRegistryBaseUrl = (): string => {
-    const envUrl = (typeof import.meta !== 'undefined' && import.meta.env?.PUBLIC_REGISTRY_URL) ||
-                   (typeof process !== 'undefined' && process.env?.PUBLIC_REGISTRY_URL) ||
-                   (typeof import.meta !== 'undefined' && import.meta.env?.REGISTRY_URL) ||
-                   (typeof process !== 'undefined' && process.env?.REGISTRY_URL);
+    let envUrl: string | undefined;
+    for (const key of ENV_KEYS) {
+        const val = (typeof import.meta !== 'undefined' && import.meta.env?.[key]) ||
+                    (typeof process !== 'undefined' && process.env?.[key]);
+        if (val) {
+            envUrl = val;
+            break;
+        }
+    }
     
-    const rawUrl = envUrl || 'https://registry.iamrichardd.com/pharos-kitchen-design';
+    const rawUrl = envUrl || DEFAULT_REGISTRY_URL;
     return rawUrl.endsWith('/') ? rawUrl.slice(0, -1) : rawUrl;
 };
 

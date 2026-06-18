@@ -98,15 +98,16 @@ const DemoWorkspaceContent: React.FC = () => {
                 if (!active) return;
                 
                 if (e instanceof RegistryLoadError && e.reason === 'DENIED') {
-                    setStatusText(`Unable to load catalog. Please check your internet connection or try again later.`);
+                    setStatusText('Access to design catalog restricted or unauthorized.');
                 } else {
+                    setStatusText('Could not connect to catalog. Please check your network connection.');
                     try {
                         // Initialize empty handle instead of mockRegistry fallback for temporary recoverable network drops
                         const h = load_registry_wasm({});
                         setHandle(h);
                         setStatusText('');
                     } catch (fallbackErr: any) {
-                        setStatusText(`Failed to start catalog engine. Please refresh the page.`);
+                        setStatusText('Failed to start catalog engine. Please refresh the page.');
                     }
                 }
             }
