@@ -51,6 +51,7 @@ resource "cloudflare_dns_record" "pkd_mx_1" {
   type     = "MX"
   priority = 10
   ttl      = 3600
+  lifecycle { ignore_changes = all }
 }
 
 resource "cloudflare_dns_record" "pkd_mx_2" {
@@ -60,6 +61,7 @@ resource "cloudflare_dns_record" "pkd_mx_2" {
   type     = "MX"
   priority = 20
   ttl      = 3600
+  lifecycle { ignore_changes = all }
 }
 
 resource "cloudflare_dns_record" "pkd_mx_3" {
@@ -69,6 +71,7 @@ resource "cloudflare_dns_record" "pkd_mx_3" {
   type     = "MX"
   priority = 30
   ttl      = 3600
+  lifecycle { ignore_changes = all }
 }
 
 # --- R2 Registry Bucket Custom Domain Binding ---
