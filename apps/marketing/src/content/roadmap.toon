@@ -3,14 +3,14 @@
  * Component: Marketing / Content
  * File: roadmap.toon
  * Purpose: Automated reflection of authoritative internal logs.
- * Last Synced: 2026-06-18T21:07:51.660Z
+ * Last Synced: 2026-06-18T22:54:20.352Z
  * ======================================================================== */
 
 title: Pharos System Roadmap
 type: roadmap
-lastSynced: 2026-06-18T21:07:51.660Z
+lastSynced: 2026-06-18T22:54:20.352Z
 
-items[44]{id, name, status, phase, tag, description}:
+items[45]{id, name, status, phase, tag, description}:
   "254", "Provision Cloudflare R2 Registry Storage", "Deployed", "Sprint 5.03", "CORE", "Provisioned the R2 bucket for BIM Registry assets, bound `registry.iamrichardd.com` via `cloudflare_r2_custom_domain`, and upgraded the infrastructure slice to Cloudflare Provider v5.20.0 for compatibility. Verified 🟢 PHAROS GREEN."
   "242", "Implement RFC-2378 OmniBar & Procedural Hover-Bake", "Deployed", "Sprint 5.03", "CORE", "Implemented Web Component command bar, unified wildcard search across workspaces, integrated real-time WebGL canvas, and verified input validation / ReDoS protections. Verified 🟢 PHAROS GREEN."
   "252", "Connect Demo OmniBar to Production Search Index and Category Shards", "Deployed", "Sprint 5.03", "CORE", "Implemented R2 bucket fetch client in demo, integrated production index with WASM query engine, added lazy-loaded category shards, and added micro-animations with status panel. Verified 🟢 PHAROS GREEN."
@@ -53,5 +53,6 @@ items[44]{id, name, status, phase, tag, description}:
   "87", "Domain-to-Org Mapping", "In Progress", "Sprint 5.03", "IDENTITY", "Implementing secure domain validation for organizational onboarding."
   "270", "Refactor Deploy Site Workflow Trigger Paths", "In Progress", "Sprint 5.03", "CORE", "Add apps/demo/** to the on: push: paths: filter in deploy-site.yml to ensure demo site changes trigger redeployments."
   "271", "Implement Cloudflare R2 Upload Pipeline for Search Index", "In Progress", "Sprint 5.03", "CORE", "Implement S3-compatible R2 upload client in pkd-cli and uncomment/update promotion commands in pulse.yml to target R2 registry bucket."
+  "273", "Decouple Marketing and Demo Build Stages in Containerfile.ts", "In Progress", "Sprint 5.03", "CORE", "Refactor Containerfile.ts to isolate the React demo compilation stage, preventing demo compilation failures from blocking marketing builds."
   "84", "Dual-Stream Release Pipeline", "Blueprint Approved", "Sprint 5.04", "TOOLING", "Configuring separate channels for stable and nightly releases."
   "85", "Official Homebrew Tap", "Blueprint Approved", "Sprint 5.04", "TOOLING", "Initializing the official Pharos Homebrew tap for macOS/Linux distribution."
