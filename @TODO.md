@@ -6,7 +6,7 @@
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Central tracking for Phase-specific tasks and issues (Present & Future).
  * Traceability: Issue #207
- * Last Updated: 2026-06-12
+ * Last Updated: 2026-06-16
  * ======================================================================== -->
 
 <!-- 
@@ -24,7 +24,6 @@
 ### Sprint 5.03: The Ghost & The Bridge (2026-06-15) - 🚀 ACTIVE
 - [ ] **Issue #239**: [TAG: UX] Refactor Marketing Site IA for Command-First Identity. [DESC: Implement high-fidelity Terminal Hero and capability-based documentation flow.] [ECT: 5]
 - [ ] **Issue #185**: [TAG: Perf] Zero-Allocation JSON Parsing. [DESC: Implementing source-generated JSON parsers to eliminate allocation overhead in WASM.]
-- [ ] **Issue #107**: [TAG: Perf] Dependency Pruning. [DESC: Audit and prune `pkd-core` dependencies for lean WASM binaries.]
 - [ ] **Issue #42**: [TAG: Security] SRI & SEO Audit. [DESC: Remediating SRI hashes and optimizing SEO for the Marketing site.]
 - [ ] **Issue #87**: [TAG: Security] Domain-to-Org Mapping. [DESC: Implementing secure domain validation for organizational onboarding.]
 

@@ -6,7 +6,7 @@
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Iterative log of project milestones and sprint outcomes (Past & Present).
  * Traceability: Issue #207
- * Last Updated: 2026-06-12
+ * Last Updated: 2026-06-17
  * ======================================================================== -->
 
 <!-- 
@@ -25,6 +25,9 @@
 ### Sprint 5.03: The Ghost & The Bridge (2026-06-15) - 🚀 ACTIVE
 - [x] **Issue #254**: [TAG: Infrastructure] Provision Cloudflare R2 Registry Storage. [DESC: Provisioned the R2 bucket for BIM Registry assets, bound `registry.iamrichardd.com` via `cloudflare_r2_custom_domain`, and upgraded the infrastructure slice to Cloudflare Provider v5.20.0 for compatibility. Verified 🟢 PHAROS GREEN.] [ECT: 2] [ACT: 3]
 - [x] **Issue #242**: [TAG: UX] Implement RFC-2378 OmniBar & Procedural Hover-Bake. [DESC: Implemented Web Component command bar, unified wildcard search across workspaces, integrated real-time WebGL canvas, and verified input validation / ReDoS protections. Verified 🟢 PHAROS GREEN.] [ECT: 3] [ACT: 4]
+- [x] **Issue #252**: [TAG: UX] Connect Demo OmniBar to Production Search Index and Category Shards. [DESC: Implemented R2 bucket fetch client in demo, integrated production index with WASM query engine, added lazy-loaded category shards, and added micro-animations with status panel. Verified 🟢 PHAROS GREEN.] [ECT: 3] [ACT: 3]
+- [x] **Issue #258**: [TAG: ci/cd] Remediate CI Disk Exhaustion in Containerfile.bridge by Standardizing on Debian Base. [DESC: Replaced the bloated sam build-dotnet8 base image in Containerfile.bridge with standard Debian Bookworm and installed dotnet-sdk-8.0 directly, resolving CI disk exhaustion. Verified 🟢 PHAROS GREEN.] [ECT: 2] [ACT: 2]
+- [x] **Issue #107**: [TAG: Perf] Dependency Pruning. [DESC: Audited and pruned pkd-core dependencies. Isolated native-only crates (dashmap, rayon) to native targets, significantly reducing WASM artifact size. Verified 🟢 PHAROS GREEN.] [ECT: 2] [ACT: 2]
 
 ### Sprint 5.02: The Speed & Security Foundation (2026-06-08) - ✅ COMPLETED
 - [x] **Issue #248**: [TAG: Governance] Conclude Sprint 5.02 and Draft Friday Handoff. [DESC: Reconciled Sprint 5.02 backlog, updated DORA metrics, drafted Friday handoff report, and prepared weekly update blog post. Verified 🟢 PHAROS GREEN.] [ECT: 1] [ACT: 1]
