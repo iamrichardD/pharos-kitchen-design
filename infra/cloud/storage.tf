@@ -13,6 +13,7 @@
 resource "cloudflare_d1_database" "auth_db" {
   account_id = var.CLOUDFLARE_ACCOUNT_ID
   name       = "${var.PROJECT_NAME}-auth"
+  lifecycle { ignore_changes = all }
 }
 
 # 2. Cloudflare R2 Bucket for BIM Registry Assets
