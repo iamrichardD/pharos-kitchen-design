@@ -3,19 +3,20 @@
  * Component: Marketing / Content
  * File: roadmap.toon
  * Purpose: Automated reflection of authoritative internal logs.
- * Last Synced: 2026-06-18T04:49:41.262Z
+ * Last Synced: 2026-06-18T21:07:51.660Z
  * ======================================================================== */
 
 title: Pharos System Roadmap
 type: roadmap
-lastSynced: 2026-06-18T04:49:41.262Z
+lastSynced: 2026-06-18T21:07:51.660Z
 
-items[41]{id, name, status, phase, tag, description}:
+items[44]{id, name, status, phase, tag, description}:
   "254", "Provision Cloudflare R2 Registry Storage", "Deployed", "Sprint 5.03", "CORE", "Provisioned the R2 bucket for BIM Registry assets, bound `registry.iamrichardd.com` via `cloudflare_r2_custom_domain`, and upgraded the infrastructure slice to Cloudflare Provider v5.20.0 for compatibility. Verified 🟢 PHAROS GREEN."
   "242", "Implement RFC-2378 OmniBar & Procedural Hover-Bake", "Deployed", "Sprint 5.03", "CORE", "Implemented Web Component command bar, unified wildcard search across workspaces, integrated real-time WebGL canvas, and verified input validation / ReDoS protections. Verified 🟢 PHAROS GREEN."
   "252", "Connect Demo OmniBar to Production Search Index and Category Shards", "Deployed", "Sprint 5.03", "CORE", "Implemented R2 bucket fetch client in demo, integrated production index with WASM query engine, added lazy-loaded category shards, and added micro-animations with status panel. Verified 🟢 PHAROS GREEN."
   "258", "Remediate CI Disk Exhaustion in Containerfile.bridge by Standardizing on Debian Base", "Deployed", "Sprint 5.03", "CORE", "Replaced the bloated sam build-dotnet8 base image in Containerfile.bridge with standard Debian Bookworm and installed dotnet-sdk-8.0 directly, resolving CI disk exhaustion. Verified 🟢 PHAROS GREEN."
   "107", "Dependency Pruning", "Deployed", "Sprint 5.03", "CORE", "Audited and pruned pkd-core dependencies. Isolated native-only crates (dashmap, rayon) to native targets, significantly reducing WASM artifact size. Verified 🟢 PHAROS GREEN."
+  "267", "Resolve Demo Site Search Index Asset Pathing Mismatch", "Deployed", "Sprint 5.03", "CORE", "Decoupled registry base URLs, implemented custom RegistryLoadError, polished UI diagnostic copy, and added 404/403 failure test cases. Verified 🟢 PHAROS GREEN."
   "248", "Conclude Sprint 5.02 and Draft Friday Handoff", "Deployed", "Sprint 5.02", "PROTOCOL", "Reconciled Sprint 5.02 backlog, updated DORA metrics, drafted Friday handoff report, and prepared weekly update blog post. Verified 🟢 PHAROS GREEN."
   "235", "Resolve Demo URL 404 Build Omission", "Deployed", "Sprint 5.02", "TOOLING", "Refactored Containerfile.ts to build and nest the Demo app, enforced React 19.0.0, and unified the React island for context sharing. Verified 🟢 PHAROS GREEN."
   "237", "Remediate Rust Toolchain and Metadata Warnings", "Deployed", "Sprint 5.02", "CORE", "Centralized package metadata via workspace inheritance, resolved stylistic drifts, and removed dead code in `pkd-cli`. Verified 🟢 PHAROS GREEN."
@@ -50,5 +51,7 @@ items[41]{id, name, status, phase, tag, description}:
   "185", "Zero-Allocation JSON Parsing", "In Progress", "Sprint 5.03", "CORE", "Implementing source-generated JSON parsers to eliminate allocation overhead in WASM."
   "42", "SRI & SEO Audit", "In Progress", "Sprint 5.03", "IDENTITY", "Remediating SRI hashes and optimizing SEO for the Marketing site."
   "87", "Domain-to-Org Mapping", "In Progress", "Sprint 5.03", "IDENTITY", "Implementing secure domain validation for organizational onboarding."
+  "270", "Refactor Deploy Site Workflow Trigger Paths", "In Progress", "Sprint 5.03", "CORE", "Add apps/demo/** to the on: push: paths: filter in deploy-site.yml to ensure demo site changes trigger redeployments."
+  "271", "Implement Cloudflare R2 Upload Pipeline for Search Index", "In Progress", "Sprint 5.03", "CORE", "Implement S3-compatible R2 upload client in pkd-cli and uncomment/update promotion commands in pulse.yml to target R2 registry bucket."
   "84", "Dual-Stream Release Pipeline", "Blueprint Approved", "Sprint 5.04", "TOOLING", "Configuring separate channels for stable and nightly releases."
   "85", "Official Homebrew Tap", "Blueprint Approved", "Sprint 5.04", "TOOLING", "Initializing the official Pharos Homebrew tap for macOS/Linux distribution."

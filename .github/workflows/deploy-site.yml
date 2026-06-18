@@ -6,6 +6,7 @@
 # License: FSL-1.1 (See LICENSE file for details)
 # Purpose: Deploys the Astro marketing site to GitHub Pages.
 # Traceability: Issue #13, ADR 0004
+# Last Updated: 2026-06-18
 # ========================================================================
 
 name: "🌐 Deploy Marketing Site"
@@ -16,6 +17,7 @@ on:
       - main
     paths:
       - 'apps/marketing/**'
+      - 'apps/demo/**'
       - 'packages/**'
       - 'scripts/install.sh'
       - 'Containerfile.*'
