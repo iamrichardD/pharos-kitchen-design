@@ -53,6 +53,26 @@ jobs:
       - name: "🔄 Initialize OpenTofu"
         run: tofu init
 
+      - name: "🛠️ State Remediation (Cloudflare v5 Migration)"
+        run: |
+          echo "Attempting manual state migration for Cloudflare resources..."
+          tofu state mv cloudflare_record.pkd_spf cloudflare_dns_record.pkd_spf || true
+          tofu state mv cloudflare_record.pkd_dkim cloudflare_dns_record.pkd_dkim || true
+          tofu state mv cloudflare_record.pkd_dmarc cloudflare_dns_record.pkd_dmarc || true
+          tofu state mv cloudflare_record.pkd_mx_1 cloudflare_dns_record.pkd_mx_1 || true
+          tofu state mv cloudflare_record.pkd_mx_2 cloudflare_dns_record.pkd_mx_2 || true
+          tofu state mv cloudflare_record.pkd_mx_3 cloudflare_dns_record.pkd_mx_3 || true
+          tofu state mv cloudflare_record.registry_dns cloudflare_dns_record.registry_dns || true
+          tofu state mv cloudflare_r2_bucket_domain.registry_domain cloudflare_r2_custom_domain.registry_domain || true
+          
+          # Remediate D1 Database ID format if needed
+          # In v5, ID must be account_id/database_id. If current ID is just UUID, we must refresh it.
+          tofu refresh -target=cloudflare_d1_database.auth_db
+        env:
+          TF_VAR_AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+          TF_VAR_CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
       - name: "📋 Infrastructure Plan"
         run: tofu plan -out=tfplan
         env:
