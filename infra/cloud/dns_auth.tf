@@ -83,15 +83,6 @@ resource "cloudflare_r2_custom_domain" "registry_domain" {
   zone_id     = var.cloudflare_zone_id
 }
 
-resource "cloudflare_dns_record" "registry_dns" {
-  zone_id = var.cloudflare_zone_id
-  name    = "registry"
-  content = cloudflare_r2_custom_domain.registry_domain.domain
-  type    = "CNAME"
-  proxied = true
-  ttl     = 1 # Automatic when proxied
-}
-
 # --- Variables ---
 # Injected via TF_VAR_ environmental variables in GitHub Actions.
 variable "cloudflare_zone_id" {
