@@ -17,21 +17,11 @@
 
 ## 1. Today's Core Achievements
 
-Today's focus was on **"Infrastructure Resiliency, Registry Alignment, and Pipeline Hardening."** We successfully navigated a complex Cloudflare Provider v5 migration, resolved R2 registry mapping blocks, corrected silent deployment omissions, and refined our CI/CD workflows.
+Today's focus was on **"Registry Alignment, Asset Mismatch Resolution, and Pipeline Hardening."** We resolved the R2 path resolution mismatch for the demo search index, corrected automated deployment triggers, and synchronized backlog tracking artifacts.
 
-- **Issue #254 (Provision Cloudflare R2 Registry Storage)**:
-  - **Status:** **COMPLETED** & Merged.
-  - Provisioned R2 bucket for BIM assets and bound it to `registry.iamrichardd.com`.
-  - Resolved circular CNAME reference (Error 9039) by leveraging R2's automatic DNS mapping.
-- **Issue #258 (Remediate CI Disk Exhaustion)**:
-  - **Status:** **COMPLETED** & Merged.
-  - Standardized `Containerfile.bridge` on a slim Debian Bookworm base to prevent runner exhaustion.
-- **Issue #265 (Infra Recovery & State Deep Clean)**:
-  - **Status:** **COMPLETED** & Merged.
-  - Implemented `infra/cloud/state-recovery.sh` to automate Terraform lock breaking and state reconciliation.
 - **Issue #267 (Resolve Demo Site Search Index Asset Pathing Mismatch)**:
   - **Status:** **COMPLETED** & Merged.
-  - Centralized registry base URLs in a decoupled utility config, mapped structured errors using `RegistryLoadError` subclass, and polished status messages to use human-centric UI diagnostics.
+  - Centralized registry base URLs in a decoupled utility config, mapped structured errors using the `RegistryLoadError` subclass, and polished status messages to use human-centric UI diagnostics.
 - **Issue #270 (Refactor Deploy Site Workflow Trigger Paths)**:
   - **Status:** **COMPLETED** & Merged.
   - Added the missing `apps/demo/**` path filter trigger to `.github/workflows/deploy-site.yml` to restore automated live site updates.
@@ -40,15 +30,11 @@ Today's focus was on **"Infrastructure Resiliency, Registry Alignment, and Pipel
 
 ## 2. DORA Metrics & Build Audit
 
-- **Lead Time (Average)**: ~2.3 Hours (Includes provider migration, refactoring, and CI validation).
-- **Deployment Frequency**: **9 Successful Merges to Main** (High frequency code, config, and tracking updates).
-- **Change Failure Rate (CFR)**: **35.7%** (5 failures on the `main` branch across 14 qualifying builds).
-  - *Failure 1*: Redundant `moved` blocks causing v5 provider validation loop.
-  - *Failure 2*: Stale Terraform state lock in CI during high-frequency infra updates.
-  - *Failure 3*: Cloudflare Error 9039 (Circular CNAME) during R2 domain binding.
-  - *Failure 4*: Cloudflare Provider v5 validation error on `account_id` placement.
-  - *Failure 5*: Transient runner connection reset (`ECONNRESET` during npm package installation) on the Pulse/Marketing workflow.
-  - *Remediation*: Infrastructure steps were resolved via state-recovery scripts, and the transient npm failure was cleared by triggering a manual re-run in the GitHub UI.
+- **Lead Time (Average)**: ~1.0 Hour (Implementation, review, and verification time for Issues #267 and #270).
+- **Deployment Frequency**: **6 Successful Merges/Commits to Main** (Focused on demo index resolution and trigger mappings).
+- **Change Failure Rate (CFR)**: **16.7%** (1 failure on the `main` branch across 6 qualifying builds).
+  - *Failure 1*: Transient runner connection reset (`ECONNRESET` during npm package installation) on the Pulse/Marketing workflow.
+  - *Remediation*: Bypassed transient environment failure by triggering a manual workflow execution via the GitHub UI, which compiled successfully.
 
 ## 3. Current Project State
 
