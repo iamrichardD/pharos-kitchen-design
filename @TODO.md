@@ -28,7 +28,7 @@
 - [ ] **Issue #87**: [TAG: Security] Domain-to-Org Mapping. [DESC: Implementing secure domain validation for organizational onboarding.]
 - [ ] **Issue #270**: [TAG: ci/cd] Refactor Deploy Site Workflow Trigger Paths. [DESC: Add apps/demo/** to the on: push: paths: filter in deploy-site.yml to ensure demo site changes trigger redeployments.] [ECT: 2]
 - [ ] **Issue #271**: [TAG: Infrastructure] Implement Cloudflare R2 Upload Pipeline for Search Index. [DESC: Implement S3-compatible R2 upload client in pkd-cli and uncomment/update promotion commands in pulse.yml to target R2 registry bucket.] [ECT: 3]
-
+- [ ] **Issue #273**: [TAG: debt] Decouple Marketing and Demo Build Stages in Containerfile.ts. [DESC: Refactor Containerfile.ts to isolate the React demo compilation stage, preventing demo compilation failures from blocking marketing builds.] [ECT: 3]
 
 ---
 
