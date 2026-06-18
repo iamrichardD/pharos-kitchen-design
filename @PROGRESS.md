@@ -28,6 +28,8 @@
 - [x] **Issue #252**: [TAG: UX] Connect Demo OmniBar to Production Search Index and Category Shards. [DESC: Implemented R2 bucket fetch client in demo, integrated production index with WASM query engine, added lazy-loaded category shards, and added micro-animations with status panel. Verified 🟢 PHAROS GREEN.] [ECT: 3] [ACT: 3]
 - [x] **Issue #258**: [TAG: ci/cd] Remediate CI Disk Exhaustion in Containerfile.bridge by Standardizing on Debian Base. [DESC: Replaced the bloated sam build-dotnet8 base image in Containerfile.bridge with standard Debian Bookworm and installed dotnet-sdk-8.0 directly, resolving CI disk exhaustion. Verified 🟢 PHAROS GREEN.] [ECT: 2] [ACT: 2]
 - [x] **Issue #107**: [TAG: Perf] Dependency Pruning. [DESC: Audited and pruned pkd-core dependencies. Isolated native-only crates (dashmap, rayon) to native targets, significantly reducing WASM artifact size. Verified 🟢 PHAROS GREEN.] [ECT: 2] [ACT: 2]
+- [x] **Issue #267**: [TAG: UX] Resolve Demo Site Search Index Asset Pathing Mismatch. [DESC: Decoupled registry base URLs, implemented custom RegistryLoadError, polished UI diagnostic copy, and added 404/403 failure test cases. Verified 🟢 PHAROS GREEN.] [ECT: 2] [ACT: 2]
+
 
 ### Sprint 5.02: The Speed & Security Foundation (2026-06-08) - ✅ COMPLETED
 - [x] **Issue #248**: [TAG: Governance] Conclude Sprint 5.02 and Draft Friday Handoff. [DESC: Reconciled Sprint 5.02 backlog, updated DORA metrics, drafted Friday handoff report, and prepared weekly update blog post. Verified 🟢 PHAROS GREEN.] [ECT: 1] [ACT: 1]
