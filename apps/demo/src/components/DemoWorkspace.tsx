@@ -15,6 +15,7 @@ import { useWasm, WasmProvider } from './WasmContext';
 import { OmniBar } from './OmniBar';
 import { CanvasStage } from './CanvasStage';
 import { useConnectivity } from '../utils/NetworkConnectivity';
+import { getSearchIndexUrl, RegistryLoadError } from '../utils/registryConfig';
 
 export interface PharosMetadata {
     metadata_id: string;
@@ -59,7 +60,7 @@ const DemoWorkspaceContent: React.FC = () => {
     // Handle catalog availability due to network state changes from custom hook
     useEffect(() => {
         if (isOffline) {
-            setStatusText('[SYS] Catalog Offline. Registry unavailable.');
+            setStatusText('Catalog is currently offline. You can still search your offline library.');
         } else {
             setStatusText('');
         }
@@ -71,17 +72,20 @@ const DemoWorkspaceContent: React.FC = () => {
         if (wasmStatus !== 'READY') return;
         
         let active = true;
-        const REGISTRY_ENDPOINT = 'https://registry.iamrichardd.com/pharos-kitchen-design/search-index.bin';
 
         const loadRegistry = async () => {
             try {
-                setStatusText('[SYS] Fetching production search index...');
-                const response = await fetch(REGISTRY_ENDPOINT);
+                setStatusText('Loading kitchen design catalog...');
+                const response = await fetch(getSearchIndexUrl());
                 if (!response.ok) {
                     if (response.status === 404 || response.status === 403) {
-                        throw new Error(`Registry Access Denied: 404/403 Object Mismatch at target URL.`);
+                        throw new RegistryLoadError(
+                            `Registry Access Denied: HTTP ${response.status}`,
+                            'DENIED',
+                            response.status
+                        );
                     }
-                    throw new Error(`HTTP error ${response.status}`);
+                    throw new RegistryLoadError(`HTTP error ${response.status}`, 'NETWORK', response.status);
                 }
                 const registryJson = await response.json();
                 if (!active) return;
@@ -93,9 +97,8 @@ const DemoWorkspaceContent: React.FC = () => {
                 console.error("WASM Registry CDN Loading Failed:", e);
                 if (!active) return;
                 
-                // If it's an explicit path routing/permissions block, stop initialization and alert user
-                if (e.message?.includes('Registry Access Denied')) {
-                    setStatusText(`[ERROR] Public asset registry routing block: File missing or permissions restricted.`);
+                if (e instanceof RegistryLoadError && e.reason === 'DENIED') {
+                    setStatusText(`Unable to load catalog. Please check your internet connection or try again later.`);
                 } else {
                     try {
                         // Initialize empty handle instead of mockRegistry fallback for temporary recoverable network drops
@@ -103,7 +106,7 @@ const DemoWorkspaceContent: React.FC = () => {
                         setHandle(h);
                         setStatusText('');
                     } catch (fallbackErr: any) {
-                        setStatusText(`[ERROR] WASM Registry initialization failure: ${fallbackErr.toString()}`);
+                        setStatusText(`Failed to start catalog engine. Please refresh the page.`);
                     }
                 }
             }
@@ -152,7 +155,7 @@ const DemoWorkspaceContent: React.FC = () => {
         // Signed manifest transmission mock simulation
         const manifest = selectedModel.geometry_manifest;
         console.log("🚀 Sending signed manifest to pkd-bridge:", manifest);
-        setStatusText(`[SYS] Signed manifest for ${selectedModel.name} successfully dispatched to pkd-bridge.`);
+        setStatusText(`Sent design information for ${selectedModel.name} to Revit.`);
     };
 
     // Revit Action Tooltip Logic
@@ -169,7 +172,7 @@ const DemoWorkspaceContent: React.FC = () => {
     if (wasmStatus === 'LOADING') {
         return (
             <div style={{ padding: '4rem', textAlign: 'center', fontFamily: 'monospace', color: '#ff6b00' }}>
-                [SYS] LOADING PHAROS WASM ENGINE...
+                Starting Pharos kitchen engine...
             </div>
         );
     }
@@ -177,7 +180,7 @@ const DemoWorkspaceContent: React.FC = () => {
     if (wasmStatus === 'ERROR') {
         return (
             <div style={{ padding: '4rem', textAlign: 'center', fontFamily: 'monospace', color: '#ef4444' }}>
-                [ERROR] FFI LOAD ERROR: {wasmError || 'Failed to initialize WASM subsystem.'}
+                Could not load design tools. Please check system compatibility. ({wasmError || 'Unknown engine error'})
             </div>
         );
     }
@@ -214,7 +217,7 @@ const DemoWorkspaceContent: React.FC = () => {
                         gap: '12px'
                     }}
                 >
-                    <span>[OFFLINE] Offline Mode Active. Local cache search enabled.</span>
+                    <span>Working offline. Using search results from your local library.</span>
                     <button
                         onClick={triggerCheck}
                         style={{

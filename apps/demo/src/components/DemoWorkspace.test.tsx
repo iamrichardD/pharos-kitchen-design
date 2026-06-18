@@ -161,6 +161,44 @@ describe('DemoWorkspace', () => {
         });
     });
 
+    it('test_should_display_denied_error_when_cdn_fetch_returns_404', async () => {
+        mockFetch.mockImplementation((url: string) => {
+            if (url.includes('search-index.bin')) {
+                return Promise.resolve({
+                    ok: false,
+                    status: 404,
+                    statusText: 'Not Found'
+                });
+            }
+            return Promise.resolve({ ok: true });
+        });
+
+        render(<DemoWorkspace />);
+
+        await waitFor(() => {
+            expect(screen.getByText(/Unable to load catalog. Please check your internet connection or try again later./i)).toBeDefined();
+        });
+    });
+
+    it('test_should_display_denied_error_when_cdn_fetch_returns_403', async () => {
+        mockFetch.mockImplementation((url: string) => {
+            if (url.includes('search-index.bin')) {
+                return Promise.resolve({
+                    ok: false,
+                    status: 403,
+                    statusText: 'Forbidden'
+                });
+            }
+            return Promise.resolve({ ok: true });
+        });
+
+        render(<DemoWorkspace />);
+
+        await waitFor(() => {
+            expect(screen.getByText(/Unable to load catalog. Please check your internet connection or try again later./i)).toBeDefined();
+        });
+    });
+
     it('test_should_display_offline_mode_indicator_when_browser_is_offline', async () => {
         const spy = vi.spyOn(NetworkConnectivity, 'useConnectivity').mockReturnValue({ isOnline: false, triggerCheck: vi.fn() });
         render(<DemoWorkspace />);
@@ -168,7 +206,7 @@ describe('DemoWorkspace', () => {
         await waitFor(() => {
             const indicator = screen.getByTestId('offline-mode-indicator');
             expect(indicator).toBeDefined();
-            expect(indicator.textContent).toContain('Offline Mode Active');
+            expect(indicator.textContent).toContain('Working offline');
         });
         spy.mockRestore();
     });

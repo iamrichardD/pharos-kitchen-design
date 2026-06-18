@@ -10,6 +10,7 @@
  * ======================================================================== */
 
 import { useState, useEffect } from 'react';
+import { getPingUrl } from './registryConfig';
 
 export interface ConnectivityDetector {
     checkConnectivity(): Promise<boolean>;
@@ -18,7 +19,7 @@ export interface ConnectivityDetector {
 export class PingConnectivityDetector implements ConnectivityDetector {
     private pingUrl: string;
 
-    constructor(pingUrl = 'https://registry.iamrichardd.com/ping') {
+    constructor(pingUrl = getPingUrl()) {
         this.pingUrl = pingUrl;
     }
 
