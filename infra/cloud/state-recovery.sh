@@ -16,6 +16,12 @@ ZONE_ID=${TF_VAR_cloudflare_zone_id}
 
 echo "🛠️ Starting Deep State Recovery..."
 
+# 0. Force unlock the state
+# A stale lock from a previous failed run is currently blocking state access.
+# ID extracted from logs: e99f1c23-f6a9-0ab6-535a-ad6d729df8b2
+echo "Attempting to clear stale state lock..."
+tofu force-unlock -force e99f1c23-f6a9-0ab6-535a-ad6d729df8b2 || echo "Lock already cleared or unlock failed."
+
 # 1. Pull the raw state
 tofu state pull > raw_state.json
 
