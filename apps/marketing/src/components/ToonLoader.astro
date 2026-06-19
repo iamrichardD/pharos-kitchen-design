@@ -12,12 +12,13 @@
 
 interface Props {
   content: string;
+  id?: string;
 }
 
-const { content } = Astro.props;
+const { content, id } = Astro.props;
 ---
 
-<div class="toon-container bg-bg-base/40 border border-ph-pulse/20 rounded-lg p-6 font-mono text-sm text-text-base shadow-2xl transition-colors duration-300" data-toon={content}>
+<div class="toon-container bg-bg-base/40 border border-ph-pulse/20 rounded-lg p-6 font-mono text-sm text-text-base shadow-2xl transition-colors duration-300" data-toon={content} data-id={id}>
   <div class="toon-status flex items-center gap-2 mb-4">
     <div class="w-2 h-2 rounded-full bg-ph-pulse animate-pulse"></div>
     <span class="text-xs uppercase tracking-tighter opacity-60">Initializing Pharos WASM Runtime...</span>
@@ -28,6 +29,11 @@ const { content } = Astro.props;
     <div class="toon-body prose prose-slate dark:prose-invert max-w-none text-text-base leading-relaxed mb-8"></div>
     <div class="toon-visuals mb-12"></div>
     <div class="toon-lists mt-8 space-y-10"></div>
+    {id && (
+      <div class="mt-8 pt-4 border-t border-ph-pulse/10 flex justify-end items-center text-[10px] uppercase tracking-wider opacity-40">
+        <span>#{id}</span>
+      </div>
+    )}
   </div>
 
   <div class="toon-fallback hidden py-12 text-center border-2 border-dashed border-red-500/20 rounded-lg bg-red-500/5">
@@ -39,14 +45,28 @@ const { content } = Astro.props;
     <button onclick="window.location.reload()" class="mt-6 px-4 py-2 bg-red-900/30 border border-red-500/50 text-red-500 text-[10px] uppercase hover:bg-red-500 hover:text-white transition-all">
       Attempt Re-Sync
     </button>
-  </div>
 </div>
 
 <script>
   // @ts-ignore
   import init, { parse_toon } from '@pkd/toon';
+  import { formatDate } from '../utils/date';
 
   let wasmInitialized = false;
+
+  function escapeHtml(str: string | undefined): string {
+    if (!str) return '';
+    return str.replace(/[&<>"']/g, (m) => {
+      switch (m) {
+        case '&': return '&amp;';
+        case '<': return '&lt;';
+        case '>': return '&gt;';
+        case '"': return '&quot;';
+        case "'": return '&#039;';
+        default: return m;
+      }
+    });
+  }
 
   async function loadAllToons() {
     const containers = document.querySelectorAll('.toon-container');
@@ -84,40 +104,59 @@ const { content } = Astro.props;
 
           // 1. Render Header Metadata
           if (header && doc.metadata) {
+            const formattedDate = formatDate(doc.metadata.date);
+
             header.innerHTML = `
               <div class="flex justify-between items-start mb-2">
-               <h1 class="text-2xl font-bold text-text-base tracking-tight">${doc.metadata.title || 'Pharos Update'}</h1>
-               <span class="px-2 py-0.5 bg-ph-pulse/5 border border-ph-pulse/20 text-[10px] uppercase text-ph-pulse font-bold rounded">
-                 Verified Log
-               </span>
-             </div>
-             <div class="flex gap-4 text-[10px] uppercase tracking-wider opacity-60">
-               <span>By: ${doc.metadata.author || 'PMA'}</span>
-               <span>Ref: ${doc.metadata.date || '2026-XX-XX'}</span>
-               <span class="text-ph-pulse">Stream: ${doc.metadata.stream || 'Engineering'}</span>
-             </div>
-           `;
+                <h1 class="text-2xl font-bold text-text-base tracking-tight">${escapeHtml(doc.metadata.title || 'Pharos Update')}</h1>
+                <span class="px-2 py-0.5 bg-ph-pulse/5 border border-ph-pulse/20 text-[10px] uppercase text-ph-pulse font-bold rounded">
+                  Verified Log
+                </span>
+              </div>
+              <div class="flex gap-4 text-[10px] uppercase tracking-wider opacity-60">
+                <span>By: ${escapeHtml(doc.metadata.author || 'PMA')}</span>
+                <span>Release Date: ${escapeHtml(formattedDate)}</span>
+                <span class="text-ph-pulse">Category: ${escapeHtml(doc.metadata.stream || 'Engineering')}</span>
+              </div>
+            `;
           }
 
          // 2. Render Primary Body (Extract from 'body' list if it exists)
          if (body) {
-             if (doc.lists?.body?.items?.[0]?.[0]) {
-               body.innerHTML = `<p>${doc.lists.body.items[0][0]}</p>`;
-             } else {
-               body.innerHTML = `<p class="italic opacity-50 text-xs text-center">No narrative content in this log.</p>`;
-             }
+              if (doc.lists?.body?.items?.[0]?.[0]) {
+                body.innerHTML = `<p>${escapeHtml(doc.lists.body.items[0][0])}</p>`;
+              } else {
+                body.innerHTML = `<p class="italic opacity-50 text-xs text-center">No narrative content in this log.</p>`;
+              }
          }
 
-         // 3. Render Visual Assets (Infographics)
-         if (visuals && doc.lists?.infographics) {
-           visuals.innerHTML = doc.lists.infographics.items.map((row: string[]) => `
-             <div class="relative group">
-               <div class="absolute -inset-1 bg-gradient-to-r from-emerald-500/20 to-emerald-400/20 dark:from-emerald-500/20 dark:to-emerald-400/20 from-ph-blue/5 to-ph-blue/10 opacity-20 blur group-hover:opacity-40 transition-all duration-1000"></div>
-               <img src="/pharos-kitchen-design${row[2]}" alt="${row[0]}" class="relative w-full border border-ph-pulse/10 rounded-lg shadow-2xl" />
-               <div class="mt-2 text-[10px] uppercase tracking-[0.2em] opacity-40 text-center">${row[0]} [${row[1]}]</div>
-             </div>
-           `).join('');
-         }
+          // 3. Render Visual Assets (Infographics)
+          if (visuals && doc.lists?.infographics) {
+            visuals.innerHTML = doc.lists.infographics.items.map((row: string[]) => {
+              const imgPath = row[2] || '';
+              const isResponsive = imgPath.endsWith('-dark.jpg') || imgPath.endsWith('-dark.png');
+              if (isResponsive) {
+                const lightPath = imgPath.replace('-dark.', '-light.');
+                return `
+                  <div class="relative group">
+                    <div class="absolute -inset-1 bg-gradient-to-r from-emerald-500/20 to-emerald-400/20 dark:from-emerald-500/20 dark:to-emerald-400/20 from-ph-blue/5 to-ph-blue/10 opacity-20 blur group-hover:opacity-40 transition-all duration-1000"></div>
+                    <picture>
+                      <source srcset="/pharos-kitchen-design${escapeHtml(imgPath)}" media="(prefers-color-scheme: dark)">
+                      <img src="/pharos-kitchen-design${escapeHtml(lightPath)}" alt="${escapeHtml(row[0])}" class="relative w-full border border-ph-pulse/10 rounded-lg shadow-2xl" />
+                    </picture>
+                    <div class="mt-2 text-[10px] uppercase tracking-[0.2em] opacity-40 text-center">${escapeHtml(row[0])} [${escapeHtml(row[1])}]</div>
+                  </div>
+                `;
+              }
+              return `
+                <div class="relative group">
+                  <div class="absolute -inset-1 bg-gradient-to-r from-emerald-500/20 to-emerald-400/20 dark:from-emerald-500/20 dark:to-emerald-400/20 from-ph-blue/5 to-ph-blue/10 opacity-20 blur group-hover:opacity-40 transition-all duration-1000"></div>
+                  <img src="/pharos-kitchen-design${escapeHtml(imgPath)}" alt="${escapeHtml(row[0])}" class="relative w-full border border-ph-pulse/10 rounded-lg shadow-2xl" />
+                  <div class="mt-2 text-[10px] uppercase tracking-[0.2em] opacity-40 text-center">${escapeHtml(row[0])} [${escapeHtml(row[1])}]</div>
+                </div>
+              `;
+            }).join('');
+          }
 
          // 4. Render Tabular Data (Metrics, Sprint Logs, etc.)
          if (lists && doc.lists) {

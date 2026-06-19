@@ -3,20 +3,21 @@
  * Component: Marketing / Content
  * File: roadmap.toon
  * Purpose: Automated reflection of authoritative internal logs.
- * Last Synced: 2026-06-18T22:54:20.352Z
+ * Last Synced: 2026-06-19T19:31:54.621Z
  * ======================================================================== */
 
 title: Pharos System Roadmap
 type: roadmap
-lastSynced: 2026-06-18T22:54:20.352Z
+lastSynced: 2026-06-19T19:31:54.621Z
 
-items[45]{id, name, status, phase, tag, description}:
+items[66]{id, name, status, phase, tag, description}:
   "254", "Provision Cloudflare R2 Registry Storage", "Deployed", "Sprint 5.03", "CORE", "Provisioned the R2 bucket for BIM Registry assets, bound `registry.iamrichardd.com` via `cloudflare_r2_custom_domain`, and upgraded the infrastructure slice to Cloudflare Provider v5.20.0 for compatibility. Verified 🟢 PHAROS GREEN."
   "242", "Implement RFC-2378 OmniBar & Procedural Hover-Bake", "Deployed", "Sprint 5.03", "CORE", "Implemented Web Component command bar, unified wildcard search across workspaces, integrated real-time WebGL canvas, and verified input validation / ReDoS protections. Verified 🟢 PHAROS GREEN."
   "252", "Connect Demo OmniBar to Production Search Index and Category Shards", "Deployed", "Sprint 5.03", "CORE", "Implemented R2 bucket fetch client in demo, integrated production index with WASM query engine, added lazy-loaded category shards, and added micro-animations with status panel. Verified 🟢 PHAROS GREEN."
   "258", "Remediate CI Disk Exhaustion in Containerfile.bridge by Standardizing on Debian Base", "Deployed", "Sprint 5.03", "CORE", "Replaced the bloated sam build-dotnet8 base image in Containerfile.bridge with standard Debian Bookworm and installed dotnet-sdk-8.0 directly, resolving CI disk exhaustion. Verified 🟢 PHAROS GREEN."
   "107", "Dependency Pruning", "Deployed", "Sprint 5.03", "CORE", "Audited and pruned pkd-core dependencies. Isolated native-only crates (dashmap, rayon) to native targets, significantly reducing WASM artifact size. Verified 🟢 PHAROS GREEN."
   "267", "Resolve Demo Site Search Index Asset Pathing Mismatch", "Deployed", "Sprint 5.03", "CORE", "Decoupled registry base URLs, implemented custom RegistryLoadError, polished UI diagnostic copy, and added 404/403 failure test cases. Verified 🟢 PHAROS GREEN."
+  "270", "Refactor Deploy Site Workflow Trigger Paths", "Deployed", "Sprint 5.03", "CORE", "Added apps/demo/** to the on: push: paths: filter in deploy-site.yml to ensure demo site changes trigger redeployments. Verified 🟢 PHAROS GREEN."
   "248", "Conclude Sprint 5.02 and Draft Friday Handoff", "Deployed", "Sprint 5.02", "PROTOCOL", "Reconciled Sprint 5.02 backlog, updated DORA metrics, drafted Friday handoff report, and prepared weekly update blog post. Verified 🟢 PHAROS GREEN."
   "235", "Resolve Demo URL 404 Build Omission", "Deployed", "Sprint 5.02", "TOOLING", "Refactored Containerfile.ts to build and nest the Demo app, enforced React 19.0.0, and unified the React island for context sharing. Verified 🟢 PHAROS GREEN."
   "237", "Remediate Rust Toolchain and Metadata Warnings", "Deployed", "Sprint 5.02", "CORE", "Centralized package metadata via workspace inheritance, resolved stylistic drifts, and removed dead code in `pkd-cli`. Verified 🟢 PHAROS GREEN."
@@ -47,12 +48,32 @@ items[45]{id, name, status, phase, tag, description}:
   "123", "Zero-Allocation Marshalling", "Deployed", "Sprint 4.11", "BRIDGE", "Delivered high-performance memory-safe marshalling for the Revit Bridge (ECT 4)."
   "175", "Design System Alignment", "Deployed", "Sprint 4.11", "UX", "Aligned the Marketing TOON loader with the Pharos Design System typography."
   "168", "Automated Boundary Enforcement", "Deployed", "Sprint 4.11", "PROTOCOL", "Implemented ADR-0044 drift detection to ensure Rust/C# parity."
-  "239", "Refactor Marketing Site IA for Command-First Identity", "In Progress", "Sprint 5.03", "CORE", "Implement high-fidelity Terminal Hero and capability-based documentation flow."
-  "185", "Zero-Allocation JSON Parsing", "In Progress", "Sprint 5.03", "CORE", "Implementing source-generated JSON parsers to eliminate allocation overhead in WASM."
-  "42", "SRI & SEO Audit", "In Progress", "Sprint 5.03", "IDENTITY", "Remediating SRI hashes and optimizing SEO for the Marketing site."
-  "87", "Domain-to-Org Mapping", "In Progress", "Sprint 5.03", "IDENTITY", "Implementing secure domain validation for organizational onboarding."
-  "270", "Refactor Deploy Site Workflow Trigger Paths", "In Progress", "Sprint 5.03", "CORE", "Add apps/demo/** to the on: push: paths: filter in deploy-site.yml to ensure demo site changes trigger redeployments."
-  "271", "Implement Cloudflare R2 Upload Pipeline for Search Index", "In Progress", "Sprint 5.03", "CORE", "Implement S3-compatible R2 upload client in pkd-cli and uncomment/update promotion commands in pulse.yml to target R2 registry bucket."
-  "273", "Decouple Marketing and Demo Build Stages in Containerfile.ts", "In Progress", "Sprint 5.03", "CORE", "Refactor Containerfile.ts to isolate the React demo compilation stage, preventing demo compilation failures from blocking marketing builds."
-  "84", "Dual-Stream Release Pipeline", "Blueprint Approved", "Sprint 5.04", "TOOLING", "Configuring separate channels for stable and nightly releases."
-  "85", "Official Homebrew Tap", "Blueprint Approved", "Sprint 5.04", "TOOLING", "Initializing the official Pharos Homebrew tap for macOS/Linux distribution."
+  "275", "Configure Production-Only CORS Rules for Cloudflare R2 Registry Storage", "In Progress", "Sprint 5.04", "CORE", "Define cloudflare_r2_bucket_cors in storage.tf and lock down allowed_origins strictly to production domains."
+  "276", "Add --registry-target Flags and Update Registry CLI Documentation", "In Progress", "Sprint 5.04", "CORE", "Add target flag to pkd-cli to allow baking indices to local folder and update docs."
+  "277", "Implement Local Disk Registry Serving with Path Guards in Vite Dev Server", "In Progress", "Sprint 5.04", "CORE", "Register custom middleware in Astro/Vite configs to serve local indices with directory traversal checks."
+  "273", "Decouple Marketing and Demo Build Stages in Containerfile.ts", "In Progress", "Sprint 5.04", "CORE", "Refactor Containerfile.ts to isolate the React demo compilation stage, preventing demo compilation failures from blocking marketing builds."
+  "274", "Integrate cargo-machete into pulse.sh", "In Progress", "Sprint 5.04", "CORE", "Integrate cargo-machete into core validation slice under Podman to enforce dependency health checks."
+  "239", "Refactor Marketing Site IA for Command-First Identity", "In Progress", "Sprint 5.04", "CORE", "Implement high-fidelity Terminal Hero and capability-based documentation flow. Requires 50% Mid-Sprint Rigor Gate review."
+  "185", "Zero-Allocation JSON Parsing", "Blueprint Approved", "Sprint 5.05", "CORE", "Implementing source-generated JSON parsers to eliminate allocation overhead in WASM."
+  "42", "SRI & SEO Audit", "Blueprint Approved", "Sprint 5.05", "IDENTITY", "Remediating SRI hashes and optimizing SEO for the Marketing site."
+  "84", "Dual-Stream Release Pipeline", "Blueprint Approved", "Sprint 5.05", "TOOLING", "Configuring separate channels for stable and nightly releases."
+  "85", "Official Homebrew Tap", "Blueprint Approved", "Sprint 5.05", "TOOLING", "Initializing the official Pharos Homebrew tap for macOS/Linux distribution."
+  "87", "Domain-to-Org Mapping", "Blueprint Approved", "Sprint 6.01", "IDENTITY", "Implementing secure domain validation for organizational onboarding."
+  "268", "Design Production Split boundaries", "Blueprint Approved", "Sprint 6.01", "CORE", "Decouple production infrastructure stages to isolate networking blocks."
+  "257", "Enforce Reference Validation", "Blueprint Approved", "Sprint 6.01", "UX", "Add runtime validators for Three.js layout elements."
+  "256", "Standardize Web Components", "Blueprint Approved", "Sprint 6.01", "UX", "Refactor custom layout components to strictly inherit standard bindings."
+  "253", "Cryptographic signature validation", "Blueprint Approved", "Sprint 6.01", "IDENTITY", "Implement runtime checks for search index binary signatures."
+  "251", "Refactor Schemas", "Blueprint Approved", "Sprint 6.01", "CORE", "Optimize JSON validation templates for manufacturer datasets."
+  "227", "Implement Info Cards", "Blueprint Approved", "Sprint 6.01", "UX", "Build interactive hover metadata panels for Three.js canvas items."
+  "226", "Purge Legacy SQLite modules", "Blueprint Approved", "Sprint 6.01", "IDENTITY", "Remove dead sqlite libraries to decrease Tauri compile overhead."
+  "225", "Implement Vfs boundary checks", "Blueprint Approved", "Sprint 6.01", "UX", "Restrict file read scopes in local loaders."
+  "212", "Decommission old AWS credentials", "Blueprint Approved", "Sprint 6.01", "CORE", "Purge vestigial IAM secrets from GitHub variables."
+  "211", "Purge vestigial auth routes", "Blueprint Approved", "Sprint 6.01", "CORE", "Deprecate endpoint routes bypassed by passkey auth."
+  "209", "Document BIM Standard", "Blueprint Approved", "Sprint 6.01", "PROTOCOL", "Publish comprehensive guide for manufacturer schema adherence."
+  "193", "Remediate critical NPM warnings", "Blueprint Approved", "Sprint 6.01", "IDENTITY", "Apply overrides to resolve nested vulnerable dependencies."
+  "192", "Remediate high vulnerability NPM packages", "Blueprint Approved", "Sprint 6.01", "IDENTITY", "Patch devalue, fast-uri, and js-cookie vulnerabilities. Note: Astro >= 5.0.0 and happy-dom fixes are already completed."
+  "184", "Implement Rust unit tests for Dialects", "Blueprint Approved", "Sprint 6.01", "CORE", "Ensure True and Frymaster dialers have 100% logic test coverage."
+  "144", "IKD Empowerment Hub UI", "Blueprint Approved", "Sprint 6.01", "UX", "Build workspace interface for solo designers."
+  "89", "Develop Manufacturer Onboarding Portal", "Blueprint Approved", "Sprint 6.01", "UX", "Build interface for uploading OEM dialects."
+  "28", "Shared Design Schema standardization", "Blueprint Approved", "Sprint 6.01", "CORE", "Re-align JSON dialect structures across Revit and Three.js."
+  "278", "Implement webMCP metrics endpoint to expose DORA and sprint telemetry", "Blueprint Approved", "Sprint 6.01", "PROTOCOL", "Implement /mcp/metrics route in apps/marketing using Astro endpoint handlers to serve JSON telemetry."

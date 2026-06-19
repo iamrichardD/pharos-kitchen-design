@@ -21,12 +21,6 @@ const sortedUpdates = allUpdates.sort((a, b) => {
   if (dateCompare !== 0) return dateCompare;
   return b.id.localeCompare(a.id);
 });
-
-const streams = [
-  { label: "Engineering", value: "stream=engineering" },
-  { label: "Design", value: "stream=design" },
-  { label: "Logistics", value: "stream=logistics" }
-];
 ---
 
 <BaseLayout title="Pharos Pulse | Authoritative Log" description="Follow our sprint notes for weekly progress, community advisories and updates, and for strategic milestones defining our roadmap.">
@@ -46,8 +40,8 @@ const streams = [
       <div class="mb-16 sticky top-24 z-40">
         <pkd-command-bar 
           id="blog-command-bar"
-          placeholder="Filter by stream=engineering, tag=wasm, or keywords..."
-          pills={JSON.stringify(streams)}
+          type="blog"
+          placeholder="Filter by category=engineering, tag=wasm, or keywords..."
         />
       </div>
 
@@ -56,16 +50,8 @@ const streams = [
         {sortedUpdates.length > 0 ? (
           sortedUpdates.map((update) => (
             <article class="blog-entry group" data-raw={update.data.content}>
-              <div class="flex flex-col md:flex-row gap-8">
-                <div class="md:w-32 flex-shrink-0 pt-2">
-                   <div class="sticky top-48">
-                      <div class="text-[10px] font-bold text-ph-pulse/40 uppercase tracking-[0.2em] mb-1">Entry ID</div>
-                      <div class="text-lg font-mono text-text-base/20 group-hover:text-ph-pulse/40 transition-colors">#{update.id}</div>
-                   </div>
-                </div>
-                <div class="flex-grow">
-                   <ToonLoader content={update.data.content} />
-                </div>
+              <div class="max-w-3xl mx-auto">
+                <ToonLoader id={update.id} content={update.data.content} />
               </div>
             </article>
           ))
@@ -104,8 +90,12 @@ const streams = [
       if (normalizedQuery.length > 0) {
         if (normalizedQuery.includes('=')) {
           const parts = normalizedQuery.split('=');
-          const key = parts[0]?.trim();
+          let key = parts[0]?.trim();
           const value = parts[1]?.trim();
+          
+          if (key === 'category') {
+            key = 'stream';
+          }
           
           if (key && value) {
             const isWildcard = value.includes('*') || value.includes('+') || value.includes('?') || value.includes('[');
