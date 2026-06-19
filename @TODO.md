@@ -6,7 +6,7 @@
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Central tracking for Phase-specific tasks and issues (Present & Future).
  * Traceability: Issue #207
- * Last Updated: 2026-06-16
+ * Last Updated: 2026-06-19
  * ======================================================================== -->
 
 <!-- 
@@ -21,19 +21,46 @@
 
 ## 🚀 Active Sprint
 
-### Sprint 5.03: The Ghost & The Bridge (2026-06-15) - 🚀 ACTIVE
-- [ ] **Issue #239**: [TAG: UX] Refactor Marketing Site IA for Command-First Identity. [DESC: Implement high-fidelity Terminal Hero and capability-based documentation flow.] [ECT: 5]
-- [ ] **Issue #185**: [TAG: Perf] Zero-Allocation JSON Parsing. [DESC: Implementing source-generated JSON parsers to eliminate allocation overhead in WASM.]
-- [ ] **Issue #42**: [TAG: Security] SRI & SEO Audit. [DESC: Remediating SRI hashes and optimizing SEO for the Marketing site.]
-- [ ] **Issue #87**: [TAG: Security] Domain-to-Org Mapping. [DESC: Implementing secure domain validation for organizational onboarding.]
-- [ ] **Issue #270**: [TAG: ci/cd] Refactor Deploy Site Workflow Trigger Paths. [DESC: Add apps/demo/** to the on: push: paths: filter in deploy-site.yml to ensure demo site changes trigger redeployments.] [ECT: 2]
-- [ ] **Issue #271**: [TAG: Infrastructure] Implement Cloudflare R2 Upload Pipeline for Search Index. [DESC: Implement S3-compatible R2 upload client in pkd-cli and uncomment/update promotion commands in pulse.yml to target R2 registry bucket.] [ECT: 3]
+### Sprint 5.04: Milestone 5 - Completion & Infrastructure (2026-06-22) - 🚀 ACTIVE
+- [ ] **Issue #275**: [TAG: Infrastructure] Configure Production-Only CORS Rules for Cloudflare R2 Registry Storage. [DESC: Define cloudflare_r2_bucket_cors in storage.tf and lock down allowed_origins strictly to production domains.] [ECT: 2]
+- [ ] **Issue #276**: [TAG: debt] Add --registry-target Flags and Update Registry CLI Documentation. [DESC: Add target flag to pkd-cli to allow baking indices to local folder and update docs.] [ECT: 2]
+- [ ] **Issue #277**: [TAG: debt] Implement Local Disk Registry Serving with Path Guards in Vite Dev Server. [DESC: Register custom middleware in Astro/Vite configs to serve local indices with directory traversal checks.] [ECT: 3]
 - [ ] **Issue #273**: [TAG: debt] Decouple Marketing and Demo Build Stages in Containerfile.ts. [DESC: Refactor Containerfile.ts to isolate the React demo compilation stage, preventing demo compilation failures from blocking marketing builds.] [ECT: 3]
+- [ ] **Issue #274**: [TAG: Debt] Integrate cargo-machete into pulse.sh. [DESC: Integrate cargo-machete into core validation slice under Podman to enforce dependency health checks.] [ECT: 1]
+- [ ] **Issue #239**: [TAG: UX] Refactor Marketing Site IA for Command-First Identity. [DESC: Implement high-fidelity Terminal Hero and capability-based documentation flow. Requires 50% Mid-Sprint Rigor Gate review.] [ECT: 5]
 
 ---
 
 ## 📅 Future Sprints
 
-### Sprint 5.04: The Scaling Infrastructure (2026-07-06) - 🔮 PLANNED
-- [ ] **Issue #84**: [TAG: Infra] Dual-Stream Release Pipeline. [DESC: Configuring separate channels for stable and nightly releases.]
-- [ ] **Issue #85**: [TAG: Infra] Official Homebrew Tap. [DESC: Initializing the official Pharos Homebrew tap for macOS/Linux distribution.]
+### Sprint 5.05: Milestone 5 - Performance & Launch (2026-07-06) - 🔮 PLANNED
+- [ ] **Issue #185**: [TAG: Perf] Zero-Allocation JSON Parsing. [DESC: Implementing source-generated JSON parsers to eliminate allocation overhead in WASM.] [ECT: 3]
+- [ ] **Issue #42**: [TAG: Security] SRI & SEO Audit. [DESC: Remediating SRI hashes and optimizing SEO for the Marketing site.] [ECT: 2]
+- [ ] **Issue #84**: [TAG: Infra] Dual-Stream Release Pipeline. [DESC: Configuring separate channels for stable and nightly releases.] [ECT: 2]
+- [ ] **Issue #85**: [TAG: Infra] Official Homebrew Tap. [DESC: Initializing the official Pharos Homebrew tap for macOS/Linux distribution.] [ECT: 2]
+
+### Sprint 6.01: Milestone 6 - Enterprise Sync & Multi-Org (2026-07-20) - 🔮 PLANNED
+- [ ] **Issue #87**: [TAG: Security] Domain-to-Org Mapping. [DESC: Implementing secure domain validation for organizational onboarding.] [ECT: 3]
+
+---
+
+## ❄️ Backlog Icebox (Unassigned)
+
+- [ ] **Issue #268**: [TAG: Infrastructure] Design Production Split boundaries. [DESC: Decouple production infrastructure stages to isolate networking blocks.] [ECT: 3]
+- [ ] **Issue #257**: [TAG: UI] Enforce Reference Validation. [DESC: Add runtime validators for Three.js layout elements.] [ECT: 2]
+- [ ] **Issue #256**: [TAG: UI] Standardize Web Components. [DESC: Refactor custom layout components to strictly inherit standard bindings.] [ECT: 2]
+- [ ] **Issue #253**: [TAG: Security] Cryptographic signature validation. [DESC: Implement runtime checks for search index binary signatures.] [ECT: 3]
+- [ ] **Issue #251**: [TAG: Debt] Refactor Schemas. [DESC: Optimize JSON validation templates for manufacturer datasets.] [ECT: 4]
+- [ ] **Issue #227**: [TAG: UI] Implement Info Cards. [DESC: Build interactive hover metadata panels for Three.js canvas items.] [ECT: 2]
+- [ ] **Issue #226**: [TAG: Security] Purge Legacy SQLite modules. [DESC: Remove dead sqlite libraries to decrease Tauri compile overhead.] [ECT: 2]
+- [ ] **Issue #225**: [TAG: UI] Implement Vfs boundary checks. [DESC: Restrict file read scopes in local loaders.] [ECT: 3]
+- [ ] **Issue #212**: [TAG: Debt] Decommission old AWS credentials. [DESC: Purge vestigial IAM secrets from GitHub variables.] [ECT: 1]
+- [ ] **Issue #211**: [TAG: Debt] Purge vestigial auth routes. [DESC: Deprecate endpoint routes bypassed by passkey auth.] [ECT: 1]
+- [ ] **Issue #209**: [TAG: Governance] Document BIM Standard. [DESC: Publish comprehensive guide for manufacturer schema adherence.] [ECT: 2]
+- [ ] **Issue #193**: [TAG: Security] Remediate critical NPM warnings. [DESC: Apply overrides to resolve nested vulnerable dependencies.] [ECT: 2]
+- [ ] **Issue #192**: [TAG: Security] Remediate high vulnerability NPM packages. [DESC: Patch devalue, fast-uri, and js-cookie vulnerabilities. Note: Astro >= 5.0.0 and happy-dom fixes are already completed.] [ECT: 3]
+- [ ] **Issue #184**: [TAG: Debt] Implement Rust unit tests for Dialects. [DESC: Ensure True and Frymaster dialers have 100% logic test coverage.] [ECT: 2]
+- [ ] **Issue #144**: [TAG: UI] IKD Empowerment Hub UI. [DESC: Build workspace interface for solo designers.] [ECT: 4]
+- [ ] **Issue #89**: [TAG: UI] Develop Manufacturer Onboarding Portal. [DESC: Build interface for uploading OEM dialects.] [ECT: 4]
+- [ ] **Issue #28**: [TAG: Core] Shared Design Schema standardization. [DESC: Re-align JSON dialect structures across Revit and Three.js.] [ECT: 4]
+- [ ] **Issue #278**: [TAG: Governance] Implement webMCP metrics endpoint to expose DORA and sprint telemetry. [DESC: Implement /mcp/metrics route in apps/marketing using Astro endpoint handlers to serve JSON telemetry.] [ECT: 2]

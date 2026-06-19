@@ -1,0 +1,41 @@
+/* ========================================================================
+ * Project: Pharos Kitchen Design (Project Prism)
+ * Component: Marketing / Blog (Product Update)
+ * File: apps/marketing/src/content/updates/2026-06-19-command-first-and-local-control.toon
+ * Author: Senior Pharos Product Manager / PMA
+ * License: FSL-1.1 (See LICENSE file for details)
+ * Purpose: Strategic summary of Sprint 5.03 - Speed & Privacy.
+ * Traceability: Issue #248, Issue #274, Issue #275
+ * Last Updated: 2026-06-19
+ * ======================================================================== */
+
+title: Designed for Speed, Built for Privacy
+type: update
+date: 2026-06-19
+createdAt: 2026-06-19T19:30:00Z
+releaseAt: 2026-06-19T20:00:00Z
+author: PMA (Meta-Architect)
+stream: engineering
+tags: security, performance, ci-cd, identity, R2
+
+# The Change
+body[1]{content}:
+  "At Pharos Kitchen Design (PKD), we build with a commitment to zero friction and high reliability. This week, in Sprint 5.03, we focused on making catalog discovery instant and secure. By moving our data registry to a globally distributed network and optimizing local client storage, we ensure your tools load instantly and work completely offline, protecting your client files from cloud leaks."
+
+# Core Achievements
+achievements[3]{focus, impact}:
+  High-Speed Registry, "Hosted our equipment database on a global, distributed storage network, eliminating catalog loading bottlenecks."
+  Offline Freedom, "Compiled search catalogs to run locally on your machine, enabling drag-and-drop design without internet access."
+  Data Privacy, "Secured client files and pricing structures by keeping all design calculations strictly on your local disk."
+
+# Visualizing the Boundary
+infographics[1]{alt, category, path}:
+  PKD Split Security Boundary Map, Strategy Schematic, /assets/infographics/sprint-5.03-boundary-dark.jpg
+
+# Sprint 5.03 Performance
+metrics[1]{assigned_ect, unplanned_ect, completed_ect, variance, volatility}:
+  16, 0, 16, 0, 0.0%
+
+# Why it matters for designers
+closing[1]{content}:
+  "Reliability is a baseline, not a target. With our local boundary established, we look ahead to Sprint 5.04: executing the automated catalog promotion pipeline and decoupling our build stages. The kitchen design standard remains secure."

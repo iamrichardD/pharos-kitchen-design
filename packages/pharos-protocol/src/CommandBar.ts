@@ -9,13 +9,14 @@
  * Last Updated: 2026-06-15
  * ======================================================================== */
 
+
 export class PkdCommandBar extends HTMLElement {
     private inputField: HTMLInputElement | null = null;
     private helperDropdown: HTMLDivElement | null = null;
     private pillsContainer: HTMLDivElement | null = null;
 
     static get observedAttributes() {
-        return ['placeholder', 'value', 'pills'];
+        return ['placeholder', 'value', 'pills', 'type'];
     }
 
     constructor() {
@@ -37,6 +38,8 @@ export class PkdCommandBar extends HTMLElement {
             this.inputField.value = newValue;
         } else if (name === 'pills') {
             this.renderPills();
+        } else if (name === 'type') {
+            this.renderDropdownContent();
         }
     }
 
@@ -62,7 +65,7 @@ export class PkdCommandBar extends HTMLElement {
                     left: -4px;
                     right: -4px;
                     bottom: -4px;
-                    background: linear-gradient(90deg, rgba(255, 107, 0, 0.15) 0%, rgba(0, 95, 184, 0.05) 100%);
+                    background: linear-gradient(90deg, rgba(var(--ph-orange, 255, 107, 0), 0.15) 0%, rgba(var(--ph-blue, 0, 95, 184), 0.05) 100%);
                     border-radius: 12px;
                     filter: blur(8px);
                     opacity: 0.3;
@@ -73,10 +76,10 @@ export class PkdCommandBar extends HTMLElement {
                 }
                 .wrapper {
                     position: relative;
-                    background-color: rgba(26, 26, 26, 0.95);
+                    background-color: rgba(var(--bg-base, 26, 26, 26), 0.95);
                     backdrop-filter: blur(20px);
-                    border: 1px solid rgba(0, 95, 184, 0.3);
-                    border-left: 3px solid #ff6b00;
+                    border: 1px solid rgba(var(--border-blueprint, 0, 95, 184), var(--border-opacity, 0.3));
+                    border-left: 3px solid rgb(var(--ph-orange, 255, 107, 0));
                     border-radius: 8px;
                     display: flex;
                     align-items: center;
@@ -86,20 +89,20 @@ export class PkdCommandBar extends HTMLElement {
                 }
                 .prefix {
                     padding: 4px 8px;
-                    background-color: rgba(0, 95, 184, 0.1);
-                    border: 1px solid rgba(0, 95, 184, 0.2);
+                    background-color: rgba(var(--border-blueprint, 0, 95, 184), 0.1);
+                    border: 1px solid rgba(var(--border-blueprint, 0, 95, 184), 0.2);
                     border-radius: 4px;
                     flex-shrink: 0;
                 }
                 .prefix-text {
-                    color: #84a59d;
+                    color: rgb(var(--text-muted, 156, 163, 175));
                     font-family: monospace;
                     font-size: 11px;
                 }
                 .input-field {
                     background: transparent;
                     border: none;
-                    color: #f3f4f6;
+                    color: rgb(var(--text-base, 243, 244, 246));
                     font-family: monospace;
                     font-size: 14px;
                     flex-grow: 1;
@@ -107,7 +110,7 @@ export class PkdCommandBar extends HTMLElement {
                     min-width: 100px;
                 }
                 .input-field::placeholder {
-                    color: rgba(156, 163, 175, 0.5);
+                    color: rgba(var(--text-muted, 156, 163, 175), 0.5);
                 }
                 .pills {
                     display: flex;
@@ -116,9 +119,9 @@ export class PkdCommandBar extends HTMLElement {
                 }
                 .pill {
                     padding: 4px 10px;
-                    background-color: rgba(255, 107, 0, 0.05);
-                    border: 1px solid rgba(255, 107, 0, 0.2);
-                    color: #9ca3af;
+                    background-color: rgba(var(--ph-orange, 255, 107, 0), 0.05);
+                    border: 1px solid rgba(var(--ph-orange, 255, 107, 0), 0.2);
+                    color: rgb(var(--text-muted, 156, 163, 175));
                     font-family: monospace;
                     font-size: 10px;
                     text-transform: uppercase;
@@ -127,9 +130,9 @@ export class PkdCommandBar extends HTMLElement {
                     transition: all 0.2s;
                 }
                 .pill:hover {
-                    color: #ff6b00;
-                    border-color: #ff6b00;
-                    background-color: rgba(255, 107, 0, 0.1);
+                    color: rgb(var(--ph-orange, 255, 107, 0));
+                    border-color: rgb(var(--ph-orange, 255, 107, 0));
+                    background-color: rgba(var(--ph-orange, 255, 107, 0), 0.1);
                 }
                 .dropdown {
                     position: absolute;
@@ -138,9 +141,9 @@ export class PkdCommandBar extends HTMLElement {
                     right: 0;
                     margin-top: 8px;
                     padding: 20px;
-                    background-color: rgba(26, 26, 26, 0.95);
+                    background-color: rgba(var(--bg-base, 26, 26, 26), 0.95);
                     backdrop-filter: blur(20px);
-                    border: 1px solid rgba(0, 95, 184, 0.3);
+                    border: 1px solid rgba(var(--border-blueprint, 0, 95, 184), var(--border-opacity, 0.3));
                     border-radius: 8px;
                     box-shadow: 0 15px 40px rgba(0,0,0,0.5);
                     z-index: 100;
@@ -170,7 +173,7 @@ export class PkdCommandBar extends HTMLElement {
                 .section-title {
                     font-size: 10px;
                     font-family: monospace;
-                    color: #ff6b00;
+                    color: rgb(var(--ph-orange, 255, 107, 0));
                     text-transform: uppercase;
                     letter-spacing: 0.15em;
                     margin: 0 0 12px 0;
@@ -192,19 +195,19 @@ export class PkdCommandBar extends HTMLElement {
                 .code {
                     font-size: 11px;
                     font-family: monospace;
-                    color: #f3f4f6;
-                    background-color: rgba(255,107,0,0.1);
+                    color: rgb(var(--text-base, 243, 244, 246));
+                    background-color: rgba(var(--ph-orange, 255, 107, 0), 0.1);
                     padding: 2px 6px;
                     border-radius: 4px;
                 }
                 .desc {
-                    color: #84a59d;
+                    color: rgb(var(--text-muted, 156, 163, 175));
                     text-transform: uppercase;
                 }
                 .expand-toggle {
                     background: transparent;
-                    border: 1px dashed rgba(255, 107, 0, 0.4);
-                    color: #ff6b00;
+                    border: 1px dashed rgba(var(--ph-orange, 255, 107, 0), 0.4);
+                    color: rgb(var(--ph-orange, 255, 107, 0));
                     font-family: monospace;
                     font-size: 10px;
                     padding: 4px 8px;
@@ -217,12 +220,12 @@ export class PkdCommandBar extends HTMLElement {
                     display: inline-block;
                 }
                 .expand-toggle:hover {
-                    background-color: rgba(255, 107, 0, 0.1);
-                    border-color: #ff6b00;
+                    background-color: rgba(var(--ph-orange, 255, 107, 0), 0.1);
+                    border-color: rgb(var(--ph-orange, 255, 107, 0));
                 }
                 .expanded-section {
                     display: none;
-                    border-top: 1px dashed rgba(255, 255, 255, 0.05);
+                    border-top: 1px dashed rgba(var(--text-base, 243, 244, 246), 0.05);
                     padding-top: 12px;
                     margin-top: 12px;
                 }
@@ -242,10 +245,10 @@ export class PkdCommandBar extends HTMLElement {
                 .footer {
                     display: flex;
                     justify-content: space-between;
-                    border-top: 1px solid rgba(255, 255, 255, 0.05);
+                    border-top: 1px solid rgba(var(--text-base, 243, 244, 246), 0.05);
                     padding-top: 10px;
                     font-size: 9px;
-                    color: #84a59d;
+                    color: rgb(var(--text-muted, 156, 163, 175));
                     font-family: monospace;
                 }
                 .footer-right {
@@ -272,23 +275,7 @@ export class PkdCommandBar extends HTMLElement {
                 </div>
                 <div class="dropdown" id="helper-dropdown">
                     <div class="grid">
-                        <div>
-                            <h4 class="section-title">Query Options</h4>
-                            <ul class="list">
-                                <li class="item">
-                                    <code class="code">manufacturer=</code>
-                                    <span class="desc">Filter by manufacturer</span>
-                                </li>
-                                <li class="item">
-                                    <code class="code">voltage=</code>
-                                    <span class="desc">Filter by voltage (e.g. 240V)</span>
-                                </li>
-                                <li class="item">
-                                    <code class="code">category=</code>
-                                    <span class="desc">Filter by category (e.g. Specialty*)</span>
-                                </li>
-                            </ul>
-                        </div>
+                        <div id="query-options-container"></div>
                         <div>
                             <h4 class="section-title">Wildcards & Sets</h4>
                             <ul class="list">
@@ -312,32 +299,7 @@ export class PkdCommandBar extends HTMLElement {
                     
                     <div class="expanded-section" id="expanded-section">
                         <h4 class="section-title">Additional Query Options</h4>
-                        <div class="expanded-grid">
-                            <ul class="list">
-                                <li class="item">
-                                    <code class="code">phase=</code>
-                                    <span class="desc">Electrical phase count (e.g. 3)</span>
-                                </li>
-                                <li class="item">
-                                    <code class="code">wattage=</code>
-                                    <span class="desc">Power usage (e.g. 4500W)</span>
-                                </li>
-                                <li class="item">
-                                    <code class="code">btu=</code>
-                                    <span class="desc">Gas heating capacity (e.g. 120000)</span>
-                                </li>
-                            </ul>
-                            <ul class="list">
-                                <li class="item">
-                                    <code class="code">drainconnection=</code>
-                                    <span class="desc">Plumbing sizing (e.g. 2" NPT)</span>
-                                </li>
-                                <li class="item">
-                                    <code class="code">width=</code> / <code class="code">depth=</code> / <code class="code">height=</code>
-                                    <span class="desc">Equipment dimensions in inches</span>
-                                </li>
-                            </ul>
-                        </div>
+                        <div id="expanded-section-content"></div>
                     </div>
 
                 </div>
@@ -349,7 +311,121 @@ export class PkdCommandBar extends HTMLElement {
         this.helperDropdown = this.shadowRoot!.getElementById('helper-dropdown') as HTMLDivElement;
         this.pillsContainer = this.shadowRoot!.getElementById('pills-container') as HTMLDivElement;
 
+        this.renderDropdownContent();
         this.renderPills();
+    }
+
+    private renderDropdownContent() {
+        const queryOptionsContainer = this.shadowRoot!.getElementById('query-options-container');
+        const expandedSectionContent = this.shadowRoot!.getElementById('expanded-section-content');
+        if (!queryOptionsContainer || !expandedSectionContent) return;
+
+        const type = this.getAttribute('type') || 'app';
+
+        if (type === 'blog') {
+            queryOptionsContainer.innerHTML = `
+                <h4 class="section-title">Query Options</h4>
+                <ul class="list">
+                    <li class="item">
+                        <code class="code">category=</code>
+                        <span class="desc">Filter by category (e.g. engineering)</span>
+                    </li>
+                    <li class="item">
+                        <code class="code">tag=</code>
+                        <span class="desc">Filter by tag (e.g. wasm)</span>
+                    </li>
+                    <li class="item">
+                        <code class="code">author=</code>
+                        <span class="desc">Filter by author (e.g. PMA)</span>
+                    </li>
+                </ul>
+            `;
+            expandedSectionContent.innerHTML = `
+                <div class="expanded-grid">
+                    <ul class="list">
+                        <li class="item">
+                            <code class="code">id=</code>
+                            <span class="desc">Filter by specific ledger ID</span>
+                        </li>
+                    </ul>
+                </div>
+            `;
+        } else if (type === 'roadmap') {
+            queryOptionsContainer.innerHTML = `
+                <h4 class="section-title">Query Options</h4>
+                <ul class="list">
+                    <li class="item">
+                        <code class="code">status=</code>
+                        <span class="desc">Filter by status (deployed, progress, blueprint)</span>
+                    </li>
+                    <li class="item">
+                        <code class="code">tag=</code>
+                        <span class="desc">Filter by engineering tag (core, bridge, etc)</span>
+                    </li>
+                    <li class="item">
+                        <code class="code">stream=</code>
+                        <span class="desc">Filter by roadmap phase (e.g. phase_1)</span>
+                    </li>
+                </ul>
+            `;
+            expandedSectionContent.innerHTML = `
+                <div class="expanded-grid">
+                    <ul class="list">
+                        <li class="item">
+                            <code class="code">sprint=</code>
+                            <span class="desc">Filter by sprint name (e.g. Sprint 5.03)</span>
+                        </li>
+                    </ul>
+                </div>
+            `;
+        } else {
+            // Default 'app' view
+            queryOptionsContainer.innerHTML = `
+                <h4 class="section-title">Query Options</h4>
+                <ul class="list">
+                    <li class="item">
+                        <code class="code">manufacturer=</code>
+                        <span class="desc">Filter by manufacturer</span>
+                    </li>
+                    <li class="item">
+                        <code class="code">voltage=</code>
+                        <span class="desc">Filter by voltage (e.g. 240V)</span>
+                    </li>
+                    <li class="item">
+                        <code class="code">category=</code>
+                        <span class="desc">Filter by category (e.g. Specialty*)</span>
+                    </li>
+                </ul>
+            `;
+            expandedSectionContent.innerHTML = `
+                <div class="expanded-grid">
+                    <ul class="list">
+                        <li class="item">
+                            <code class="code">phase=</code>
+                            <span class="desc">Electrical phase count (e.g. 3)</span>
+                        </li>
+                        <li class="item">
+                            <code class="code">wattage=</code>
+                            <span class="desc">Power usage (e.g. 4500W)</span>
+                        </li>
+                        <li class="item">
+                            <code class="code">btu=</code>
+                            <span class="desc">Gas heating capacity (e.g. 120000)</span>
+                        </li>
+                    </ul>
+                    <ul class="list">
+                        <li class="item">
+                            <code class="code">drainconnection=</code>
+                            <span class="desc">Plumbing sizing (e.g. 2" NPT)</span>
+                        </li>
+                        <li class="item">
+                            <code class="code">width=</code> / <code class="code">depth=</code> / <code class="code">height=</code>
+                            <span class="desc">Equipment dimensions in inches</span>
+                        </li>
+                    </ul>
+                </div>
+            `;
+        }
     }
 
     private renderPills() {
@@ -395,17 +471,19 @@ export class PkdCommandBar extends HTMLElement {
         this.inputField.addEventListener('focus', () => {
             this.updateDropdownState();
         });
-
         this.inputField.addEventListener('blur', () => {
             setTimeout(() => {
                 this.updateDropdownState();
             }, 150);
         });
 
+        // Prevent the input from blurring when clicking inside the dropdown
+        this.helperDropdown?.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+        });
+
         // Use document-level click to handle clicks outside the custom element
         document.addEventListener('click', this.handleOutsideClick);
-
-        // Toggle expanded help section
         const expandBtn = this.shadowRoot!.getElementById('expand-help-btn');
         const expandedSec = this.shadowRoot!.getElementById('expanded-section');
         if (expandBtn && expandedSec) {
