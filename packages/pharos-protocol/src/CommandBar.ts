@@ -472,9 +472,7 @@ export class PkdCommandBar extends HTMLElement {
             this.updateDropdownState();
         });
         this.inputField.addEventListener('blur', () => {
-            setTimeout(() => {
-                this.updateDropdownState();
-            }, 150);
+            this.updateDropdownState();
         });
 
         // Prevent the input from blurring when clicking inside the dropdown
