@@ -50,6 +50,7 @@ const { content, id } = Astro.props;
 <script>
   // @ts-ignore
   import init, { parse_toon } from '@pkd/toon';
+  import { formatDate } from '../utils/date';
 
   let wasmInitialized = false;
 
@@ -103,20 +104,7 @@ const { content, id } = Astro.props;
 
           // 1. Render Header Metadata
           if (header && doc.metadata) {
-            const rawDate = doc.metadata.date;
-            let formattedDate = '2026-XX-XX';
-            if (rawDate) {
-              try {
-                const parsedDate = new Date(rawDate);
-                if (!isNaN(parsedDate.getTime())) {
-                  formattedDate = parsedDate.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
-                } else {
-                  formattedDate = rawDate;
-                }
-              } catch (e) {
-                formattedDate = rawDate;
-              }
-            }
+            const formattedDate = formatDate(doc.metadata.date);
 
             header.innerHTML = `
               <div class="flex justify-between items-start mb-2">
