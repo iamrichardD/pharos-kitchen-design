@@ -32,6 +32,7 @@ WORKSPACE_ROOT=$(git rev-parse --show-toplevel)
 # -w: Sets the container working directory to /work
 # --security-opt: Required for certain WASM/Rust build operations
 podman run --rm \
+    -e DEBIAN_FRONTEND=noninteractive \
     --security-opt seccomp=unconfined \
     --dns 1.1.1.1 \
     -v "${WORKSPACE_ROOT}:/work:z" \

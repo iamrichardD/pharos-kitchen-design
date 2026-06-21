@@ -64,7 +64,7 @@ run_core() {
     # 4b. Roadmap Synchronization (ADR-0051)
     # Why: Ensures the public roadmap is always in sync with authoritative logs.
     echo "   [Process] Synchronizing Authoritative Roadmap..."
-    ./scripts/podman-wrapper.sh "public.ecr.aws/docker/library/node:24-bookworm" npx tsx scripts/sync-roadmap.ts
+    ./scripts/podman-wrapper.sh "public.ecr.aws/docker/library/node:24-bookworm@sha256:8530f76a96d88820d288761f022e318970dda93d01536919fbc16076b7983e63" npx tsx scripts/sync-roadmap.ts
 
     # 5. File Prologue Audit (FSL-1.1 Legal Compliance)
     # Why: Ensures every source file acknowledges the FSL-1.1 license and traceability.

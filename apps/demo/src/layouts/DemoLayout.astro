@@ -32,6 +32,23 @@ const { title } = Astro.props;
 		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Roboto+Condensed:wght@700&display=swap" rel="stylesheet">
 
 		<style is:global>
+			@import "tailwindcss";
+
+			@theme {
+				--color-ph-charcoal: rgb(var(--ph-charcoal));
+				--color-ph-orange: rgb(var(--ph-orange));
+				--color-ph-blue: rgb(var(--ph-blue));
+				--color-ph-emerald: rgb(var(--ph-emerald));
+				--color-bg-base: rgb(var(--bg-base));
+				--color-text-base: rgb(var(--text-base));
+				--color-text-muted: rgb(var(--text-muted));
+				--color-grid-line: rgb(var(--grid-line));
+				--color-border-blueprint: rgb(var(--border-blueprint));
+
+				--font-condensed: "Roboto Condensed", sans-serif;
+				--font-sans: "Inter", sans-serif;
+			}
+
 			:root {
 				/* Foundation Colors */
 				--ph-charcoal: 26, 26, 26;

@@ -3347,9 +3347,6 @@ dependencies = [
  "once_cell",
  "pharos-protocol",
  "regex",
- "serde",
- "serde_json",
- "thiserror 1.0.69",
 ]
 
 [[package]]
@@ -3358,10 +3355,6 @@ version = "0.1.0"
 dependencies = [
  "extism-pdk",
  "pharos-protocol",
- "regex",
- "serde",
- "serde_json",
- "thiserror 1.0.69",
 ]
 
 [[package]]
@@ -3374,9 +3367,6 @@ dependencies = [
  "once_cell",
  "pharos-protocol",
  "regex",
- "serde",
- "serde_json",
- "thiserror 1.0.69",
 ]
 
 [[package]]

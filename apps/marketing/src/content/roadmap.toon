@@ -3,12 +3,12 @@
  * Component: Marketing / Content
  * File: roadmap.toon
  * Purpose: Automated reflection of authoritative internal logs.
- * Last Synced: 2026-06-19T19:31:54.621Z
+ * Last Synced: 2026-06-21T20:43:52.876Z
  * ======================================================================== */
 
 title: Pharos System Roadmap
 type: roadmap
-lastSynced: 2026-06-19T19:31:54.621Z
+lastSynced: 2026-06-21T20:43:52.876Z
 
 items[66]{id, name, status, phase, tag, description}:
   "254", "Provision Cloudflare R2 Registry Storage", "Deployed", "Sprint 5.03", "CORE", "Provisioned the R2 bucket for BIM Registry assets, bound `registry.iamrichardd.com` via `cloudflare_r2_custom_domain`, and upgraded the infrastructure slice to Cloudflare Provider v5.20.0 for compatibility. Verified 🟢 PHAROS GREEN."

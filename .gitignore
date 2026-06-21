@@ -1,4 +1,6 @@
+.air/
 .artifacts/
+.history/
 !.artifacts/ux/
 search-index.tar.zst
 search-index/
@@ -18,7 +20,6 @@ target/
 .env
 .idea/
 .vscode/
-.history/
 *.log
 *.tgz
 
@@ -48,7 +49,6 @@ TestResults/
 *.userosscache
 *.sln.docstates
 .vs/
-.history/
 *.nupkg
 
 data/*.db
