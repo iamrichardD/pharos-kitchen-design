@@ -1,3 +1,14 @@
+<!-- ========================================================================
+ * Project: Pharos Kitchen Design (Project Prism)
+ * Component: Documentation / General Overview
+ * File: README.md
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * License: FSL-1.1 (See LICENSE file for details)
+ * Purpose: Root documentation containing architectural stack overview, legal compliance, and local container review instructions.
+ * Traceability: General Onboarding & Workflow
+ * Last Updated: 2026-06-21
+ * ======================================================================== -->
+
 # Pharos Kitchen Design (Project Prism)
 **Advancing Open Standards and Interoperability in AEC.**
 
@@ -15,6 +26,22 @@ PKD is built on a high-performance foundation designed to exceed the **McMaster-
 2.  **The 50KB Bloat Rule**: Individual equipment metadata must remain ultra-lean.
 3.  **Global Parity**: Native support for **en-US** and **es-MX** with real-time unit switching.
 4.  **Shift-Left Security**: Vulnerability identification integrated into the research phase.
+
+## 🛠️ Local Environment Review
+To inspect the rendered marketing hub and demo site locally without installing host-side dependencies, start the Astro preview server inside the standard Podman container with port forwarding:
+
+```bash
+podman run --rm --security-opt seccomp=unconfined \
+  -p 4321:4321 \
+  -v "$(pwd):/work:z" \
+  -w /work/apps/marketing \
+  public.ecr.aws/docker/library/node:24-bookworm \
+  npx astro preview --port 4321 --host 0.0.0.0
+```
+
+Once running, you can view the live changes at:
+- **Marketing Site**: [http://localhost:4321/pharos-kitchen-design](http://localhost:4321/pharos-kitchen-design)
+- **Interactive Demo**: [http://localhost:4321/pharos-kitchen-design/demo/](http://localhost:4321/pharos-kitchen-design/demo/)
 
 ## 📝 Engineering Traceability
 The project follows a high-rigor documentation standard. All architectural and strategic decisions are captured as immutable records:

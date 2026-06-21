@@ -12,6 +12,8 @@
 
 # Stage 1: Rust Builder (Metadata Core)
 FROM public.ecr.aws/docker/library/rust@sha256:fb328f0f58becb23ba1719940a2c94ece8b0b48afa837d05b79ef64bc1e18f6e AS rust-builder
+ENV DEBIAN_FRONTEND=noninteractive
+
 ARG BUILD_MODE=debug
 # Enable full backtraces for debug builds to facilitate rapid root-cause analysis.
 ENV RUST_BACKTRACE=full
@@ -22,6 +24,9 @@ RUN cd packages/pkd-core && \
 
 # Stage 2: .NET SDK (Revit Bridge Integration Tests)
 FROM public.ecr.aws/docker/library/debian@sha256:35ae959f6e83ffb465e7614d27b4fddd28288caa551fbca2798367567cce80d3 AS dotnet-tester
+ENV DEBIAN_FRONTEND=noninteractive
+ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
+
 ARG BUILD_MODE=debug
 ENV BUILD_MODE=$BUILD_MODE
 WORKDIR /work

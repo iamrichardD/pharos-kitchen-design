@@ -39,7 +39,7 @@ jobs:
           node-version: 24
 
       - name: "📦 Install Dependencies"
-        run: npm ci
+        run: npm ci --omit=dev
         working-directory: packages/auth-bridge
 
       - name: "🚀 Deploy to Cloudflare"

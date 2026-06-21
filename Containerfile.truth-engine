@@ -10,7 +10,7 @@
 
 # --- Stage 1: Rust/WASM Builder ---
 FROM public.ecr.aws/docker/library/rust@sha256:fb328f0f58becb23ba1719940a2c94ece8b0b48afa837d05b79ef64bc1e18f6e AS builder
-
+ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
     pkg-config \
     libssl-dev \
@@ -33,7 +33,7 @@ RUN bash scripts/build-wasm.sh
 
 # --- Stage 2: Truth Engine Runner ---
 FROM mcr.microsoft.com/playwright:v1.59.1-noble@sha256:b0ab6f3cb99aa7803adbc14d9027ec1785fc6e433b97e134e0f8fe61683b6b53
-
+ENV DEBIAN_FRONTEND=noninteractive
 # Force Node 24 installation
 RUN apt-get update && apt-get install -y curl && \
     curl -fsSL https://deb.nodesource.com/setup_24.x | bash - && \

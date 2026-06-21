@@ -8,6 +8,7 @@
 # Traceability: Issue #117, ADR-0029, Issue #237 (Space Optimization)
 # ========================================================================
 FROM public.ecr.aws/docker/library/rust@sha256:fb328f0f58becb23ba1719940a2c94ece8b0b48afa837d05b79ef64bc1e18f6e AS chef
+ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y pkg-config libssl-dev curl && \
     # Standardized wasm-pack installation (v0.15.0 pinned binary)
     curl -LsSf https://github.com/rustwasm/wasm-pack/releases/download/v0.15.0/wasm-pack-v0.15.0-x86_64-unknown-linux-musl.tar.gz -o wasm-pack.tgz && \
@@ -26,6 +27,7 @@ RUN cargo chef prepare --recipe-path recipe.json
 
 # Combined Build Stage (Eliminates COPY --from=cacher disk churn)
 FROM chef AS rust-builder
+ENV DEBIAN_FRONTEND=noninteractive
 ARG BUILD_MODE=debug
 ENV BUILD_MODE=$BUILD_MODE
 ENV RUST_BACKTRACE=full
@@ -56,11 +58,13 @@ RUN if [ "$BUILD_MODE" = "release" ]; then MODE_FLAG="--release"; else MODE_FLAG
 
 # Stage 5: Manifest Verifier (Supply Chain Gate)
 FROM rust-builder AS manifest-verifier
+ENV DEBIAN_FRONTEND=noninteractive
 ARG BUILD_MODE=debug
 RUN /work/target/$BUILD_MODE/pkd core verify-manifest /work/dist/dialects
 
 # Stage 6: Node.js (TypeScript & Security Audit)
 FROM public.ecr.aws/docker/library/node:24-bookworm@sha256:8530f76a96d88820d288761f022e318970dda93d01536919fbc16076b7983e63 AS ts-auditor
+ENV DEBIAN_FRONTEND=noninteractive
 ARG BUILD_MODE=debug
 WORKDIR /work
 COPY . .
@@ -69,14 +73,15 @@ COPY --from=rust-builder /work/packages/pkd-core/pkg /work/packages/pkd-core/pkg
 COPY --from=rust-builder /work/target/$BUILD_MODE/pkd /usr/local/bin/pkd
 RUN chmod +x /usr/local/bin/pkd
 COPY --from=manifest-verifier /work/dist/dialects/manifest.json /work/manifest-verified-marker
-RUN npm ci && \
-    (npm audit --workspaces || echo \"⚠️ Warning: Audit found known issues, proceeding per SECURITY_LOG.md\") && \
+RUN npm ci --omit=dev && \
+    npm audit --workspaces && \
     npm test && \
     npm cache clean --force && \
     rm -rf /root/.npm/_cacache
 
 # Stage 7: .NET SDK (Integrated "Pulse" Handshake) on Debian
 FROM public.ecr.aws/docker/library/debian@sha256:35ae959f6e83ffb465e7614d27b4fddd28288caa551fbca2798367567cce80d3 AS pulse-final
+ENV DEBIAN_FRONTEND=noninteractive
 ARG BUILD_MODE=debug
 ENV BUILD_MODE=$BUILD_MODE
 WORKDIR /work

@@ -1,0 +1,19 @@
+build(deps): migrate to Tailwind CSS v4 and align TypeScript to v6.0.3
+
+- Tailwind CSS v4 Migration:
+  - Replaced `@astrojs/tailwind` with `@tailwindcss/vite` in both `apps/marketing` and `apps/demo`.
+  - Removed deprecated `tailwind.config.mjs` files and refactored stylesheets to use native Tailwind v4 `@import "tailwindcss"`, `@theme` blocks, and `@utility` directives.
+  - Resolved black-and-white visual fallback by wrapping raw CSS variables in `rgb(var(...))` inside the `@theme` block, allowing Tailwind's compiler to correctly parse valid CSS colors.
+
+- Toolchain & Dependency Alignment:
+  - Aligned all workspaces to use TypeScript `^6.0.3`, matching the root `package.json` requirements.
+  - Added `tsup` and `@playwright/mcp` dev dependencies.
+  - Implemented `npm audit fix --omit=dev --force` during container builds to harden the dependency tree.
+  - Added `esbuild` overrides (`^0.28.1`) to resolve version conflicts.
+
+- Rust Dialects Cleanup:
+  - Removed unused dependencies (`serde`, `serde_json`, `thiserror`) from the dialects (`pkd-dialect-true`, `pkd-dialect-frymaster`, and `pkd-dialect-template`) to streamline build times and reduce binary bloat.
+
+- Container & CI/CD Hardening:
+  - Injected `DEBIAN_FRONTEND=noninteractive` flags into Containerfiles to prevent interactive install hangs.
+  - Installed `apt-utils` and `libterm-readline-gnu-perl` in base image stages to suppress terminal warnings during container construction.
