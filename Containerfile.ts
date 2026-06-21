@@ -7,6 +7,7 @@
 # Purpose: Optimized Zero-Host execution environment for Pharos TS packages.
 #          Includes a multi-stage Rust builder for WASM dependencies.
 # Traceability: Issue #105, Issue #142 (Build Remediation)
+# Last Updated: 2026-06-21
 # ========================================================================
 
 # Stage 1: WASM Builder (Rust)
@@ -78,8 +79,14 @@ COPY . .
 RUN cp scripts/install.sh apps/marketing/public/install.sh && \
     cp scripts/install.ps1 apps/marketing/public/install.ps1
 
-# Run Audits and Fail-Fast Sentinels
+# Stage 3a: Run Security Audit (Fail Fast)
 RUN npm audit fix --omit=dev --force --include-workspace-root
+
+# Stage 3b: Run Design System Sentinel (No Legacy Gray Classes)
+RUN grep -rnE "text-gray-300|text-gray-400|text-gray-500" apps/marketing/src/ && echo "FAILED: Legacy theme classes detected" && exit 1 || echo "Theme Audit: PASSED"
+
+# Stage 3c: Verify Local Asset Integrity (Prevent Ghost Images)
+RUN grep -rnE "src=\"|srcset=\"" apps/marketing/src/ | grep -v "http" | sed -E 's/.*src="([^"]+)".*/\1/; s/.*srcset="([^"]+)".*/\1/' | sort | uniq | while read asset; do [ -f "apps/marketing/public${asset#/pharos-kitchen-design}" ] || (echo "FAILED: Missing asset $asset" && exit 1); done && echo "Asset Audit: PASSED"
 
 # Verify WASM Integrity before build (ADR-0033 Small Stones)
 RUN [ -f "packages/pkd-toon/pkg/pkd_toon_bg.wasm" ] || (echo "❌ Error: pkd-toon WASM missing!" && exit 1)
