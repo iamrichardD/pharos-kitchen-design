@@ -27,13 +27,13 @@
 - [ ] **Issue #277**: [TAG: debt] Implement Local Disk Registry Serving with Path Guards in Vite Dev Server. [DESC: Register custom middleware in Astro/Vite configs to serve local indices with directory traversal checks.] [ECT: 3]
 - [ ] **Issue #273**: [TAG: debt] Decouple Marketing and Demo Build Stages in Containerfile.ts. [DESC: Refactor Containerfile.ts to isolate the React demo compilation stage, preventing demo compilation failures from blocking marketing builds.] [ECT: 3]
 - [ ] **Issue #274**: [TAG: Debt] Integrate cargo-machete into pulse.sh. [DESC: Integrate cargo-machete into core validation slice under Podman to enforce dependency health checks.] [ECT: 1]
-- [ ] **Issue #239**: [TAG: UX] Refactor Marketing Site IA for Command-First Identity. [DESC: Implement high-fidelity Terminal Hero and capability-based documentation flow. Requires 50% Mid-Sprint Rigor Gate review.] [ECT: 5]
 
 ---
 
 ## 📅 Future Sprints
 
 ### Sprint 5.05: Milestone 5 - Performance & Launch (2026-07-06) - 🔮 PLANNED
+- [ ] **Issue #239**: [TAG: UX] Refactor Marketing Site IA for Command-First Identity. [DESC: Implement high-fidelity Terminal Hero and capability-based documentation flow. Requires 50% Mid-Sprint Rigor Gate review.] [ECT: 5]
 - [ ] **Issue #185**: [TAG: Perf] Zero-Allocation JSON Parsing. [DESC: Implementing source-generated JSON parsers to eliminate allocation overhead in WASM.] [ECT: 3]
 - [ ] **Issue #42**: [TAG: Security] SRI & SEO Audit. [DESC: Remediating SRI hashes and optimizing SEO for the Marketing site.] [ECT: 2]
 - [ ] **Issue #84**: [TAG: Infra] Dual-Stream Release Pipeline. [DESC: Configuring separate channels for stable and nightly releases.] [ECT: 2]
