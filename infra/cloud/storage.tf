@@ -35,7 +35,7 @@ resource "cloudflare_r2_bucket_cors" "registry_bucket_cors" {
       allowed = {
         methods = ["GET", "OPTIONS"]
         origins = ["https://iamrichardd.com", "https://*.iamrichardd.com"]
-        headers = ["*"]
+        headers = ["Content-Type", "Range"]
       }
     }
   ]
