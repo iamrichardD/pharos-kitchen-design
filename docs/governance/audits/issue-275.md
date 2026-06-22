@@ -29,9 +29,9 @@
 - **Resource**: `cloudflare_r2_bucket_cors.registry_bucket_cors`
 - **Bucket**: `cloudflare_r2_bucket.registry_bucket` (pkd-prism-registry)
 - **Rule ID**: `ProductionOnlyAccess`
-- **Allowed Methods**: `GET`, `OPTIONS`
+- **Allowed Methods**: `GET`
 - **Allowed Origins**: `https://iamrichardd.com`, `https://*.iamrichardd.com`
-- **Allowed Headers**: `*`
+- **Allowed Headers**: `Content-Type, Range`
 - **Max Age**: 86400 seconds (24 hours)
 
 ## Crucible Decision

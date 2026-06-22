@@ -33,7 +33,7 @@ resource "cloudflare_r2_bucket_cors" "registry_bucket_cors" {
       id              = "ProductionOnlyAccess"
       max_age_seconds = 86400
       allowed = {
-        methods = ["GET", "OPTIONS"]
+        methods = ["GET"]
         origins = ["https://iamrichardd.com", "https://*.iamrichardd.com"]
         headers = ["Content-Type", "Range"]
       }
