@@ -6,7 +6,7 @@
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Iterative log of project milestones and sprint outcomes (Past & Present).
  * Traceability: Issue #207
- * Last Updated: 2026-06-17
+ * Last Updated: 2026-06-22
  * ======================================================================== -->
 
 <!-- 
@@ -21,6 +21,9 @@
 
 ## 🎯 Current Milestone: Phase 5 - IKD Enablement (Ghost Links & Scale)
 **Status**: 🚀 ACTIVE (Sprint 5.04)
+
+### Sprint 5.04: Milestone 5 - Completion & Infrastructure (2026-06-22) - 🚀 ACTIVE
+- [x] **Issue #275**: [TAG: Infrastructure] Configure Production-Only CORS Rules for Cloudflare R2 Registry Storage. [DESC: Enforced production-only origins and restricted allowed headers to Content-Type and Range to minimize attack surface. Verified 🟢 PHAROS GREEN.] [ECT: 2] [ACT: 2]
 
 ### Sprint 5.03: The Ghost & The Bridge (2026-06-15) - ✅ COMPLETED
 - [x] **Issue #254**: [TAG: Infrastructure] Provision Cloudflare R2 Registry Storage. [DESC: Provisioned the R2 bucket for BIM Registry assets, bound `registry.iamrichardd.com` via `cloudflare_r2_custom_domain`, and upgraded the infrastructure slice to Cloudflare Provider v5.20.0 for compatibility. Verified 🟢 PHAROS GREEN.] [ECT: 2] [ACT: 3]

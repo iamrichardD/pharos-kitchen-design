@@ -6,7 +6,7 @@
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Central tracking for Phase-specific tasks and issues (Present & Future).
  * Traceability: Issue #207
- * Last Updated: 2026-06-19
+ * Last Updated: 2026-06-22
  * ======================================================================== -->
 
 <!-- 
@@ -22,7 +22,6 @@
 ## 🚀 Active Sprint
 
 ### Sprint 5.04: Milestone 5 - Completion & Infrastructure (2026-06-22) - 🚀 ACTIVE
-- [ ] **Issue #275**: [TAG: Infrastructure] Configure Production-Only CORS Rules for Cloudflare R2 Registry Storage. [DESC: Define cloudflare_r2_bucket_cors in storage.tf and lock down allowed_origins strictly to production domains.] [ECT: 2]
 - [ ] **Issue #276**: [TAG: debt] Add --registry-target Flags and Update Registry CLI Documentation. [DESC: Add target flag to pkd-cli to allow baking indices to local folder and update docs.] [ECT: 2]
 - [ ] **Issue #277**: [TAG: debt] Implement Local Disk Registry Serving with Path Guards in Vite Dev Server. [DESC: Register custom middleware in Astro/Vite configs to serve local indices with directory traversal checks.] [ECT: 3]
 - [ ] **Issue #273**: [TAG: debt] Decouple Marketing and Demo Build Stages in Containerfile.ts. [DESC: Refactor Containerfile.ts to isolate the React demo compilation stage, preventing demo compilation failures from blocking marketing builds.] [ECT: 3]
