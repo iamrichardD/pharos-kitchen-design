@@ -10,7 +10,7 @@
 - **Rationale:** Why was this path promoted over others?
 - **Alternatives Evaluated:** Briefly describe the discarded options.
 
-## ⚔️ The PKD Crucible (Audit Log)
+## ⚔️ The Pharos Crucible (Audit Log)
 <!-- This section is populated by the Auditor Agent and verified by the HitL. 
      Refer to [.github/PRACTICES.md](.github/PRACTICES.md) and [.github/CRUCIBLE_HEURISTICS.md](.github/CRUCIBLE_HEURISTICS.md) -->
 - [ ] **Beck (Feedback):** TDD traceability and YAGNI compliance confirmed.
