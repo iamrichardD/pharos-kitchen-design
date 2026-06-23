@@ -5,7 +5,7 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Formal command reference for the Pharos Kitchen Design CLI (pkd).
- * Traceability: Issue #10, Issue #12, Issue #78, Issue #81, ADR-0006
+ * Traceability: Issue #10, Issue #12, Issue #78, Issue #81, ADR-0006, Issue #276
  * ======================================================================== -->
 
 # Pharos Kitchen Design CLI (pkd) Reference Guide
@@ -74,7 +74,12 @@ Metadata and engine operations.
 
 ### `pkd registry`
 Distribution lifecycle management for the Pharos Registry (Requires `OEM` or `ADMIN` role for mutation).
-- **`bake --source <PATH> --output <PATH> [--shard-id <ID>]`**: Transforms raw JSON shards into a compressed Zstd archive and Tantivy index.
+
+#### Global Options
+- **`--registry-target <PATH>`** (env: `PHAROS_REGISTRY_TARGET`): Sets a default target directory for registry output operations. When specified, subcommands such as `bake` will use this path as a fallback if their own `--output` flag is omitted.
+
+#### Subcommands
+- **`bake --source <PATH> [--output <PATH>] [--shard-id <ID>]`**: Transforms raw JSON shards into a compressed Zstd archive and Tantivy index. If `--output` is omitted, the value of `--registry-target` (or `PHAROS_REGISTRY_TARGET`) is used. An error is raised if neither is provided.
 - **`verify --path <PATH> [--remote] [--hash <HASH>]`**: Performs deep integrity checks on local or remote registry artifacts.
 - **`push --source <PATH> --shard-id <ID>`**: Promotes baked artifacts to the authoritative CDN (R2). Enforces the **Organization Sentinel** to ensure OEMs only push to their assigned shards.
 - **`pulse [--env <REALM>]`**: High-rigor system health and synchronization check. Ensures local cache parity with remote truth.

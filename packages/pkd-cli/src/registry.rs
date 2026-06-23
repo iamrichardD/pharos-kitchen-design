@@ -5,7 +5,7 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Distribution lifecycle management for the Pharos Registry.
- * Traceability: Issue #126, ADR-0026, ADR-0027
+ * Traceability: Issue #126, ADR-0026, ADR-0027, Issue #276
  * ======================================================================== */
 
 use crate::auth::AuthManager;
@@ -18,6 +18,10 @@ use std::path::PathBuf;
 
 #[derive(Args, Debug)]
 pub struct RegistryArgs {
+    /// Default target directory for registry output (overrides per-command defaults)
+    #[arg(long, env = "PHAROS_REGISTRY_TARGET", global = true)]
+    pub registry_target: Option<PathBuf>,
+
     #[command(subcommand)]
     pub action: RegistryCommands,
 }
@@ -29,9 +33,9 @@ pub enum RegistryCommands {
         /// Source directory containing sharded JSON files
         #[arg(short, long)]
         source: PathBuf,
-        /// Output directory for the compiled artifacts
+        /// Output directory for the compiled artifacts (falls back to --registry-target)
         #[arg(short, long)]
-        output: PathBuf,
+        output: Option<PathBuf>,
         /// Optional shard-id for incremental baking
         #[arg(long)]
         shard_id: Option<String>,
@@ -84,13 +88,25 @@ impl RegistryManager {
         Self { auth_mgr, env }
     }
 
-    pub async fn handle(&self, action: RegistryCommands) -> Result<()> {
+    pub async fn handle(
+        &self,
+        action: RegistryCommands,
+        registry_target: Option<PathBuf>,
+    ) -> Result<()> {
         match action {
             RegistryCommands::Bake {
                 source,
                 output,
                 shard_id,
-            } => self.bake(source, output, shard_id).await,
+            } => {
+                let resolved_output = output.or(registry_target).ok_or_else(|| {
+                    anyhow!(
+                        "No output directory specified. Provide --output on the bake command \
+                         or --registry-target on the registry command (or set PHAROS_REGISTRY_TARGET)."
+                    )
+                })?;
+                self.bake(source, resolved_output, shard_id).await
+            }
             RegistryCommands::Verify { path, remote, hash } => {
                 self.verify(path, remote, hash).await
             }
@@ -473,6 +489,87 @@ mod tests {
             .with_mock_token("access_token", "acc")
             .with_mock_token("id_token", &mock_token)
     }
+
+    // --- Registry Target Override Tests (Issue #276) ---
+
+    #[tokio::test]
+    async fn test_bake_should_use_output_when_both_output_and_registry_target_provided() {
+        let auth_mgr = setup_mock_auth(PharosRole::Admin, None);
+        let mgr = RegistryManager::new(auth_mgr, PharosEnv::Dev);
+        let source_dir = TempDir::new().unwrap();
+        let output_dir = TempDir::new().unwrap();
+        let target_dir = TempDir::new().unwrap();
+
+        // When both --output and --registry-target are provided, --output wins
+        let action = RegistryCommands::Bake {
+            source: source_dir.path().to_path_buf(),
+            output: Some(output_dir.path().to_path_buf()),
+            shard_id: None,
+        };
+
+        let result = mgr
+            .handle(action, Some(target_dir.path().to_path_buf()))
+            .await;
+        // Bake succeeds with empty source; artifacts land in output_dir, not target_dir
+        assert!(result.is_ok());
+        assert!(
+            output_dir.path().join("search-index.tar.zst").exists(),
+            "Artifacts should be written to --output, not --registry-target"
+        );
+        assert!(
+            !target_dir.path().join("search-index.tar.zst").exists(),
+            "--registry-target directory should remain empty when --output is provided"
+        );
+    }
+
+    #[tokio::test]
+    async fn test_bake_should_fallback_to_registry_target_when_output_omitted() {
+        let auth_mgr = setup_mock_auth(PharosRole::Admin, None);
+        let mgr = RegistryManager::new(auth_mgr, PharosEnv::Dev);
+        let source_dir = TempDir::new().unwrap();
+        let target_dir = TempDir::new().unwrap();
+
+        let action = RegistryCommands::Bake {
+            source: source_dir.path().to_path_buf(),
+            output: None,
+            shard_id: None,
+        };
+
+        let result = mgr
+            .handle(action, Some(target_dir.path().to_path_buf()))
+            .await;
+        // Bake should succeed, writing artifacts into registry-target
+        assert!(result.is_ok());
+        assert!(
+            target_dir.path().join("search-index.tar.zst").exists(),
+            "Artifacts should fall back to --registry-target when --output is omitted"
+        );
+    }
+
+    #[tokio::test]
+    async fn test_bake_should_error_when_neither_output_nor_registry_target_provided() {
+        let auth_mgr = setup_mock_auth(PharosRole::Admin, None);
+        let mgr = RegistryManager::new(auth_mgr, PharosEnv::Dev);
+        let source_dir = TempDir::new().unwrap();
+
+        let action = RegistryCommands::Bake {
+            source: source_dir.path().to_path_buf(),
+            output: None,
+            shard_id: None,
+        };
+
+        let result = mgr.handle(action, None).await;
+        assert!(result.is_err());
+        assert!(
+            result
+                .unwrap_err()
+                .to_string()
+                .contains("No output directory specified"),
+            "Should fail with clear error when neither --output nor --registry-target is provided"
+        );
+    }
+
+    // --- Push Authorization Tests ---
 
     #[tokio::test]
     async fn test_should_allow_push_when_admin_authenticated() {
