@@ -228,7 +228,9 @@ async fn main() -> Result<()> {
                 }
             },
             Commands::Registry(args) => {
-                registry_mgr.handle(args.action).await?;
+                registry_mgr
+                    .handle(args.action, args.registry_target)
+                    .await?;
             }
             Commands::Gov { action } => match action {
                 GovCommands::Lint => {
