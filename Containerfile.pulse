@@ -5,7 +5,7 @@
 # Author: Richard D. (https://github.com/iamrichardd)
 # License: FSL-1.1
 # Purpose: Unified \"Pulse\" validation for Rust, .NET, and TypeScript.
-# Traceability: Issue #117, ADR-0029, Issue #237 (Space Optimization)
+# Traceability: Issue #117, ADR-0029, Issue #237 (Space Optimization), Issue #274
 # ========================================================================
 FROM public.ecr.aws/docker/library/rust@sha256:fb328f0f58becb23ba1719940a2c94ece8b0b48afa837d05b79ef64bc1e18f6e AS chef
 ENV DEBIAN_FRONTEND=noninteractive
@@ -41,6 +41,13 @@ RUN curl -LsSf https://github.com/rustsec/rustsec/releases/download/cargo-audit%
     mv cargo-audit-x86_64-unknown-linux-musl-v0.22.2/cargo-audit /usr/local/cargo/bin/ && \
     rm -rf cargo-audit.tgz cargo-audit-x86_64-unknown-linux-musl-v0.22.2
 
+# Standardized cargo-machete installation (v0.7.0 pinned binary, Issue #274)
+RUN curl -LsSf https://github.com/bnjbvr/cargo-machete/releases/download/v0.7.0/cargo-machete-v0.7.0-x86_64-unknown-linux-musl.tar.gz -o cargo-machete.tgz && \
+    echo "473f663c7b47166fc4eb87f82716ba709b22cc62a52763585c529974b5aeb6e5  cargo-machete.tgz" | sha256sum -c - && \
+    tar xzf cargo-machete.tgz && \
+    mv cargo-machete-v0.7.0-x86_64-unknown-linux-musl/cargo-machete /usr/local/cargo/bin/ && \
+    rm -rf cargo-machete.tgz cargo-machete-v0.7.0-x86_64-unknown-linux-musl
+
 # Cook dependencies in the same stage to avoid multi-gigabyte layer copies
 COPY --from=planner /work/recipe.json recipe.json
 RUN if [ "$BUILD_MODE" = "release" ]; then MODE_FLAG="--release"; else MODE_FLAG=""; fi && \
@@ -49,6 +56,7 @@ RUN if [ "$BUILD_MODE" = "release" ]; then MODE_FLAG="--release"; else MODE_FLAG
 # Copy source code and build
 COPY . .
 RUN if [ "$BUILD_MODE" = "release" ]; then MODE_FLAG="--release"; else MODE_FLAG=""; fi && \
+    cargo machete && \
     (cd packages/pkd-core && cargo fmt --check && cargo clippy -- -D warnings && cargo test && cargo build $MODE_FLAG && cargo audit) && \
     (cd packages/pkd-cli && cargo fmt --check && cargo clippy -- -D warnings && cargo test && cargo build $MODE_FLAG) && \
     bash scripts/build-wasm.sh && \

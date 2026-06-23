@@ -23,7 +23,6 @@ serde-wasm-bindgen = "0.6"
 sha2 = "0.10"
 hex = "0.4"
 pharos-protocol = { path = "../pharos-protocol" }
-once_cell = "1.18"
 anyhow = "1.0"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
