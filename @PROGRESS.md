@@ -24,6 +24,8 @@
 
 ### Sprint 5.04: Milestone 5 - Completion & Infrastructure (2026-06-22) - 🚀 ACTIVE
 - [x] **Issue #275**: [TAG: Infrastructure] Configure Production-Only CORS Rules for Cloudflare R2 Registry Storage. [DESC: Enforced production-only origins and restricted allowed headers to Content-Type and Range to minimize attack surface. Verified 🟢 PHAROS GREEN.] [ECT: 2] [ACT: 2]
+- [x] **Issue #274**: [TAG: Debt] Integrate cargo-machete into pulse.sh. [DESC: Pinned and installed cargo-machete v0.7.0 binary inside Podman build, automated unused dependency checks in pulse, and pruned 8 unused dependencies from workspace. Verified 🟢 PHAROS GREEN.] [ECT: 1] [ACT: 1]
+- [x] **Issue #276**: [TAG: Debt] Add --registry-target Flags and Update Registry CLI Documentation. [DESC: Added global --registry-target flag and environment variable to registry commands, relaxed output directory parameter to optional with fallback resolution, and added unit/integration tests. Verified 🟢 PHAROS GREEN.] [ECT: 2] [ACT: 2]
 
 ### Sprint 5.03: The Ghost & The Bridge (2026-06-15) - ✅ COMPLETED
 - [x] **Issue #254**: [TAG: Infrastructure] Provision Cloudflare R2 Registry Storage. [DESC: Provisioned the R2 bucket for BIM Registry assets, bound `registry.iamrichardd.com` via `cloudflare_r2_custom_domain`, and upgraded the infrastructure slice to Cloudflare Provider v5.20.0 for compatibility. Verified 🟢 PHAROS GREEN.] [ECT: 2] [ACT: 3]
