@@ -22,11 +22,8 @@
 ## 🚀 Active Sprint
 
 ### Sprint 5.04: Milestone 5 - Completion & Infrastructure (2026-06-22) - 🚀 ACTIVE
-- [ ] **Issue #276**: [TAG: debt] Add --registry-target Flags and Update Registry CLI Documentation. [DESC: Add target flag to pkd-cli to allow baking indices to local folder and update docs.] [ECT: 2]
 - [ ] **Issue #277**: [TAG: debt] Implement Local Disk Registry Serving with Path Guards in Vite Dev Server. [DESC: Register custom middleware in Astro/Vite configs to serve local indices with directory traversal checks.] [ECT: 3]
 - [ ] **Issue #273**: [TAG: debt] Decouple Marketing and Demo Build Stages in Containerfile.ts. [DESC: Refactor Containerfile.ts to isolate the React demo compilation stage, preventing demo compilation failures from blocking marketing builds.] [ECT: 3]
-- [ ] **Issue #274**: [TAG: Debt] Integrate cargo-machete into pulse.sh. [DESC: Integrate cargo-machete into core validation slice under Podman to enforce dependency health checks.] [ECT: 1]
-
 ---
 
 ## 📅 Future Sprints
