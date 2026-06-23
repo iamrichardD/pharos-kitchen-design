@@ -22,10 +22,8 @@ clap = { version = "4.5.4", features = ["derive", "env"] }
 anyhow = "1.0.81"
 thiserror = "1.0.58"
 tokio = { version = "1.36.0", features = ["full"] }
-tracing = "0.1.40"
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
 colored = "2.1.0"
-indicatif = "0.17.8"
 self_update = { version = "0.41.0", features = ["archive-tar", "archive-zip", "compression-flate2", "rustls"] }
 
 # Auth & Identity
@@ -33,13 +31,8 @@ keyring = "2.3.2"
 reqwest = { version = "0.12", features = ["json", "rustls-tls"], default-features = false }
 serde = { version = "1.0.197", features = ["derive"] }
 serde_json = "1.0.114"
-url = "2.5.0"
 jsonwebtoken = "9.2.0"
 base64 = "0.21.0"
-
-# AWS SDK (Cognito Administration)
-aws-config = "1.1.7"
-aws-sdk-cognitoidentityprovider = "1.17.0"
 
 # Local Core
 pkd-core = { path = "../pkd-core" }
@@ -51,7 +44,6 @@ tantivy = "0.22.0"
 tar = "0.4.40"
 zstd = "=0.13.0"
 walkdir = "2.5.0"
-serde_yaml = "0.9.34"
 ignore = "0.4.25"
 regex = "1.12.3"
 toml = "0.8.12"
