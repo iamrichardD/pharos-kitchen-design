@@ -207,4 +207,57 @@ describe('handleRegistryRequest', () => {
     expect(handled).toBe(true);
     expect(res.statusCode).toBe(403);
   });
+
+  it('test_should_return_400_when_malformed_uri_is_requested', () => {
+    const res = createMockResponse();
+    const handled = handleRegistryRequest(
+      '/pharos-kitchen-design/registry/%E0%A4%A',
+      registryRoot,
+      res as any,
+    );
+
+    expect(handled).toBe(true);
+    expect(res.statusCode).toBe(400);
+    expect((res.body as string)).toContain('400 Bad Request');
+  });
+
+  it('test_should_return_200_when_query_parameters_are_present', () => {
+    const payload = Buffer.from([0xde, 0xad]);
+    fs.writeFileSync(path.join(registryRoot, 'index.bin'), payload);
+
+    const res = createMockResponse();
+    const handled = handleRegistryRequest(
+      '/pharos-kitchen-design/registry/index.bin?v=123',
+      registryRoot,
+      res as any,
+    );
+
+    expect(handled).toBe(true);
+    expect(res.statusCode).toBe(200);
+    expect(Buffer.compare(res.body as Buffer, payload)).toBe(0);
+  });
+
+  it('test_should_return_403_when_symlink_points_outside_registry', () => {
+    // Create a file outside the registry boundary
+    const outsideDir = path.join(tmpDir, 'outside');
+    fs.mkdirSync(outsideDir, { recursive: true });
+    fs.writeFileSync(path.join(outsideDir, 'secret.txt'), 'secret data');
+
+    // Create a symlink inside registry that points outside
+    fs.symlinkSync(
+      path.join(outsideDir, 'secret.txt'),
+      path.join(registryRoot, 'evil-link.bin'),
+    );
+
+    const res = createMockResponse();
+    const handled = handleRegistryRequest(
+      '/pharos-kitchen-design/registry/evil-link.bin',
+      registryRoot,
+      res as any,
+    );
+
+    expect(handled).toBe(true);
+    expect(res.statusCode).toBe(403);
+    expect((res.body as string)).toContain('symlink traversal');
+  });
 });

@@ -48,6 +48,15 @@ export function validatePathBoundary(
     return 'path traversal detected';
   }
 
+  // Guard against symlink traversal: resolve the real path and re-check boundary
+  if (fs.existsSync(resolved)) {
+    const realResolved = fs.realpathSync(resolved);
+    const realRoot = fs.realpathSync(registryRoot);
+    if (!realResolved.startsWith(realRoot + path.sep) && realResolved !== realRoot) {
+      return 'symlink traversal detected';
+    }
+  }
+
   return null;
 }
 
@@ -60,11 +69,21 @@ export function handleRegistryRequest(
   registryRoot: string,
   res: ServerResponse,
 ): boolean {
-  if (!url.startsWith(ROUTE_PREFIX)) {
+  // Strip query parameters before matching the route prefix
+  const pathname = url.split('?')[0];
+
+  if (!pathname.startsWith(ROUTE_PREFIX)) {
     return false;
   }
 
-  const relativePath = decodeURIComponent(url.slice(ROUTE_PREFIX.length));
+  let relativePath: string;
+  try {
+    relativePath = decodeURIComponent(pathname.slice(ROUTE_PREFIX.length));
+  } catch {
+    res.writeHead(400, { 'Content-Type': 'text/plain' });
+    res.end('400 Bad Request: malformed URI');
+    return true;
+  }
 
   const violation = validatePathBoundary(relativePath, registryRoot);
   if (violation) {

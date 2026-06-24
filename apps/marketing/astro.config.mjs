@@ -7,6 +7,7 @@
  * Traceability: ADR 0012, ADR 0015
  * ======================================================================== */
 
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@astrojs/react';
@@ -29,7 +30,7 @@ export default defineConfig({
   },
   integrations: [react()],
   vite: {
-    plugins: [tailwindcss(), pharosRegistryPlugin(new URL('.', import.meta.url).pathname)],
+    plugins: [tailwindcss(), pharosRegistryPlugin(fileURLToPath(new URL('.', import.meta.url)))],
     build: {
       chunkSizeWarningLimit: 1000,
     },
