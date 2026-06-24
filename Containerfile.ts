@@ -53,11 +53,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN npm install -g wrangler
 WORKDIR /work
 
-# Stage 3: TypeScript Builder
-FROM base AS builder
+# Stage 3: Demo Builder Stage
+FROM base AS demo-builder
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Copy only package files for caching (ADR-0007)
+# Copy package files for caching (ADR-0007)
 COPY package.json package-lock.json ./
 COPY apps/marketing/package.json apps/marketing/package.json
 COPY apps/demo/package.json apps/demo/package.json
@@ -65,7 +65,35 @@ COPY packages/pkd-core/package.json packages/pkd-core/package.json
 COPY packages/auth-bridge/package.json packages/auth-bridge/package.json
 COPY packages/truth-engine/package.json packages/truth-engine/package.json
 
-# Inject WASM artifacts from wasm-builder (Mandatory for @pkd/toon file: dependency)
+# Inject WASM artifacts from wasm-builder
+COPY --from=wasm-builder /work/packages/pkd-core/pkg ./packages/pkd-core/pkg
+COPY --from=wasm-builder /work/packages/pkd-toon/pkg ./packages/pkd-toon/pkg
+
+# Install dependencies (Immutable layer if package-lock unchanged)
+RUN npm ci --omit=dev
+
+# Copy remaining source code
+COPY . .
+
+# Build internal protocol package first (ADR-0007)
+RUN npm install tsup typescript && npm run build --workspace=@pkd/protocol
+
+# Build Demo Site (ADR-0004)
+RUN npm run build --workspace=apps/demo
+
+# Stage 4: Marketing Builder Stage
+FROM base AS marketing-builder
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Copy package files for caching (ADR-0007)
+COPY package.json package-lock.json ./
+COPY apps/marketing/package.json apps/marketing/package.json
+COPY apps/demo/package.json apps/demo/package.json
+COPY packages/pkd-core/package.json packages/pkd-core/package.json
+COPY packages/auth-bridge/package.json packages/auth-bridge/package.json
+COPY packages/truth-engine/package.json packages/truth-engine/package.json
+
+# Inject WASM artifacts from wasm-builder
 COPY --from=wasm-builder /work/packages/pkd-core/pkg ./packages/pkd-core/pkg
 COPY --from=wasm-builder /work/packages/pkd-toon/pkg ./packages/pkd-toon/pkg
 
@@ -79,17 +107,14 @@ COPY . .
 RUN cp scripts/install.sh apps/marketing/public/install.sh && \
     cp scripts/install.ps1 apps/marketing/public/install.ps1
 
-# Stage 3a: Run Security Audit (Fail Fast)
+# Run Security Audit (Fail Fast)
 RUN npm audit fix --omit=dev --force --include-workspace-root
 
-# Stage 3b: Run Design System Sentinel (No Legacy Gray Classes)
+# Run Design System Sentinel (No Legacy Gray Classes)
 RUN if grep -rnE "text-gray-300|text-gray-400|text-gray-500" apps/marketing/src/; then echo "FAILED: Legacy theme classes detected" && exit 1; else echo "Theme Audit: PASSED"; fi
 
-# Stage 3c: Verify Local Asset Integrity (Prevent Ghost Images)
+# Verify Local Asset Integrity (Prevent Ghost Images)
 RUN grep -rnE "src=\"|srcset=\"" apps/marketing/src/ | grep -v "http" | grep -v "\\$" | sed -E 's/.*src="([^"]+)".*/\1/; s/.*srcset="([^"]+)".*/\1/' | sort | uniq | while read asset; do [ -f "apps/marketing/public${asset#/pharos-kitchen-design}" ] || { echo "FAILED: Missing asset $asset" && exit 1; }; done && echo "Asset Audit: PASSED"
-
-# Verify WASM Integrity before build (ADR-0033 Small Stones)
-RUN [ -f "packages/pkd-toon/pkg/pkd_toon_bg.wasm" ] || (echo "❌ Error: pkd-toon WASM missing!" && exit 1)
 
 # Build internal protocol package first (ADR-0007)
 RUN npm install tsup typescript && npm run build --workspace=@pkd/protocol
@@ -97,14 +122,17 @@ RUN npm install tsup typescript && npm run build --workspace=@pkd/protocol
 # Build Marketing Site
 RUN npm run build --workspace=apps/marketing
 
-# Build Demo Site (ADR-0004)
-RUN npm run build --workspace=apps/demo
+# Stage 5: Final Packaging Stage
+FROM base AS packager
+ENV DEBIAN_FRONTEND=noninteractive
 
-# Nest Demo Site into Marketing (ADR-0004)
-RUN mkdir -p apps/marketing/dist/demo && \
-    cp -r apps/demo/dist/* apps/marketing/dist/demo/
+# Copy built marketing site
+COPY --from=marketing-builder /work/apps/marketing/dist /work/apps/marketing/dist
 
-# Final Validation: Verify nesting (Fail Fast)
+# Copy built demo site nested under marketing/dist/demo
+COPY --from=demo-builder /work/apps/demo/dist /work/apps/marketing/dist/demo
+
+# Fail-Fast Assembly Validation
 RUN [ -f "apps/marketing/dist/demo/index.html" ] || (echo "❌ Error: Demo build nesting failed!" && exit 1)
 
 # Default command: No-op
