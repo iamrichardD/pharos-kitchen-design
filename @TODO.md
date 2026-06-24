@@ -22,8 +22,6 @@
 ## 🚀 Active Sprint
 
 ### Sprint 5.04: Milestone 5 - Completion & Infrastructure (2026-06-22) - 🚀 ACTIVE
-- [ ] **Issue #277**: [TAG: debt] Implement Local Disk Registry Serving with Path Guards in Vite Dev Server. [DESC: Register custom middleware in Astro/Vite configs to serve local indices with directory traversal checks.] [ECT: 3]
-- [ ] **Issue #273**: [TAG: debt] Decouple Marketing and Demo Build Stages in Containerfile.ts. [DESC: Refactor Containerfile.ts to isolate the React demo compilation stage, preventing demo compilation failures from blocking marketing builds.] [ECT: 3]
 ---
 
 ## 📅 Future Sprints
