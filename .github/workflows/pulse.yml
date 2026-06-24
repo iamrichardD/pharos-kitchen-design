@@ -74,5 +74,14 @@ jobs:
       - name: Promote Artifacts (Cloudflare R2)
         if: github.ref == 'refs/heads/main' && matrix.slice == 'core'
         run: |
-          echo "🚀 Promoting authoritative WASM core to Cloudflare R2 Registry..."
-          # wrangler r2 object put pharos-registry/pkd-core.wasm --file=packages/pkd-core/pkg/pkd_core_bg.wasm
+          echo "🚀 Baking authoritative search index..."
+          podman run --rm --security-opt seccomp=unconfined -v ${{ github.workspace }}:/work -w /work pkd-core-builder /work/target/release/pkd registry bake --output /work/.artifacts/registry
+
+      - name: Upload Index to Cloudflare R2
+        if: github.ref == 'refs/heads/main' && matrix.slice == 'core'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: "4.103.0"
+          command: r2 object put pkd-prism-registry/search-index.tar.zst --file=.artifacts/registry/search-index.tar.zst

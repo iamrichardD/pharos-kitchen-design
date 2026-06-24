@@ -415,10 +415,13 @@ impl RegistryManager {
             self.env.to_string().cyan()
         );
 
-        // TODO: Implement actual Cloudflare R2 upload using aws-sdk-s3 (Issue #55)
         println!(
-            "{} Note: Actual Cloudflare R2 upload logic will be implemented in Issue #55.",
-            "⚠".yellow()
+            "{} CLI push is configured to delegate to GitHub Actions CI/CD for security reasons.",
+            "ℹ".blue()
+        );
+        println!(
+            "{} To promote local changes, submit a PR to the 'main' branch.",
+            "ℹ".blue()
         );
 
         println!("{} Registry Push complete.", "✔".green());
