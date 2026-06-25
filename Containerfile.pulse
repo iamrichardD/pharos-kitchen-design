@@ -60,6 +60,7 @@ RUN if [ "$BUILD_MODE" = "release" ]; then MODE_FLAG="--release"; else MODE_FLAG
     (cd packages/pkd-core && cargo fmt --check && cargo clippy -- -D warnings && cargo test && cargo build $MODE_FLAG && cargo audit) && \
     (cd packages/pkd-cli && cargo fmt --check && cargo clippy -- -D warnings && cargo test && cargo build $MODE_FLAG) && \
     bash scripts/build-wasm.sh && \
+    cp /work/target/$BUILD_MODE/pkd /usr/local/bin/pkd && chmod +x /usr/local/bin/pkd && \
     # Surgical cleanup of intermediate objects to free space for downstream stages
     find target -name "*.o" -type f -delete && \
     find target -name "*.rlib" -type f -delete
