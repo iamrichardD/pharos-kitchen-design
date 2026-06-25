@@ -75,7 +75,7 @@ jobs:
         if: github.ref == 'refs/heads/main' && matrix.slice == 'core'
         run: |
           echo "🚀 Baking authoritative search index..."
-          podman run --rm --security-opt seccomp=unconfined -v ${{ github.workspace }}:/work -w /work pkd-core-builder pkd registry bake --output /work/.artifacts/registry
+          podman run --rm --security-opt seccomp=unconfined -v ${{ github.workspace }}:/work -w /work pkd-core-builder pkd registry bake --source /work/packages/pkd-core/samples --output /work/.artifacts/registry
 
       - name: Upload Index to Cloudflare R2
         if: github.ref == 'refs/heads/main' && matrix.slice == 'core'

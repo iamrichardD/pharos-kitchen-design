@@ -40,6 +40,7 @@ We copy the compiled CLI binary to `/usr/local/bin/pkd` during the `rust-builder
   - Placed outside the `/work` mount, preventing the binary from being overwritten or masked by the host volume.
   - Simplifies script invocations since the binary is available globally on the system `$PATH`.
   - Avoids the massive path-translation cognitive load and script churn introduced by Option 2.
+  - **Baking Source Requirement**: The index bake command must explicitly supply the `--source` parameter pointing to the sample registry files (e.g., `--source /work/packages/pkd-core/samples`) so the containerized execution can locate the input schemas correctly within the `/work` mount volume.
 * **Cons**:
   - Requires building the container image to test CLI code changes (though this is already the standard pipeline pattern during pulse verification, mitigating local dev friction).
 
