@@ -107,3 +107,6 @@ We run the compilation inside the container, extract the compiled binary back to
 
 ### The Winner: **Option 1 (Global Stage Binary Copy)**
 While Option 1 requires building the container image to test CLI code changes, this is already the standard pipeline pattern during pulse verification. Selecting Option 1 completely avoids the massive path-translation cognitive load and script churn introduced by Option 2, providing a much cleaner path resolution and keeping developer friction to a minimum.
+
+To guarantee that the search index generator has a deterministic and correct dataset source, the command must explicitly supply the `--source` parameter (pointing to `/work/packages/pkd-core/samples`). This parameter ensures that the index baker operates on the correct volume path inside the container environment.
+

@@ -3,12 +3,12 @@
  * Component: Marketing / Content
  * File: roadmap.toon
  * Purpose: Automated reflection of authoritative internal logs.
- * Last Synced: 2026-06-25T17:29:07.432Z
+ * Last Synced: 2026-06-25T20:41:16.087Z
  * ======================================================================== */
 
 title: Pharos System Roadmap
 type: roadmap
-lastSynced: 2026-06-25T17:29:07.432Z
+lastSynced: 2026-06-25T20:41:16.087Z
 
 items[67]{id, name, status, phase, tag, description}:
   "275", "Configure Production-Only CORS Rules for Cloudflare R2 Registry Storage", "Deployed", "Sprint 5.04", "CORE", "Enforced production-only origins and restricted allowed headers to Content-Type and Range to minimize attack surface. Verified 🟢 PHAROS GREEN."
