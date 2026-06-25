@@ -6,7 +6,7 @@
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Iterative log of project milestones and sprint outcomes (Past & Present).
  * Traceability: Issue #207
- * Last Updated: 2026-06-22
+ * Last Updated: 2026-06-24
  * ======================================================================== -->
 
 <!-- 
@@ -28,6 +28,7 @@
 - [x] **Issue #276**: [TAG: Debt] Add --registry-target Flags and Update Registry CLI Documentation. [DESC: Added global --registry-target flag and environment variable to registry commands, relaxed output directory parameter to optional with fallback resolution, and added unit/integration tests. Verified 🟢 PHAROS GREEN.] [ECT: 2] [ACT: 2]
 - [x] **Issue #277**: [TAG: debt] Implement Local Disk Registry Serving with Path Guards in Vite Dev Server. [DESC: Registered custom middleware in Astro/Vite configs to serve local indices with directory traversal and symlink checks. Verified 🟢 PHAROS GREEN.] [ECT: 3] [ACT: 3]
 - [x] **Issue #273**: [TAG: debt] Decouple Marketing and Demo Build Stages in Containerfile.ts. [DESC: Decoupled the React demo compilation stage from the marketing build in Containerfile.ts to prevent demo compilation errors from blocking marketing site assembly. Verified 🟢 PHAROS GREEN.] [ECT: 3] [ACT: 3]
+- [x] **Issue #271**: [TAG: ci/cd] Promote Search Index to Cloudflare R2 on Merge and Update CLI Push Guidance. [DESC: Configured automated index baking in the core builder container and enabled Wrangler auto-promotion to the Cloudflare R2 registry bucket on merge. Refactored local CLI push stub to print professional guidance. Verified 🟢 PHAROS GREEN.] [ECT: 2] [ACT: 2]
 
 ### Sprint 5.03: The Ghost & The Bridge (2026-06-15) - ✅ COMPLETED
 - [x] **Issue #254**: [TAG: Infrastructure] Provision Cloudflare R2 Registry Storage. [DESC: Provisioned the R2 bucket for BIM Registry assets, bound `registry.iamrichardd.com` via `cloudflare_r2_custom_domain`, and upgraded the infrastructure slice to Cloudflare Provider v5.20.0 for compatibility. Verified 🟢 PHAROS GREEN.] [ECT: 2] [ACT: 3]
