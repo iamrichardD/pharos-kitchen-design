@@ -24,6 +24,7 @@
 - **Review Notes**:
   - The changes resolve the container search index baking path conflict by copying the compiled `pkd` binary to `/usr/local/bin/pkd` in the `rust-builder` stage of `Containerfile.pulse`.
   - The `.github/workflows/pulse.yml` workflow has been updated to invoke the `pkd` binary globally instead of relying on the local workspace target path (`/work/target/release/pkd`), preventing path masking from the host volume mount.
+  - The `pkd registry bake` command now explicitly includes the `--source /work/packages/pkd-core/samples` parameter to specify the input directory for baking.
   - A comprehensive design analysis evaluating three implementation options (Global Copy, Distinct Mount, and Host Extraction) has been documented in `docs/design-analysis.md`.
   - Local validation checks and build integrity verify successfully in Podman.
 
@@ -31,6 +32,7 @@
 | Concern | Status |
 |:--------|:-------|
 | Clean path resolution for search index baking | 🟢 PASS |
+| The --source parameter points to the correct sample registry source | 🟢 PASS |
 | Global invocation of pkd outside masked volume mount | 🟢 PASS |
 | Documentation of Crucible Three-Option design analysis | 🟢 PASS |
 | Build verification confirms compilation success in Podman | 🟢 PASS |
