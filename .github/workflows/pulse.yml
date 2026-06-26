@@ -26,6 +26,7 @@ jobs:
   pulse:
     name: Pulse / ${{ matrix.slice }}
     runs-on: ubuntu-latest
+    environment: ${{ github.ref == 'refs/heads/main' && 'production' || null }}
     strategy:
       fail-fast: true
       matrix:
