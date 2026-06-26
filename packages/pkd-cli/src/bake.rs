@@ -144,6 +144,7 @@ impl BakeEngine {
                 .iter()
                 .map(|r| (r.metadata_id.clone(), r.clone()))
                 .collect();
+        fs::create_dir_all(output)?;
         let search_index_bin_path = output.join("search-index.bin");
         let search_index_json = serde_json::to_string(&search_index_map)?;
         fs::write(&search_index_bin_path, search_index_json)?;
