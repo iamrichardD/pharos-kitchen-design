@@ -288,6 +288,7 @@ mod tests {
         }
         assert!(result.is_ok());
         assert!(output_dir.path().join("search-index.tar.zst").exists());
+        assert!(output_dir.path().join("search-index.bin").exists());
         assert!(output_dir.path().join("search-index").exists());
     }
 
@@ -349,6 +350,7 @@ mod tests {
         let result = engine.run(source_dir.path(), output_dir.path()).await;
 
         assert!(result.is_ok());
+        assert!(output_dir.path().join("search-index.bin").exists());
         assert!(output_dir.path().join("search-index").exists());
     }
 }
