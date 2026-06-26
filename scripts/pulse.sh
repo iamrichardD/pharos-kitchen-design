@@ -35,6 +35,10 @@ run_core() {
     echo "   [Infra] Verifying Podman-Wrapper Argument Quoting..."
     bash scripts/test-quoting.sh
 
+    # 1b. CI Workflow secret verification
+    echo "   [Infra] Verifying Workflow Environment Secrets Configuration..."
+    bash scripts/test-issue-306.sh
+
     # 2. Build the Core Warden Environment (Fail Fast)
     # Why: This builds the container while running fmt, clippy, tests, and audit inside.
     #      Consolidating these ensures atomicity and saves disk space in CI.

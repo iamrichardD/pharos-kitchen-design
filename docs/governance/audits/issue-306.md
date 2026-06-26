@@ -23,13 +23,21 @@
 ---
 
 ## 1. Review of Changes (Git Diff Analysis)
-The change targets the GitHub Actions workflow in `.github/workflows/pulse.yml` at the artifact promotion stages. 
+The changes target the GitHub Actions workflow in `.github/workflows/pulse.yml` at the job and artifact promotion stages, as well as introducing a local regression test script.
 
 ```diff
 diff --git a/.github/workflows/pulse.yml b/.github/workflows/pulse.yml
 index 8c3a4b8..64c0668 100644
 --- a/.github/workflows/pulse.yml
 +++ b/.github/workflows/pulse.yml
+@@ -26,6 +26,7 @@ jobs:
+   pulse:
+     name: Pulse / ${{ matrix.slice }}
+     runs-on: ubuntu-latest
++    environment: ${{ github.ref == 'refs/heads/main' && 'production' || null }}
+     strategy:
+       fail-fast: true
+       matrix:
 @@ -86,6 +86,9 @@ jobs:
            accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
            wranglerVersion: "4.103.0"
@@ -56,9 +64,11 @@ index 8c3a4b8..64c0668 100644
 ### A. Security Risks
 - **Credential Leakage Risk:** 🟢 **NEGLIGIBLE.** The environment variables retrieve their values directly from GitHub Actions Secrets (`secrets.CLOUDFLARE_API_TOKEN` and `secrets.CLOUDFLARE_ACCOUNT_ID`). These are masked in runner logs and never hardcoded in the repository.
 - **Scope Restriction:** 🟢 **HIGH.** The environment variable injection is scoped *strictly* to the specific steps running `cloudflare/wrangler-action@v3`. It is not injected at the job level or globally, limiting the blast radius in the event of compromised actions or tasks in other steps.
+- **Environment Boundary Control:** 🟢 **HIGH.** The environment configuration only mounts `production` during builds on the `main` branch, preventing untrusted pull requests from accessing these sensitive deployment secrets.
 
 ### B. Gaps
-- **Action Behavior vs. CLI Expectation:** The `cloudflare/wrangler-action` receives parameters like `apiToken` and `accountId` as inputs. Under the hood, however, when the custom `command:` parameter is executed, it runs wrangler in a subshell environment. In non-interactive CI environments, the CLI requires the explicit presence of `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` in the system environment to authenticate custom `r2` actions. The gap has been successfully closed.
+- **Action Behavior vs. CLI Expectation:** The `cloudflare/wrangler-action` receives parameters like `apiToken` and `accountId` as inputs. Under the hood, however, when the custom `command:` parameter is executed, it runs wrangler in a subshell environment. In non-interactive CI environments, the CLI requires the explicit presence of `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` in the system environment to authenticate custom `r2` actions. Furthermore, since these secrets are defined at the environment level, we must target `environment: production` dynamically to ensure GHA exposes them to the runner. The gap has been successfully closed.
+- **Local Verification Mismatch:** To prevent future regressions where wrangler tasks are added without environment targeting, we introduced a local verification script `scripts/test-issue-306.sh` that validates the workflow file's environment configurations. This has been integrated directly into `pulse.sh` under the `CORE` slice.
 
 ### C. Developer & User Experience (U/DX)
 - **CI/CD Reliability:** 🟢 **EXCELLENT.** The pipeline is no longer blocked by non-interactive credential checks during deployment. 
