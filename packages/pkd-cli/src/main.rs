@@ -6,7 +6,8 @@
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Entry point for the Pharos CLI (pkd). Implements the Admin-First
  *          Control Plane strategy defined in ADR-0006.
- * Traceability: Issue #10 - CLI Implementation
+ * Traceability: Issue #10 - CLI Implementation, Issue #302
+ * Last Updated: 2026-06-26
  * ======================================================================== */
 
 mod admin;
@@ -407,6 +408,7 @@ fn validate_selections(
 }
 
 async fn handle_core_bake(source: PathBuf, output: PathBuf) -> Result<()> {
+    bake::prepare_output_directory(&output)?;
     let engine = bake::BakeEngine::new();
     engine.run(&source, &output).await
 }

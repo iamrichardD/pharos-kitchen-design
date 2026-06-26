@@ -5,7 +5,8 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Tantivy indexing and Zstd-compression for the Truth Engine.
- * Traceability: Issue #53 - ETL Bake, Issue #124
+ * Traceability: Issue #53 - ETL Bake, Issue #124, Issue #302
+ * Last Updated: 2026-06-26
  * ======================================================================== */
 
 use anyhow::{anyhow, Result};
@@ -144,7 +145,6 @@ impl BakeEngine {
                 .iter()
                 .map(|r| (r.metadata_id.clone(), r.clone()))
                 .collect();
-        fs::create_dir_all(output)?;
         let search_index_bin_path = output.join("search-index.bin");
         let search_index_json = serde_json::to_string(&search_index_map)?;
         fs::write(&search_index_bin_path, search_index_json)?;
@@ -243,6 +243,21 @@ impl BakeEngine {
     }
 }
 
+pub fn prepare_output_directory(output: &Path) -> Result<()> {
+    if output.is_file() {
+        return Err(anyhow!(
+            "Output path {:?} exists and is a file, but a directory is required.",
+            output
+        ));
+    }
+    if !output.exists() {
+        println!("{} Creating output directory: {:?}", "ℹ".blue(), output);
+        fs::create_dir_all(output)
+            .map_err(|e| anyhow!("Failed to create output directory {:?}: {}", output, e))?;
+    }
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -252,6 +267,8 @@ mod tests {
     async fn test_should_create_index_and_archive_when_valid_json_provided() {
         let source_dir = TempDir::new().unwrap();
         let output_dir = TempDir::new().unwrap();
+
+        prepare_output_directory(output_dir.path()).unwrap();
 
         // Create a valid Pharos JSON file with all mandatory parameters
         let valid_json = r#"{
@@ -298,6 +315,8 @@ mod tests {
         let source_dir = TempDir::new().unwrap();
         let output_dir = TempDir::new().unwrap();
 
+        prepare_output_directory(output_dir.path()).unwrap();
+
         // Missing mandatory fields
         let invalid_json = r#"{"name": "Incomplete"}"#;
         fs::write(source_dir.path().join("bad.json"), invalid_json).unwrap();
@@ -314,6 +333,8 @@ mod tests {
     async fn test_should_create_index_from_shard() {
         let source_dir = TempDir::new().unwrap();
         let output_dir = TempDir::new().unwrap();
+
+        prepare_output_directory(output_dir.path()).unwrap();
 
         let shard_json = r#"{
             "shard_id": "test_shard",
@@ -353,5 +374,49 @@ mod tests {
         assert!(result.is_ok());
         assert!(output_dir.path().join("search-index.bin").exists());
         assert!(output_dir.path().join("search-index").exists());
+    }
+
+    #[tokio::test]
+    async fn test_should_create_index_in_new_nested_directory() {
+        let source_dir = TempDir::new().unwrap();
+        let temp_dir = TempDir::new().unwrap();
+        let output_dir_path = temp_dir.path().join("nested/new/dir");
+
+        let valid_json = r#"{
+            "pkd_prologue": { "project": "Pharos", "component": "Test", "file": "test.json", "author": "me", "license": "FSL-1.1", "purpose": "Testing", "traceability": "Issue-302" },
+            "metadata_id": "PHX-TEST-002",
+            "name": "Test Fryer 2",
+            "schema_version": "1.0.0",
+            "classification": { "omniclass_table_23": "23-33 11 11 11", "category": "Specialty Equipment" },
+            "parameters": {
+                "PKD_Manufacturer": "Frymaster",
+                "PKD_ModelNumber": "TEST-100",
+                "PKD_MainCategory": "Fryers",
+                "PKD_TargetMarket": "Commercial",
+                "PKD_Voltage": "208V",
+                "PKD_Phase": 3,
+                "PKD_Wattage": "4500W",
+                "PKD_BTU": "0",
+                "PKD_DrainConnection": "2\"",
+                "PKD_DocLinks": [],
+                "PKD_Industry": ["Foodservice"],
+                "PKD_TargetRegions": ["US"],
+                "PKD_AssetViews": {}
+            },
+            "lod_geometry_specs": { "100": { "type": "BoundingBox", "dimensions": { "width": 1.0, "depth": 1.0, "height": 1.0 }, "description": "test" } },
+            "performance_metadata": { "estimated_rfa_size_kb": 1, "procedural_lod_enabled": false, "ghost_link_active": false }
+        }"#;
+
+        fs::write(source_dir.path().join("test.json"), valid_json).unwrap();
+
+        assert!(!output_dir_path.exists());
+        let prep_result = prepare_output_directory(&output_dir_path);
+        assert!(prep_result.is_ok());
+        assert!(output_dir_path.exists());
+
+        let engine = BakeEngine::new();
+        let result = engine.run(source_dir.path(), &output_dir_path).await;
+        assert!(result.is_ok());
+        assert!(output_dir_path.join("search-index.tar.zst").exists());
     }
 }
