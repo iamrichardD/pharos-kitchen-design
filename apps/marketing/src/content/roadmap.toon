@@ -3,14 +3,14 @@
  * Component: Marketing / Content
  * File: roadmap.toon
  * Purpose: Automated reflection of authoritative internal logs.
- * Last Synced: 2026-06-26T22:22:51.251Z
+ * Last Synced: 2026-06-26T23:58:50.118Z
  * ======================================================================== */
 
 title: Pharos System Roadmap
 type: roadmap
-lastSynced: 2026-06-26T22:22:51.251Z
+lastSynced: 2026-06-26T23:58:50.118Z
 
-items[68]{id, name, status, phase, tag, description}:
+items[69]{id, name, status, phase, tag, description}:
   "275", "Configure Production-Only CORS Rules for Cloudflare R2 Registry Storage", "Deployed", "Sprint 5.04", "CORE", "Enforced production-only origins and restricted allowed headers to Content-Type and Range to minimize attack surface. Verified 🟢 PHAROS GREEN."
   "274", "Integrate cargo-machete into pulse.sh", "Deployed", "Sprint 5.04", "CORE", "Pinned and installed cargo-machete v0.7.0 binary inside Podman build, automated unused dependency checks in pulse, and pruned 8 unused dependencies from workspace. Verified 🟢 PHAROS GREEN."
   "276", "Add --registry-target Flags and Update Registry CLI Documentation", "Deployed", "Sprint 5.04", "CORE", "Added global --registry-target flag and environment variable to registry commands, relaxed output directory parameter to optional with fallback resolution, and added unit/integration tests. Verified 🟢 PHAROS GREEN."
@@ -18,6 +18,7 @@ items[68]{id, name, status, phase, tag, description}:
   "273", "Decouple Marketing and Demo Build Stages in Containerfile.ts", "Deployed", "Sprint 5.04", "CORE", "Decoupled the React demo compilation stage from the marketing build in Containerfile.ts to prevent demo compilation errors from blocking marketing site assembly. Verified 🟢 PHAROS GREEN."
   "271", "Promote Search Index to Cloudflare R2 on Merge and Update CLI Push Guidance", "Deployed", "Sprint 5.04", "CORE", "Configured automated index baking in the core builder container and enabled Wrangler auto-promotion to the Cloudflare R2 registry bucket on merge. Refactored local CLI push stub to print professional guidance. Verified 🟢 PHAROS GREEN."
   "300", "Deploy Search Index Binary to Correct CDN Key Prefix", "Deployed", "Sprint 5.04", "CORE", "Compiled search-index.bin JSON database in pkd registry bake and configured the pulse workflow to upload both files under the pharos-kitchen-design prefix to Cloudflare R2 CDN. Verified 🟢 PHAROS GREEN."
+  "306", "Expose Cloudflare Environment Secrets Dynamically in Pulse Workflow", "Deployed", "Sprint 5.04", "CORE", "Configured dynamic environment targeting for the sharded pulse job, exposing Cloudflare credentials on release builds to the main branch while shielding them on feature branch PRs. Added local verification test to capture workflow environment errors. Verified 🟢 PHAROS GREEN."
   "254", "Provision Cloudflare R2 Registry Storage", "Deployed", "Sprint 5.03", "CORE", "Provisioned the R2 bucket for BIM Registry assets, bound `registry.iamrichardd.com` via `cloudflare_r2_custom_domain`, and upgraded the infrastructure slice to Cloudflare Provider v5.20.0 for compatibility. Verified 🟢 PHAROS GREEN."
   "242", "Implement RFC-2378 OmniBar & Procedural Hover-Bake", "Deployed", "Sprint 5.03", "CORE", "Implemented Web Component command bar, unified wildcard search across workspaces, integrated real-time WebGL canvas, and verified input validation / ReDoS protections. Verified 🟢 PHAROS GREEN."
   "252", "Connect Demo OmniBar to Production Search Index and Category Shards", "Deployed", "Sprint 5.03", "CORE", "Implemented R2 bucket fetch client in demo, integrated production index with WASM query engine, added lazy-loaded category shards, and added micro-animations with status panel. Verified 🟢 PHAROS GREEN."
@@ -55,11 +56,11 @@ items[68]{id, name, status, phase, tag, description}:
   "123", "Zero-Allocation Marshalling", "Deployed", "Sprint 4.11", "BRIDGE", "Delivered high-performance memory-safe marshalling for the Revit Bridge (ECT 4)."
   "175", "Design System Alignment", "Deployed", "Sprint 4.11", "UX", "Aligned the Marketing TOON loader with the Pharos Design System typography."
   "168", "Automated Boundary Enforcement", "Deployed", "Sprint 4.11", "PROTOCOL", "Implemented ADR-0044 drift detection to ensure Rust/C# parity."
-  "239", "Refactor Marketing Site IA for Command-First Identity", "Blueprint Approved", "Sprint 5.05", "CORE", "Implement high-fidelity Terminal Hero and capability-based documentation flow. Requires 50% Mid-Sprint Rigor Gate review."
-  "185", "Zero-Allocation JSON Parsing", "Blueprint Approved", "Sprint 5.05", "CORE", "Implementing source-generated JSON parsers to eliminate allocation overhead in WASM."
-  "42", "SRI & SEO Audit", "Blueprint Approved", "Sprint 5.05", "IDENTITY", "Remediating SRI hashes and optimizing SEO for the Marketing site."
-  "84", "Dual-Stream Release Pipeline", "Blueprint Approved", "Sprint 5.05", "TOOLING", "Configuring separate channels for stable and nightly releases."
-  "85", "Official Homebrew Tap", "Blueprint Approved", "Sprint 5.05", "TOOLING", "Initializing the official Pharos Homebrew tap for macOS/Linux distribution."
+  "239", "Refactor Marketing Site IA for Command-First Identity", "In Progress", "Sprint 5.05", "CORE", "Implement high-fidelity Terminal Hero and capability-based documentation flow. Requires 50% Mid-Sprint Rigor Gate review."
+  "185", "Zero-Allocation JSON Parsing", "In Progress", "Sprint 5.05", "CORE", "Implementing source-generated JSON parsers to eliminate allocation overhead in WASM."
+  "42", "SRI & SEO Audit", "In Progress", "Sprint 5.05", "IDENTITY", "Remediating SRI hashes and optimizing SEO for the Marketing site."
+  "84", "Dual-Stream Release Pipeline", "In Progress", "Sprint 5.05", "TOOLING", "Configuring separate channels for stable and nightly releases."
+  "85", "Official Homebrew Tap", "In Progress", "Sprint 5.05", "TOOLING", "Initializing the official Pharos Homebrew tap for macOS/Linux distribution."
   "87", "Domain-to-Org Mapping", "Blueprint Approved", "Sprint 6.01", "IDENTITY", "Implementing secure domain validation for organizational onboarding."
   "268", "Design Production Split boundaries", "Blueprint Approved", "Sprint 6.01", "CORE", "Decouple production infrastructure stages to isolate networking blocks."
   "257", "Enforce Reference Validation", "Blueprint Approved", "Sprint 6.01", "UX", "Add runtime validators for Three.js layout elements."
