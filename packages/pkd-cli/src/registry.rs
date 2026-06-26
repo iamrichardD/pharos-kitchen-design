@@ -5,7 +5,8 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Distribution lifecycle management for the Pharos Registry.
- * Traceability: Issue #126, ADR-0026, ADR-0027, Issue #276
+ * Traceability: Issue #126, ADR-0026, ADR-0027, Issue #276, Issue #302
+ * Last Updated: 2026-06-26
  * ======================================================================== */
 
 use crate::auth::AuthManager;
@@ -340,6 +341,7 @@ impl RegistryManager {
             println!("{} Filtering for shard-id: {}", "  -".blue(), id.cyan());
         }
 
+        crate::bake::prepare_output_directory(&output)?;
         let engine = crate::bake::BakeEngine::new();
         engine.run_incremental(&source, &output, shard_id).await
     }
