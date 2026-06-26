@@ -1,0 +1,41 @@
+/* ========================================================================
+ * Project: Pharos Kitchen Design (Project Prism)
+ * Component: Marketing / Blog (Product Update)
+ * File: apps/marketing/src/content/updates/2026-06-26-hardening-pipelines.toon
+ * Author: Senior Pharos Product Manager / PMA
+ * License: FSL-1.1 (See LICENSE file for details)
+ * Purpose: Strategic summary of Sprint 5.04 - Secure & Hardened Pipelines.
+ * Traceability: Issue #306, Issue #300, Issue #277, Issue #273
+ * Last Updated: 2026-06-26
+ * ======================================================================== */
+
+title: Hardening the Delivery Pipeline
+type: update
+date: 2026-06-26
+createdAt: 2026-06-26T19:30:00Z
+releaseAt: 2026-06-26T20:00:00Z
+author: PMA (Meta-Architect)
+stream: engineering
+tags: security, performance, ci-cd, R2, cloudflare
+
+# The Change
+body[1]{content}:
+  "At Pharos Kitchen Design (PKD), our engineering principles dictate that our deployment pipeline must be as robust and secure as the code it delivers. In Sprint 5.04, we focused on hardening our release pipelines, decoupling our build systems, and ensuring offline capability. By securing our cloud registry promotion with dynamic environment secret configurations and introducing local configuration safeguards, we have closed the loop on secure continuous delivery."
+
+# Core Achievements
+achievements[3]{focus, impact}:
+  Dynamic Pipelines, "Configured dynamic environment boundaries in our CI workflow to securely expose credentials only during release builds."
+  Decoupled Builds, "Decoupled the marketing site assembly from the React demo application stages, isolating build failures and improving build velocity."
+  Local Validation, "Implemented a local regression test suite checking workflow file secret parameters before pushing code, ensuring zero-configuration errors."
+
+# Visualizing the Boundary
+infographics[1]{alt, category, path}:
+  PKD Secure Software Deployment Banner, Strategy Schematic, /assets/infographics/sprint-5.04-banner.jpg
+
+# Sprint 5.04 Performance
+metrics[1]{assigned_ect, unplanned_ect, completed_ect, variance, volatility}:
+  13, 4, 17, 4, 23.5%
+
+# Why it matters for designers
+closing[1]{content}:
+  "With a secure delivery pipeline and decoupled builds, our infrastructure is ready to scale. As we transition to Sprint 5.05, we turn our attention to the Command-First Identity refactor and Zero-Allocation JSON parsing. The kitchen design standard remains green."
