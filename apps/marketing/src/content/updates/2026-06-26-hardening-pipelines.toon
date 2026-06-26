@@ -20,13 +20,13 @@ tags: security, performance, ci-cd, R2, cloudflare
 
 # The Change
 body[1]{content}:
-  "At Pharos Kitchen Design (PKD), our engineering principles dictate that our deployment pipeline must be as robust and secure as the code it delivers. In Sprint 5.04, we focused on hardening our release pipelines, decoupling our build systems, and ensuring offline capability. By securing our cloud registry promotion with dynamic environment secret configurations and introducing local configuration safeguards, we have closed the loop on secure continuous delivery."
+  "At Pharos Kitchen Design (PKD), we believe your tools should respect your time. In Sprint 5.04, we focused on hardening our delivery pipelines, ensuring that the software you rely on remains completely secure, predictable, and available offline. By decoupling our static documentation assembly from client-side UI application stages, we ensure a minor interface update never halts your access to the core equipment database. We manage our architectural dependencies with the same rigor you apply to your kitchen plumbing lines."
 
 # Core Achievements
 achievements[3]{focus, impact}:
-  Dynamic Pipelines, "Configured dynamic environment boundaries in our CI workflow to securely expose credentials only during release builds."
-  Decoupled Builds, "Decoupled the marketing site assembly from the React demo application stages, isolating build failures and improving build velocity."
-  Local Validation, "Implemented a local regression test suite checking workflow file secret parameters before pushing code, ensuring zero-configuration errors."
+  Dynamic Security, "Configured dynamic environment boundaries so sensitive deployment credentials are restricted strictly to release builds, shielding development channels."
+  Isolated Assembly, "Decoupled the static marketing site compilation from the React demo application stages to prevent local UI experiments from blocking core deployments."
+  Local Safeguards, "Integrated automated local verification tests that validate workflow settings before commits are pushed, preventing CI pipeline drift."
 
 # Visualizing the Boundary
 infographics[1]{alt, category, path}:
@@ -38,4 +38,4 @@ metrics[1]{assigned_ect, unplanned_ect, completed_ect, variance, volatility}:
 
 # Why it matters for designers
 closing[1]{content}:
-  "With a secure delivery pipeline and decoupled builds, our infrastructure is ready to scale. As we transition to Sprint 5.05, we turn our attention to the Command-First Identity refactor and Zero-Allocation JSON parsing. The kitchen design standard remains green."
+  "A hardened delivery pipeline is a promise of reliability. As we transition to Sprint 5.05, we turn our focus to Zero-Allocation JSON parsing—which means your database loads instantly with zero lag, even when dragging heavy equipment layouts on a standard laptop on-site. The design standard remains green."
