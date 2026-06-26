@@ -7,6 +7,7 @@
 # Purpose: Draft configuration for parallelized CI sharding (Issue #108).
 # Why: ADR-0017 (Multi-Stage chaining) ensures cross-language FFI stability.
 # Traceability: Issue #108, Task 4.26.2, Task 4.26.3
+# Last Updated: 2026-06-26
 # ========================================================================
 
 name: Pulse (Sharded)
@@ -84,7 +85,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: "4.103.0"
-          command: r2 object put pkd-prism-registry/pharos-kitchen-design/search-index.tar.zst --file=.artifacts/registry/search-index.tar.zst
+          command: r2 object put pkd-prism-registry/pharos-kitchen-design/search-index.tar.zst --file=.artifacts/registry/search-index.tar.zst --remote
 
       - name: Upload Index Binary to Cloudflare R2
         if: github.ref == 'refs/heads/main' && matrix.slice == 'core'
@@ -93,4 +94,4 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: "4.103.0"
-          command: r2 object put pkd-prism-registry/pharos-kitchen-design/search-index.bin --file=.artifacts/registry/search-index.bin
+          command: r2 object put pkd-prism-registry/pharos-kitchen-design/search-index.bin --file=.artifacts/registry/search-index.bin --remote
