@@ -138,6 +138,17 @@ impl BakeEngine {
             metadata_records.len()
         );
 
+        // Generate the legacy JSON search-index.bin for the Web client
+        let search_index_map: std::collections::HashMap<String, pkd_core::PharosMetadata> =
+            metadata_records
+                .iter()
+                .map(|r| (r.metadata_id.clone(), r.clone()))
+                .collect();
+        let search_index_bin_path = output.join("search-index.bin");
+        let search_index_json = serde_json::to_string(&search_index_map)?;
+        fs::write(&search_index_bin_path, search_index_json)?;
+        println!("{} search-index.bin written successfully.", "✔".green());
+
         // 2. Tantivy Indexing
         let index_path = output.join("search-index");
         if index_path.exists() {
@@ -277,6 +288,7 @@ mod tests {
         }
         assert!(result.is_ok());
         assert!(output_dir.path().join("search-index.tar.zst").exists());
+        assert!(output_dir.path().join("search-index.bin").exists());
         assert!(output_dir.path().join("search-index").exists());
     }
 
@@ -338,6 +350,7 @@ mod tests {
         let result = engine.run(source_dir.path(), output_dir.path()).await;
 
         assert!(result.is_ok());
+        assert!(output_dir.path().join("search-index.bin").exists());
         assert!(output_dir.path().join("search-index").exists());
     }
 }
