@@ -77,11 +77,20 @@ jobs:
           echo "🚀 Baking authoritative search index..."
           podman run --rm --security-opt seccomp=unconfined -v ${{ github.workspace }}:/work -w /work pkd-core-builder pkd registry bake --source /work/packages/pkd-core/samples --output /work/.artifacts/registry
 
-      - name: Upload Index to Cloudflare R2
+      - name: Upload Index Tarball to Cloudflare R2
         if: github.ref == 'refs/heads/main' && matrix.slice == 'core'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: "4.103.0"
-          command: r2 object put pkd-prism-registry/search-index.tar.zst --file=.artifacts/registry/search-index.tar.zst
+          command: r2 object put pkd-prism-registry/pharos-kitchen-design/search-index.tar.zst --file=.artifacts/registry/search-index.tar.zst
+
+      - name: Upload Index Binary to Cloudflare R2
+        if: github.ref == 'refs/heads/main' && matrix.slice == 'core'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: "4.103.0"
+          command: r2 object put pkd-prism-registry/pharos-kitchen-design/search-index.bin --file=.artifacts/registry/search-index.bin
