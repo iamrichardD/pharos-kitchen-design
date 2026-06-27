@@ -45,6 +45,7 @@ run_core() {
     echo "   [Build] Building Pharos Core Environment (Quality Gates Included)..."
     podman build \
         --security-opt seccomp=unconfined \
+        --dns 1.1.1.1 \
         --target rust-builder \
         -t pkd-core-builder \
         --build-arg BUILD_MODE="$BUILD_MODE" \
@@ -185,6 +186,7 @@ run_marketing() {
     # We use the TS Containerfile which handles Astro build and audits.
     podman build \
         --security-opt seccomp=unconfined \
+        --dns 1.1.1.1 \
         -t pkd-ts-auditor \
         --build-arg BUILD_MODE="$BUILD_MODE" \
         -f Containerfile.ts .

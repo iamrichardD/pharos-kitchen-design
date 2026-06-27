@@ -9,6 +9,8 @@
 # Traceability: Priority 2, Issue #29, Issue #220
 # ========================================================================
 
+set -eo pipefail
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 HASH_FILE="$SCRIPT_DIR/blessed-hashes.json"
 
