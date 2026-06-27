@@ -9,6 +9,7 @@
  * ======================================================================== */
 
 import { defineCollection } from 'astro:content';
+
 import { z } from 'zod';
 import fs from 'node:fs';
 import path from 'node:path';

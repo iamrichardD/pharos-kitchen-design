@@ -48,7 +48,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 ARG BUILD_MODE=debug
 RUN apt-get update && apt-get install -y --no-install-recommends apt-utils
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl openssl libterm-readline-gnu-perl && \
+    curl openssl ca-certificates libterm-readline-gnu-perl && \
     rm -rf /var/lib/apt/lists/*
 RUN npm install -g wrangler
 WORKDIR /work

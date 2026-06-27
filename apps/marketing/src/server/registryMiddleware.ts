@@ -72,7 +72,7 @@ export function handleRegistryRequest(
   // Strip query parameters before matching the route prefix
   const pathname = url.split('?')[0];
 
-  if (!pathname.startsWith(ROUTE_PREFIX)) {
+  if (!pathname || !pathname.startsWith(ROUTE_PREFIX)) {
     return false;
   }
 
