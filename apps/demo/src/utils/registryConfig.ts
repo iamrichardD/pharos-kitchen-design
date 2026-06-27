@@ -36,13 +36,7 @@ export const getShardUrl = (categorySlug: string): string => {
 };
 
 export const getPingUrl = (): string => {
-    try {
-        const baseUrl = getRegistryBaseUrl();
-        const url = new URL(baseUrl);
-        return `${url.origin}/ping`;
-    } catch {
-        return 'https://registry.iamrichardd.com/ping';
-    }
+    return 'https://iamrichardd.com';
 };
 
 export class RegistryLoadError extends Error {
