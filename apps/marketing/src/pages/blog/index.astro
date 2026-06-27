@@ -17,7 +17,7 @@ import ToonLoader from '../../components/ToonLoader.astro';
 const allUpdates = await getCollection('updates');
 // Sort by Date descending, then ID descending
 const sortedUpdates = allUpdates.sort((a, b) => {
-  const dateCompare = b.data.date.localeCompare(a.data.date);
+  const dateCompare = (b.data as any).date.localeCompare((a.data as any).date);
   if (dateCompare !== 0) return dateCompare;
   return b.id.localeCompare(a.id);
 });
@@ -49,9 +49,9 @@ const sortedUpdates = allUpdates.sort((a, b) => {
       <div id="blog-feed" class="space-y-24">
         {sortedUpdates.length > 0 ? (
           sortedUpdates.map((update) => (
-            <article class="blog-entry group" data-raw={update.data.content}>
+            <article class="blog-entry group" data-raw={(update.data as any).content}>
               <div class="max-w-3xl mx-auto">
-                <ToonLoader id={update.id} content={update.data.content} />
+                <ToonLoader id={update.id} content={(update.data as any).content} />
               </div>
             </article>
           ))

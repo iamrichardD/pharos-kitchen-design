@@ -9,6 +9,7 @@
  * ======================================================================== */
 
 import { defineCollection } from 'astro:content';
+
 import { z } from 'zod';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -34,11 +35,11 @@ const updates = defineCollection({
       };
     });
   },
-  schema: z.object({
+  schema: ({}) => z.object({
     id: z.string(),
     content: z.string(),
     date: z.string(),
-  }),
+  }) as any,
 });
 
 export const collections = {
