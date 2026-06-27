@@ -35,11 +35,11 @@ const updates = defineCollection({
       };
     });
   },
-  schema: ({}) => z.object({
+  schema: z.object({
     id: z.string(),
     content: z.string(),
     date: z.string(),
-  }) as any,
+  }),
 });
 
 export const collections = {
