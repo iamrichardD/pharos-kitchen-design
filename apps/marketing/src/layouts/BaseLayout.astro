@@ -11,6 +11,7 @@
  */
 
 import '../styles/global.css';
+import { navItems } from '../config/navigation';
 
 interface Props {
 	title: string;
@@ -37,7 +38,7 @@ const { title, description = "Pharos Kitchen Design (PKD): Metadata-First Truth 
 
 		<!-- Umami Analytics (Hardened with SRI) -->
 		<script is:inline defer src="https://cloud.umami.is/script.js" data-website-id="72cdde11-d1e4-4a33-9cc3-a00d5fe4651b" integrity="sha384-DCWdwYp9BA8848i6w0Y5RQh8ANWh1jp1+NjJ/a+jqFZi1nvw6st1t+bFQ9+hhNXe" crossorigin="anonymous"></script>
-	<script integrity="sha384-STAY_THE_SAME" src="https://other.com/script.js"></script></head>
+	</head>
 	<body class="blueprint-grid min-h-screen flex flex-col">
 		<header class="border-b border-border-blueprint py-4 bg-bg-base/80 backdrop-blur-sm sticky top-0 z-50 transition-colors duration-300">
 			<div class="container mx-auto px-4 flex justify-between items-center">
@@ -45,14 +46,16 @@ const { title, description = "Pharos Kitchen Design (PKD): Metadata-First Truth 
 					<div class="w-8 h-8 bg-ph-orange flex items-center justify-center font-condensed text-ph-charcoal text-xl">P</div>
 					<span class="font-condensed text-xl tracking-tight hidden sm:inline">PHAROS KITCHEN DESIGN</span>
 				</a>
-				<nav class="flex gap-6 font-condensed text-sm tracking-widest uppercase">
-					<a href="/pharos-kitchen-design/features" class="hover:text-ph-orange transition-colors">Features</a>
-					<a href="/pharos-kitchen-design/docs/user-guide" class="hover:text-ph-orange transition-colors">Guide</a>
-					<a href="/pharos-kitchen-design/coverage" class="hover:text-ph-orange transition-colors">Coverage</a>
-					<a href="/pharos-kitchen-design/blog" class="hover:text-ph-orange transition-colors text-ph-pulse font-bold">Pulse</a>
-					<a href="/pharos-kitchen-design/bridge" class="hover:text-ph-orange transition-colors">Bridge</a>
-					<a href="/pharos-kitchen-design/install" class="hover:text-ph-orange transition-colors">Install</a>
-					<a href="/pharos-kitchen-design/roadmap" class="hover:text-ph-blue transition-colors text-ph-blue underline underline-offset-4 decoration-ph-orange/40">Roadmap</a>
+				<nav class="flex gap-6 font-condensed text-sm tracking-widest uppercase items-center">
+					{navItems.map((item) => (
+						<a
+							href={item.path}
+							class={item.class || "hover:text-ph-orange transition-colors"}
+						>
+							{item.label}
+						</a>
+					))}
+					<a href="/pharos-kitchen-design/verify" class="hover:text-ph-orange transition-colors">Sign In</a>
 				</nav>
 			</div>
 		</header>

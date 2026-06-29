@@ -1,0 +1,24 @@
+/**
+ * Project: Pharos Kitchen Design (Project Prism)
+ * Component: Configuration / Navigation
+ * License: FSL-1.1 (See LICENSE file for details)
+ * File: navigation.ts
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * Purpose: Central definition of the main marketing navigation schema.
+ * Traceability: Issue #313
+ * Last Updated: 2026-06-29
+ */
+
+export interface NavItem {
+  label: string;
+  path: string;
+  class?: string;
+}
+
+export const navItems: NavItem[] = [
+  { label: 'Guide', path: '/pharos-kitchen-design/docs/user-guide' },
+  { label: 'Reference', path: '/pharos-kitchen-design/coverage' },
+  { label: 'Blog', path: '/pharos-kitchen-design/blog' },
+  { label: 'About', path: '/pharos-kitchen-design/features' },
+  { label: 'Roadmap', path: '/pharos-kitchen-design/roadmap', class: 'text-ph-blue underline underline-offset-4 decoration-ph-orange/40 hover:text-ph-blue' }
+];
