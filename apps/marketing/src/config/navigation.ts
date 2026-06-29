@@ -16,9 +16,10 @@ export interface NavItem {
 }
 
 export const navItems: NavItem[] = [
-  { label: 'Guide', path: '/pharos-kitchen-design/docs/user-guide' },
-  { label: 'Reference', path: '/pharos-kitchen-design/coverage' },
+  { label: 'Guide', path: '/pharos-kitchen-design/guide' },
+  { label: 'Revit Plugin', path: '/pharos-kitchen-design/revit-plugin' },
+  { label: 'Download', path: '/pharos-kitchen-design/download' },
+  { label: 'Reference', path: '/pharos-kitchen-design/reference' },
   { label: 'Blog', path: '/pharos-kitchen-design/blog' },
-  { label: 'About', path: '/pharos-kitchen-design/features' },
   { label: 'Roadmap', path: '/pharos-kitchen-design/roadmap', class: 'text-ph-blue underline underline-offset-4 decoration-ph-orange/40 hover:text-ph-blue' }
 ];
