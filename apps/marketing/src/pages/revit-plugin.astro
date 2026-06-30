@@ -1,12 +1,13 @@
 ---
 /* ========================================================================
  * Project: Pharos Kitchen Design (Project Prism)
- * Component: Pages / Bridge
+ * Component: Pages / Revit Plugin
  * License: FSL-1.1 (See LICENSE file for details)
- * File: bridge.astro
+ * File: revit-plugin.astro
  * Author: Richard D. (https://github.com/iamrichardd)
- * Purpose: Technical overview of the Edge Identity Handshake & Ghost-Link.
+ * Purpose: Content Strategy overview for the Revit Integration Plugin.
  * Traceability: ADR 0015, ADR 0021, Issue #81
+ * Last Updated: 2026-06-29
  * ======================================================================== */
 
 import BaseLayout from "../layouts/BaseLayout.astro";
@@ -15,9 +16,15 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 <BaseLayout title="Revit Plugin | Pharos Kitchen Design" description="Synchronize equipment metadata, specifications, and layout attributes directly with your Revit workstation.">
   <section class="py-20 bg-bg-base/60 relative overflow-hidden transition-colors duration-300">
     <div class="container mx-auto px-4 relative z-10">
+      <!-- Technical Compatibility Badge -->
+      <div class="inline-flex items-center gap-2 px-3 py-1 mb-6 text-xs font-mono tracking-widest text-ph-pulse border border-ph-pulse/40 bg-ph-pulse/10 rounded-sm uppercase">
+        <span class="w-1.5 h-1.5 rounded-full bg-ph-pulse animate-pulse"></span>
+        NATIVE REVIT 2025+ COMPATIBILITY (.NET 8.0)
+      </div>
+      
       <h1 class="text-6xl font-bold mb-6 font-mono tracking-tighter italic">Revit Integration Plugin</h1>
       <p class="text-xl text-text-muted max-w-2xl leading-relaxed">
-        Pharos Kitchen Design eliminates the gap between your web tools and your desktop design software. Our connectivity layer ensures your professional persona is available wherever you work—from the web portal to the Revit command line.
+        Pharos Kitchen Design bridges the gap between your web tools and desktop design software. Our connectivity layer ensures your professional design metadata is synchronized directly with your Revit workstation.
       </p>
     </div>
     <!-- Blueprint Grid Decoration -->
@@ -25,37 +32,82 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   </section>
 
   <section class="py-20 container mx-auto px-4">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-16">
-      <!-- 01 // ONE IDENTITY -->
-      <div class="space-y-8">
-        <div class="text-ph-orange font-mono text-sm tracking-widest uppercase">01 // DESIGNER IDENTITY</div>
-        <h2 class="text-4xl font-bold">One Login, <span class="text-ph-blue">Any Platform.</span></h2>
-        <p class="text-text-base/80 leading-relaxed text-lg">
-          Stop managing separate passwords for every design tool. PKD uses professional identity standards to synchronize your profile across your entire workflow.
-        </p>
-        <div class="bg-bg-base/40 border-l-4 border-ph-orange p-6 font-mono text-xs space-y-2">
-          <div class="text-text-muted">>> pkd core pulse --env prod</div>
-          <div class="text-ph-blue">S: Pulse Check: Registry Verified [SHA-256: 8f2d...]</div>
-          <div class="text-ph-pulse">S: Identity Verified: Designer_ID_71</div>
-          <div class="text-text-muted">>> Connection established on all devices.</div>
+    <div class="space-y-24">
+      <!-- SECTION 1: Zero-Bloat Layouts -->
+      <div class="flex flex-col md:flex-row gap-12 items-center">
+        <div class="flex-1 order-2 md:order-1">
+          <div class="blueprint-border p-6 bg-bg-base/20 aspect-video flex flex-col justify-center font-mono text-[11px] text-ph-blue/80 space-y-3 overflow-hidden">
+            <div class="text-ph-blue font-bold uppercase tracking-wider text-xs">>> Revit DirectShape API Builder</div>
+            <div class="border-t border-ph-blue/20 my-1"></div>
+            <div>Category: <span class="text-white">OST_FoodServiceEquipment</span></div>
+            <div>Procedural LOD: <span class="text-white">LOD 100 / LOD 200</span></div>
+            <div>Geometry: <span class="text-white">DirectShape.CreateElement()</span></div>
+            <div class="text-ph-pulse font-semibold">Instance Size: &lt; 15 KB (Zero-Bloat)</div>
+            <div class="text-text-muted text-[10px] italic">// Rationale: Avoids monolithic family templates for basic box shapes</div>
+          </div>
         </div>
-        <p class="text-text-muted text-sm italic">
-          Optimized for global performance, ensuring you're always connected.
-        </p>
+        <div class="flex-1 order-1 md:order-2">
+          <h2 class="text-3xl font-bold mb-4 font-mono uppercase tracking-tight text-ph-blue italic">01 // Zero-Bloat Layouts</h2>
+          <p class="text-text-base/80 mb-6 leading-relaxed text-lg">
+            Say goodbye to bulky project files that crawl to a halt. We leverage Revit's modern <strong>DirectShape API</strong> to instantiate lightweight, procedurally generated components (LOD 100/200) under the native <code class="bg-bg-base/60 px-1 py-0.5 rounded font-mono text-sm text-ph-blue">FoodServiceEquipment</code> category. This approach keeps project file sizes minimal while retaining all mandatory architectural bounds.
+          </p>
+          <ul class="space-y-3 font-mono text-xs uppercase text-text-muted">
+            <li class="flex items-center gap-2"><span class="text-ph-blue">+</span> Instant procedurally generated geometries</li>
+            <li class="flex items-center gap-2"><span class="text-ph-blue">+</span> Prevents model bloat and family library clutter</li>
+            <li class="flex items-center gap-2"><span class="text-ph-blue">+</span> Compliant with standard Revit categorization rules</li>
+          </ul>
+        </div>
       </div>
 
-      <!-- 02 // CONNECTED SPECS -->
-      <div class="space-y-8">
-        <div class="text-ph-blue font-mono text-sm tracking-widest uppercase">02 // CONNECTED SPECIFICATIONS</div>
-        <h2 class="text-4xl font-bold">Deterministic <span class="text-ph-orange">Accuracy.</span></h2>
-        <p class="text-text-base/80 leading-relaxed text-lg">
-          Your equipment details shouldn't vanish when you export a project. PKD ensures that manufacturer attributes and GUIDs stay locked to your 3D models, surviving the transition between design and project management.
-        </p>
-        <div class="blueprint-border p-4 bg-bg-base/20 aspect-video flex items-center justify-center">
-            <picture class="w-full h-full">
-              <source srcset="/pharos-kitchen-design/assets/screenshots/ghost-link-metadata-light.png" media="(prefers-color-scheme: light)">
-              <img src="/pharos-kitchen-design/assets/screenshots/ghost-link-metadata-dark.png" alt="Connected Specifications" class="w-full h-full object-cover opacity-60" />
-            </picture>
+      <!-- SECTION 2: Real-Time Layout Synchronization -->
+      <div class="flex flex-col md:flex-row gap-12 items-center">
+        <div class="flex-1">
+          <h2 class="text-3xl font-bold mb-4 font-mono uppercase tracking-tight text-ph-orange italic">02 // Real-Time Layout Synchronization</h2>
+          <p class="text-text-base/80 mb-6 leading-relaxed text-lg">
+            Keep your workflow seamless and uninterrupted. Our background listener, driven by <strong>Ghost Tuning</strong>, tracks real-time edits made inside your secure browser sandbox. When you adjust equipment sizes, positions, or specifications in the web UI, those deltas are broadcast and applied instantly to your open Revit model.
+          </p>
+          <ul class="space-y-3 font-mono text-xs uppercase text-text-muted mb-6">
+            <li class="flex items-center gap-2"><span class="text-ph-orange">+</span> Secure background communication channel</li>
+            <li class="flex items-center gap-2"><span class="text-ph-orange">+</span> Bi-directional positioning and layout updates</li>
+            <li class="flex items-center gap-2"><span class="text-ph-orange">+</span> Zero-delay coordination for dynamic edits</li>
+          </ul>
+        </div>
+        <div class="flex-1">
+          <div class="blueprint-border p-6 bg-bg-base/20 aspect-video flex flex-col justify-center font-mono text-[11px] text-ph-orange/80 space-y-3 overflow-hidden">
+            <div class="text-ph-orange font-bold uppercase tracking-wider text-xs">>> Ghost Tuning Listener Status</div>
+            <div class="border-t border-ph-orange/20 my-1"></div>
+            <div>Sandbox Event: <span class="text-white">OnComponentTransformed</span></div>
+            <div>Delta Payload: <span class="text-white">&#123; dx: 1.25m, dy: -0.80m, rot: 90° &#125;</span></div>
+            <div>Revit Transaction: <span class="text-white">Active (Committed)</span></div>
+            <div class="text-ph-pulse font-semibold">Latency: ~4ms (Telemetry Verified)</div>
+            <div class="text-text-muted text-[10px] italic">// Rationale: Real-time UI updates without blocking UI threads</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 3: One-Click Parameter Audits -->
+      <div class="flex flex-col md:flex-row gap-12 items-center">
+        <div class="flex-1 order-2 md:order-1">
+          <div class="blueprint-border p-6 bg-bg-base/20 aspect-video flex flex-col justify-center font-mono text-[11px] text-ph-pulse/80 space-y-3 overflow-hidden">
+            <div class="text-ph-pulse font-bold uppercase tracking-wider text-xs">>> Rust WASM / FFI Parameter Validator</div>
+            <div class="border-t border-ph-pulse/20 my-1"></div>
+            <div>Module: <span class="text-white">pkd_core.dll (Native FFI Bindings)</span></div>
+            <div>Audit Target: <span class="text-white">Electrical & Plumbing Connectors</span></div>
+            <div class="text-red-400 font-semibold">Mismatch Found: VoltageMismatch (Req: 208V, Set: 120V)</div>
+            <div class="text-ph-pulse font-semibold">Audit Result: Warning Flagged in Revit Ribbon</div>
+            <div class="text-text-muted text-[10px] italic">// Rationale: Single Source of Truth validation directly from the Ribbon</div>
+          </div>
+        </div>
+        <div class="flex-1 order-1 md:order-2">
+          <h2 class="text-3xl font-bold mb-4 font-mono uppercase tracking-tight text-ph-pulse italic">03 // One-Click Parameter Audits</h2>
+          <p class="text-text-base/80 mb-6 leading-relaxed text-lg">
+            Ensure code compliance and prevent physical errors before construction begins. With a single click from the Revit ribbon, run an audit that queries <code class="bg-bg-base/60 px-1 py-0.5 rounded font-mono text-sm text-ph-pulse">pkd_core</code> via native <strong>FFI</strong>. The validator verifies critical parameters—including voltages, phases, plumbing connections, and clear spaces—against our centralized schema.
+          </p>
+          <ul class="space-y-3 font-mono text-xs uppercase text-text-muted">
+            <li class="flex items-center gap-2"><span class="text-ph-pulse">+</span> Direct FFI bindings to core Rust validation engine</li>
+            <li class="flex items-center gap-2"><span class="text-ph-pulse">+</span> Checks utility attributes (Voltage, Phase, Water, Drain)</li>
+            <li class="flex items-center gap-2"><span class="text-ph-pulse">+</span> Visual error indicators highlighted in the native ribbon</li>
+          </ul>
         </div>
       </div>
     </div>
