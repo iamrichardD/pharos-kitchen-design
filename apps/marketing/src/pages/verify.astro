@@ -58,6 +58,18 @@ import BaseLayout from "../layouts/BaseLayout.astro";
             <input type="text" id="username" name="username" placeholder="designer@studio.com" required class="w-full bg-bg-base/60 border border-border-blueprint/20 px-3 py-2 font-mono text-text-base text-sm focus:outline-none focus:border-ph-orange" />
           </div>
 
+          <div class="flex items-center gap-2 py-2 text-left">
+            <input 
+              type="checkbox" 
+              id="register_toggle" 
+              name="register_toggle" 
+              class="w-4 h-4 bg-bg-base/60 border border-border-blueprint/40 checked:bg-ph-orange focus:ring-0 focus:outline-none accent-ph-orange cursor-pointer"
+            />
+            <label for="register_toggle" class="text-[10px] font-mono text-text-muted uppercase tracking-widest cursor-pointer select-none">
+              Register new device/account
+            </label>
+          </div>
+
           <div id="status-container" class="hidden text-xs font-mono py-2 px-4 border-l-2 border-ph-orange bg-ph-orange/10 text-ph-orange text-left mb-6">
             <!-- Dynamic Status -->
           </div>
@@ -88,6 +100,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
 <script>
   import { startAuthentication, startRegistration } from '@simplewebauthn/browser';
+  import { SessionManager } from '../utils/session';
 
   const AUTH_URL = 'http://localhost:8787'; // Dev fallback, should be environment driven
 
@@ -123,38 +136,38 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     const formData = new FormData(form);
     const user_code = formData.get('user_code') as string;
     const username = formData.get('username') as string;
+    const isRegisterMode = (document.getElementById('register_toggle') as HTMLInputElement)?.checked;
 
     submitBtn.disabled = true;
-    submitBtn.innerText = "AUTHORIZING...";
+    submitBtn.innerText = isRegisterMode ? "REGISTERING..." : "AUTHORIZING...";
     showStatus("Locating identity shards...");
 
     try {
         // 1. Fetch Auth Options
-        let isRegistration = false;
-        let optionsRes = await fetch(`${AUTH_URL}/auth/login/options`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username })
-        });
+        let isRegistration = isRegisterMode;
+        let optionsRes;
+
+        if (isRegistration) {
+            showStatus("Initializing registration challenge...");
+            optionsRes = await fetch(`${AUTH_URL}/auth/register/options`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username })
+            });
+        } else {
+            showStatus("Requesting authentication options...");
+            optionsRes = await fetch(`${AUTH_URL}/auth/login/options`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username })
+            });
+        }
 
         let resData = await optionsRes.json() as any;
 
         if (!optionsRes.ok) {
-            if (resData.error === 'user_not_found') {
-                isRegistration = true;
-                showStatus("Account not found. Transitioning to Create Account...");
-                submitBtn.innerText = "REGISTER DEVICE...";
-                
-                optionsRes = await fetch(`${AUTH_URL}/auth/register/options`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username })
-                });
-                
-                if (!optionsRes.ok) {
-                    throw new Error("Failed to initialize registration challenge.");
-                }
-                resData = await optionsRes.json() as any;
+            if (resData.error === 'user_not_found' && !isRegistration) {
+                throw new Error("Account not found. Please verify your handle or check 'Register new device/account' to sign up.");
             } else {
                 throw new Error(resData.error || "Failed to initialize security challenge.");
             }
@@ -215,6 +228,10 @@ import BaseLayout from "../layouts/BaseLayout.astro";
         if (!confirmRes.ok) {
             const err = await confirmRes.json() as any;
             throw new Error(err.error || "Bridge handshake failed");
+        }
+
+        if (access_token) {
+            SessionManager.setSession(access_token);
         }
 
         form.classList.add('hidden');
