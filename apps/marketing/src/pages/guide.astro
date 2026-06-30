@@ -79,22 +79,22 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 								<div class="p-4 border border-border-blueprint/10 bg-bg-base/20">
 									<code class="text-ph-orange text-lg">* (Asterisk)</code>
 									<p class="text-xs text-text-muted mt-2 uppercase">Zero or more characters</p>
-									<p class="text-sm mt-1">"ho*" finds Hobart and Honeywell.</p>
+									<p class="text-sm mt-1">"Hob*" finds "Hobart".</p>
 								</div>
 								<div class="p-4 border border-border-blueprint/10 bg-bg-base/20">
 									<code class="text-ph-orange text-lg">+ (Plus)</code>
 									<p class="text-xs text-text-muted mt-2 uppercase">One or more characters</p>
-									<p class="text-sm mt-1">"3+m" finds 30m but not 3m.</p>
+									<p class="text-sm mt-1">"V+36" finds "V4B36" (matching "4B" between V and 36).</p>
 								</div>
 								<div class="p-4 border border-border-blueprint/10 bg-bg-base/20">
 									<code class="text-ph-orange text-lg">? (Question)</code>
 									<p class="text-xs text-text-muted mt-2 uppercase">Exactly one character</p>
-									<p class="text-sm mt-1">"3?m" finds 30m and 3am.</p>
+									<p class="text-sm mt-1">"LXe?" finds "LXeR" (matching "R").</p>
 								</div>
 								<div class="p-4 border border-border-blueprint/10 bg-bg-base/20">
 									<code class="text-ph-orange text-lg">[set] (Brackets)</code>
 									<p class="text-xs text-text-muted mt-2 uppercase">One character from a set</p>
-									<p class="text-sm mt-1">"t[ao]nk" finds tank and tonk.</p>
+									<p class="text-sm mt-1">"V4B3[567]" finds "V4B36" (matching "6" within the set).</p>
 								</div>
 							</div>
 						</div>
