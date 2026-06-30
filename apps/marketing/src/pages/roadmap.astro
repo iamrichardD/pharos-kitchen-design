@@ -5,8 +5,9 @@
  * License: FSL-1.1 (See LICENSE file for details)
  * File: src/pages/roadmap.astro
  * Author: Richard D. (https://github.com/iamrichardd)
- * Purpose: High-fidelity "Professional Grade" Technical Maturity Matrix.
- * Traceability: ADR-0012, ADR-0051, Issue #215
+ * Purpose: High-fidelity "Professional Grade" Technical Maturity Matrix with collapse sections.
+ * Traceability: ADR-0012, ADR-0051, Issue #215, Issue #311
+ * Last Updated: 2026-06-30
  * ======================================================================== */
 
 import BaseLayout from "../layouts/BaseLayout.astro";
@@ -79,8 +80,7 @@ const filterPills = [
       </div>
 
       <p class="text-xl text-text-muted max-w-3xl leading-relaxed">
-        Pharos Kitchen Design (PKD) is a **Metadata-First Standard**. 
-        Our roadmap tracks the chronological maturity of the system, prioritizing high-rigor foundations over features.
+        Our roadmap tracks the features and tools designed to help you work faster, collaborate seamlessly, and design without software bloat. We prioritize core system speed and asset accuracy first, ensuring your kitchen models load instantly and run perfectly.
       </p>
     </div>
 
@@ -95,12 +95,12 @@ const filterPills = [
     </div>
 
     <div class="space-y-32">
-      <!-- ACTIVE SQUAD -->
+      <!-- 1. IN PROGRESS -->
       <section class="filter-section transition-all duration-500">
-        <div class="flex items-center gap-4 mb-10">
-          <h2 class="text-2xl font-black font-mono tracking-tighter text-ph-blue uppercase">01. Active Squad</h2>
+        <div class="flex items-center gap-4 mb-10 cursor-pointer select-none" data-toggle-section>
+          <h2 class="text-2xl font-black font-mono tracking-tighter text-ph-blue uppercase">In Progress</h2>
           <div class="h-px flex-1 bg-ph-blue/20"></div>
-          <span class="text-[10px] font-mono text-text-muted uppercase tracking-widest">{activeSquad.length} In Progress</span>
+          <span class="text-[10px] font-mono text-text-muted uppercase tracking-widest">{activeSquad.length} In Progress <span class="toggle-icon text-xs font-mono ml-2 text-text-muted text-ph-blue">▼</span></span>
         </div>
         
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -129,46 +129,12 @@ const filterPills = [
         </div>
       </section>
 
-      <!-- DEPLOYED SPEC -->
+      <!-- 2. TO DO -->
       <section class="filter-section transition-all duration-500">
-        <div class="flex items-center gap-4 mb-10">
-          <h2 class="text-2xl font-black font-mono tracking-tighter text-ph-pulse uppercase">02. Deployed Specifications</h2>
-          <div class="h-px flex-1 bg-ph-pulse/20"></div>
-          <span class="text-[10px] font-mono text-text-muted uppercase tracking-widest">{deployedSpec.length} Verified</span>
-        </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {deployedSpec.map((item) => (
-            <div class="roadmap-card group relative bg-bg-base/40 border border-ph-pulse/20 p-8 hover:border-ph-pulse transition-all duration-300 shadow-lg hover:shadow-ph-pulse/10 flex flex-col justify-between" data-raw={`status=deployed tag=${item.tag.toLowerCase()} stream=${item.phase.toLowerCase()} name=${item.name.toLowerCase()} desc=${item.description.toLowerCase()}`}>
-              <div class="absolute top-0 left-0 bg-ph-pulse px-3 py-1 text-[9px] font-mono text-ph-charcoal uppercase tracking-widest font-bold">
-                [{item.tag}]
-              </div>
-              <div class="mt-4">
-                <div class="text-xs font-mono text-ph-orange mb-2 uppercase tracking-widest font-bold">{item.phase}</div>
-                <h3 class="text-2xl font-bold text-text-base mb-4 tracking-tight">{item.name}</h3>
-                <p class="text-text-muted text-sm leading-relaxed mb-6 italic">{item.description}</p>
-              </div>
-              <div class="mt-4 pt-4 border-t border-border-blueprint/10 flex justify-between items-center opacity-40 group-hover:opacity-100 transition-opacity">
-                <div class="text-[9px] font-mono text-text-muted uppercase">
-                  {item.id ? `SPEC_ID: #${item.id}` : 'SPEC_ID: PENDING'}
-                </div>
-                <div class="h-px flex-1 mx-4 bg-border-blueprint/20"></div>
-                <div class="w-2 h-2 bg-ph-pulse rounded-full"></div>
-              </div>
-            </div>
-          ))}
-        </div>
-        <div class="no-match-msg hidden py-10 text-center border border-dashed border-ph-pulse/10 rounded-xl bg-ph-pulse/5">
-           <p class="text-text-muted font-mono text-xs uppercase tracking-widest">No Deployed Spec Matches Found</p>
-        </div>
-      </section>
-
-      <!-- FUTURE BLUEPRINT -->
-      <section class="filter-section transition-all duration-500">
-        <div class="flex items-center gap-4 mb-10">
-          <h2 class="text-2xl font-black font-mono tracking-tighter text-amber-500 uppercase">03. Future Blueprints</h2>
+        <div class="flex items-center gap-4 mb-10 cursor-pointer select-none" data-toggle-section>
+          <h2 class="text-2xl font-black font-mono tracking-tighter text-amber-500 uppercase">To Do</h2>
           <div class="h-px flex-1 bg-amber-500/20"></div>
-          <span class="text-[10px] font-mono text-text-muted uppercase tracking-widest">{futureBlueprint.length} Approved</span>
+          <span class="text-[10px] font-mono text-text-muted uppercase tracking-widest">{futureBlueprint.length} Approved <span class="toggle-icon text-xs font-mono ml-2 text-text-muted text-amber-500">▼</span></span>
         </div>
         
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -196,6 +162,40 @@ const filterPills = [
            <p class="text-text-muted font-mono text-xs uppercase tracking-widest">No Future Blueprint Matches Found</p>
         </div>
       </section>
+
+      <!-- 3. COMPLETED -->
+      <section class="filter-section transition-all duration-500">
+        <div class="flex items-center gap-4 mb-10 cursor-pointer select-none" data-toggle-section>
+          <h2 class="text-2xl font-black font-mono tracking-tighter text-ph-pulse uppercase">Completed</h2>
+          <div class="h-px flex-1 bg-ph-pulse/20"></div>
+          <span class="text-[10px] font-mono text-text-muted uppercase tracking-widest">{deployedSpec.length} Verified <span class="toggle-icon text-xs font-mono ml-2 text-text-muted text-ph-pulse">▼</span></span>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {deployedSpec.map((item) => (
+            <div class="roadmap-card group relative bg-bg-base/40 border border-ph-pulse/20 p-8 hover:border-ph-pulse transition-all duration-300 shadow-lg hover:shadow-ph-pulse/10 flex flex-col justify-between" data-raw={`status=deployed tag=${item.tag.toLowerCase()} stream=${item.phase.toLowerCase()} name=${item.name.toLowerCase()} desc=${item.description.toLowerCase()}`}>
+              <div class="absolute top-0 left-0 bg-ph-pulse px-3 py-1 text-[9px] font-mono text-ph-charcoal uppercase tracking-widest font-bold">
+                [{item.tag}]
+              </div>
+              <div class="mt-4">
+                <div class="text-xs font-mono text-ph-orange mb-2 uppercase tracking-widest font-bold">{item.phase}</div>
+                <h3 class="text-2xl font-bold text-text-base mb-4 tracking-tight">{item.name}</h3>
+                <p class="text-text-muted text-sm leading-relaxed mb-6 italic">{item.description}</p>
+              </div>
+              <div class="mt-4 pt-4 border-t border-border-blueprint/10 flex justify-between items-center opacity-40 group-hover:opacity-100 transition-opacity">
+                <div class="text-[9px] font-mono text-text-muted uppercase">
+                  {item.id ? `SPEC_ID: #${item.id}` : 'SPEC_ID: PENDING'}
+                </div>
+                <div class="h-px flex-1 mx-4 bg-border-blueprint/20"></div>
+                <div class="w-2 h-2 bg-ph-pulse rounded-full"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div class="no-match-msg hidden py-10 text-center border border-dashed border-ph-pulse/10 rounded-xl bg-ph-pulse/5">
+           <p class="text-text-muted font-mono text-xs uppercase tracking-widest">No Deployed Spec Matches Found</p>
+        </div>
+      </section>
     </div>
 
     <!-- Final CTA -->
@@ -218,6 +218,10 @@ const filterPills = [
 <style>
   .roadmap-card {
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .filter-section.collapsed .grid,
+  .filter-section.collapsed .no-match-msg {
+    display: none !important;
   }
 </style>
 
@@ -306,5 +310,18 @@ const filterPills = [
   commandBar?.addEventListener('pkd-query', (e: Event) => {
     const customEvent = e as CustomEvent;
     applyFilterLocal(customEvent.detail.value, targetSelector, collapseEmptySections);
+  });
+
+  // Toggle collapse/expand interaction
+  document.querySelectorAll('[data-toggle-section]').forEach((header) => {
+    header.addEventListener('click', () => {
+      const section = header.closest('.filter-section');
+      if (!section) return;
+      section.classList.toggle('collapsed');
+      const icon = header.querySelector('.toggle-icon');
+      if (icon) {
+        icon.textContent = section.classList.contains('collapsed') ? '▶' : '▼';
+      }
+    });
   });
 </script>
