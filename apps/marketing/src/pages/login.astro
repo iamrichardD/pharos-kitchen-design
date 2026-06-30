@@ -28,11 +28,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
           Authenticate using your passkey to sign in to your designer account.
         </p>
 
-        <!-- Kathy Sierra UX Hook: Empowering Context -->
-        <div id="ux-hook-container" class="hidden mb-6 text-left border-l-2 border-ph-blue pl-4 py-2 bg-ph-blue/5">
-            <h3 id="ux-hook-title" class="text-ph-blue font-bold text-sm tracking-widest uppercase mb-1">Secure Identity</h3>
-            <p id="ux-hook-text" class="text-text-muted text-xs font-mono leading-relaxed"></p>
-        </div>
+
 
         <form id="verify-form" class="space-y-6">
           <div class="space-y-2 text-left">
@@ -90,10 +86,6 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   const statusContainer = document.getElementById('status-container');
   const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
   const successContainer = document.getElementById('success-container');
-  
-  const uxHookContainer = document.getElementById('ux-hook-container');
-  const uxHookTitle = document.getElementById('ux-hook-title');
-  const uxHookText = document.getElementById('ux-hook-text');
 
   let statusTimeout: number | undefined;
 
@@ -114,12 +106,17 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   };
 
   const showUXHook = (title: string, text: string) => {
-      if (uxHookContainer && uxHookTitle && uxHookText) {
-          uxHookTitle.innerText = title;
-          uxHookText.innerText = text;
-          uxHookContainer.classList.remove('hidden');
+      if (!statusContainer) return;
+      statusContainer.innerText = `>> [${title.toUpperCase()}]: ${text}`;
+      statusContainer.classList.remove('hidden');
+      statusContainer.style.borderColor = '#38bdf8';
+      statusContainer.style.color = '#38bdf8';
+
+      if (statusTimeout) {
+        clearTimeout(statusTimeout);
+        statusTimeout = undefined;
       }
-  }
+  };
 
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -207,7 +204,6 @@ import BaseLayout from "../layouts/BaseLayout.astro";
         }
 
         form.classList.add('hidden');
-        uxHookContainer?.classList.add('hidden');
         successContainer?.classList.remove('hidden');
 
         // Immediately redirect user straight to /roadmap
