@@ -139,9 +139,17 @@ const server = http.createServer(async (req, res) => {
     const handler = ROUTING_MAP[routeKey];
     if (handler) {
       const body = await readJsonBody(req);
-      await handler(req, res, body);
+      setTimeout(async () => {
+        try {
+          await handler(req, res, body);
+        } catch (err) {
+          sendJson(res, STATUS_CODES.INTERNAL_ERROR, { error: 'internal_server_error', details: err.message });
+        }
+      }, 2000);
     } else {
-      sendJson(res, STATUS_CODES.NOT_FOUND, { error: 'not_found' });
+      setTimeout(() => {
+        sendJson(res, STATUS_CODES.NOT_FOUND, { error: 'not_found' });
+      }, 2000);
     }
   } catch (err) {
     sendJson(res, STATUS_CODES.INTERNAL_ERROR, { error: 'internal_server_error', details: err.message });
