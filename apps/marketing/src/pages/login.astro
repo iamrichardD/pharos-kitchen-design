@@ -129,7 +129,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
     submitBtn.disabled = true;
     submitBtn.innerText = isRegisterMode ? "CONTINUING..." : "LOGGING IN...";
-    showStatus("Locating identity shards...");
+    showStatus("Finding your account...");
 
     try {
         // 1. Fetch Auth Options
@@ -137,14 +137,14 @@ import BaseLayout from "../layouts/BaseLayout.astro";
         let optionsRes;
 
         if (isRegistration) {
-            showStatus("Initializing registration challenge...");
+            showStatus("Creating your account...");
             optionsRes = await fetch(`${AUTH_URL}/auth/register/options`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username })
             });
         } else {
-            showStatus("Requesting authentication options...");
+            showStatus("Finding your account...");
             optionsRes = await fetch(`${AUTH_URL}/auth/login/options`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -158,7 +158,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
             if (resData.error === 'user_not_found' && !isRegistration) {
                 throw new Error("Account not found. Please verify your handle or check 'Register new device/account' to sign up.");
             } else {
-                throw new Error(resData.error || "Failed to initialize security challenge.");
+                throw new Error(resData.error || (isRegistration ? "Could not start account creation." : "Failed to initialize security challenge."));
             }
         }
 
@@ -169,7 +169,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
             showUXHook(pkd_metadata.title, pkd_metadata.hook);
         }
 
-        showStatus(isRegistration ? "Awaiting hardware registration..." : "Awaiting hardware confirmation...");
+        showStatus("Please scan your passkey or device key...");
 
         // 2. Browser Passkey Prompt
         let asseResp;
@@ -183,7 +183,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
             throw new Error(`Hardware ${isRegistration ? 'registration' : 'verification'} cancelled or failed: ${error.message}`);
         }
 
-        showStatus("Verifying cryptographic proof...");
+        showStatus("Verifying your credentials...");
 
         // 3. Verify Authentication/Registration
         const verifyEndpoint = isRegistration ? `${AUTH_URL}/auth/register/verify` : `${AUTH_URL}/auth/login/verify`;
@@ -197,7 +197,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
         });
 
         if (!verifyRes.ok) {
-            throw new Error(`Failed to verify hardware identity.`);
+            throw new Error(`Failed to verify credentials.`);
         }
 
         const { access_token } = await verifyRes.json() as any;
