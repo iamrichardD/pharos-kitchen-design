@@ -216,7 +216,16 @@ import BaseLayout from "../layouts/BaseLayout.astro";
         }, 800);
 
     } catch (err: any) {
-        showStatus(err.message, true);
+        const errMsg = err.message || "";
+        let friendlyMsg = "Something went wrong. Please try again.";
+        
+        if (/fetch/i.test(errMsg)) {
+            friendlyMsg = "Could not connect to the network. Please check your connection.";
+        } else if (/cancelled|aborted|abort|dismissed/i.test(errMsg)) {
+            friendlyMsg = "Sign-in verification was cancelled.";
+        }
+        
+        showStatus(friendlyMsg, true);
         submitBtn.disabled = false;
         submitBtn.innerText = isRegisterMode ? "CONTINUE" : "LOGIN";
     }
