@@ -20,6 +20,7 @@ interface Props {
 }
 
 const { title, description = "Pharos Kitchen Design (PKD): Metadata-First Truth for the Independent Kitchen Designer." } = Astro.props;
+const currentPath = Astro.url.pathname;
 ---
 
 <!doctype html>
@@ -48,15 +49,23 @@ const { title, description = "Pharos Kitchen Design (PKD): Metadata-First Truth 
 					<span class="font-condensed text-xl tracking-tight hidden sm:inline">PHAROS KITCHEN DESIGN</span>
 				</a>
 				<nav class="hidden md:flex gap-6 font-condensed text-sm tracking-widest uppercase items-center">
-					{navItems.map((item) => (
-						<a
-							href={item.path}
-							class={item.class || "hover:text-ph-orange transition-colors"}
-						>
-							{item.label}
-						</a>
-					))}
-					<a href="/pharos-kitchen-design/verify" class="hover:text-ph-orange transition-colors">Sign In</a>
+					{navItems.map((item) => {
+						const isActive = currentPath === item.path || currentPath === `${item.path}/`;
+						return (
+							<a
+								href={item.path}
+								class={isActive ? "text-ph-orange underline underline-offset-4 decoration-ph-orange/50 pointer-events-none" : "hover:text-ph-orange transition-colors"}
+							>
+								{item.label}
+							</a>
+						);
+					})}
+					<a
+						href="/pharos-kitchen-design/verify"
+						class={(currentPath === '/pharos-kitchen-design/verify' || currentPath === '/pharos-kitchen-design/verify/') ? "text-ph-orange underline underline-offset-4 decoration-ph-orange/50 pointer-events-none" : "hover:text-ph-orange transition-colors"}
+					>
+						Sign In
+					</a>
 				</nav>
 				<button 
 					id="menu-btn" 
@@ -74,15 +83,23 @@ const { title, description = "Pharos Kitchen Design (PKD): Metadata-First Truth 
 				id="mobile-menu" 
 				class="hidden absolute top-[65px] left-0 w-full bg-bg-base/95 backdrop-blur-md border-b border-border-blueprint/50 flex-col items-end p-6 gap-4 font-condensed text-sm tracking-widest uppercase md:hidden z-40"
 			>
-				{navItems.map((item) => (
-					<a
-						href={item.path}
-						class={`${item.class || "hover:text-ph-orange transition-colors"} w-full text-right`}
-					>
-						{item.label}
-					</a>
-				))}
-				<a href="/pharos-kitchen-design/verify" class="w-full text-right hover:text-ph-orange transition-colors pt-2 border-t border-border-blueprint/10">Sign In</a>
+				{navItems.map((item) => {
+					const isActive = currentPath === item.path || currentPath === `${item.path}/`;
+					return (
+						<a
+							href={item.path}
+							class={isActive ? "w-full text-right text-ph-orange underline underline-offset-4 decoration-ph-orange/50 pointer-events-none" : "w-full text-right hover:text-ph-orange transition-colors"}
+						>
+							{item.label}
+						</a>
+					);
+				})}
+				<a
+					href="/pharos-kitchen-design/verify"
+					class={(currentPath === '/pharos-kitchen-design/verify' || currentPath === '/pharos-kitchen-design/verify/') ? "w-full text-right text-ph-orange underline underline-offset-4 decoration-ph-orange/50 pointer-events-none pt-2 border-t border-border-blueprint/10" : "w-full text-right hover:text-ph-orange transition-colors pt-2 border-t border-border-blueprint/10"}
+				>
+					Sign In
+				</a>
 			</div>
 		</header>
 
