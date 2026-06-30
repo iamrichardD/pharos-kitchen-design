@@ -11,18 +11,19 @@
  * ======================================================================== */
 
 import BaseLayout from "../layouts/BaseLayout.astro";
+import PageHeader from "../components/PageHeader.astro";
 ---
 
 <BaseLayout title="Revit Plugin | Pharos Kitchen Design" description="Synchronize equipment metadata, specifications, and layout attributes directly with your Revit workstation.">
-  <section class="py-20 bg-bg-base/60 relative overflow-hidden transition-colors duration-300">
-    <div class="container mx-auto px-4 relative z-10">
+  <PageHeader title="Revit Integration Plugin" description="Workstation Bridge" />
+  <section class="py-10 bg-bg-base/60 relative overflow-hidden transition-colors duration-300">
+    <div class="container mx-auto px-6 relative z-10">
       <!-- Technical Compatibility Badge -->
       <div class="inline-flex items-center gap-2 px-3 py-1 mb-6 text-xs font-mono tracking-widest text-ph-pulse border border-ph-pulse/40 bg-ph-pulse/10 rounded-sm uppercase">
         <span class="w-1.5 h-1.5 rounded-full bg-ph-pulse animate-pulse"></span>
         NATIVE REVIT 2025+ COMPATIBILITY (.NET 8.0)
       </div>
       
-      <h1 class="text-6xl font-bold mb-6 font-mono tracking-tighter italic">Revit Integration Plugin</h1>
       <p class="text-xl text-text-muted max-w-2xl leading-relaxed">
         Pharos Kitchen Design bridges the gap between your web tools and desktop design software. Our connectivity layer ensures your professional design metadata is synchronized directly with your Revit workstation.
       </p>

@@ -13,6 +13,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import ToonLoader from '../../components/ToonLoader.astro';
+import PageHeader from '../../components/PageHeader.astro';
 
 const allUpdates = await getCollection('updates');
 // Sort by Date descending, then ID descending
@@ -24,17 +25,12 @@ const sortedUpdates = allUpdates.sort((a, b) => {
 ---
 
 <BaseLayout title="Pharos Pulse | Authoritative Log" description="Follow our sprint notes for weekly progress, community advisories and updates, and for strategic milestones defining our roadmap.">
+  <PageHeader title="Pharos Pulse" description="News and Engineering Updates" />
   <div class="relative overflow-hidden bg-bg-base transition-colors duration-300 pb-32">
     <!-- Subtle Background Elements -->
     <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-ph-pulse/5 blur-[120px] rounded-full pointer-events-none"></div>
     
-    <main class="relative z-10 max-w-5xl mx-auto px-6 pt-24">
-      <header class="mb-20 text-center">
-        <h1 class="text-5xl md:text-6xl font-black text-text-base mb-6 tracking-tighter">PHAROS PULSE</h1>
-        <p class="text-text-muted font-mono text-sm max-w-2xl mx-auto leading-relaxed">
-          Follow our sprint notes for weekly progress, community advisories and updates, and for strategic milestones defining our roadmap. We document our journey to ensure every commitment is verified and standards are met.
-        </p>
-      </header>
+    <main class="relative z-10 max-w-5xl mx-auto px-6 pt-10">
 
       <!-- RFC-2378 Command Bar -->
       <div class="mb-16 sticky top-24 z-40">
