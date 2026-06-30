@@ -6,7 +6,7 @@
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Central tracking for Phase-specific tasks and issues (Present & Future).
  * Traceability: Issue #207
- * Last Updated: 2026-06-22
+ * Last Updated: 2026-06-29
  * ======================================================================== -->
 
 <!-- 
@@ -23,6 +23,9 @@
 
 ### Sprint 5.05: Milestone 5 - Performance & Launch (2026-07-06) - 🚀 ACTIVE
 - [ ] **Issue #239**: [TAG: UX] Refactor Marketing Site IA for Command-First Identity. [DESC: Implement high-fidelity Terminal Hero and capability-based documentation flow. Requires 50% Mid-Sprint Rigor Gate review.] [ECT: 5]
+- [ ] **Issue #313**: [TAG: IA] Refactor Navigation Layout and Naming Taxonomy. [DESC: Reorganize header page links to standard terminology (Guide, Reference, Blog, About) using a config-driven array layout.] [ECT: 2]
+- [ ] **Issue #312**: [TAG: UX] Resolve Mobile Navigation Horizontal Overflow. [DESC: Investigate and implement responsive header navigation layout to prevent horizontal overflow in portrait mobile orientations using VoidZero hamburger drawer pattern.] [ECT: 2]
+- [ ] **Issue #311**: [TAG: UX] Implement Dynamic Login and Settings Navigation Link. [DESC: Develop client-side <pharos-nav-auth> Custom Element and SessionManager utility to swap between Login and Settings dynamically without layout shift.] [ECT: 2]
 - [ ] **Issue #185**: [TAG: Perf] Zero-Allocation JSON Parsing. [DESC: Implementing source-generated JSON parsers to eliminate allocation overhead in WASM.] [ECT: 3]
 - [ ] **Issue #42**: [TAG: Security] SRI & SEO Audit. [DESC: Remediating SRI hashes and optimizing SEO for the Marketing site.] [ECT: 2]
 - [ ] **Issue #84**: [TAG: Infra] Dual-Stream Release Pipeline. [DESC: Configuring separate channels for stable and nightly releases.] [ECT: 2]

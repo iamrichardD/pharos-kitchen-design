@@ -1,0 +1,215 @@
+---
+/* ========================================================================
+ * Project: Pharos Kitchen Design (Project Prism)
+ * Component: Marketing Site / Pages / Download
+ * License: FSL-1.1 (See LICENSE file for details)
+ * File: download.astro
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * Purpose: High-fidelity CLI installation landing page.
+ * Traceability: Issue #76, Issue #81, ADR-0006
+ * Last Updated: 2026-06-29
+ * ======================================================================== */
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import BlueprintCard from '../components/BlueprintCard.astro';
+import PlatformTabs from '../components/PlatformTabs.astro';
+---
+
+<BaseLayout title="Download | Pharos Kitchen Design" description="Download the Pharos CLI and Revit plugin installers for Windows, macOS, and Linux.">
+  <div class="container mx-auto px-4 py-12">
+    <div class="max-w-6xl mx-auto">
+      <header class="mb-12 border-b border-border-blueprint/30 pb-6">
+        <h1 class="text-4xl md:text-5xl mb-4">Download Pharos Tools</h1>
+        <p class="text-xl text-text-muted max-w-2xl font-mono uppercase tracking-tighter">
+          Install the reliable command center and Revit integration suite for the modern Independent Kitchen Designer.
+        </p>
+      </header>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+        <!-- Left Column: Revit Plugin Installation -->
+        <div class="space-y-6">
+          <h2 class="text-2xl font-condensed uppercase tracking-wide text-text-base border-b border-border-blueprint/40 pb-2">
+            Revit Plugin Installation
+          </h2>
+          <BlueprintCard>
+            <div class="space-y-6 text-sm">
+              <p class="text-text-muted leading-relaxed font-mono text-xs">
+                Install the Pharos integration plugin directly into Autodesk Revit 2025 to enable metadata placement and Ghost Tuning synchronization.
+              </p>
+
+              <div class="py-2">
+                <a 
+                  href="https://github.com/iamrichardD/pharos-kitchen-design/releases" 
+                  class="inline-block w-full text-center bg-ph-orange text-ph-charcoal font-bold py-3 px-4 hover:bg-white transition-colors uppercase tracking-widest text-sm font-mono border border-ph-orange"
+                >
+                  Download Plugin Package (ZIP)
+                </a>
+              </div>
+
+              <div class="space-y-4">
+                <h3 class="text-ph-blue font-mono uppercase tracking-wider text-xs">3-Step Installation Guide</h3>
+                <ol class="space-y-4 font-mono text-xs text-text-muted list-decimal list-inside pl-1">
+                  <li class="leading-relaxed">
+                    <span class="text-text-base">Extract</span> the downloaded ZIP package.
+                  </li>
+                  <li class="leading-relaxed">
+                    <span class="text-text-base">Copy</span> <code class="text-ph-orange bg-black/30 px-1 py-0.5 rounded">Pharos.addin</code> and all companion binaries to:
+                    <code class="block mt-2 p-2 bg-black/20 border border-ph-blue/20 text-ph-blue select-all overflow-x-auto">%APPDATA%\Autodesk\Revit\Addins\2025</code>
+                  </li>
+                  <li class="leading-relaxed">
+                    <span class="text-text-base">Restart</span> Autodesk Revit 2025 to load the plugin tools.
+                  </li>
+                </ol>
+              </div>
+            </div>
+          </BlueprintCard>
+        </div>
+
+        <!-- Right Column: CLI Command Center -->
+        <div class="space-y-6">
+          <h2 class="text-2xl font-condensed uppercase tracking-wide text-text-base border-b border-border-blueprint/40 pb-2">
+            CLI Command Center
+          </h2>
+          <PlatformTabs>
+            <div slot="linux">
+              <BlueprintCard title="Linux (x86_64 / AArch64)">
+                <div class="space-y-6 font-mono text-sm">
+                  <div class="flex justify-between items-start">
+                    <p class="text-text-muted italic border-l-2 border-ph-blue pl-4">Primary Development Target</p>
+                    <span class="px-2 py-0.5 text-[10px] font-bold tracking-widest bg-ph-blue/20 text-ph-blue border border-ph-blue/50 rounded">TECHNICAL PREVIEW</span>
+                  </div>
+                  
+                  <div>
+                    <h3 class="text-ph-orange mb-2">1. System Dependencies</h3>
+                    <p class="mb-2">PKD uses your computer's secure storage to keep your session safe. Ensure the following items are installed:</p>
+                    <div class="bg-black/20 p-4 border border-ph-blue/30">
+                      <code class="text-ph-blue"># Ubuntu / Debian</code><br/>
+                      <code>sudo apt-get install libsecret-1-dev gnome-keyring</code><br/><br/>
+                      <code class="text-ph-blue"># Fedora</code><br/>
+                      <code>sudo dnf install libsecret-devel</code>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 class="text-ph-orange mb-2">2. Installation</h3>
+                    <div class="bg-black/20 p-4 border border-ph-blue/30">
+                      <code class="text-ph-blue"># Download and install via shell script</code><br/>
+                      <code>curl -sSf https://iamrichardd.com/pharos-kitchen-design/install.sh | sh</code>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 class="text-ph-orange mb-2">3. Verification</h3>
+                    <div class="bg-black/20 p-4 border border-ph-blue/30">
+                      <code>pkd --version</code>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 class="text-ph-orange mb-2">4. Lifecycle & Exit</h3>
+                    <p class="mb-2">Run the installer again to trigger an <strong>Authoritative</strong> update check. To remove PKD:</p>
+                    <div class="bg-black/20 p-4 border border-ph-blue/30">
+                      <code># Uninstall and purge credentials</code><br/>
+                      <code>pkd-install --uninstall --purge</code>
+                    </div>
+                  </div>
+                </div>
+              </BlueprintCard>
+            </div>
+
+            <div slot="windows">
+              <BlueprintCard title="Windows (x64)">
+                <div class="space-y-6 font-mono text-sm">
+                  <div class="flex justify-between items-start">
+                    <p class="text-text-muted italic border-l-2 border-ph-blue pl-4">Native Credential Management</p>
+                    <span class="px-2 py-0.5 text-[10px] font-bold tracking-widest bg-ph-blue/20 text-ph-blue border border-ph-blue/50 rounded">TECHNICAL PREVIEW</span>
+                  </div>
+
+                  <div>
+                    <h3 class="text-ph-orange mb-2">Security Note</h3>
+                    <p class="mb-4">
+                      The `pkd` CLI integrates with **Windows Credential Manager** to store authentication tokens. No additional drivers are required.
+                    </p>
+                  </div>
+
+                  <div>
+                    <h3 class="text-ph-orange mb-2">1. Installation</h3>
+                    <p class="mb-2">Download the installer or use PowerShell:</p>
+                    <div class="bg-black/20 p-4 border border-ph-blue/30 overflow-x-auto">
+                      <code>irm https://iamrichardd.com/pharos-kitchen-design/install.ps1 | iex</code>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 class="text-ph-orange mb-2">2. Verification</h3>
+                    <div class="bg-black/20 p-4 border border-ph-blue/30">
+                      <code>pkd --version</code>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 class="text-ph-orange mb-2">3. Lifecycle & Exit</h3>
+                    <p class="mb-2">Re-run the PowerShell command for an <strong>Authoritative</strong> update. To remove:</p>
+                    <div class="bg-black/20 p-4 border border-ph-blue/30">
+                      <code># Uninstall via the install script</code><br/>
+                      <code>install.ps1 -Uninstall -Purge</code>
+                    </div>
+                  </div>
+                </div>
+              </BlueprintCard>
+            </div>
+
+            <div slot="macos">
+              <BlueprintCard title="macOS (Universal Binary)">
+                <div class="space-y-6 font-mono text-sm">
+                  <div class="flex justify-between items-start">
+                    <p class="text-text-muted italic border-l-2 border-ph-blue pl-4">Native Secure Enclave Path</p>
+                    <span class="px-2 py-0.5 text-[10px] font-bold tracking-widest bg-ph-blue/20 text-ph-blue border border-ph-blue/50 rounded">TECHNICAL PREVIEW</span>
+                  </div>
+
+                  <div>
+                    <h3 class="text-ph-orange mb-2">1. Installation</h3>
+                    <p class="mb-4">
+                      The universal installer handles architecture detection and security authorization automatically.
+                    </p>
+                    <div class="bg-black/20 p-4 border border-ph-blue/30">
+                      <code class="text-ph-blue"># Download and install via shell script</code><br/>
+                      <code>curl -sSf https://iamrichardd.com/pharos-kitchen-design/install.sh | sh</code>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 class="text-ph-orange mb-2">2. Security Audit</h3>
+                    <p class="mb-2">As an independent FSL-1.1 project, the script proactively clears the quarantine flag for the <strong>Authoritative</strong> binary.</p>
+                  </div>
+
+                  <div>
+                    <h3 class="text-ph-orange mb-2">3. Verification</h3>
+                    <div class="bg-black/20 p-4 border border-ph-blue/30">
+                      <code>pkd --version</code>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 class="text-ph-orange mb-2">4. Lifecycle & Exit</h3>
+                    <p class="mb-2">Run the installer again for updates. To remove:</p>
+                    <div class="bg-black/20 p-4 border border-ph-blue/30">
+                      <code># Uninstall and purge credentials</code><br/>
+                      <code>pkd-install --uninstall --purge</code>
+                    </div>
+                  </div>
+                </div>
+              </BlueprintCard>
+            </div>
+          </PlatformTabs>
+        </div>
+      </div>
+
+      <footer class="mt-12 pt-12 border-t border-border-blueprint/30">
+        <p class="text-xs text-text-muted uppercase tracking-widest font-mono">
+          Security: All binaries are signed. Verify checksums in the <a href="https://github.com/iamrichardD/pharos-kitchen-design/releases" class="text-ph-blue hover:text-ph-orange">GitHub Releases</a>.
+        </p>
+      </footer>
+    </div>
+  </div>
+</BaseLayout>

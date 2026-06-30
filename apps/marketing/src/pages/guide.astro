@@ -1,0 +1,122 @@
+---
+/**
+ * Project: Pharos Kitchen Design (Project Prism)
+ * Component: Documentation / User Guide
+ * File: guide.astro
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * License: FSL-1.1 (See LICENSE file for details)
+ * Purpose: Designer-centric guide covering Web UI, Revit integration, and CLI search syntax.
+ * Traceability: Issue #313
+ * Last Updated: 2026-06-29
+ */
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Search Guide | Pharos Kitchen Design" description="Learn how to search and filter commercial kitchen equipment metadata using the Pharos attribute-first syntax.">
+	<section class="py-16 container mx-auto px-4">
+		<div class="max-w-4xl mx-auto">
+			<h1 class="text-4xl md:text-5xl mb-8 font-bold text-ph-blue">Equipment Search Guide</h1>
+			
+			<p class="text-xl text-text-base/80 mb-12 leading-relaxed">
+				Don't hunt for equipment. Discover it. Pharos utilizes a professional, attribute-first search protocol that lets you find the exact equipment you need in milliseconds.
+			</p>
+
+			<div class="space-y-12">
+				<!-- Section 1: Explore & Specify Equipment -->
+				<div class="bg-bg-base/40 p-8 border border-border-blueprint/20">
+					<h2 class="text-2xl font-bold text-ph-blue mb-4">Explore & Specify Equipment</h2>
+					<p class="mb-4 text-text-base/70">
+						Discover food service equipment models using the interactive web interface. The search page provides intuitive visual filtering to isolate options by category, manufacturer, or connection requirements.
+					</p>
+					<p class="text-text-base/70">
+						Utilize the high-performance WebGL preview canvas to inspect 3D models before downloading. Interactively verify physical dimensions, clearance boundaries, and electrical parameters (voltage, phase, amperage) to ensure alignment with facility constraints.
+					</p>
+				</div>
+
+				<!-- Section 2: Insert Directly into Revit -->
+				<div class="bg-bg-base/40 p-8 border border-border-blueprint/20">
+					<h2 class="text-2xl font-bold text-ph-orange mb-4">Insert Directly into Revit</h2>
+					<p class="mb-4 text-text-base/70">
+						Integrate verified models directly into your projects without leaving your CAD environment. Pair your workstation securely via device WebAuthn pairing at <a href="/verify" class="text-ph-blue hover:underline">/verify</a> to establish local authority.
+					</p>
+					<p class="text-text-base/70">
+						Use the Revit Plugin sync button to fetch lightweight, metadata-rich Revit families, automatically placing them in your design workspace with full electrical and mechanical connector properties populated.
+					</p>
+				</div>
+
+				<!-- Section 3: Query Data via the CLI -->
+				<div class="bg-bg-base/40 p-8 border border-border-blueprint/20">
+					<h2 class="text-2xl font-bold text-ph-pulse mb-6">Query Data via the CLI</h2>
+					<p class="mb-8 text-text-base/70">
+						For power-users and automation pipelines, the Pharos CLI provides a direct, attribute-first syntax for querying the global equipment database.
+					</p>
+					
+					<div class="space-y-8 pl-0 md:pl-4">
+						<div>
+							<h3 class="text-lg font-semibold text-text-base mb-2">The Basic Query</h3>
+							<p class="mb-4 text-sm text-text-base/70">
+								Search for equipment by manufacturer or model name directly.
+							</p>
+							<div class="p-4 bg-black/40 font-mono text-sm text-ph-pulse border-l-4 border-ph-pulse">
+								$ pkd manufacturer=hobart
+							</div>
+						</div>
+
+						<div>
+							<h3 class="text-lg font-semibold text-text-base mb-2">Physical Properties</h3>
+							<p class="mb-4 text-sm text-text-base/70">
+								Narrow down results with voltage, phase, or physical dimensions to match utility configurations.
+							</p>
+							<div class="p-4 bg-black/40 font-mono text-sm text-ph-blue border-l-4 border-ph-blue">
+								$ pkd manufacturer=vulcan voltage=208 phase=3
+							</div>
+						</div>
+
+						<div>
+							<h3 class="text-lg font-semibold text-text-base mb-4">Wildcard Cheat Sheet</h3>
+							<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+								<div class="p-4 border border-border-blueprint/10 bg-bg-base/20">
+									<code class="text-ph-orange text-lg">* (Asterisk)</code>
+									<p class="text-xs text-text-muted mt-2 uppercase">Zero or more characters</p>
+									<p class="text-sm mt-1">"Hob*" finds "Hobart".</p>
+								</div>
+								<div class="p-4 border border-border-blueprint/10 bg-bg-base/20">
+									<code class="text-ph-orange text-lg">+ (Plus)</code>
+									<p class="text-xs text-text-muted mt-2 uppercase">One or more characters</p>
+									<p class="text-sm mt-1">"V+36" finds "V4B36" (matching "4B" between V and 36).</p>
+								</div>
+								<div class="p-4 border border-border-blueprint/10 bg-bg-base/20">
+									<code class="text-ph-orange text-lg">? (Question)</code>
+									<p class="text-xs text-text-muted mt-2 uppercase">Exactly one character</p>
+									<p class="text-sm mt-1">"LXe?" finds "LXeR" (matching "R").</p>
+								</div>
+								<div class="p-4 border border-border-blueprint/10 bg-bg-base/20">
+									<code class="text-ph-orange text-lg">[set] (Brackets)</code>
+									<p class="text-xs text-text-muted mt-2 uppercase">One character from a set</p>
+									<p class="text-sm mt-1">"V4B3[567]" finds "V4B36" (matching "6" within the set).</p>
+								</div>
+							</div>
+						</div>
+
+						<div>
+							<h3 class="text-lg font-semibold text-text-base mb-2">Return Clause</h3>
+							<p class="mb-4 text-sm text-text-base/70">
+								Specify exactly which attributes should be returned by the CLI command.
+							</p>
+							<div class="p-4 bg-black/40 font-mono text-sm text-ph-pulse border-l-4 border-ph-pulse">
+								$ pkd manufacturer=3m return name model voltage
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="pt-8 border-t border-border-blueprint/10">
+					<p class="text-sm text-text-muted font-mono uppercase">
+						Full Technical Specification: <a href="/pharos-kitchen-design/docs/search-specification.md" class="text-ph-blue hover:underline">search-specification.md</a>
+					</p>
+				</div>
+			</div>
+		</div>
+	</section>
+</BaseLayout>
