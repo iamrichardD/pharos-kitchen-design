@@ -15,8 +15,8 @@
         },
         "challengeToken": "token-login-existing",
         "pkd_metadata": {
-          "title": "Developer Portal",
-          "hook": "Accessing administrative configuration vault."
+          "title": "Logging in...",
+          "hook": "Stand by"
         }
       },
       "loginVerify": {
@@ -33,8 +33,8 @@
         },
         "challengeToken": "token-register-new",
         "pkd_metadata": {
-          "title": "New Account Creation",
-          "hook": "Provisioning secure identity keys."
+          "title": "Creating account...",
+          "hook": "Stand by"
         }
       },
       "registerVerify": {
