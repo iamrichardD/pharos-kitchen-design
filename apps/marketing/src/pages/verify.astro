@@ -79,7 +79,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
             id="submit-btn"
             class="w-full bg-ph-blue text-ph-charcoal font-bold py-4 hover:bg-white transition-colors uppercase tracking-widest text-sm"
           >
-            [ LOGIN ]
+            LOGIN
           </button>
         </form>
 
@@ -241,7 +241,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     } catch (err: any) {
         showStatus(err.message, true);
         submitBtn.disabled = false;
-        submitBtn.innerText = isRegisterMode ? "[ CONTINUE ]" : "[ LOGIN ]";
+        submitBtn.innerText = isRegisterMode ? "CONTINUE" : "LOGIN";
     }
   });
 
@@ -259,9 +259,9 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   const registerToggle = document.getElementById('register_toggle') as HTMLInputElement;
   registerToggle?.addEventListener('change', () => {
     if (registerToggle.checked) {
-      submitBtn.innerText = "[ CONTINUE ]";
+      submitBtn.innerText = "CONTINUE";
     } else {
-      submitBtn.innerText = "[ LOGIN ]";
+      submitBtn.innerText = "LOGIN";
     }
   });
 </script>
