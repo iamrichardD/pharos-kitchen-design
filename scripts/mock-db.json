@@ -1,0 +1,45 @@
+{
+  "pkd_prologue": {
+    "project": "Pharos Kitchen Design (Project Prism)",
+    "component": "DevSecOps / Mock Server DB",
+    "last_updated": "2026-06-30"
+  },
+  "database": {
+    "existing@iamrichardd.com": {
+      "loginOptions": {
+        "options": {
+          "challenge": "auth-challenge-existing-12345",
+          "rpId": "localhost",
+          "allowCredentials": [],
+          "userVerification": "preferred"
+        },
+        "challengeToken": "token-login-existing",
+        "pkd_metadata": {
+          "title": "Developer Portal",
+          "hook": "Accessing administrative configuration vault."
+        }
+      },
+      "loginVerify": {
+        "access_token": "pharos_access_token_existing_user_session"
+      }
+    },
+    "new@iamrichardd.com": {
+      "registerOptions": {
+        "options": {
+          "challenge": "reg-challenge-new-67890",
+          "rp": { "name": "Pharos Identity Bridge", "id": "localhost" },
+          "user": { "id": "new-user-id", "name": "new@iamrichardd.com", "displayName": "New User" },
+          "pubKeyCredParams": [{ "type": "public-key", "alg": -7 }]
+        },
+        "challengeToken": "token-register-new",
+        "pkd_metadata": {
+          "title": "New Account Creation",
+          "hook": "Provisioning secure identity keys."
+        }
+      },
+      "registerVerify": {
+        "access_token": "pharos_access_token_new_user_session"
+      }
+    }
+  }
+}

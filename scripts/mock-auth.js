@@ -4,54 +4,36 @@
  * File: scripts/mock-auth.js
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
- * Purpose: Mock WebAuthn Authentication Server on port 8787.
+ * Purpose: Mock WebAuthn Authentication Server with dynamic routing map.
  * Traceability: Issue #311
  * Last Updated: 2026-06-30
  * ======================================================================== */
 
 const http = require('http');
+const fs = require('fs');
+const path = require('path');
 
-const PORT = 8787;
+const PORT = process.env.PORT || 8787;
 
-const MOCK_DB = {
-  'existing@iamrichardd.com': {
-    loginOptions: {
-      options: {
-        challenge: 'auth-challenge-existing-12345',
-        rpId: 'localhost',
-        allowCredentials: [],
-        userVerification: 'preferred'
-      },
-      challengeToken: 'token-login-existing',
-      pkd_metadata: {
-        title: 'Developer Portal',
-        hook: 'Accessing administrative configuration vault.'
-      }
-    },
-    loginVerify: {
-      access_token: 'pharos_access_token_existing_user_session'
-    }
-  },
-  'new@iamrichardd.com': {
-    registerOptions: {
-      options: {
-        challenge: 'reg-challenge-new-67890',
-        rp: { name: 'Pharos Identity Bridge', id: 'localhost' },
-        user: { id: 'new-user-id', name: 'new@iamrichardd.com', displayName: 'New User' },
-        pubKeyCredParams: [{ type: 'public-key', alg: -7 }]
-      },
-      challengeToken: 'token-register-new',
-      pkd_metadata: {
-        title: 'New Account Creation',
-        hook: 'Provisioning secure identity keys.'
-      }
-    },
-    registerVerify: {
-      access_token: 'pharos_access_token_new_user_session'
-    }
-  }
+// Load Mock DB
+const dbPath = path.join(__dirname, 'mock-db.json');
+const MOCK_DB = JSON.parse(fs.readFileSync(dbPath, 'utf8')).database;
+
+const ROUTES = {
+  LOGIN_OPTIONS: '/auth/login/options',
+  REGISTER_OPTIONS: '/auth/register/options',
+  LOGIN_VERIFY: '/auth/login/verify',
+  REGISTER_VERIFY: '/auth/register/verify',
 };
 
+const STATUS_CODES = {
+  OK: 200,
+  BAD_REQUEST: 400,
+  NOT_FOUND: 404,
+  INTERNAL_ERROR: 500,
+};
+
+// CORS configuration helper
 const handleCors = (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -83,54 +65,93 @@ const sendJson = (res, statusCode, payload) => {
   res.end(JSON.stringify(payload));
 };
 
+// Helper: Find user in DB by username or challenge token
+const findUserByUsername = (username) => MOCK_DB[username] || null;
+
+const findUserByChallengeToken = (token) => {
+  for (const username in MOCK_DB) {
+    const user = MOCK_DB[username];
+    if (user.loginOptions && user.loginOptions.challengeToken === token) {
+      return { username, user, type: 'login' };
+    }
+    if (user.registerOptions && user.registerOptions.challengeToken === token) {
+      return { username, user, type: 'register' };
+    }
+  }
+  return null;
+};
+
+// ROUTING HANDLERS
+const handleLoginOptions = async (req, res, body) => {
+  const user = findUserByUsername(body.username);
+  if (user && user.loginOptions) {
+    sendJson(res, STATUS_CODES.OK, user.loginOptions);
+  } else {
+    sendJson(res, STATUS_CODES.NOT_FOUND, { error: 'user_not_found' });
+  }
+};
+
+const handleRegisterOptions = async (req, res, body) => {
+  const user = findUserByUsername(body.username);
+  if (user && user.registerOptions) {
+    sendJson(res, STATUS_CODES.OK, user.registerOptions);
+  } else {
+    sendJson(res, STATUS_CODES.BAD_REQUEST, { error: 'invalid_username_for_registration' });
+  }
+};
+
+const handleLoginVerify = async (req, res, body) => {
+  const token = body.challengeToken;
+  const match = findUserByChallengeToken(token);
+  if (match && match.type === 'login' && match.user.loginVerify) {
+    sendJson(res, STATUS_CODES.OK, match.user.loginVerify);
+  } else {
+    sendJson(res, STATUS_CODES.BAD_REQUEST, { error: 'invalid_challenge_or_credentials' });
+  }
+};
+
+const handleRegisterVerify = async (req, res, body) => {
+  const token = body.challengeToken;
+  const match = findUserByChallengeToken(token);
+  if (match && match.type === 'register' && match.user.registerVerify) {
+    sendJson(res, STATUS_CODES.OK, match.user.registerVerify);
+  } else {
+    sendJson(res, STATUS_CODES.BAD_REQUEST, { error: 'invalid_challenge_or_credentials' });
+  }
+};
+
+// ROUTING DICTIONARY
+const ROUTING_MAP = {
+  [`POST:${ROUTES.LOGIN_OPTIONS}`]: handleLoginOptions,
+  [`POST:${ROUTES.REGISTER_OPTIONS}`]: handleRegisterOptions,
+  [`POST:${ROUTES.LOGIN_VERIFY}`]: handleLoginVerify,
+  [`POST:${ROUTES.REGISTER_VERIFY}`]: handleRegisterVerify,
+};
+
 const server = http.createServer(async (req, res) => {
   if (handleCors(req, res)) return;
 
   const url = new URL(req.url, `http://${req.headers.host}`);
   const path = url.pathname;
+  const routeKey = `${req.method}:${path}`;
 
   try {
-    if (req.method === 'POST') {
+    const handler = ROUTING_MAP[routeKey];
+    if (handler) {
       const body = await readJsonBody(req);
-      const username = body.username || '';
-
-      if (path === '/auth/login/options') {
-        const user = MOCK_DB[username];
-        if (user && user.loginOptions) {
-          sendJson(res, 200, user.loginOptions);
-        } else {
-          sendJson(res, 404, { error: 'user_not_found' });
-        }
-        return;
-      }
-
-      if (path === '/auth/register/options') {
-        const user = MOCK_DB[username];
-        if (user && user.registerOptions) {
-          sendJson(res, 200, user.registerOptions);
-        } else {
-          sendJson(res, 400, { error: 'invalid_username_for_registration' });
-        }
-        return;
-      }
-
-      if (path === '/auth/login/verify') {
-        sendJson(res, 200, MOCK_DB['existing@iamrichardd.com'].loginVerify);
-        return;
-      }
-
-      if (path === '/auth/register/verify') {
-        sendJson(res, 200, MOCK_DB['new@iamrichardd.com'].registerVerify);
-        return;
-      }
+      await handler(req, res, body);
+    } else {
+      sendJson(res, STATUS_CODES.NOT_FOUND, { error: 'not_found' });
     }
-
-    sendJson(res, 404, { error: 'not_found' });
   } catch (err) {
-    sendJson(res, 500, { error: 'internal_server_error', details: err.message });
+    sendJson(res, STATUS_CODES.INTERNAL_ERROR, { error: 'internal_server_error', details: err.message });
   }
 });
 
-server.listen(PORT, () => {
-  console.log(`📡 Mock Auth Server running on http://localhost:${PORT}`);
-});
+if (require.main === module) {
+  server.listen(PORT, () => {
+    console.log(`📡 Mock Auth Server running on http://localhost:${PORT}`);
+  });
+}
+
+module.exports = server;
