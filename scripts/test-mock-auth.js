@@ -85,6 +85,11 @@ const runTests = async () => {
     assert(res5.statusCode === 200, 'New user verification returns 200');
     assert(res5.body.access_token === 'pharos_access_token_new_user_session', 'Access token is correctly mapped');
 
+    // Test 6: Registration conflict for existing user
+    const res6 = await postRequest('/auth/register/options', { username: 'existing@iamrichardd.com' });
+    assert(res6.statusCode === 409, 'Registration conflict returns 409');
+    assert(res6.body.error === 'user_already_exists', 'Error payload reports user_already_exists');
+
     console.log('\n🎉 ALL MOCK AUTH SIMULATOR TESTS PASSED.');
     server.close(() => {
       process.exit(0);

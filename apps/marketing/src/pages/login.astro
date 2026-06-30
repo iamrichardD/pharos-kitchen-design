@@ -118,30 +118,22 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       }
   };
 
-  form?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const formData = new FormData(form);
-    const username = formData.get('username') as string;
-    const isRegisterMode = (document.getElementById('register_toggle') as HTMLInputElement)?.checked;
-
+  const performAuth = async (username: string, isRegistration: boolean) => {
     submitBtn.disabled = true;
-    submitBtn.innerText = isRegisterMode ? "CONTINUING..." : "LOGGING IN...";
-    showStatus("Finding your account...");
+    submitBtn.innerText = isRegistration ? "CONTINUING..." : "LOGGING IN...";
+    showStatus(isRegistration ? "Creating your account..." : "Finding your account...");
 
     try {
         // 1. Fetch Auth Options
-        let isRegistration = isRegisterMode;
         let optionsRes;
 
         if (isRegistration) {
-            showStatus("Creating your account...");
             optionsRes = await fetch(`${AUTH_URL}/auth/register/options`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username })
             });
         } else {
-            showStatus("Finding your account...");
             optionsRes = await fetch(`${AUTH_URL}/auth/login/options`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -152,6 +144,19 @@ import BaseLayout from "../layouts/BaseLayout.astro";
         let resData = await optionsRes.json() as any;
 
         if (!optionsRes.ok) {
+            if (resData.error === 'user_already_exists' && isRegistration) {
+                showUXHook("Existing Account", "Email already registered. Transitioning to Login...");
+                const registerToggle = document.getElementById('register_toggle') as HTMLInputElement;
+                if (registerToggle) {
+                    registerToggle.checked = false;
+                }
+                submitBtn.innerText = "LOGGING IN...";
+                setTimeout(() => {
+                    performAuth(username, false);
+                }, 1500);
+                return;
+            }
+
             if (resData.error === 'user_not_found' && !isRegistration) {
                 throw new Error("Account not found. Please verify your handle or check 'Register new device/account' to sign up.");
             } else {
@@ -215,16 +220,39 @@ import BaseLayout from "../layouts/BaseLayout.astro";
         const errMsg = err.message || "";
         let friendlyMsg = "Something went wrong. Please try again.";
         
+        if (errMsg === 'user_already_exists') {
+            showUXHook("Existing Account", "Email already registered. Transitioning to Login...");
+            const registerToggle = document.getElementById('register_toggle') as HTMLInputElement;
+            if (registerToggle) {
+                registerToggle.checked = false;
+            }
+            submitBtn.innerText = "LOGGING IN...";
+            setTimeout(() => {
+                performAuth(username, false);
+            }, 1500);
+            return;
+        }
+
         if (/fetch/i.test(errMsg)) {
             friendlyMsg = "Could not connect to the network. Please check your connection.";
         } else if (/cancelled|aborted|abort|dismissed/i.test(errMsg)) {
             friendlyMsg = "Sign-in verification was cancelled.";
+        } else {
+            friendlyMsg = errMsg;
         }
         
         showStatus(friendlyMsg, true);
         submitBtn.disabled = false;
-        submitBtn.innerText = isRegisterMode ? "CONTINUE" : "LOGIN";
+        submitBtn.innerText = isRegistration ? "CONTINUE" : "LOGIN";
     }
+  };
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(form);
+    const username = formData.get('username') as string;
+    const isRegisterMode = (document.getElementById('register_toggle') as HTMLInputElement)?.checked;
+    await performAuth(username, isRegisterMode);
   });
 
   // Dynamic Button Text based on Register Checkbox state

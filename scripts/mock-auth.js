@@ -92,6 +92,10 @@ const handleLoginOptions = async (req, res, body) => {
 };
 
 const handleRegisterOptions = async (req, res, body) => {
+  if (body.username === 'existing@iamrichardd.com') {
+    sendJson(res, 409, { error: 'user_already_exists' });
+    return;
+  }
   const user = findUserByUsername(body.username);
   if (user && user.registerOptions) {
     sendJson(res, STATUS_CODES.OK, user.registerOptions);
