@@ -22,6 +22,9 @@
 ## 🎯 Current Milestone: Phase 5 - IKD Enablement (Ghost Links & Scale)
 **Status**: 🚀 ACTIVE (Sprint 5.05)
 
+### Sprint 5.05: Milestone 5 - Performance & Launch (2026-07-06) - 🚀 ACTIVE
+- [x] **Issue #313**: [TAG: IA] Refactor Navigation Layout and Naming Taxonomy. [DESC: Reorganized header page links to standard terminology (Guide, Reference, Blog, About) using a config-driven array layout. Verified 🟢 PHAROS GREEN.] [ECT: 2] [ACT: 2]
+
 ### Sprint 5.04: Milestone 5 - Completion & Infrastructure (2026-06-22) - ✅ COMPLETED
 - [x] **Issue #275**: [TAG: Infrastructure] Configure Production-Only CORS Rules for Cloudflare R2 Registry Storage. [DESC: Enforced production-only origins and restricted allowed headers to Content-Type and Range to minimize attack surface. Verified 🟢 PHAROS GREEN.] [ECT: 2] [ACT: 2]
 - [x] **Issue #274**: [TAG: Debt] Integrate cargo-machete into pulse.sh. [DESC: Pinned and installed cargo-machete v0.7.0 binary inside Podman build, automated unused dependency checks in pulse, and pruned 8 unused dependencies from workspace. Verified 🟢 PHAROS GREEN.] [ECT: 1] [ACT: 1]

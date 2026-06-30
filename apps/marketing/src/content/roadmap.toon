@@ -3,14 +3,15 @@
  * Component: Marketing / Content
  * File: roadmap.toon
  * Purpose: Automated reflection of authoritative internal logs.
- * Last Synced: 2026-06-30T04:46:38.430Z
+ * Last Synced: 2026-06-30T14:00:05.503Z
  * ======================================================================== */
 
 title: Pharos System Roadmap
 type: roadmap
-lastSynced: 2026-06-30T04:46:38.430Z
+lastSynced: 2026-06-30T14:00:05.503Z
 
 items[72]{id, name, status, phase, tag, description}:
+  "313", "Refactor Navigation Layout and Naming Taxonomy", "Deployed", "Sprint 5.05", "CORE", "Reorganized header page links to standard terminology (Guide, Reference, Blog, About) using a config-driven array layout. Verified 🟢 PHAROS GREEN."
   "275", "Configure Production-Only CORS Rules for Cloudflare R2 Registry Storage", "Deployed", "Sprint 5.04", "CORE", "Enforced production-only origins and restricted allowed headers to Content-Type and Range to minimize attack surface. Verified 🟢 PHAROS GREEN."
   "274", "Integrate cargo-machete into pulse.sh", "Deployed", "Sprint 5.04", "CORE", "Pinned and installed cargo-machete v0.7.0 binary inside Podman build, automated unused dependency checks in pulse, and pruned 8 unused dependencies from workspace. Verified 🟢 PHAROS GREEN."
   "276", "Add --registry-target Flags and Update Registry CLI Documentation", "Deployed", "Sprint 5.04", "CORE", "Added global --registry-target flag and environment variable to registry commands, relaxed output directory parameter to optional with fallback resolution, and added unit/integration tests. Verified 🟢 PHAROS GREEN."
@@ -57,7 +58,6 @@ items[72]{id, name, status, phase, tag, description}:
   "175", "Design System Alignment", "Deployed", "Sprint 4.11", "UX", "Aligned the Marketing TOON loader with the Pharos Design System typography."
   "168", "Automated Boundary Enforcement", "Deployed", "Sprint 4.11", "PROTOCOL", "Implemented ADR-0044 drift detection to ensure Rust/C# parity."
   "239", "Refactor Marketing Site IA for Command-First Identity", "In Progress", "Sprint 5.05", "CORE", "Implement high-fidelity Terminal Hero and capability-based documentation flow. Requires 50% Mid-Sprint Rigor Gate review."
-  "313", "Refactor Navigation Layout and Naming Taxonomy", "In Progress", "Sprint 5.05", "CORE", "Reorganize header page links to standard terminology (Guide, Reference, Blog, About) using a config-driven array layout."
   "312", "Resolve Mobile Navigation Horizontal Overflow", "In Progress", "Sprint 5.05", "CORE", "Investigate and implement responsive header navigation layout to prevent horizontal overflow in portrait mobile orientations using VoidZero hamburger drawer pattern."
   "311", "Implement Dynamic Login and Settings Navigation Link", "In Progress", "Sprint 5.05", "CORE", "Develop client-side <pharos-nav-auth> Custom Element and SessionManager utility to swap between Login and Settings dynamically without layout shift."
   "185", "Zero-Allocation JSON Parsing", "In Progress", "Sprint 5.05", "CORE", "Implementing source-generated JSON parsers to eliminate allocation overhead in WASM."
