@@ -40,16 +40,15 @@ import BaseLayout from "../layouts/BaseLayout.astro";
         <form id="verify-form" class="space-y-6">
           <div class="space-y-2 text-left">
             <label for="user_code" class="block text-[10px] font-mono text-ph-blue uppercase tracking-widest">
-              [USER_CODE]
+              [USER_CODE] (Optional for web-only login)
             </label>
             <input 
               type="text" 
               id="user_code" 
               name="user_code" 
-              placeholder="ABCD-1234"
+              placeholder="ABCD-1234 (Optional)"
               class="w-full bg-bg-base/60 border border-border-blueprint/40 px-4 py-4 text-center text-3xl font-mono text-ph-orange placeholder:text-text-muted focus:outline-none focus:border-ph-orange transition-colors"
               maxlength="9"
-              required
             />
           </div>
 
@@ -213,25 +212,35 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
         const { access_token } = await verifyRes.json() as any;
 
-        showStatus("Linking Edge Bridge...");
-        
-        // 4. Call the Auth Bridge (Worker) to approve the device code
-        const confirmRes = await fetch(`${AUTH_URL}/auth/confirm`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                user_code: user_code.replace('-', '').toUpperCase(),
-                access_token
-            })
-        });
+        const trimmedCode = user_code ? user_code.trim() : "";
+        if (trimmedCode) {
+            showStatus("Linking Edge Bridge...");
+            
+            // 4. Call the Auth Bridge (Worker) to approve the device code
+            const confirmRes = await fetch(`${AUTH_URL}/auth/confirm`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user_code: trimmedCode.replace('-', '').toUpperCase(),
+                    access_token
+                })
+            });
 
-        if (!confirmRes.ok) {
-            const err = await confirmRes.json() as any;
-            throw new Error(err.error || "Bridge handshake failed");
+            if (!confirmRes.ok) {
+                const err = await confirmRes.json() as any;
+                throw new Error(err.error || "Bridge handshake failed");
+            }
         }
 
         if (access_token) {
             SessionManager.setSession(access_token);
+        }
+
+        if (!trimmedCode) {
+            const successText = successContainer?.querySelector('p');
+            const successTitle = successContainer?.querySelector('h2');
+            if (successTitle) successTitle.textContent = "Authenticated";
+            if (successText) successText.textContent = "You are now logged in. Your session is active.";
         }
 
         form.classList.add('hidden');
