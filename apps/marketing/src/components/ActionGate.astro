@@ -38,7 +38,7 @@ const { organizationId } = Astro.props;
         if (!session) {
           e.preventDefault();
           const orgId = gate.getAttribute('data-org');
-          window.location.href = `/verify?org=${orgId || 'global'}&reason=fulfillment`;
+          window.location.href = `/login?org=${orgId || 'global'}&reason=fulfillment`;
         }
       }
     });

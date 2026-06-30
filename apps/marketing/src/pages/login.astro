@@ -1,11 +1,11 @@
 ---
 /* ========================================================================
  * Project: Pharos Kitchen Design (Project Prism)
- * Component: Marketing / Verify
+ * Component: Marketing / Login
  * License: FSL-1.1 (See LICENSE file for details)
- * File: src/pages/verify.astro
+ * File: src/pages/login.astro
  * Author: Richard D. (https://github.com/iamrichardd)
- * Purpose: Secure Passkey Authentication Sign-In Page.
+ * Purpose: Secure Passkey Authentication Login Page.
  * Traceability: ADR 0018, ADR 0021, Issue #7, Issue #206, Issue #311
  * Last Updated: 2026-06-30
  * ======================================================================== */
@@ -13,7 +13,7 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 ---
 
-<BaseLayout title="Sign In | Pharos Kitchen Design Identity Bridge">
+<BaseLayout title="Login | Pharos Kitchen Design Identity Bridge">
   <main class="max-w-4xl mx-auto px-6 py-20 min-h-screen flex flex-col items-center justify-center blueprint-grid transition-colors duration-300">
     <div class="w-full max-w-md bg-bg-base/40 border border-border-blueprint/20 p-10 relative overflow-hidden blueprint-border">
       
@@ -22,7 +22,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
       <div class="relative z-10 text-center">
         <h1 class="text-4xl font-bold mb-4 font-mono tracking-tighter italic uppercase text-text-base">
-          Sign In
+          Login
         </h1>
         <p class="text-text-muted mb-6 text-sm leading-relaxed font-mono">
           Authenticate using your passkey to sign in to your designer account.

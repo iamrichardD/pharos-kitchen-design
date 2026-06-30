@@ -54,9 +54,9 @@ export class PharosNavAuth extends HTMLElement {
       }
     } else {
       this.anchor.textContent = 'Login';
-      this.anchor.href = '/pharos-kitchen-design/verify';
+      this.anchor.href = '/pharos-kitchen-design/login';
       
-      const isActive = currentPath === '/pharos-kitchen-design/verify' || currentPath === '/pharos-kitchen-design/verify/';
+      const isActive = currentPath === '/pharos-kitchen-design/login' || currentPath === '/pharos-kitchen-design/login/';
       if (isActive) {
         this.anchor.className = this.getAttribute('active-class') || '';
       } else {
