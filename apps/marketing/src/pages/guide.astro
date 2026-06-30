@@ -2,12 +2,12 @@
 /**
  * Project: Pharos Kitchen Design (Project Prism)
  * Component: Documentation / User Guide
- * License: FSL-1.1 (See LICENSE file for details)
  * File: guide.astro
  * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
- * Purpose: Designer-centric guide for the Pharos search syntax.
- * Traceability: Issue #99, Task 4.23
+ * Purpose: Designer-centric guide covering Web UI, Revit integration, and CLI search syntax.
+ * Traceability: Issue #313
+ * Last Updated: 2026-06-29
  */
 
 import BaseLayout from '../layouts/BaseLayout.astro';
@@ -23,63 +23,91 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 			</p>
 
 			<div class="space-y-12">
-				<!-- Basic Search -->
+				<!-- Section 1: Explore & Specify Equipment -->
 				<div class="bg-bg-base/40 p-8 border border-border-blueprint/20">
-					<h2 class="text-2xl mb-4 font-mono uppercase tracking-widest text-ph-orange italic">01 // The Basic Query</h2>
-					<p class="mb-6 text-text-base/70">
-						You can search for equipment by simply typing the manufacturer or model directly into the CLI.
+					<h2 class="text-2xl font-bold text-ph-blue mb-4">Explore & Specify Equipment</h2>
+					<p class="mb-4 text-text-base/70">
+						Discover food service equipment models using the interactive web interface. The search page provides intuitive visual filtering to isolate options by category, manufacturer, or connection requirements.
 					</p>
-					<div class="p-4 bg-black/40 font-mono text-sm text-ph-pulse border-l-4 border-ph-pulse">
-						$ pkd manufacturer=hobart
-					</div>
+					<p class="text-text-base/70">
+						Utilize the high-performance WebGL preview canvas to inspect 3D models before downloading. Interactively verify physical dimensions, clearance boundaries, and electrical parameters (voltage, phase, amperage) to ensure alignment with facility constraints.
+					</p>
 				</div>
 
-				<!-- Multi-Attribute -->
+				<!-- Section 2: Insert Directly into Revit -->
 				<div class="bg-bg-base/40 p-8 border border-border-blueprint/20">
-					<h2 class="text-2xl mb-4 font-mono uppercase tracking-widest text-ph-blue italic">02 // Physical Properties</h2>
-					<p class="mb-6 text-text-base/70">
-						Narrow your search by including electrical or physical requirements. Pharos ensures that your results match the site's infrastructure.
+					<h2 class="text-2xl font-bold text-ph-orange mb-4">Insert Directly into Revit</h2>
+					<p class="mb-4 text-text-base/70">
+						Integrate verified models directly into your projects without leaving your CAD environment. Pair your workstation securely via device WebAuthn pairing at <a href="/verify" class="text-ph-blue hover:underline">/verify</a> to establish local authority.
 					</p>
-					<div class="p-4 bg-black/40 font-mono text-sm text-ph-blue border-l-4 border-ph-blue">
-						$ pkd manufacturer=vulcan voltage=208 phase=3
-					</div>
+					<p class="text-text-base/70">
+						Use the Revit Plugin sync button to fetch lightweight, metadata-rich Revit families, automatically placing them in your design workspace with full electrical and mechanical connector properties populated.
+					</p>
 				</div>
 
-				<!-- Wildcards Cheat Sheet -->
+				<!-- Section 3: Query Data via the CLI -->
 				<div class="bg-bg-base/40 p-8 border border-border-blueprint/20">
-					<h2 class="text-2xl mb-6 font-mono uppercase tracking-widest text-ph-orange italic">03 // Wildcard Cheat Sheet</h2>
-					<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-						<div class="p-4 border border-border-blueprint/10 bg-bg-base/20">
-							<code class="text-ph-orange text-lg">* (Asterisk)</code>
-							<p class="text-xs text-text-muted mt-2 uppercase">Zero or more characters</p>
-							<p class="text-sm mt-1">"ho*" finds Hobart and Honeywell.</p>
-						</div>
-						<div class="p-4 border border-border-blueprint/10 bg-bg-base/20">
-							<code class="text-ph-orange text-lg">+ (Plus)</code>
-							<p class="text-xs text-text-muted mt-2 uppercase">One or more characters</p>
-							<p class="text-sm mt-1">"3+m" finds 30m but not 3m.</p>
-						</div>
-						<div class="p-4 border border-border-blueprint/10 bg-bg-base/20">
-							<code class="text-ph-orange text-lg">? (Question)</code>
-							<p class="text-xs text-text-muted mt-2 uppercase">Exactly one character</p>
-							<p class="text-sm mt-1">"3?m" finds 30m and 3am.</p>
-						</div>
-						<div class="p-4 border border-border-blueprint/10 bg-bg-base/20">
-							<code class="text-ph-orange text-lg">[set] (Brackets)</code>
-							<p class="text-xs text-text-muted mt-2 uppercase">One character from a set</p>
-							<p class="text-sm mt-1">"t[ao]nk" finds tank and tonk.</p>
-						</div>
-					</div>
-				</div>
-
-				<!-- Return Filters -->
-				<div class="bg-bg-base/40 p-8 border border-border-blueprint/20">
-					<h2 class="text-2xl mb-4 font-mono uppercase tracking-widest text-ph-pulse italic">04 // Return Clause</h2>
-					<p class="mb-6 text-text-base/70">
-						Control what information is displayed. Use the <code class="text-ph-pulse">return</code> keyword to specify exactly which fields you want to see.
+					<h2 class="text-2xl font-bold text-ph-pulse mb-6">Query Data via the CLI</h2>
+					<p class="mb-8 text-text-base/70">
+						For power-users and automation pipelines, the Pharos CLI provides a direct, attribute-first syntax for querying the global equipment database.
 					</p>
-					<div class="p-4 bg-black/40 font-mono text-sm text-ph-pulse border-l-4 border-ph-pulse">
-						$ pkd manufacturer=3m return name model voltage
+					
+					<div class="space-y-8 pl-0 md:pl-4">
+						<div>
+							<h3 class="text-lg font-semibold text-text-base mb-2">The Basic Query</h3>
+							<p class="mb-4 text-sm text-text-base/70">
+								Search for equipment by manufacturer or model name directly.
+							</p>
+							<div class="p-4 bg-black/40 font-mono text-sm text-ph-pulse border-l-4 border-ph-pulse">
+								$ pkd manufacturer=hobart
+							</div>
+						</div>
+
+						<div>
+							<h3 class="text-lg font-semibold text-text-base mb-2">Physical Properties</h3>
+							<p class="mb-4 text-sm text-text-base/70">
+								Narrow down results with voltage, phase, or physical dimensions to match utility configurations.
+							</p>
+							<div class="p-4 bg-black/40 font-mono text-sm text-ph-blue border-l-4 border-ph-blue">
+								$ pkd manufacturer=vulcan voltage=208 phase=3
+							</div>
+						</div>
+
+						<div>
+							<h3 class="text-lg font-semibold text-text-base mb-4">Wildcard Cheat Sheet</h3>
+							<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+								<div class="p-4 border border-border-blueprint/10 bg-bg-base/20">
+									<code class="text-ph-orange text-lg">* (Asterisk)</code>
+									<p class="text-xs text-text-muted mt-2 uppercase">Zero or more characters</p>
+									<p class="text-sm mt-1">"ho*" finds Hobart and Honeywell.</p>
+								</div>
+								<div class="p-4 border border-border-blueprint/10 bg-bg-base/20">
+									<code class="text-ph-orange text-lg">+ (Plus)</code>
+									<p class="text-xs text-text-muted mt-2 uppercase">One or more characters</p>
+									<p class="text-sm mt-1">"3+m" finds 30m but not 3m.</p>
+								</div>
+								<div class="p-4 border border-border-blueprint/10 bg-bg-base/20">
+									<code class="text-ph-orange text-lg">? (Question)</code>
+									<p class="text-xs text-text-muted mt-2 uppercase">Exactly one character</p>
+									<p class="text-sm mt-1">"3?m" finds 30m and 3am.</p>
+								</div>
+								<div class="p-4 border border-border-blueprint/10 bg-bg-base/20">
+									<code class="text-ph-orange text-lg">[set] (Brackets)</code>
+									<p class="text-xs text-text-muted mt-2 uppercase">One character from a set</p>
+									<p class="text-sm mt-1">"t[ao]nk" finds tank and tonk.</p>
+								</div>
+							</div>
+						</div>
+
+						<div>
+							<h3 class="text-lg font-semibold text-text-base mb-2">Return Clause</h3>
+							<p class="mb-4 text-sm text-text-base/70">
+								Specify exactly which attributes should be returned by the CLI command.
+							</p>
+							<div class="p-4 bg-black/40 font-mono text-sm text-ph-pulse border-l-4 border-ph-pulse">
+								$ pkd manufacturer=3m return name model voltage
+							</div>
+						</div>
 					</div>
 				</div>
 
