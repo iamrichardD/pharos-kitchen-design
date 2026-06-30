@@ -79,7 +79,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
             id="submit-btn"
             class="w-full bg-ph-blue text-ph-charcoal font-bold py-4 hover:bg-white transition-colors uppercase tracking-widest text-sm"
           >
-            Initiate Secure Handshake
+            [ LOGIN ]
           </button>
         </form>
 
@@ -139,7 +139,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     const isRegisterMode = (document.getElementById('register_toggle') as HTMLInputElement)?.checked;
 
     submitBtn.disabled = true;
-    submitBtn.innerText = isRegisterMode ? "REGISTERING..." : "AUTHORIZING...";
+    submitBtn.innerText = isRegisterMode ? "CONTINUING..." : "LOGGING IN...";
     showStatus("Locating identity shards...");
 
     try {
@@ -241,7 +241,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     } catch (err: any) {
         showStatus(err.message, true);
         submitBtn.disabled = false;
-        submitBtn.innerText = "Initiate Secure Handshake";
+        submitBtn.innerText = isRegisterMode ? "[ CONTINUE ]" : "[ LOGIN ]";
     }
   });
 
@@ -253,5 +253,15 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       value = value.slice(0, 4) + '-' + value.slice(4, 8);
     }
     input.value = value;
+  });
+
+  // Dynamic Button Text based on Register Checkbox state
+  const registerToggle = document.getElementById('register_toggle') as HTMLInputElement;
+  registerToggle?.addEventListener('change', () => {
+    if (registerToggle.checked) {
+      submitBtn.innerText = "[ CONTINUE ]";
+    } else {
+      submitBtn.innerText = "[ LOGIN ]";
+    }
   });
 </script>
