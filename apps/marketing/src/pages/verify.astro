@@ -5,14 +5,15 @@
  * License: FSL-1.1 (See LICENSE file for details)
  * File: src/pages/verify.astro
  * Author: Richard D. (https://github.com/iamrichardd)
- * Purpose: Device Authorization Handshake (RFC 8628) Verification Page with Passkeys.
- * Traceability: ADR 0018, ADR 0021, Issue #7, Issue #206
+ * Purpose: Secure Passkey Authentication Sign-In Page.
+ * Traceability: ADR 0018, ADR 0021, Issue #7, Issue #206, Issue #311
+ * Last Updated: 2026-06-30
  * ======================================================================== */
 
 import BaseLayout from "../layouts/BaseLayout.astro";
 ---
 
-<BaseLayout title="Device Verification | Pharos Kitchen Design Identity Bridge">
+<BaseLayout title="Sign In | Pharos Kitchen Design Identity Bridge">
   <main class="max-w-4xl mx-auto px-6 py-20 min-h-screen flex flex-col items-center justify-center blueprint-grid transition-colors duration-300">
     <div class="w-full max-w-md bg-bg-base/40 border border-border-blueprint/20 p-10 relative overflow-hidden blueprint-border">
       
@@ -21,14 +22,10 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
       <div class="relative z-10 text-center">
         <h1 class="text-4xl font-bold mb-4 font-mono tracking-tighter italic uppercase text-text-base">
-          VERIFY_DEVICE
+          SIGN_IN
         </h1>
         <p class="text-text-muted mb-6 text-sm leading-relaxed font-mono">
-          Enter the code displayed on your device and authenticate to link your identity.
-        </p>
-
-        <p id="hardware-hint" class="hidden mb-6 text-xs text-ph-blue font-mono bg-ph-blue/5 p-4 border-l-2 border-ph-blue text-left leading-relaxed">
-          Looking for a security key. If you don't have one plugged in, you can scan the QR code with your phone's camera to sign in.
+          Authenticate using your passkey to sign in to your designer account.
         </p>
 
         <!-- Kathy Sierra UX Hook: Empowering Context -->
@@ -38,20 +35,6 @@ import BaseLayout from "../layouts/BaseLayout.astro";
         </div>
 
         <form id="verify-form" class="space-y-6">
-          <div class="space-y-2 text-left">
-            <label for="user_code" class="block text-[10px] font-mono text-ph-blue uppercase tracking-widest">
-              [USER_CODE] (Optional for web-only login)
-            </label>
-            <input 
-              type="text" 
-              id="user_code" 
-              name="user_code" 
-              placeholder="ABCD-1234 (Optional)"
-              class="w-full bg-bg-base/60 border border-border-blueprint/40 px-4 py-4 text-center text-3xl font-mono text-ph-orange placeholder:text-text-muted focus:outline-none focus:border-ph-orange transition-colors"
-              maxlength="9"
-            />
-          </div>
-
           <div class="space-y-2 text-left">
             <label for="username" class="block text-[10px] font-mono text-ph-blue uppercase tracking-widest">[AUTHORITY_HANDLE]</label>
             <input type="text" id="username" name="username" placeholder="designer@studio.com" required class="w-full bg-bg-base/60 border border-border-blueprint/20 px-3 py-2 font-mono text-text-base text-sm focus:outline-none focus:border-ph-orange" />
@@ -84,9 +67,9 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
         <div id="success-container" class="hidden space-y-6">
             <div class="text-ph-pulse text-6xl mb-4">✓</div>
-            <h2 class="text-2xl font-bold text-text-base uppercase tracking-tighter">Device Authorized</h2>
+            <h2 class="text-2xl font-bold text-text-base uppercase tracking-tighter">Authenticated</h2>
             <p class="text-text-muted text-sm leading-relaxed font-mono">
-              The cryptographic hardware handshake is complete. You can now return to your Revit workstation.
+              Identity verification complete. Unlocking matrix gateway...
             </p>
             <a href="/pharos-kitchen-design/roadmap" class="inline-block mt-8 text-ph-blue hover:text-white transition-colors font-mono text-xs uppercase tracking-widest">
                 Return to Matrix >>
@@ -130,10 +113,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const hardwareHint = document.getElementById('hardware-hint');
-    if (hardwareHint) hardwareHint.classList.remove('hidden');
     const formData = new FormData(form);
-    const user_code = formData.get('user_code') as string;
     const username = formData.get('username') as string;
     const isRegisterMode = (document.getElementById('register_toggle') as HTMLInputElement)?.checked;
 
@@ -212,56 +192,24 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
         const { access_token } = await verifyRes.json() as any;
 
-        const trimmedCode = user_code ? user_code.trim() : "";
-        if (trimmedCode) {
-            showStatus("Linking Edge Bridge...");
-            
-            // 4. Call the Auth Bridge (Worker) to approve the device code
-            const confirmRes = await fetch(`${AUTH_URL}/auth/confirm`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    user_code: trimmedCode.replace('-', '').toUpperCase(),
-                    access_token
-                })
-            });
-
-            if (!confirmRes.ok) {
-                const err = await confirmRes.json() as any;
-                throw new Error(err.error || "Bridge handshake failed");
-            }
-        }
-
         if (access_token) {
             SessionManager.setSession(access_token);
-        }
-
-        if (!trimmedCode) {
-            const successText = successContainer?.querySelector('p');
-            const successTitle = successContainer?.querySelector('h2');
-            if (successTitle) successTitle.textContent = "Authenticated";
-            if (successText) successText.textContent = "You are now logged in. Your session is active.";
         }
 
         form.classList.add('hidden');
         uxHookContainer?.classList.add('hidden');
         successContainer?.classList.remove('hidden');
 
+        // Immediately redirect user straight to /roadmap
+        setTimeout(() => {
+            window.location.href = '/pharos-kitchen-design/roadmap';
+        }, 800);
+
     } catch (err: any) {
         showStatus(err.message, true);
         submitBtn.disabled = false;
         submitBtn.innerText = isRegisterMode ? "CONTINUE" : "LOGIN";
     }
-  });
-
-  // Auto-format user_code (ABCD-1234)
-  const input = document.getElementById('user_code') as HTMLInputElement;
-  input?.addEventListener('input', () => {
-    let value = input.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-    if (value.length > 4) {
-      value = value.slice(0, 4) + '-' + value.slice(4, 8);
-    }
-    input.value = value;
   });
 
   // Dynamic Button Text based on Register Checkbox state
