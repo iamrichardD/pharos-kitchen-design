@@ -217,6 +217,9 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
         if (access_token) {
             SessionManager.setSession(access_token);
+            if (isRegistration) {
+                localStorage.setItem('created_at', new Date().toISOString());
+            }
         }
 
         form.classList.add('hidden');

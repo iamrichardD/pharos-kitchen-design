@@ -51,6 +51,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           <div class="space-y-1 text-left">
             <label for="email" class="block text-[10px] font-mono text-ph-blue/50 uppercase tracking-widest">Email Address</label>
             <input type="text" id="email" name="email" readonly disabled class="w-full bg-bg-base/20 border border-border-blueprint/10 px-3 py-2 font-mono text-text-muted text-sm cursor-not-allowed select-none" />
+            <div id="trial-info" class="text-[11px] font-mono text-text-muted mt-2 border-l border-ph-blue/30 pl-3 py-0.5">
+              <!-- Dynamic Trial Info -->
+            </div>
           </div>
 
           <button 
@@ -113,14 +116,36 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
   // Deduce email on mount
   const token = SessionManager.getToken(); // Retrieves active session token string
+  const trialInfoElement = document.getElementById('trial-info');
+  let userEmail = 'designer@example.com';
   if (token) {
     if (token.includes('new')) {
-      emailInput.value = 'new@iamrichardd.com';
+      userEmail = 'new@iamrichardd.com';
     } else if (token.includes('existing')) {
-      emailInput.value = 'existing@iamrichardd.com';
-    } else {
-      emailInput.value = 'designer@example.com';
+      userEmail = 'existing@iamrichardd.com';
     }
+    emailInput.value = userEmail;
+  }
+
+  // Calculate and display trial countdown
+  let createdAtStr = localStorage.getItem('created_at');
+  if (userEmail === 'existing@iamrichardd.com' && !createdAtStr) {
+    const twelveDaysAgo = new Date();
+    twelveDaysAgo.setDate(twelveDaysAgo.getDate() - 12);
+    createdAtStr = twelveDaysAgo.toISOString();
+    localStorage.setItem('created_at', createdAtStr);
+  } else if (!createdAtStr) {
+    createdAtStr = new Date().toISOString();
+  }
+
+  const createdAt = new Date(createdAtStr);
+  const now = new Date();
+  const elapsedDays = Math.floor((now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24));
+  const daysRemaining = Math.max(0, 30 - elapsedDays);
+  const formattedDate = createdAt.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+
+  if (trialInfoElement) {
+    trialInfoElement.innerText = `Trial Status: ${daysRemaining} days remaining (Started on ${formattedDate})`;
   }
 
   // Load previously saved values
