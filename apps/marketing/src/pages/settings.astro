@@ -112,7 +112,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   };
 
   // Deduce email on mount
-  const token = SessionManager.isAuthenticated(); // Retrieves active session token
+  const token = SessionManager.getToken(); // Retrieves active session token string
   if (token) {
     if (token.includes('new')) {
       emailInput.value = 'new@iamrichardd.com';
@@ -124,18 +124,18 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   }
 
   // Load previously saved values
-  if (firstNameInput) firstNameInput.value = localStorage.getItem('pkd_first_name') || '';
-  if (lastNameInput) lastNameInput.value = localStorage.getItem('pkd_last_name') || '';
-  if (titleInput) titleInput.value = localStorage.getItem('pkd_title') || '';
-  if (studioNameInput) studioNameInput.value = localStorage.getItem('pkd_studio') || '';
+  if (firstNameInput) firstNameInput.value = localStorage.getItem('first_name') || '';
+  if (lastNameInput) lastNameInput.value = localStorage.getItem('last_name') || '';
+  if (titleInput) titleInput.value = localStorage.getItem('title') || '';
+  if (studioNameInput) studioNameInput.value = localStorage.getItem('studio_name') || '';
 
   // Save profile click handler
   profileForm?.addEventListener('submit', (e) => {
     e.preventDefault();
-    localStorage.setItem('pkd_first_name', firstNameInput.value);
-    localStorage.setItem('pkd_last_name', lastNameInput.value);
-    localStorage.setItem('pkd_title', titleInput.value);
-    localStorage.setItem('pkd_studio', studioNameInput.value);
+    localStorage.setItem('first_name', firstNameInput.value);
+    localStorage.setItem('last_name', lastNameInput.value);
+    localStorage.setItem('title', titleInput.value);
+    localStorage.setItem('studio_name', studioNameInput.value);
     
     showStatus('Profile saved successfully.');
   });

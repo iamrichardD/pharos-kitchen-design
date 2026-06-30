@@ -26,6 +26,11 @@ export class SessionManager {
     return !!token;
   }
 
+  public static getToken(): string | null {
+    if (typeof window === 'undefined') return null;
+    return this.getCookie('pharos_session') || localStorage.getItem('pharos_session');
+  }
+
   public static setSession(token: string): void {
     if (typeof window === 'undefined') return;
     
