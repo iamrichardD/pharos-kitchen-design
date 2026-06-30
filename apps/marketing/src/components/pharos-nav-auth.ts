@@ -28,6 +28,11 @@ export class PharosNavAuth extends HTMLElement {
     window.removeEventListener('pharos:session-change', this.handleSessionChange);
   }
 
+  private handleLogout = (e: MouseEvent) => {
+    e.preventDefault();
+    SessionManager.clearSession();
+  };
+
   private handleSessionChange = (e: Event) => {
     const customEvent = e as CustomEvent<{ isAuthenticated: boolean }>;
     this.updateState(customEvent.detail.isAuthenticated);
@@ -42,9 +47,12 @@ export class PharosNavAuth extends HTMLElement {
     if (!this.anchor) return;
     const currentPath = window.location.pathname;
     
+    this.anchor.removeEventListener('click', this.handleLogout as any);
+
     if (isAuthed) {
-      this.anchor.textContent = 'Settings';
-      this.anchor.href = '/pharos-kitchen-design/settings';
+      this.anchor.textContent = 'Logout';
+      this.anchor.href = '#';
+      this.anchor.addEventListener('click', this.handleLogout as any);
       
       const isActive = currentPath === '/pharos-kitchen-design/settings' || currentPath === '/pharos-kitchen-design/settings/';
       if (isActive) {
