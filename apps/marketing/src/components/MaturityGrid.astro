@@ -7,6 +7,7 @@
  * Author: Richard D. (https://github.com/iamrichardd)
  * Purpose: Visualizes equipment category coverage and sync status.
  * Traceability: ADR 0015
+ * Last Updated: 2026-06-29
  */
 
 import FidelityBadge from './FidelityBadge.astro';
@@ -16,9 +17,14 @@ import { categories } from '../data/categories';
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 transition-colors duration-300">
 	{categories.map((cat) => (
 		<div class="blueprint-border p-4 bg-bg-base/40 transition-colors duration-300">
-			<div class="flex justify-between items-start mb-4">
-				<h4 class="text-sm text-text-muted font-mono uppercase">{cat.name}</h4>
+			<div class="flex justify-between items-start mb-2">
+				<h4 class="text-sm font-bold text-text-muted font-mono uppercase">{cat.name}</h4>
 				<FidelityBadge level={cat.fidelity} />
+			</div>
+			
+			<div class="mb-4">
+				<p class="text-[11px] text-text font-mono">{cat.models}</p>
+				<p class="text-[10px] text-text-muted/70 font-mono italic">{cat.category}</p>
 			</div>
 			
 			<div class="space-y-2">
