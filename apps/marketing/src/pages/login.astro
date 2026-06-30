@@ -52,7 +52,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
             </label>
           </div>
 
-          <div id="status-container" class="hidden text-xs font-mono py-2 px-4 border-l-2 border-ph-orange bg-ph-orange/10 text-ph-orange text-left mb-6">
+          <div id="status-container" class="hidden absolute bottom-6 left-6 right-6 z-50 text-xs font-mono p-3 border border-ph-orange/40 bg-bg-base/95 text-ph-orange text-left rounded shadow-lg">
             <!-- Dynamic Status -->
           </div>
 
@@ -95,12 +95,22 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   const uxHookTitle = document.getElementById('ux-hook-title');
   const uxHookText = document.getElementById('ux-hook-text');
 
+  let statusTimeout: number | undefined;
+
   const showStatus = (msg: string, isError = false) => {
     if (!statusContainer) return;
     statusContainer.innerText = `>> ${msg}`;
     statusContainer.classList.remove('hidden');
     statusContainer.style.borderColor = isError ? '#ef4444' : '#f97316';
     statusContainer.style.color = isError ? '#ef4444' : '#f97316';
+
+    if (statusTimeout) {
+      clearTimeout(statusTimeout);
+    }
+
+    statusTimeout = window.setTimeout(() => {
+      statusContainer.classList.add('hidden');
+    }, 5000);
   };
 
   const showUXHook = (title: string, text: string) => {
