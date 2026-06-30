@@ -63,13 +63,24 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
         <div id="success-container" class="hidden space-y-6">
             <div class="text-ph-pulse text-6xl mb-4">✓</div>
-            <h2 class="text-2xl font-bold text-text-base uppercase tracking-tighter">Authenticated</h2>
+            <h2 class="text-2xl font-bold text-text-base uppercase tracking-tighter">Connection Established</h2>
             <p class="text-text-muted text-sm leading-relaxed font-mono">
-              Identity verification complete. Unlocking matrix gateway...
+              Welcome to Pharos Kitchen Design. Your secure designer session is active.
             </p>
-            <a href="/pharos-kitchen-design/roadmap" class="inline-block mt-8 text-ph-blue hover:text-white transition-colors font-mono text-xs uppercase tracking-widest">
-                Return to Matrix >>
-            </a>
+            <div class="pt-4 space-y-4">
+              <a 
+                href="/pharos-kitchen-design/demo" 
+                class="inline-block w-full bg-ph-blue text-ph-charcoal font-bold py-4 hover:bg-white transition-colors uppercase tracking-widest text-sm text-center"
+              >
+                Open Workspace
+              </a>
+              <a 
+                href="/pharos-kitchen-design/roadmap" 
+                class="inline-block w-full text-center text-text-muted hover:text-white transition-colors font-mono text-xs uppercase tracking-widest pt-2"
+              >
+                View Product Roadmap
+              </a>
+            </div>
         </div>
       </div>
     </div>
@@ -210,11 +221,6 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
         form.classList.add('hidden');
         successContainer?.classList.remove('hidden');
-
-        // Immediately redirect user straight to /roadmap
-        setTimeout(() => {
-            window.location.href = '/pharos-kitchen-design/roadmap';
-        }, 800);
 
     } catch (err: any) {
         const errMsg = err.message || "";
