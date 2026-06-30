@@ -46,7 +46,7 @@ const { title, description = "Pharos Kitchen Design (PKD): Metadata-First Truth 
 					<div class="w-8 h-8 bg-ph-orange flex items-center justify-center font-condensed text-ph-charcoal text-xl">P</div>
 					<span class="font-condensed text-xl tracking-tight hidden sm:inline">PHAROS KITCHEN DESIGN</span>
 				</a>
-				<nav class="flex gap-6 font-condensed text-sm tracking-widest uppercase items-center">
+				<nav class="hidden md:flex gap-6 font-condensed text-sm tracking-widest uppercase items-center">
 					{navItems.map((item) => (
 						<a
 							href={item.path}
@@ -57,6 +57,31 @@ const { title, description = "Pharos Kitchen Design (PKD): Metadata-First Truth 
 					))}
 					<a href="/pharos-kitchen-design/verify" class="hover:text-ph-orange transition-colors">Sign In</a>
 				</nav>
+				<button 
+					id="menu-btn" 
+					class="md:hidden flex flex-col justify-center items-center w-8 h-8 gap-1.5 focus:outline-none" 
+					aria-expanded="false" 
+					aria-controls="mobile-menu" 
+					aria-label="Toggle Menu"
+				>
+					<span class="w-6 h-0.5 bg-text-base transition-transform duration-300"></span>
+					<span class="w-6 h-0.5 bg-text-base transition-transform duration-300"></span>
+					<span class="w-6 h-0.5 bg-text-base transition-transform duration-300"></span>
+				</button>
+			</div>
+			<div 
+				id="mobile-menu" 
+				class="hidden absolute top-[65px] left-0 w-full bg-bg-base/95 backdrop-blur-md border-b border-border-blueprint/50 flex-col p-6 gap-4 font-condensed text-sm tracking-widest uppercase md:hidden z-40"
+			>
+				{navItems.map((item) => (
+					<a
+						href={item.path}
+						class={item.class || "hover:text-ph-orange transition-colors"}
+					>
+						{item.label}
+					</a>
+				))}
+				<a href="/pharos-kitchen-design/verify" class="hover:text-ph-orange transition-colors pt-2 border-t border-border-blueprint/10">Sign In</a>
 			</div>
 		</header>
 
@@ -75,5 +100,33 @@ const { title, description = "Pharos Kitchen Design (PKD): Metadata-First Truth 
 				</div>
 			</div>
 		</footer>
+
+		<script is:inline>
+			const menuBtn = document.getElementById('menu-btn');
+			const mobileMenu = document.getElementById('mobile-menu');
+			
+			if (menuBtn && mobileMenu) {
+				menuBtn.addEventListener('click', () => {
+					const isExpanded = menuBtn.getAttribute('aria-expanded') === 'true';
+					menuBtn.setAttribute('aria-expanded', !isExpanded ? 'true' : 'false');
+					mobileMenu.classList.toggle('hidden');
+					mobileMenu.classList.toggle('flex');
+					
+					// Animate hamburger button spans into an X
+					const spans = menuBtn.querySelectorAll('span');
+					if (spans.length === 3) {
+						if (!isExpanded) {
+							spans[0].style.transform = 'translateY(8px) rotate(45deg)';
+							spans[1].style.opacity = '0';
+							spans[2].style.transform = 'translateY(-8px) rotate(-45deg)';
+						} else {
+							spans[0].style.transform = 'none';
+							spans[1].style.opacity = '1';
+							spans[2].style.transform = 'none';
+						}
+					}
+				});
+			}
+		</script>
 	</body>
 </html>
