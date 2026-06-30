@@ -24,20 +24,66 @@ import MaturityGrid from '../components/MaturityGrid.astro';
 
 		<MaturityGrid />
 
-		<div class="mt-20 blueprint-border p-8 bg-ph-orange/5 border-ph-orange/20">
-			<div class="flex flex-col md:flex-row items-center gap-10">
-				<div class="flex-1">
-					<h2 class="text-ph-orange text-3xl mb-4 uppercase">WebMCP North Star</h2>
-					<p class="text-text-base/80 mb-6 leading-relaxed">
-						Pharos Kitchen Design is built for humans and AI agents. Our WebMCP (Model Context Protocol) interface allows emergent behaviors—allowing AI assistants to directly query manufacturer metadata for intelligent selection.
-					</p>
-					<div class="flex gap-4 items-center">
-						<span class="text-xs text-ph-orange font-bold uppercase tracking-widest border border-ph-orange/30 px-3 py-1">PHASE 4: AGENTIC INTEGRATION</span>
-					</div>
-				</div>
-				<div class="w-full md:w-1/3 h-32 bg-bg-base/60 flex items-center justify-center font-mono text-[10px] text-text-muted uppercase border border-border-blueprint/20">
-					[ VISUALIZING AGENTIC FLOW ]
-				</div>
+		<div class="mt-20 blueprint-border p-8 bg-ph-blue/5 border-ph-blue/20">
+			<h2 class="text-ph-orange text-3xl mb-4 uppercase">Utility Scheduling Reference</h2>
+			<p class="text-text-base/80 mb-8 leading-relaxed max-w-3xl">
+				Pharos automatically bakes all critical utility parameters directly into your placed components. Use this reference dictionary to align your Revit schedule templates with our normalized database properties, eliminating manual copy-pasting from manufacturer brochures.
+			</p>
+			<div class="overflow-x-auto">
+				<table class="w-full text-left border-collapse text-xs md:text-sm font-sans">
+					<thead>
+						<tr class="border-b border-border-blueprint/30 bg-ph-blue/10">
+							<th class="py-3 px-4 font-condensed uppercase tracking-wider text-ph-orange font-bold">Design Domain</th>
+							<th class="py-3 px-4 font-condensed uppercase tracking-wider text-ph-orange font-bold">Schedule Field</th>
+							<th class="py-3 px-4 font-condensed uppercase tracking-wider text-ph-orange font-bold">Revit Parameter</th>
+							<th class="py-3 px-4 font-condensed uppercase tracking-wider text-ph-orange font-bold">Manual PDF Lookup Eliminated?</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr class="border-b border-border-blueprint/10 hover:bg-ph-blue/5 transition-colors">
+							<td class="py-3 px-4 font-bold text-text-base">Electrical</td>
+							<td class="py-3 px-4 text-text-base">Operating Voltage</td>
+							<td class="py-3 px-4"><code class="bg-ph-charcoal/50 text-ph-orange px-2 py-0.5 rounded border border-border-blueprint/20 font-mono text-xs">voltage</code></td>
+							<td class="py-3 px-4 text-text-muted"><span class="text-emerald-500 font-bold">Yes</span> - Populates exact voltage requirements (208V, 240V, etc.).</td>
+						</tr>
+						<tr class="border-b border-border-blueprint/10 hover:bg-ph-blue/5 transition-colors">
+							<td class="py-3 px-4 font-bold text-text-base">Electrical</td>
+							<td class="py-3 px-4 text-text-base">Phase</td>
+							<td class="py-3 px-4"><code class="bg-ph-charcoal/50 text-ph-orange px-2 py-0.5 rounded border border-border-blueprint/20 font-mono text-xs">phase</code></td>
+							<td class="py-3 px-4 text-text-muted"><span class="text-emerald-500 font-bold">Yes</span> - Validates Single (1ph) vs. Three Phase (3ph) loads.</td>
+						</tr>
+						<tr class="border-b border-border-blueprint/10 hover:bg-ph-blue/5 transition-colors">
+							<td class="py-3 px-4 font-bold text-text-base">Gas</td>
+							<td class="py-3 px-4 text-text-base">Gas Load (BTU/hr)</td>
+							<td class="py-3 px-4"><code class="bg-ph-charcoal/50 text-ph-orange px-2 py-0.5 rounded border border-border-blueprint/20 font-mono text-xs">btu</code></td>
+							<td class="py-3 px-4 text-text-muted"><span class="text-emerald-500 font-bold">Yes</span> - Populates burner inputs for ventilation sizing.</td>
+						</tr>
+						<tr class="border-b border-border-blueprint/10 hover:bg-ph-blue/5 transition-colors">
+							<td class="py-3 px-4 font-bold text-text-base">Plumbing</td>
+							<td class="py-3 px-4 text-text-base">Waste Connection</td>
+							<td class="py-3 px-4"><code class="bg-ph-charcoal/50 text-ph-orange px-2 py-0.5 rounded border border-border-blueprint/20 font-mono text-xs">drain_connection</code></td>
+							<td class="py-3 px-4 text-text-muted"><span class="text-emerald-500 font-bold">Yes</span> - Specifies pipe connection size and NPT threads.</td>
+						</tr>
+						<tr class="border-b border-border-blueprint/10 hover:bg-ph-blue/5 transition-colors">
+							<td class="py-3 px-4 font-bold text-text-base">Dimensions</td>
+							<td class="py-3 px-4 text-text-base">Equipment Width</td>
+							<td class="py-3 px-4"><code class="bg-ph-charcoal/50 text-ph-orange px-2 py-0.5 rounded border border-border-blueprint/20 font-mono text-xs">width</code></td>
+							<td class="py-3 px-4 text-text-muted"><span class="text-emerald-500 font-bold">Yes</span> - Feeds exact footprint dimensions for layout clearance.</td>
+						</tr>
+						<tr class="border-b border-border-blueprint/10 hover:bg-ph-blue/5 transition-colors">
+							<td class="py-3 px-4 font-bold text-text-base">Dimensions</td>
+							<td class="py-3 px-4 text-text-base">Equipment Depth</td>
+							<td class="py-3 px-4"><code class="bg-ph-charcoal/50 text-ph-orange px-2 py-0.5 rounded border border-border-blueprint/20 font-mono text-xs">depth</code></td>
+							<td class="py-3 px-4 text-text-muted"><span class="text-emerald-500 font-bold">Yes</span> - Feeds exact footprint dimensions for layout clearance.</td>
+						</tr>
+						<tr class="hover:bg-ph-blue/5 transition-colors">
+							<td class="py-3 px-4 font-bold text-text-base">Dimensions</td>
+							<td class="py-3 px-4 text-text-base">Equipment Height</td>
+							<td class="py-3 px-4"><code class="bg-ph-charcoal/50 text-ph-orange px-2 py-0.5 rounded border border-border-blueprint/20 font-mono text-xs">height</code></td>
+							<td class="py-3 px-4 text-text-muted"><span class="text-emerald-500 font-bold">Yes</span> - Feeds exact footprint dimensions for layout clearance.</td>
+						</tr>
+					</tbody>
+				</table>
 			</div>
 		</div>
 	</section>
