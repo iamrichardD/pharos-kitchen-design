@@ -8,6 +8,7 @@
  * Purpose: Global shell for the IKD marketing site.
  * Traceability: ADR 0012, ADR 0013, ADR 0015, Issue #81
  * Deployment-Trigger: Issue #76 / Issue #78 Recovery Run
+ * Last Updated: 2026-06-30
  */
 
 import '../styles/global.css';
@@ -59,7 +60,7 @@ const { title, description = "Pharos Kitchen Design (PKD): Metadata-First Truth 
 				</nav>
 				<button 
 					id="menu-btn" 
-					class="md:hidden flex flex-col justify-center items-center w-8 h-8 gap-1.5 focus:outline-none" 
+					class="md:hidden flex flex-col justify-center items-center w-8 h-8 gap-1.5 focus:outline-none cursor-pointer" 
 					aria-expanded="false" 
 					aria-controls="mobile-menu" 
 					aria-label="Toggle Menu"
@@ -71,17 +72,17 @@ const { title, description = "Pharos Kitchen Design (PKD): Metadata-First Truth 
 			</div>
 			<div 
 				id="mobile-menu" 
-				class="hidden absolute top-[65px] left-0 w-full bg-bg-base/95 backdrop-blur-md border-b border-border-blueprint/50 flex-col p-6 gap-4 font-condensed text-sm tracking-widest uppercase md:hidden z-40"
+				class="hidden absolute top-[65px] left-0 w-full bg-bg-base/95 backdrop-blur-md border-b border-border-blueprint/50 flex-col items-end p-6 gap-4 font-condensed text-sm tracking-widest uppercase md:hidden z-40"
 			>
 				{navItems.map((item) => (
 					<a
 						href={item.path}
-						class={item.class || "hover:text-ph-orange transition-colors"}
+						class={`${item.class || "hover:text-ph-orange transition-colors"} w-full text-right`}
 					>
 						{item.label}
 					</a>
 				))}
-				<a href="/pharos-kitchen-design/verify" class="hover:text-ph-orange transition-colors pt-2 border-t border-border-blueprint/10">Sign In</a>
+				<a href="/pharos-kitchen-design/verify" class="w-full text-right hover:text-ph-orange transition-colors pt-2 border-t border-border-blueprint/10">Sign In</a>
 			</div>
 		</header>
 
