@@ -50,9 +50,8 @@ export class PharosNavAuth extends HTMLElement {
     this.anchor.removeEventListener('click', this.handleLogout as any);
 
     if (isAuthed) {
-      this.anchor.textContent = 'Logout';
-      this.anchor.href = '#';
-      this.anchor.addEventListener('click', this.handleLogout as any);
+      this.anchor.textContent = 'Settings';
+      this.anchor.href = '/pharos-kitchen-design/settings';
       
       const isActive = currentPath === '/pharos-kitchen-design/settings' || currentPath === '/pharos-kitchen-design/settings/';
       if (isActive) {

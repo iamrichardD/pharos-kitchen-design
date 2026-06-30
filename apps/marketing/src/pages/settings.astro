@@ -1,0 +1,57 @@
+---
+/* ========================================================================
+ * Project: Pharos Kitchen Design (Project Prism)
+ * Component: Marketing / Settings Page
+ * File: apps/marketing/src/pages/settings.astro
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * License: FSL-1.1 (See LICENSE file for details)
+ * Purpose: Manage active developer/designer profile and security keys.
+ * Traceability: Issue #311
+ * Last Updated: 2026-06-30
+ * ======================================================================== */
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Settings">
+  <main class="min-h-screen pt-32 pb-20 px-6 max-w-7xl mx-auto flex flex-col justify-center items-center">
+    <div class="w-full max-w-md bg-bg-base/40 border border-border-blueprint/20 p-10 relative overflow-hidden blueprint-border text-center">
+      <div class="absolute inset-0 pointer-events-none opacity-5 bg-[linear-gradient(to_right,#808080_1px,transparent_1px),linear-gradient(to_bottom,#808080_1px,transparent_1px)] bg-[size:14px_24px]"></div>
+      
+      <div class="space-y-8 relative z-10">
+        <div>
+          <h1 class="text-4xl font-black text-text-base uppercase tracking-tighter mb-2">Settings</h1>
+          <p class="text-text-muted text-xs font-mono tracking-widest uppercase">Identity & Access</p>
+        </div>
+
+        <div class="border-t border-border-blueprint/10 pt-6 text-left space-y-4">
+          <h2 class="text-xs font-mono text-ph-blue uppercase tracking-widest">Active Session</h2>
+          <p class="text-text-muted text-xs font-mono leading-relaxed">
+            Your cryptographic key session is loaded and active. Access privileges are granted for the local Revit Integration Bridge.
+          </p>
+        </div>
+
+        <button 
+          id="logout-btn"
+          class="w-full bg-ph-blue text-ph-charcoal font-bold py-4 hover:bg-white transition-colors uppercase tracking-widest text-sm"
+        >
+          Clear Studio Session
+        </button>
+      </div>
+    </div>
+  </main>
+</BaseLayout>
+
+<script>
+  import { SessionManager } from '../utils/session';
+
+  // Check authentication on mount
+  if (!SessionManager.isAuthenticated()) {
+    window.location.href = '/pharos-kitchen-design/login';
+  }
+
+  const logoutBtn = document.getElementById('logout-btn');
+  logoutBtn?.addEventListener('click', () => {
+    SessionManager.clearSession();
+    window.location.href = '/pharos-kitchen-design/login';
+  });
+</script>
