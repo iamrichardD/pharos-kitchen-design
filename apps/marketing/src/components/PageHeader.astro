@@ -1,0 +1,27 @@
+---
+/* ========================================================================
+ * Project: Pharos Kitchen Design (Project Prism)
+ * Component: Marketing / PageHeader Component
+ * File: apps/marketing/src/components/PageHeader.astro
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * License: FSL-1.1 (See LICENSE file for details)
+ * Purpose: Structurally fixed and consistent page header.
+ * Traceability: Issue #311
+ * Last Updated: 2026-06-30
+ * ======================================================================== */
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<header class="w-full max-w-7xl mx-auto pt-32 pb-6 px-6 text-left border-b border-border-blueprint/10">
+  <h1 class="text-4xl md:text-5xl font-black tracking-tighter uppercase text-text-base mb-1 font-mono italic">
+    {title}
+  </h1>
+  <p class="text-text-muted text-[10px] font-mono uppercase tracking-widest">
+    {description}
+  </p>
+</header>

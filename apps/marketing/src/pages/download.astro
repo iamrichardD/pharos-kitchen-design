@@ -13,17 +13,13 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import BlueprintCard from '../components/BlueprintCard.astro';
 import PlatformTabs from '../components/PlatformTabs.astro';
+import PageHeader from '../components/PageHeader.astro';
 ---
 
 <BaseLayout title="Download | Pharos Kitchen Design" description="Download the Pharos CLI and Revit plugin installers for Windows, macOS, and Linux.">
-  <div class="container mx-auto px-4 py-12">
+  <PageHeader title="Download" description="Download Pharos Tools" />
+  <div class="container mx-auto px-6 py-12">
     <div class="max-w-6xl mx-auto">
-      <header class="mb-12 border-b border-border-blueprint/30 pb-6">
-        <h1 class="text-4xl md:text-5xl mb-4">Download Pharos Tools</h1>
-        <p class="text-xl text-text-muted max-w-2xl font-mono uppercase tracking-tighter">
-          Install the reliable command center and Revit integration suite for the modern Independent Kitchen Designer.
-        </p>
-      </header>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
         <!-- Left Column: Revit Plugin Installation -->

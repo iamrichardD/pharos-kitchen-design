@@ -10,6 +10,7 @@
  * ======================================================================== */
 
 import BaseLayout from "../layouts/BaseLayout.astro";
+import PageHeader from "../components/PageHeader.astro";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -62,7 +63,8 @@ const filterPills = [
 ---
 
 <BaseLayout title="PKD Roadmap | Pharos Kitchen Design">
-  <main class="max-w-7xl mx-auto px-6 py-20 min-h-screen blueprint-grid transition-colors duration-300">
+  <PageHeader title="Roadmap" description="Project Roadmap" />
+  <main class="max-w-7xl mx-auto px-6 py-10 min-h-screen blueprint-grid transition-colors duration-300">
     <div class="mb-20 border-l-4 border-ph-blue pl-8 py-4 bg-ph-blue/5 backdrop-blur-sm relative">
       <!-- Freshness Badge (ADR-0051) -->
       <div class="absolute top-4 right-4 flex items-center gap-3 px-4 py-2 bg-ph-pulse/10 border border-ph-pulse/20 rounded-full group cursor-help">
@@ -76,9 +78,6 @@ const filterPills = [
         </div>
       </div>
 
-      <h1 class="text-6xl font-bold text-text-base tracking-tighter mb-4 font-mono italic uppercase">
-        PKD Roadmap
-      </h1>
       <p class="text-xl text-text-muted max-w-3xl leading-relaxed">
         Pharos Kitchen Design (PKD) is a **Metadata-First Standard**. 
         Our roadmap tracks the chronological maturity of the system, prioritizing high-rigor foundations over features.

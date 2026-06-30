@@ -11,22 +11,18 @@
  * ======================================================================== */
 
 import BaseLayout from "../layouts/BaseLayout.astro";
+import PageHeader from "../components/PageHeader.astro";
 ---
 
 <BaseLayout title="Login | Pharos Kitchen Design Identity Bridge">
-  <main class="max-w-4xl mx-auto px-6 py-20 min-h-screen flex flex-col items-center justify-center blueprint-grid transition-colors duration-300">
+  <PageHeader title="Login" description="Identity & Access" />
+  <main class="max-w-4xl mx-auto px-6 pt-10 pb-20 min-h-screen flex flex-col items-center justify-center blueprint-grid transition-colors duration-300">
     <div class="w-full max-w-md bg-bg-base/40 border border-border-blueprint/20 p-10 relative overflow-hidden blueprint-border">
       
       <!-- Grid Decoration -->
       <div class="absolute inset-0 opacity-5 pointer-events-none blueprint-grid"></div>
 
       <div class="relative z-10 text-center">
-        <h1 class="text-4xl font-bold mb-4 font-mono tracking-tighter italic uppercase text-text-base">
-          Login
-        </h1>
-        <p class="text-text-muted mb-6 text-sm leading-relaxed font-mono">
-          Authenticate using your passkey to sign in to your designer account.
-        </p>
 
 
 
