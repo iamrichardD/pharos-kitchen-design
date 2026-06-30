@@ -6,7 +6,7 @@
  * File: BaseLayout.astro
  * Author: Richard D. (https://github.com/iamrichardd)
  * Purpose: Global shell for the IKD marketing site.
- * Traceability: ADR 0012, ADR 0013, ADR 0015, Issue #81
+ * Traceability: ADR 0012, ADR 0013, ADR 0015, Issue #81, Issue #312
  * Deployment-Trigger: Issue #76 / Issue #78 Recovery Run
  * Last Updated: 2026-06-30
  */
@@ -89,6 +89,7 @@ const currentPath = Astro.url.pathname;
 						<a
 							href={item.path}
 							class={isActive ? "w-full text-right text-ph-orange underline underline-offset-4 decoration-ph-orange/50 pointer-events-none" : "w-full text-right hover:text-ph-orange transition-colors"}
+							data-astro-prefetch="viewport"
 						>
 							{item.label}
 						</a>
@@ -97,6 +98,7 @@ const currentPath = Astro.url.pathname;
 				<a
 					href="/pharos-kitchen-design/verify"
 					class={(currentPath === '/pharos-kitchen-design/verify' || currentPath === '/pharos-kitchen-design/verify/') ? "w-full text-right text-ph-orange underline underline-offset-4 decoration-ph-orange/50 pointer-events-none pt-2 border-t border-border-blueprint/10" : "w-full text-right hover:text-ph-orange transition-colors pt-2 border-t border-border-blueprint/10"}
+					data-astro-prefetch="viewport"
 				>
 					Sign In
 				</a>

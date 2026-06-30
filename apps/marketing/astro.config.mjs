@@ -4,7 +4,8 @@
  * File: astro.config.mjs
  * Author: Richard D. (https://github.com/iamrichardd)
  * Purpose: Astro configuration for the IKD marketing hub.
- * Traceability: ADR 0012, ADR 0015
+ * Traceability: ADR 0012, ADR 0015, Issue #312
+ * Last Updated: 2026-06-30
  * ======================================================================== */
 
 import { fileURLToPath } from 'node:url';
@@ -21,6 +22,10 @@ export default defineConfig({
   outDir: './dist',
   publicDir: './public',
   output: 'static',
+  prefetch: {
+    prefetchAll: true,
+    defaultStrategy: 'hover'
+  },
   markdown: {
     processor: satteri({
       features: {
