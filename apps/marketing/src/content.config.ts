@@ -8,9 +8,7 @@
  * Traceability: Issue #129
  * ======================================================================== */
 
-import { defineCollection } from 'astro:content';
-
-import { z } from 'zod';
+import { defineCollection, z } from 'astro:content';
 import fs from 'node:fs';
 import path from 'node:path';
 

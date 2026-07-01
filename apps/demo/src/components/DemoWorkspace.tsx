@@ -16,7 +16,7 @@ import { OmniBar } from './OmniBar';
 import { CanvasStage } from './CanvasStage';
 import { useConnectivity } from '../utils/NetworkConnectivity';
 import { getSearchIndexUrl, RegistryLoadError } from '../utils/registryConfig';
-import { SessionManager } from '../../../marketing/src/utils/session';
+import { SessionManager } from '@pkd/protocol';
 
 export interface PharosMetadata {
     metadata_id: string;

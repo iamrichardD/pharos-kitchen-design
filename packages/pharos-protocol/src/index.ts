@@ -12,3 +12,4 @@ export * from './geometry';
 export * from './policy';
 export * from './atlas';
 export * from './CommandBar';
+export * from './session';

@@ -1,11 +1,11 @@
 /* ========================================================================
  * Project: Pharos Kitchen Design (Project Prism)
- * Component: Marketing / Session Utils
- * File: apps/marketing/src/utils/session.ts
- * Author: Lead Developer (https://github.com/iamrichardd)
+ * Component: Protocol / Session Utils
+ * File: packages/pharos-protocol/src/session.ts
+ * Author: Richard D. (https://github.com/iamrichardd)
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Client-side session manager for token storage, validation, and event dispatching.
- * Traceability: Issue #311
+ * Traceability: Issue #311, PR Crucible Audit
  * Last Updated: 2026-06-30
  * ======================================================================== */
 
@@ -34,8 +34,8 @@ export class SessionManager {
   public static setSession(token: string): void {
     if (typeof window === 'undefined') return;
     
-    // Write cookie
-    document.cookie = `pharos_session=${token}; path=/; max-age=86400; SameSite=Lax`;
+    // Write cookie with Secure and SameSite=Lax flags
+    document.cookie = `pharos_session=${token}; path=/; max-age=86400; SameSite=Lax; Secure`;
     // Write localStorage fallback/cache
     localStorage.setItem('pharos_session', token);
 
@@ -47,8 +47,8 @@ export class SessionManager {
   public static clearSession(): void {
     if (typeof window === 'undefined') return;
 
-    // Clear cookie
-    document.cookie = 'pharos_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
+    // Clear cookie with matching Secure and SameSite flags
+    document.cookie = 'pharos_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax; Secure';
     // Clear localStorage
     localStorage.removeItem('pharos_session');
 

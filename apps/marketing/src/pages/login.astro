@@ -85,7 +85,7 @@ import PageHeader from "../components/PageHeader.astro";
 
 <script>
   import { startAuthentication, startRegistration } from '@simplewebauthn/browser';
-  import { SessionManager } from '../utils/session';
+  import { SessionManager } from '@pkd/protocol';
 
   const AUTH_URL = 'http://localhost:8787'; // Dev fallback, should be environment driven
 

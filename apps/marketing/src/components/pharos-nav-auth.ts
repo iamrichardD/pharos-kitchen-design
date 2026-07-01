@@ -9,7 +9,7 @@
  * Last Updated: 2026-06-30
  * ======================================================================== */
 
-import { SessionManager } from '../utils/session';
+import { SessionManager } from '@pkd/protocol';
 
 export class PharosNavAuth extends HTMLElement {
   private anchor: HTMLAnchorElement | null = null;
@@ -28,11 +28,6 @@ export class PharosNavAuth extends HTMLElement {
     window.removeEventListener('pharos:session-change', this.handleSessionChange);
   }
 
-  private handleLogout = (e: MouseEvent) => {
-    e.preventDefault();
-    SessionManager.clearSession();
-  };
-
   private handleSessionChange = (e: Event) => {
     const customEvent = e as CustomEvent<{ isAuthenticated: boolean }>;
     this.updateState(customEvent.detail.isAuthenticated);
@@ -46,8 +41,6 @@ export class PharosNavAuth extends HTMLElement {
   private updateState(isAuthed: boolean) {
     if (!this.anchor) return;
     const currentPath = window.location.pathname;
-    
-    this.anchor.removeEventListener('click', this.handleLogout as any);
 
     if (isAuthed) {
       this.anchor.textContent = 'Settings';

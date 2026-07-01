@@ -77,7 +77,7 @@ import PageHeader from '../components/PageHeader.astro';
 </BaseLayout>
 
 <script>
-  import { SessionManager } from '../utils/session';
+  import { SessionManager } from '@pkd/protocol';
 
   // Redirect on mount if not authenticated
   if (!SessionManager.isAuthenticated()) {
