@@ -27,6 +27,7 @@
 - [ ] **Issue #315**: [TAG: Core] Implement URL Query Parameter Binding for Revit Plugin Verify Flow. [DESC: Enable Revit plugin action gate to append user_code to redirect URL pointing to settings registration path for automatic verification.] [ECT: 1]
 - [ ] **Issue #316**: [TAG: Core] Implement URL Query Parameter Binding for CLI Verify Flow. [DESC: Enable Pharos CLI tool to append user_code to redirect URL pointing to settings registration path for seamless command-line device authentication.] [ECT: 1]
 - [ ] **Issue #185**: [TAG: Perf] Zero-Allocation JSON Parsing. [DESC: Implementing source-generated JSON parsers to eliminate allocation overhead in WASM.] [ECT: 3]
+- [ ] **Issue #317**: [TAG: Core] Resolve Production Auth Endpoint Resolution and Error Masking. [DESC: Implement environment-aware auth URL resolver config helper in protocol package, URL path prefix rewrite middleware, and secure database error masking in router fetch handlers. Verified 🟢 PHAROS GREEN.] [ECT: 2]
 - [ ] **Issue #42**: [TAG: Security] SRI & SEO Audit. [DESC: Remediating SRI hashes and optimizing SEO for the Marketing site.] [ECT: 2]
 - [ ] **Issue #84**: [TAG: Infra] Dual-Stream Release Pipeline. [DESC: Configuring separate channels for stable and nightly releases.] [ECT: 2]
 - [ ] **Issue #85**: [TAG: Infra] Official Homebrew Tap. [DESC: Initializing the official Pharos Homebrew tap for macOS/Linux distribution.] [ECT: 2]

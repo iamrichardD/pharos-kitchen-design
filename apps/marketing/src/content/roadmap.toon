@@ -3,16 +3,18 @@
  * Component: Marketing / Content
  * File: roadmap.toon
  * Purpose: Automated reflection of authoritative internal logs.
- * Last Synced: 2026-06-30T15:50:16.485Z
+ * Last Synced: 2026-07-01T15:50:01.519Z
  * ======================================================================== */
 
 title: Pharos System Roadmap
 type: roadmap
-lastSynced: 2026-06-30T15:50:16.485Z
+lastSynced: 2026-07-01T15:50:01.519Z
 
-items[72]{id, name, status, phase, tag, description}:
+items[76]{id, name, status, phase, tag, description}:
+  "317", "Resolve Production Auth Endpoint Resolution and Error Masking", "Deployed", "Sprint 5.05", "CORE", "Implemented environment-aware auth URL resolver config helper in protocol package, URL path prefix rewrite middleware, and secure database error masking in router fetch handlers. Verified 🟢 PHAROS GREEN."
   "312", "Resolve Mobile Navigation Horizontal Overflow", "Deployed", "Sprint 5.05", "CORE", "Implemented responsive header navigation and mobile toggle drawer matching the voidzero.dev pattern, and enabled hybrid touch/hover prefetching. Verified 🟢 PHAROS GREEN."
   "313", "Refactor Navigation Layout and Naming Taxonomy", "Deployed", "Sprint 5.05", "CORE", "Reorganized header page links to standard terminology (Guide, Reference, Blog, About) using a config-driven array layout. Verified 🟢 PHAROS GREEN."
+  "311", "Implement Dynamic Login and Settings Navigation Link", "Deployed", "Sprint 5.05", "CORE", "Developed client-side <pharos-nav-auth> Custom Element, SessionManager in shared @pkd/protocol, settings profile maturation form with non-prefixed localStorage key persistence, and a localized 30-day trial countdown. Unified layout titles with compact <PageHeader> component and reordered roadmap with collapse toggles. Verified 🟢 PHAROS GREEN."
   "275", "Configure Production-Only CORS Rules for Cloudflare R2 Registry Storage", "Deployed", "Sprint 5.04", "CORE", "Enforced production-only origins and restricted allowed headers to Content-Type and Range to minimize attack surface. Verified 🟢 PHAROS GREEN."
   "274", "Integrate cargo-machete into pulse.sh", "Deployed", "Sprint 5.04", "CORE", "Pinned and installed cargo-machete v0.7.0 binary inside Podman build, automated unused dependency checks in pulse, and pruned 8 unused dependencies from workspace. Verified 🟢 PHAROS GREEN."
   "276", "Add --registry-target Flags and Update Registry CLI Documentation", "Deployed", "Sprint 5.04", "CORE", "Added global --registry-target flag and environment variable to registry commands, relaxed output directory parameter to optional with fallback resolution, and added unit/integration tests. Verified 🟢 PHAROS GREEN."
@@ -59,7 +61,9 @@ items[72]{id, name, status, phase, tag, description}:
   "175", "Design System Alignment", "Deployed", "Sprint 4.11", "UX", "Aligned the Marketing TOON loader with the Pharos Design System typography."
   "168", "Automated Boundary Enforcement", "Deployed", "Sprint 4.11", "PROTOCOL", "Implemented ADR-0044 drift detection to ensure Rust/C# parity."
   "239", "Refactor Marketing Site IA for Command-First Identity", "In Progress", "Sprint 5.05", "CORE", "Implement high-fidelity Terminal Hero and capability-based documentation flow. Requires 50% Mid-Sprint Rigor Gate review."
-  "311", "Implement Dynamic Login and Settings Navigation Link", "In Progress", "Sprint 5.05", "CORE", "Develop client-side <pharos-nav-auth> Custom Element and SessionManager utility to swap between Login and Settings dynamically without layout shift."
+  "314", "Support URL-Driven User Code and Settings Workspace Pairing", "In Progress", "Sprint 5.05", "CORE", "Implement URL query parameter binding for settings page at /settings/register-device?code=ABCD-1234 to handle decoupled device registration flow."
+  "315", "Implement URL Query Parameter Binding for Revit Plugin Verify Flow", "In Progress", "Sprint 5.05", "CORE", "Enable Revit plugin action gate to append user_code to redirect URL pointing to settings registration path for automatic verification."
+  "316", "Implement URL Query Parameter Binding for CLI Verify Flow", "In Progress", "Sprint 5.05", "CORE", "Enable Pharos CLI tool to append user_code to redirect URL pointing to settings registration path for seamless command-line device authentication."
   "185", "Zero-Allocation JSON Parsing", "In Progress", "Sprint 5.05", "CORE", "Implementing source-generated JSON parsers to eliminate allocation overhead in WASM."
   "42", "SRI & SEO Audit", "In Progress", "Sprint 5.05", "IDENTITY", "Remediating SRI hashes and optimizing SEO for the Marketing site."
   "84", "Dual-Stream Release Pipeline", "In Progress", "Sprint 5.05", "TOOLING", "Configuring separate channels for stable and nightly releases."

@@ -23,6 +23,7 @@
 **Status**: 🚀 ACTIVE (Sprint 5.05)
 
 ### Sprint 5.05: Milestone 5 - Performance & Launch (2026-07-06) - 🚀 ACTIVE
+- [x] **Issue #317**: [TAG: Core] Resolve Production Auth Endpoint Resolution and Error Masking. [DESC: Implemented environment-aware auth URL resolver config helper in protocol package, URL path prefix rewrite middleware, and secure database error masking in router fetch handlers. Verified 🟢 PHAROS GREEN.] [ECT: 2] [ACT: 2]
 - [x] **Issue #312**: [TAG: UX] Resolve Mobile Navigation Horizontal Overflow. [DESC: Implemented responsive header navigation and mobile toggle drawer matching the voidzero.dev pattern, and enabled hybrid touch/hover prefetching. Verified 🟢 PHAROS GREEN.] [ECT: 2] [ACT: 2]
 - [x] **Issue #313**: [TAG: IA] Refactor Navigation Layout and Naming Taxonomy. [DESC: Reorganized header page links to standard terminology (Guide, Reference, Blog, About) using a config-driven array layout. Verified 🟢 PHAROS GREEN.] [ECT: 2] [ACT: 2]
 - [x] **Issue #311**: [TAG: UX] Implement Dynamic Login and Settings Navigation Link. [DESC: Developed client-side <pharos-nav-auth> Custom Element, SessionManager in shared @pkd/protocol, settings profile maturation form with non-prefixed localStorage key persistence, and a localized 30-day trial countdown. Unified layout titles with compact <PageHeader> component and reordered roadmap with collapse toggles. Verified 🟢 PHAROS GREEN.] [ECT: 2] [ACT: 3]
