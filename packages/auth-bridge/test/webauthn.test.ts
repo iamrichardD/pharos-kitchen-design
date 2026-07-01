@@ -77,4 +77,45 @@ describe('WebAuthn Passkey Flow', () => {
     expect(data.challengeToken).toBeDefined();
     expect(data.options.allowCredentials).toHaveLength(1);
   });
+
+  it('test_should_route_and_handle_requests_when_containing_base_path_prefix', async () => {
+    mockEnv.DB.first.mockResolvedValueOnce({ id: 'user-1', username: 'user1' });
+    mockEnv.DB.all.mockResolvedValueOnce({
+        results: [{ id: 'cred-1', user_id: 'user-1', public_key: 'pk', transports: 'usb' }]
+    });
+
+    const envWithPrefix = { ...mockEnv, BASE_PATH: '/pharos-kitchen-design/api/auth' };
+    const req = new Request('http://auth.local/pharos-kitchen-design/api/auth/auth/login/options', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: 'user1' })
+    });
+
+    const res = await router.fetch(req, envWithPrefix);
+    expect(res.status).toBe(200);
+    const data = await res.json() as any;
+    expect(data.options).toBeDefined();
+    expect(data.challengeToken).toBeDefined();
+  });
+
+  it('test_should_securely_mask_errors_and_return_clean_message_to_client_on_throw', async () => {
+    const errorEnv = {
+      ...mockEnv,
+      DB: {
+        prepare: () => { throw new Error('Database connection failed catastrophically'); }
+      }
+    };
+    const req = new Request('http://auth.local/auth/login/options', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: 'user1' })
+    });
+
+    const res = await router.fetch(req, errorEnv);
+    expect(res.status).toBe(500);
+    const data = await res.json() as any;
+    expect(data.error).toBe('system_error');
+    expect(data.message).toBe('An internal error occurred. Request identifier logged.');
+    expect(data.message).not.toContain('catastrophically');
+  });
 });
