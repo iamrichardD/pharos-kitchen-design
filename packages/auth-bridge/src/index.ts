@@ -21,6 +21,7 @@ interface Env {
   RP_ID: string;
   EXPECTED_ORIGIN: string;
   DEBUG?: string;
+  BASE_PATH?: string;
   REPO?: IAuthRepository; // Optional injection for testing
 }
 
@@ -312,10 +313,23 @@ router.post('/auth/mock-approve', withRepo, async (request, env: Env) => {
 export default {
   fetch: async (request: Request, env: Env, ctx: ExecutionContext) => {
     try {
+      const url = new URL(request.url);
+      const basePath = env.BASE_PATH ?? '/pharos-kitchen-design/api/auth';
+      
+      if (url.pathname.startsWith(basePath)) {
+        const rewrittenPath = url.pathname.slice(basePath.length);
+        url.pathname = rewrittenPath.startsWith('/') ? rewrittenPath : '/' + rewrittenPath;
+        request = new Request(url.toString(), request);
+      }
+
       return await router.handle(request as PharosRequest, env, ctx);
     } catch (e: unknown) {
       const err = e as Error;
-      return new Response(JSON.stringify({ error: 'system_error', message: err.message }), { status: 500 });
+      if (err.message.startsWith('SEC_ERR:')) {
+        return new Response(JSON.stringify({ error: 'system_error', message: err.message }), { status: 500 });
+      }
+      console.error('[System Error]', err.stack || err.message);
+      return new Response(JSON.stringify({ error: 'system_error', message: 'An internal error occurred. Request identifier logged.' }), { status: 500 });
     }
   }
 };

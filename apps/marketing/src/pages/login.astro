@@ -85,9 +85,9 @@ import PageHeader from "../components/PageHeader.astro";
 
 <script>
   import { startAuthentication, startRegistration } from '@simplewebauthn/browser';
-  import { SessionManager } from '@pkd/protocol';
+  import { SessionManager, getAuthEndpoint } from '@pkd/protocol';
 
-  const AUTH_URL = 'http://localhost:8787'; // Dev fallback, should be environment driven
+  const AUTH_URL = getAuthEndpoint();
 
   const form = document.getElementById('verify-form') as HTMLFormElement;
   const statusContainer = document.getElementById('status-container');

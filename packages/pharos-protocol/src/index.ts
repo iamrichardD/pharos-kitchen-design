@@ -13,3 +13,4 @@ export * from './policy';
 export * from './atlas';
 export * from './CommandBar';
 export * from './session';
+export * from './config';
