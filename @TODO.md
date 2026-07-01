@@ -23,7 +23,6 @@
 
 ### Sprint 5.05: Milestone 5 - Performance & Launch (2026-07-06) - 🚀 ACTIVE
 - [ ] **Issue #239**: [TAG: UX] Refactor Marketing Site IA for Command-First Identity. [DESC: Implement high-fidelity Terminal Hero and capability-based documentation flow. Requires 50% Mid-Sprint Rigor Gate review.] [ECT: 5]
-- [ ] **Issue #311**: [TAG: UX] Implement Dynamic Login and Settings Navigation Link. [DESC: Develop client-side <pharos-nav-auth> Custom Element and SessionManager utility to swap between Login and Settings dynamically without layout shift.] [ECT: 2]
 - [ ] **Issue #314**: [TAG: Core] Support URL-Driven User Code and Settings Workspace Pairing. [DESC: Implement URL query parameter binding for settings page at /settings/register-device?code=ABCD-1234 to handle decoupled device registration flow.] [ECT: 2]
 - [ ] **Issue #315**: [TAG: Core] Implement URL Query Parameter Binding for Revit Plugin Verify Flow. [DESC: Enable Revit plugin action gate to append user_code to redirect URL pointing to settings registration path for automatic verification.] [ECT: 1]
 - [ ] **Issue #316**: [TAG: Core] Implement URL Query Parameter Binding for CLI Verify Flow. [DESC: Enable Pharos CLI tool to append user_code to redirect URL pointing to settings registration path for seamless command-line device authentication.] [ECT: 1]
