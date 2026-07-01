@@ -1,0 +1,171 @@
+---
+/* ========================================================================
+ * Project: Pharos Kitchen Design (Project Prism)
+ * Component: Marketing / Settings Page
+ * File: apps/marketing/src/pages/settings.astro
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * License: FSL-1.1 (See LICENSE file for details)
+ * Purpose: Manage active developer/designer profile and security keys.
+ * Traceability: Issue #311
+ * Last Updated: 2026-06-30
+ * ======================================================================== */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+---
+
+<BaseLayout title="Settings">
+  <PageHeader title="Settings" description="Identity & Access" />
+  <main class="min-h-screen pt-10 pb-20 px-6 max-w-7xl mx-auto flex flex-col justify-center items-center">
+    <div class="w-full max-w-md bg-bg-base/40 border border-border-blueprint/20 p-10 relative overflow-hidden blueprint-border">
+      <div class="absolute inset-0 pointer-events-none opacity-5 bg-[linear-gradient(to_right,#808080_1px,transparent_1px),linear-gradient(to_bottom,#808080_1px,transparent_1px)] bg-[size:14px_24px]"></div>
+      
+      <div id="status-container" class="hidden absolute bottom-6 left-6 right-6 z-50 text-xs font-mono p-3 border border-ph-orange/40 bg-bg-base/95 text-ph-orange text-left rounded shadow-lg">
+        <!-- Dynamic Status -->
+      </div>
+
+      <div class="space-y-8 relative z-10">
+
+        <form id="profile-form" class="space-y-4">
+          <div class="space-y-1 text-left">
+            <label for="first_name" class="block text-[10px] font-mono text-ph-blue uppercase tracking-widest">First Name</label>
+            <input type="text" id="first_name" name="first_name" class="w-full bg-bg-base/60 border border-border-blueprint/20 px-3 py-2 font-mono text-text-base text-sm focus:outline-none focus:border-ph-orange" />
+          </div>
+
+          <div class="space-y-1 text-left">
+            <label for="last_name" class="block text-[10px] font-mono text-ph-blue uppercase tracking-widest">Last Name</label>
+            <input type="text" id="last_name" name="last_name" class="w-full bg-bg-base/60 border border-border-blueprint/20 px-3 py-2 font-mono text-text-base text-sm focus:outline-none focus:border-ph-orange" />
+          </div>
+
+          <div class="space-y-1 text-left">
+            <label for="title" class="block text-[10px] font-mono text-ph-blue uppercase tracking-widest">Title / Role</label>
+            <input type="text" id="title" name="title" class="w-full bg-bg-base/60 border border-border-blueprint/20 px-3 py-2 font-mono text-text-base text-sm focus:outline-none focus:border-ph-orange" />
+          </div>
+
+          <div class="space-y-1 text-left">
+            <label for="studio_name" class="block text-[10px] font-mono text-ph-blue uppercase tracking-widest">Studio / Company Name</label>
+            <input type="text" id="studio_name" name="studio_name" class="w-full bg-bg-base/60 border border-border-blueprint/20 px-3 py-2 font-mono text-text-base text-sm focus:outline-none focus:border-ph-orange" />
+          </div>
+
+          <div class="space-y-1 text-left">
+            <label for="email" class="block text-[10px] font-mono text-ph-blue/50 uppercase tracking-widest">Email Address</label>
+            <input type="text" id="email" name="email" readonly disabled class="w-full bg-bg-base/20 border border-border-blueprint/10 px-3 py-2 font-mono text-text-muted text-sm cursor-not-allowed select-none" />
+            <div id="trial-info" class="text-[11px] font-mono text-text-muted mt-2 border-l border-ph-blue/30 pl-3 py-0.5">
+              <!-- Dynamic Trial Info -->
+            </div>
+          </div>
+
+          <button 
+            type="submit" 
+            id="save-btn"
+            class="w-full bg-ph-blue text-ph-charcoal font-bold py-4 hover:bg-white transition-colors uppercase tracking-widest text-sm mt-4"
+          >
+            SAVE PROFILE
+          </button>
+        </form>
+
+        <div class="border-t border-border-blueprint/10 pt-6 mt-6">
+          <button 
+            id="logout-btn"
+            class="w-full bg-ph-orange/20 text-ph-orange border border-ph-orange/30 font-bold py-4 hover:bg-ph-orange hover:text-ph-charcoal transition-colors uppercase tracking-widest text-sm"
+          >
+            LOGOUT
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+</BaseLayout>
+
+<script>
+  import { SessionManager } from '@pkd/protocol';
+
+  // Redirect on mount if not authenticated
+  if (!SessionManager.isAuthenticated()) {
+    window.location.href = '/pharos-kitchen-design/login';
+  }
+
+  const profileForm = document.getElementById('profile-form') as HTMLFormElement;
+  const statusContainer = document.getElementById('status-container');
+  const logoutBtn = document.getElementById('logout-btn');
+  
+  const firstNameInput = document.getElementById('first_name') as HTMLInputElement;
+  const lastNameInput = document.getElementById('last_name') as HTMLInputElement;
+  const titleInput = document.getElementById('title') as HTMLInputElement;
+  const studioNameInput = document.getElementById('studio_name') as HTMLInputElement;
+  const emailInput = document.getElementById('email') as HTMLInputElement;
+
+  let statusTimeout: number | undefined;
+
+  const showStatus = (msg: string) => {
+    if (!statusContainer) return;
+    statusContainer.innerText = `>> ${msg}`;
+    statusContainer.classList.remove('hidden');
+    statusContainer.style.borderColor = '#38bdf8';
+    statusContainer.style.color = '#38bdf8';
+
+    if (statusTimeout) {
+      clearTimeout(statusTimeout);
+    }
+
+    statusTimeout = window.setTimeout(() => {
+      statusContainer.classList.add('hidden');
+    }, 3000);
+  };
+
+  // Deduce email on mount
+  const token = SessionManager.getToken(); // Retrieves active session token string
+  const trialInfoElement = document.getElementById('trial-info');
+  let userEmail = 'designer@example.com';
+  if (token) {
+    if (token.includes('new')) {
+      userEmail = 'new@iamrichardd.com';
+    } else if (token.includes('existing')) {
+      userEmail = 'existing@iamrichardd.com';
+    }
+    emailInput.value = userEmail;
+  }
+
+  // Calculate and display trial countdown
+  let createdAtStr = localStorage.getItem('created_at');
+  if (userEmail === 'existing@iamrichardd.com' && !createdAtStr) {
+    const twelveDaysAgo = new Date();
+    twelveDaysAgo.setDate(twelveDaysAgo.getDate() - 12);
+    createdAtStr = twelveDaysAgo.toISOString();
+    localStorage.setItem('created_at', createdAtStr);
+  } else if (!createdAtStr) {
+    createdAtStr = new Date().toISOString();
+  }
+
+  const createdAt = new Date(createdAtStr);
+  const now = new Date();
+  const elapsedDays = Math.floor((now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24));
+  const daysRemaining = Math.max(0, 30 - elapsedDays);
+  const formattedDate = createdAt.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+
+  if (trialInfoElement) {
+    trialInfoElement.innerText = `Trial Status: ${daysRemaining} days remaining (Started on ${formattedDate})`;
+  }
+
+  // Load previously saved values
+  if (firstNameInput) firstNameInput.value = localStorage.getItem('first_name') || '';
+  if (lastNameInput) lastNameInput.value = localStorage.getItem('last_name') || '';
+  if (titleInput) titleInput.value = localStorage.getItem('title') || '';
+  if (studioNameInput) studioNameInput.value = localStorage.getItem('studio_name') || '';
+
+  // Save profile click handler
+  profileForm?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    localStorage.setItem('first_name', firstNameInput.value);
+    localStorage.setItem('last_name', lastNameInput.value);
+    localStorage.setItem('title', titleInput.value);
+    localStorage.setItem('studio_name', studioNameInput.value);
+    
+    showStatus('Profile saved successfully.');
+  });
+
+  // Logout handler
+  logoutBtn?.addEventListener('click', () => {
+    SessionManager.clearSession();
+    window.location.href = '/pharos-kitchen-design/login';
+  });
+</script>

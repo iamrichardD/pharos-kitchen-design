@@ -11,12 +11,13 @@
  */
 
 import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
 ---
 
 <BaseLayout title="Search Guide | Pharos Kitchen Design" description="Learn how to search and filter commercial kitchen equipment metadata using the Pharos attribute-first syntax.">
-	<section class="py-16 container mx-auto px-4">
+	<PageHeader title="Guide" description="Equipment Search Guide" />
+	<section class="py-16 container mx-auto px-6">
 		<div class="max-w-4xl mx-auto">
-			<h1 class="text-4xl md:text-5xl mb-8 font-bold text-ph-blue">Equipment Search Guide</h1>
 			
 			<p class="text-xl text-text-base/80 mb-12 leading-relaxed">
 				Don't hunt for equipment. Discover it. Pharos utilizes a professional, attribute-first search protocol that lets you find the exact equipment you need in milliseconds.
@@ -38,7 +39,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 				<div class="bg-bg-base/40 p-8 border border-border-blueprint/20">
 					<h2 class="text-2xl font-bold text-ph-orange mb-4">Insert Directly into Revit</h2>
 					<p class="mb-4 text-text-base/70">
-						Integrate verified models directly into your projects without leaving your CAD environment. Pair your workstation securely via device WebAuthn pairing at <a href="/verify" class="text-ph-blue hover:underline">/verify</a> to establish local authority.
+						Integrate verified models directly into your projects without leaving your CAD environment. Pair your workstation securely via device WebAuthn pairing at <a href="/login" class="text-ph-blue hover:underline">/login</a> to establish local authority.
 					</p>
 					<p class="text-text-base/70">
 						Use the Revit Plugin sync button to fetch lightweight, metadata-rich Revit families, automatically placing them in your design workspace with full electrical and mechanical connector properties populated.

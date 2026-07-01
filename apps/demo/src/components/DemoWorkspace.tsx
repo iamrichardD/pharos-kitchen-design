@@ -16,6 +16,7 @@ import { OmniBar } from './OmniBar';
 import { CanvasStage } from './CanvasStage';
 import { useConnectivity } from '../utils/NetworkConnectivity';
 import { getSearchIndexUrl, RegistryLoadError } from '../utils/registryConfig';
+import { SessionManager } from '@pkd/protocol';
 
 export interface PharosMetadata {
     metadata_id: string;
@@ -50,6 +51,21 @@ const DemoWorkspaceContent: React.FC = () => {
     // Simulation / Connection State
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isPluginConnected, setIsPluginConnected] = useState(false);
+
+    // Sync with global auth state changes
+    useEffect(() => {
+        const handleSessionChange = (e: Event) => {
+            const customEvent = e as CustomEvent<{ isAuthenticated: boolean }>;
+            setIsAuthenticated(customEvent.detail.isAuthenticated);
+        };
+        
+        window.addEventListener('pharos:session-change', handleSessionChange);
+        setIsAuthenticated(SessionManager.isAuthenticated());
+        
+        return () => {
+            window.removeEventListener('pharos:session-change', handleSessionChange);
+        };
+    }, []);
     
     // UI Feedback & Connection State
     const { isOnline, triggerCheck } = useConnectivity();
@@ -388,7 +404,15 @@ const DemoWorkspaceContent: React.FC = () => {
                                             <input 
                                                 type="checkbox" 
                                                 checked={isAuthenticated} 
-                                                onChange={(e) => setIsAuthenticated(e.target.checked)} 
+                                                onChange={(e) => {
+                                                    const checked = e.target.checked;
+                                                    setIsAuthenticated(checked);
+                                                    if (checked) {
+                                                        SessionManager.setSession('simulated-token');
+                                                    } else {
+                                                        SessionManager.clearSession();
+                                                    }
+                                                }} 
                                             />
                                             Simulate Authenticated User
                                         </label>

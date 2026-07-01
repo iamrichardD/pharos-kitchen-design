@@ -1,0 +1,272 @@
+---
+/* ========================================================================
+ * Project: Pharos Kitchen Design (Project Prism)
+ * Component: Marketing / Login
+ * License: FSL-1.1 (See LICENSE file for details)
+ * File: src/pages/login.astro
+ * Author: Richard D. (https://github.com/iamrichardd)
+ * Purpose: Secure Passkey Authentication Login Page.
+ * Traceability: ADR 0018, ADR 0021, Issue #7, Issue #206, Issue #311
+ * Last Updated: 2026-06-30
+ * ======================================================================== */
+
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PageHeader from "../components/PageHeader.astro";
+---
+
+<BaseLayout title="Login | Pharos Kitchen Design Identity Bridge">
+  <PageHeader title="Login" description="Identity & Access" />
+  <main class="max-w-4xl mx-auto px-6 pt-10 pb-20 min-h-screen flex flex-col items-center justify-center blueprint-grid transition-colors duration-300">
+    <div class="w-full max-w-md bg-bg-base/40 border border-border-blueprint/20 p-10 relative overflow-hidden blueprint-border">
+      
+      <!-- Grid Decoration -->
+      <div class="absolute inset-0 opacity-5 pointer-events-none blueprint-grid"></div>
+
+      <div class="relative z-10 text-center">
+
+
+
+        <form id="verify-form" class="space-y-6">
+          <div class="space-y-2 text-left">
+            <label for="username" class="block text-[10px] font-mono text-ph-blue uppercase tracking-widest">Email Address</label>
+            <input type="text" id="username" name="username" placeholder="designer@example.com" required class="w-full bg-bg-base/60 border border-border-blueprint/20 px-3 py-2 font-mono text-text-base text-sm focus:outline-none focus:border-ph-orange" />
+          </div>
+
+          <div class="flex items-center gap-2 py-2 text-left">
+            <input 
+              type="checkbox" 
+              id="register_toggle" 
+              name="register_toggle" 
+              class="w-4 h-4 bg-bg-base/60 border border-border-blueprint/40 checked:bg-ph-orange focus:ring-0 focus:outline-none accent-ph-orange cursor-pointer"
+            />
+            <label for="register_toggle" class="text-[10px] font-mono text-text-muted uppercase tracking-widest cursor-pointer select-none">
+              Register new device/account
+            </label>
+          </div>
+
+          <div id="status-container" class="hidden absolute bottom-6 left-6 right-6 z-50 text-xs font-mono p-3 border border-ph-orange/40 bg-bg-base/95 text-ph-orange text-left rounded shadow-lg">
+            <!-- Dynamic Status -->
+          </div>
+
+          <button 
+            type="submit" 
+            id="submit-btn"
+            class="w-full bg-ph-blue text-ph-charcoal font-bold py-4 hover:bg-white transition-colors uppercase tracking-widest text-sm"
+          >
+            LOGIN
+          </button>
+        </form>
+
+        <div id="success-container" class="hidden space-y-6">
+            <div class="text-ph-pulse text-6xl mb-4">✓</div>
+            <h2 class="text-2xl font-bold text-text-base uppercase tracking-tighter">SUCCESS! Welcome to Pharos Kitchen Design (PKD)</h2>
+            <p class="text-text-muted text-sm leading-relaxed font-mono">
+              Welcome to Pharos Kitchen Design. Your secure designer session is active.
+            </p>
+            <div class="pt-4 space-y-4">
+              <a 
+                href="/pharos-kitchen-design/demo" 
+                class="inline-block w-full bg-ph-blue text-ph-charcoal font-bold py-4 hover:bg-white transition-colors uppercase tracking-widest text-sm text-center"
+              >
+                Open Workspace
+              </a>
+              <a 
+                href="/pharos-kitchen-design/settings" 
+                class="inline-block w-full text-center text-text-muted hover:text-white transition-colors font-mono text-xs uppercase tracking-widest pt-2"
+              >
+                PERSONALIZE YOUR PROFILE
+              </a>
+            </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</BaseLayout>
+
+<script>
+  import { startAuthentication, startRegistration } from '@simplewebauthn/browser';
+  import { SessionManager } from '@pkd/protocol';
+
+  const AUTH_URL = 'http://localhost:8787'; // Dev fallback, should be environment driven
+
+  const form = document.getElementById('verify-form') as HTMLFormElement;
+  const statusContainer = document.getElementById('status-container');
+  const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
+  const successContainer = document.getElementById('success-container');
+
+  let statusTimeout: number | undefined;
+
+  const showStatus = (msg: string, isError = false) => {
+    if (!statusContainer) return;
+    statusContainer.innerText = `>> ${msg}`;
+    statusContainer.classList.remove('hidden');
+    statusContainer.style.borderColor = isError ? '#ef4444' : '#f97316';
+    statusContainer.style.color = isError ? '#ef4444' : '#f97316';
+
+    if (statusTimeout) {
+      clearTimeout(statusTimeout);
+    }
+
+    statusTimeout = window.setTimeout(() => {
+      statusContainer.classList.add('hidden');
+    }, 5000);
+  };
+
+  const showUXHook = (title: string, text: string) => {
+      if (!statusContainer) return;
+      statusContainer.innerText = `>> [${title.toUpperCase()}]: ${text}`;
+      statusContainer.classList.remove('hidden');
+      statusContainer.style.borderColor = '#38bdf8';
+      statusContainer.style.color = '#38bdf8';
+
+      if (statusTimeout) {
+        clearTimeout(statusTimeout);
+        statusTimeout = undefined;
+      }
+  };
+
+  const performAuth = async (username: string, isRegistration: boolean) => {
+    submitBtn.disabled = true;
+    submitBtn.innerText = isRegistration ? "CONTINUING..." : "LOGGING IN...";
+    showStatus(isRegistration ? "Creating your account..." : "Finding your account...");
+
+    try {
+        // 1. Fetch Auth Options
+        let optionsRes;
+
+        if (isRegistration) {
+            optionsRes = await fetch(`${AUTH_URL}/auth/register/options`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username })
+            });
+        } else {
+            optionsRes = await fetch(`${AUTH_URL}/auth/login/options`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username })
+            });
+        }
+
+        let resData = await optionsRes.json() as any;
+
+        if (!optionsRes.ok) {
+            if (resData.error === 'user_already_exists' && isRegistration) {
+                showUXHook("Existing Account", "Email already registered. Transitioning to Login...");
+                const registerToggle = document.getElementById('register_toggle') as HTMLInputElement;
+                if (registerToggle) {
+                    registerToggle.checked = false;
+                }
+                submitBtn.innerText = "LOGGING IN...";
+                setTimeout(() => {
+                    performAuth(username, false);
+                }, 1500);
+                return;
+            }
+
+            if (resData.error === 'user_not_found' && !isRegistration) {
+                throw new Error("Account not found. Please verify your handle or check 'Register new device/account' to sign up.");
+            } else {
+                throw new Error(resData.error || (isRegistration ? "Could not start account creation." : "Failed to initialize security challenge."));
+            }
+        }
+
+        const { options, challengeToken, pkd_metadata } = resData;
+        
+        // Kathy Sierra UX Hook: Show empowering message before hardware prompt
+        if (pkd_metadata) {
+            showUXHook(pkd_metadata.title, pkd_metadata.hook);
+        }
+
+        showStatus("Please scan your passkey or device key...");
+
+        // 2. Browser Passkey Prompt
+        let asseResp;
+        try {
+            if (isRegistration) {
+                asseResp = await startRegistration({ optionsJSON: options });
+            } else {
+                asseResp = await startAuthentication({ optionsJSON: options });
+            }
+        } catch (error: any) {
+            throw new Error(`Hardware ${isRegistration ? 'registration' : 'verification'} cancelled or failed: ${error.message}`);
+        }
+
+        showStatus("Verifying your credentials...");
+
+        // 3. Verify Authentication/Registration
+        const verifyEndpoint = isRegistration ? `${AUTH_URL}/auth/register/verify` : `${AUTH_URL}/auth/login/verify`;
+        const verifyRes = await fetch(verifyEndpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                response: asseResp,
+                challengeToken
+            })
+        });
+
+        if (!verifyRes.ok) {
+            throw new Error(`Failed to verify credentials.`);
+        }
+
+        const { access_token } = await verifyRes.json() as any;
+
+        if (access_token) {
+            SessionManager.setSession(access_token);
+            if (isRegistration) {
+                localStorage.setItem('created_at', new Date().toISOString());
+            }
+        }
+
+        form.classList.add('hidden');
+        successContainer?.classList.remove('hidden');
+
+    } catch (err: any) {
+        const errMsg = err.message || "";
+        let friendlyMsg = "Something went wrong. Please try again.";
+        
+        if (errMsg === 'user_already_exists') {
+            showUXHook("Existing Account", "Email already registered. Transitioning to Login...");
+            const registerToggle = document.getElementById('register_toggle') as HTMLInputElement;
+            if (registerToggle) {
+                registerToggle.checked = false;
+            }
+            submitBtn.innerText = "LOGGING IN...";
+            setTimeout(() => {
+                performAuth(username, false);
+            }, 1500);
+            return;
+        }
+
+        if (/fetch/i.test(errMsg)) {
+            friendlyMsg = "Could not connect to the network. Please check your connection.";
+        } else if (/cancelled|aborted|abort|dismissed/i.test(errMsg)) {
+            friendlyMsg = "Sign-in verification was cancelled.";
+        } else {
+            friendlyMsg = errMsg;
+        }
+        
+        showStatus(friendlyMsg, true);
+        submitBtn.disabled = false;
+        submitBtn.innerText = isRegistration ? "CONTINUE" : "LOGIN";
+    }
+  };
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(form);
+    const username = formData.get('username') as string;
+    const isRegisterMode = (document.getElementById('register_toggle') as HTMLInputElement)?.checked;
+    await performAuth(username, isRegisterMode);
+  });
+
+  // Dynamic Button Text based on Register Checkbox state
+  const registerToggle = document.getElementById('register_toggle') as HTMLInputElement;
+  registerToggle?.addEventListener('change', () => {
+    if (registerToggle.checked) {
+      submitBtn.innerText = "CONTINUE";
+    } else {
+      submitBtn.innerText = "LOGIN";
+    }
+  });
+</script>

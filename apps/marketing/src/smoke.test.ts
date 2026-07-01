@@ -53,7 +53,7 @@ describe('Marketing Site Monorepo Integrity', () => {
  */
 describe('Marketing Data Integrity (Issue #71)', () => {
   it('test_should_mark_warewashing_as_verified_when_category_exists', () => {
-    const warewashing = categories.find(c => c.name === 'Warewashing');
+    const warewashing = categories.find(c => c.category === 'Warewashing');
     expect(warewashing).toBeDefined();
     expect(warewashing?.fidelity).toBe('verified');
   });
