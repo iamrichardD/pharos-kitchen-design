@@ -35,21 +35,17 @@ const LoadingFallback = () => (
         background: '#050505',
         letterSpacing: '0.1em'
     }}>
-        <div style={{
-            width: '24px',
-            height: '24px',
-            border: '2px solid rgba(59, 130, 246, 0.2)',
-            borderTop: '2px solid #3b82f6',
-            borderRadius: '50%',
-            animation: 'spin 1s linear infinite',
-            marginBottom: '12px'
-        }} />
-        <style dangerouslySetInnerHTML={{__html: `
-            @keyframes spin {
-                0% { transform: rotate(0deg); }
-                100% { transform: rotate(360deg); }
-            }
-        `}} />
+        <div 
+            className="loading-spinner"
+            style={{
+                width: '24px',
+                height: '24px',
+                border: '2px solid rgba(59, 130, 246, 0.2)',
+                borderTop: '2px solid #3b82f6',
+                borderRadius: '50%',
+                marginBottom: '12px'
+            }} 
+        />
         LOADING ENGINE...
     </div>
 );
@@ -73,7 +69,7 @@ export const ThreeJsInterpreter: React.FC<Props> = ({ manifest, height = '400px'
                 justifyContent: 'center',
                 color: '#ef4444',
                 fontFamily: 'monospace',
-                border: '1px solid #ef444433',
+                border: '1px solid rgba(239, 68, 68, 0.2)',
                 borderRadius: '8px',
                 padding: '2rem',
                 textAlign: 'center'
@@ -107,7 +103,7 @@ export const ThreeJsInterpreter: React.FC<Props> = ({ manifest, height = '400px'
                 pointerEvents: 'none'
             }}>
                 <div style={{ 
-                    background: 'rgba(0,0,0,0.6)', 
+                    background: 'rgba(0, 0, 0, 0.6)', 
                     padding: '4px 8px', 
                     borderRadius: '4px',
                     borderLeft: '2px solid #3b82f6',
