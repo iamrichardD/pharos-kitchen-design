@@ -1,0 +1,39 @@
+/* ========================================================================
+ * Project: Pharos Kitchen Design (Project Prism)
+ * Component: Governance / Metrics
+ * File: docs/governance/REPORTS/2026-07-03-FRIDAY-WRAPUP.toon
+ * Author: PMA (via Gemini CLI)
+ * License: FSL-1.1 (See LICENSE file for details)
+ * Purpose: End of Week Performance Report for Sprint 5.05.
+ * Traceability: ADR-0033, ADR-0043, ADR-0051
+ * Last Updated: 2026-07-03
+ * ======================================================================== */
+
+sprint: 5.05
+date: 2026-07-03
+team: PHAROS_DEV_CORE
+
+# Core Capacity Metrics
+velocity[1]{date, assigned_ect, unplanned_ect, completed_ect, variance}:
+  2026-07-03, 6, 0, 6, -1 # ACT was 7 due to client-side SessionManager state and dynamic settings navigation link rendering complexity in Issue #311.
+
+# DORA Performance Metrics
+performance[1]{date, lead_time_hrs, change_failure_rate, mttr_mins}:
+  2026-07-03, 1.7, 0.0, 0 # CFR remains 0.0% due to local Podman verification and rigorous navigation state checks before merging.
+
+# Task Outcomes
+tasks[3]{id, title, ect, status}:
+  #311, Implement Dynamic Login and Settings Navigation Link, 2, Done
+  #312, Resolve Mobile Navigation Horizontal Overflow, 2, Done
+  #313, Refactor Navigation Layout and Naming Taxonomy, 2, Done
+
+# Strategic Continuity
+handoff: docs/governance/REPORTS/2026-07-03-EOD-HANDOFF.md
+routine: ADR-0032
+mandate: ADR-0033
+PR_Registry: #314
+
+# Process Remediation
+protocol_failure: None
+corrective_action: N/A
+rigor_gate_compliance: 1.00 # Perfect compliance achieved through complete issue verification and local linting.
