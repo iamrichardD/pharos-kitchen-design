@@ -35,7 +35,10 @@ export default defineConfig({
   },
   integrations: [react()],
   vite: {
-    plugins: [tailwindcss(), pharosRegistryPlugin(fileURLToPath(new URL('.', import.meta.url)))],
+    plugins: [
+      tailwindcss(),
+      pharosRegistryPlugin(fileURLToPath(new URL('.', import.meta.url)))
+    ],
     build: {
       chunkSizeWarningLimit: 1000,
     },

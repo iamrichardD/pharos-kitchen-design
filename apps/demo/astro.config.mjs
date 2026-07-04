@@ -6,12 +6,22 @@
  * License: FSL-1.1 (See LICENSE file for details)
  * Purpose: Astro configuration for the demo app, integrating React and Tailwind.
  * Traceability: Issue #28, Issue #235
- * Last Updated: 2026-06-12
+ * Last Updated: 2026-07-04
  * ======================================================================== */
 
 import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
 import tailwindcss from '@tailwindcss/vite';
+import { createLogger } from 'vite';
+
+const customLogger = createLogger();
+const originalWarn = customLogger.warn;
+customLogger.warn = (msg, options) => {
+  if (msg.includes('optimizeDeps.esbuildOptions')) {
+    return;
+  }
+  originalWarn(msg, options);
+};
 
 // https://astro.build/config
 export default defineConfig({
@@ -20,6 +30,7 @@ export default defineConfig({
   output: 'static',
   vite: {
     plugins: [tailwindcss()],
+    customLogger,
     build: {
       chunkSizeWarningLimit: 1000,
     },
